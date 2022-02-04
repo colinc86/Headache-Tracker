@@ -1,0 +1,611 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 55;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		3BF5313727ACE18D00056673 /* Headache_TrackerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF5313627ACE18D00056673 /* Headache_TrackerApp.swift */; };
+		3BF5313927ACE18D00056673 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF5313827ACE18D00056673 /* ContentView.swift */; };
+		3BF5313B27ACE18F00056673 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3BF5313A27ACE18F00056673 /* Assets.xcassets */; };
+		3BF5313E27ACE18F00056673 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3BF5313D27ACE18F00056673 /* Preview Assets.xcassets */; };
+		3BF5314027ACE18F00056673 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF5313F27ACE18F00056673 /* Persistence.swift */; };
+		3BF5314327ACE18F00056673 /* Headache_Tracker.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 3BF5314127ACE18F00056673 /* Headache_Tracker.xcdatamodeld */; };
+		3BF5314D27ACE18F00056673 /* Headache_TrackerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF5314C27ACE18F00056673 /* Headache_TrackerTests.swift */; };
+		3BF5315727ACE18F00056673 /* Headache_TrackerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF5315627ACE18F00056673 /* Headache_TrackerUITests.swift */; };
+		3BF5315927ACE18F00056673 /* Headache_TrackerUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF5315827ACE18F00056673 /* Headache_TrackerUITestsLaunchTests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		3BF5314927ACE18F00056673 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3BF5312B27ACE18D00056673 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3BF5313227ACE18D00056673;
+			remoteInfo = "Headache Tracker";
+		};
+		3BF5315327ACE18F00056673 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3BF5312B27ACE18D00056673 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3BF5313227ACE18D00056673;
+			remoteInfo = "Headache Tracker";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		3BF5313327ACE18D00056673 /* Headache Tracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Headache Tracker.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		3BF5313627ACE18D00056673 /* Headache_TrackerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Headache_TrackerApp.swift; sourceTree = "<group>"; };
+		3BF5313827ACE18D00056673 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		3BF5313A27ACE18F00056673 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		3BF5313D27ACE18F00056673 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		3BF5313F27ACE18F00056673 /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
+		3BF5314227ACE18F00056673 /* Headache_Tracker.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Headache_Tracker.xcdatamodel; sourceTree = "<group>"; };
+		3BF5314827ACE18F00056673 /* Headache TrackerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Headache TrackerTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		3BF5314C27ACE18F00056673 /* Headache_TrackerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Headache_TrackerTests.swift; sourceTree = "<group>"; };
+		3BF5315227ACE18F00056673 /* Headache TrackerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Headache TrackerUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		3BF5315627ACE18F00056673 /* Headache_TrackerUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Headache_TrackerUITests.swift; sourceTree = "<group>"; };
+		3BF5315827ACE18F00056673 /* Headache_TrackerUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Headache_TrackerUITestsLaunchTests.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		3BF5313027ACE18D00056673 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3BF5314527ACE18F00056673 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3BF5314F27ACE18F00056673 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		3BF5312A27ACE18D00056673 = {
+			isa = PBXGroup;
+			children = (
+				3BF5313527ACE18D00056673 /* Headache Tracker */,
+				3BF5314B27ACE18F00056673 /* Headache TrackerTests */,
+				3BF5315527ACE18F00056673 /* Headache TrackerUITests */,
+				3BF5313427ACE18D00056673 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		3BF5313427ACE18D00056673 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				3BF5313327ACE18D00056673 /* Headache Tracker.app */,
+				3BF5314827ACE18F00056673 /* Headache TrackerTests.xctest */,
+				3BF5315227ACE18F00056673 /* Headache TrackerUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		3BF5313527ACE18D00056673 /* Headache Tracker */ = {
+			isa = PBXGroup;
+			children = (
+				3BF5313627ACE18D00056673 /* Headache_TrackerApp.swift */,
+				3BF5313827ACE18D00056673 /* ContentView.swift */,
+				3BF5313A27ACE18F00056673 /* Assets.xcassets */,
+				3BF5313F27ACE18F00056673 /* Persistence.swift */,
+				3BF5314127ACE18F00056673 /* Headache_Tracker.xcdatamodeld */,
+				3BF5313C27ACE18F00056673 /* Preview Content */,
+			);
+			path = "Headache Tracker";
+			sourceTree = "<group>";
+		};
+		3BF5313C27ACE18F00056673 /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				3BF5313D27ACE18F00056673 /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		3BF5314B27ACE18F00056673 /* Headache TrackerTests */ = {
+			isa = PBXGroup;
+			children = (
+				3BF5314C27ACE18F00056673 /* Headache_TrackerTests.swift */,
+			);
+			path = "Headache TrackerTests";
+			sourceTree = "<group>";
+		};
+		3BF5315527ACE18F00056673 /* Headache TrackerUITests */ = {
+			isa = PBXGroup;
+			children = (
+				3BF5315627ACE18F00056673 /* Headache_TrackerUITests.swift */,
+				3BF5315827ACE18F00056673 /* Headache_TrackerUITestsLaunchTests.swift */,
+			);
+			path = "Headache TrackerUITests";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		3BF5313227ACE18D00056673 /* Headache Tracker */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3BF5315C27ACE18F00056673 /* Build configuration list for PBXNativeTarget "Headache Tracker" */;
+			buildPhases = (
+				3BF5312F27ACE18D00056673 /* Sources */,
+				3BF5313027ACE18D00056673 /* Frameworks */,
+				3BF5313127ACE18D00056673 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Headache Tracker";
+			productName = "Headache Tracker";
+			productReference = 3BF5313327ACE18D00056673 /* Headache Tracker.app */;
+			productType = "com.apple.product-type.application";
+		};
+		3BF5314727ACE18F00056673 /* Headache TrackerTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3BF5315F27ACE18F00056673 /* Build configuration list for PBXNativeTarget "Headache TrackerTests" */;
+			buildPhases = (
+				3BF5314427ACE18F00056673 /* Sources */,
+				3BF5314527ACE18F00056673 /* Frameworks */,
+				3BF5314627ACE18F00056673 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				3BF5314A27ACE18F00056673 /* PBXTargetDependency */,
+			);
+			name = "Headache TrackerTests";
+			productName = "Headache TrackerTests";
+			productReference = 3BF5314827ACE18F00056673 /* Headache TrackerTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		3BF5315127ACE18F00056673 /* Headache TrackerUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3BF5316227ACE18F00056673 /* Build configuration list for PBXNativeTarget "Headache TrackerUITests" */;
+			buildPhases = (
+				3BF5314E27ACE18F00056673 /* Sources */,
+				3BF5314F27ACE18F00056673 /* Frameworks */,
+				3BF5315027ACE18F00056673 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				3BF5315427ACE18F00056673 /* PBXTargetDependency */,
+			);
+			name = "Headache TrackerUITests";
+			productName = "Headache TrackerUITests";
+			productReference = 3BF5315227ACE18F00056673 /* Headache TrackerUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		3BF5312B27ACE18D00056673 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1320;
+				LastUpgradeCheck = 1320;
+				TargetAttributes = {
+					3BF5313227ACE18D00056673 = {
+						CreatedOnToolsVersion = 13.2;
+					};
+					3BF5314727ACE18F00056673 = {
+						CreatedOnToolsVersion = 13.2;
+						TestTargetID = 3BF5313227ACE18D00056673;
+					};
+					3BF5315127ACE18F00056673 = {
+						CreatedOnToolsVersion = 13.2;
+						TestTargetID = 3BF5313227ACE18D00056673;
+					};
+				};
+			};
+			buildConfigurationList = 3BF5312E27ACE18D00056673 /* Build configuration list for PBXProject "Headache Tracker" */;
+			compatibilityVersion = "Xcode 13.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 3BF5312A27ACE18D00056673;
+			productRefGroup = 3BF5313427ACE18D00056673 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				3BF5313227ACE18D00056673 /* Headache Tracker */,
+				3BF5314727ACE18F00056673 /* Headache TrackerTests */,
+				3BF5315127ACE18F00056673 /* Headache TrackerUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		3BF5313127ACE18D00056673 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3BF5313E27ACE18F00056673 /* Preview Assets.xcassets in Resources */,
+				3BF5313B27ACE18F00056673 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3BF5314627ACE18F00056673 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3BF5315027ACE18F00056673 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		3BF5312F27ACE18D00056673 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3BF5314027ACE18F00056673 /* Persistence.swift in Sources */,
+				3BF5313927ACE18D00056673 /* ContentView.swift in Sources */,
+				3BF5313727ACE18D00056673 /* Headache_TrackerApp.swift in Sources */,
+				3BF5314327ACE18F00056673 /* Headache_Tracker.xcdatamodeld in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3BF5314427ACE18F00056673 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3BF5314D27ACE18F00056673 /* Headache_TrackerTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3BF5314E27ACE18F00056673 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3BF5315927ACE18F00056673 /* Headache_TrackerUITestsLaunchTests.swift in Sources */,
+				3BF5315727ACE18F00056673 /* Headache_TrackerUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		3BF5314A27ACE18F00056673 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3BF5313227ACE18D00056673 /* Headache Tracker */;
+			targetProxy = 3BF5314927ACE18F00056673 /* PBXContainerItemProxy */;
+		};
+		3BF5315427ACE18F00056673 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3BF5313227ACE18D00056673 /* Headache Tracker */;
+			targetProxy = 3BF5315327ACE18F00056673 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		3BF5315A27ACE18F00056673 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.2;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		3BF5315B27ACE18F00056673 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.2;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		3BF5315D27ACE18F00056673 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"Headache Tracker/Preview Content\"";
+				DEVELOPMENT_TEAM = 4WS4246RA4;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.cnc.Headache-Tracker";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		3BF5315E27ACE18F00056673 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"Headache Tracker/Preview Content\"";
+				DEVELOPMENT_TEAM = 4WS4246RA4;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.cnc.Headache-Tracker";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		3BF5316027ACE18F00056673 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4WS4246RA4;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.cnc.Headache-TrackerTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Headache Tracker.app/Headache Tracker";
+			};
+			name = Debug;
+		};
+		3BF5316127ACE18F00056673 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4WS4246RA4;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.cnc.Headache-TrackerTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Headache Tracker.app/Headache Tracker";
+			};
+			name = Release;
+		};
+		3BF5316327ACE18F00056673 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4WS4246RA4;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.cnc.Headache-TrackerUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "Headache Tracker";
+			};
+			name = Debug;
+		};
+		3BF5316427ACE18F00056673 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4WS4246RA4;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.cnc.Headache-TrackerUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "Headache Tracker";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		3BF5312E27ACE18D00056673 /* Build configuration list for PBXProject "Headache Tracker" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3BF5315A27ACE18F00056673 /* Debug */,
+				3BF5315B27ACE18F00056673 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3BF5315C27ACE18F00056673 /* Build configuration list for PBXNativeTarget "Headache Tracker" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3BF5315D27ACE18F00056673 /* Debug */,
+				3BF5315E27ACE18F00056673 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3BF5315F27ACE18F00056673 /* Build configuration list for PBXNativeTarget "Headache TrackerTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3BF5316027ACE18F00056673 /* Debug */,
+				3BF5316127ACE18F00056673 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3BF5316227ACE18F00056673 /* Build configuration list for PBXNativeTarget "Headache TrackerUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3BF5316327ACE18F00056673 /* Debug */,
+				3BF5316427ACE18F00056673 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		3BF5314127ACE18F00056673 /* Headache_Tracker.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				3BF5314227ACE18F00056673 /* Headache_Tracker.xcdatamodel */,
+			);
+			currentVersion = 3BF5314227ACE18F00056673 /* Headache_Tracker.xcdatamodel */;
+			path = Headache_Tracker.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
+	};
+	rootObject = 3BF5312B27ACE18D00056673 /* Project object */;
+}
