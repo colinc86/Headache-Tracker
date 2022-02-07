@@ -1,0 +1,43 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "ApplicationKey",
+        "repositoryURL": "https://github.com/colinc86/ApplicationKey",
+        "state": {
+          "branch": null,
+          "revision": "16f066008580439626343dad7e2446fceb43e7d8",
+          "version": "0.1.1"
+        }
+      },
+      {
+        "package": "DataController",
+        "repositoryURL": "git@github.com:colinc86/DataController.git",
+        "state": {
+          "branch": null,
+          "revision": "207abd022dcec864d4a93443e27c86e85c1b60ba",
+          "version": "0.2.5"
+        }
+      },
+      {
+        "package": "Logger",
+        "repositoryURL": "git@github.com:colinc86/Logger.git",
+        "state": {
+          "branch": null,
+          "revision": "dc44f70e8aa1c9cabe189e0775bfb12b03546376",
+          "version": "0.1.5"
+        }
+      },
+      {
+        "package": "swift-log",
+        "repositoryURL": "https://github.com/apple/swift-log.git",
+        "state": {
+          "branch": null,
+          "revision": "5d66f7ba25daf4f94100e7022febf3c75e37a6c7",
+          "version": "1.4.2"
+        }
+      }
+    ]
+  },
+  "version": 1
+}

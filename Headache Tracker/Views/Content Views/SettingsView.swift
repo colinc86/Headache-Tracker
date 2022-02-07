@@ -1,0 +1,89 @@
+//
+//  SettingsView.swift
+//  Headache Tracker
+//
+//  Created by Colin Campbell on 2/4/22.
+//
+
+import SwiftUI
+
+struct SettingsView: View {
+  @EnvironmentObject private var headacheManager: HeadacheManager
+  @EnvironmentObject private var alertManager: AlertManager
+  
+  @AppStorage(AppSettings.healthIntegration) private var healthIntegration = false
+  @AppStorage(AppSettings.checkInAlerts) private var checkInAlerts = false
+  @AppStorage(AppSettings.checkInInterval) private var checkInInterval = TimeInterval(3600.0)
+    
+  /// The health app integration binding. Will authorize health kit if set to true.
+  var healthAppIntegration: Binding<Bool> {
+    Binding<Bool> {
+      do {
+        let status = try headacheManager.authorizationStatus()
+        return status == .sharingAuthorized && healthIntegration
+      }
+      catch {
+        return false
+      }
+    } set: { newValue in
+      healthIntegration = newValue
+      if healthIntegration {
+        headacheManager.authorize { _ in
+          do {
+            let status = try headacheManager.authorizationStatus()
+            healthIntegration = status == .sharingAuthorized
+          }
+          catch {
+            healthIntegration = false
+          }
+        }
+      }
+    }
+  }
+  
+  var body: some View {
+    NavigationView {
+      Form {
+        Section("Integrations") {
+          Toggle(isOn: healthAppIntegration) {
+            Text("Health App Integration")
+          }
+        }
+        
+        Section {
+          Toggle(isOn: $checkInAlerts) {
+            Text("Check-Ins")
+          }
+          
+          Picker(selection: $checkInInterval) {
+            ForEach(1 ..< 25) { i in
+              Text("\(i) Hour\(i > 1 ? "s" : "")").tag(TimeInterval(i) * 3600.0)
+            }
+          } label: {
+            Text("Check-In Interval")
+          }
+          .disabled(!checkInAlerts)
+        } header: {
+          Text("Notifications")
+        } footer: {
+          if alertManager.authorizationStatus == .notDetermined || alertManager.authorizationStatus == .denied {
+            Text("Visit the Settings app to update the app's notification settings.")
+          }
+          else {
+            Text("Send a notification to check in to the app the specified number of hours after your last update. The notification will only be sent once per update.")
+          }
+        }
+        .disabled(alertManager.authorizationStatus == .notDetermined || alertManager.authorizationStatus == .denied)
+      }
+      .navigationTitle("Settings")
+    }
+  }
+}
+
+struct SettingsView_Previews: PreviewProvider {
+  static var previews: some View {
+    SettingsView()
+      .environmentObject(Previewing.headacheManager)
+      .environmentObject(Previewing.alertManager)
+  }
+}
