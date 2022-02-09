@@ -30,10 +30,6 @@ struct HeadacheCell: View {
   
   var body: some View {
     HStack(alignment: .top) {
-      Image(systemName: "brain.head.profile")
-        .padding(EdgeInsets(top: 4.0, leading: 0.0, bottom: 0.0, trailing: 0.0))
-        .foregroundColor(headache.resolved ? .secondary : .accentColor)
-      
       SeverityLevel(headache: headache)
         .padding(EdgeInsets(top: 4.0, leading: 0.0, bottom: 4.0, trailing: 0.0))
         .frame(width: 20.0)

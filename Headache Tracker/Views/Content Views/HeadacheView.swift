@@ -101,7 +101,7 @@ struct HeadacheView: View {
       
       ToolbarItem(placement: .navigationBarTrailing) {
         EditButton()
-          .disabled(headache.severities?.count ?? 0 <= 1)
+          .disabled(headache.severities?.count ?? 0 <= 1 || !headache.resolved)
       }
     }
     .onAppear(perform: appeared)
