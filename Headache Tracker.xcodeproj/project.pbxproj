@@ -71,6 +71,7 @@
 		3B051A9B27B351C70017131D /* Formatters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Formatters.swift; sourceTree = "<group>"; };
 		3B051A9D27B3555E0017131D /* ConfirmationAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfirmationAlert.swift; sourceTree = "<group>"; };
 		3B051A9F27B3577B0017131D /* DestructiveConfirmationDialog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DestructiveConfirmationDialog.swift; sourceTree = "<group>"; };
+		3B051AA327B3751B0017131D /* Headache-Tracker-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Headache-Tracker-Info.plist"; sourceTree = SOURCE_ROOT; };
 		3B39DAD627ACF67600D39BB5 /* Previewing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Previewing.swift; sourceTree = "<group>"; };
 		3B39DAD827ACF74600D39BB5 /* Headache+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Headache+Extensions.swift"; sourceTree = "<group>"; };
 		3B39DADA27ACFC9C00D39BB5 /* SubtitleCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubtitleCell.swift; sourceTree = "<group>"; };
@@ -214,6 +215,7 @@
 		3BF5313527ACE18D00056673 /* Headache Tracker */ = {
 			isa = PBXGroup;
 			children = (
+				3B051AA327B3751B0017131D /* Headache-Tracker-Info.plist */,
 				3BF5316527ACE1D900056673 /* Headache Tracker.entitlements */,
 				3B39DADE27AD009F00D39BB5 /* Models */,
 				3B39DAE027AD00B700D39BB5 /* Views */,
@@ -267,6 +269,7 @@
 				3BF5312F27ACE18D00056673 /* Sources */,
 				3BF5313027ACE18D00056673 /* Frameworks */,
 				3BF5313127ACE18D00056673 /* Resources */,
+				3B051AA227B373AE0017131D /* Increment Build Number */,
 			);
 			buildRules = (
 			);
@@ -389,6 +392,27 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		3B051AA227B373AE0017131D /* Increment Build Number */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Increment Build Number";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [ $ENABLE_PREVIEWS == \"NO\" ]\nthen\n  buildNumber=$(/usr/libexec/PlistBuddy -c \"Print CFBundleVersion\" \"$INFOPLIST_FILE\")\n  buildNumber=$((0x$buildNumber))\n  buildNumber=$(($buildNumber + 1))\n  buildNumber=$(printf \"%X\" $buildNumber)\n  /usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $buildNumber\" \"$INFOPLIST_FILE\"\nelse\n  echo \"Skipping build number increment.\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		3BF5312F27ACE18D00056673 /* Sources */ = {
@@ -582,6 +606,7 @@
 				DEVELOPMENT_TEAM = 4WS4246RA4;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Headache-Tracker-Info.plist";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Headache data is shared to the Health app.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Headache data is read from the Health application to look for trends.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -593,7 +618,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.cnc.Headache-Tracker";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -614,6 +639,7 @@
 				DEVELOPMENT_TEAM = 4WS4246RA4;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Headache-Tracker-Info.plist";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Headache data is shared to the Health app.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Headache data is read from the Health application to look for trends.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -625,7 +651,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.cnc.Headache-Tracker";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
