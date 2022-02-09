@@ -7,17 +7,23 @@
 
 import SwiftUI
 
+/// Displays a headache in a cell view.
 struct HeadacheCell: View {
   
+  // MARK: Public properties
+  
+  /// The headache to display.
   @StateObject var headache: Headache
   
-  private let formatter: DateComponentsFormatter = {
-    let formatter = DateComponentsFormatter()
-    formatter.unitsStyle = .abbreviated
-    formatter.allowedUnits = [.minute, .hour, .day]
-    formatter.maximumUnitCount = 2
-    return formatter
-  }()
+  // MARK: Private properties
+  
+  /// The id of the duration view.
+  @State private var durationID = UUID()
+  
+  /// A timer to update the duration view for unresolved headaches.
+  @State private var durationUpdateTimer: Timer?
+  
+  // MARK: View body
   
   var body: some View {
     HStack(alignment: .top) {
@@ -28,11 +34,57 @@ struct HeadacheCell: View {
       
       VStack {
         SubtitleCell(title: "Onset", subtitle: headache.startTime?.formatted() ?? "N/A")
-        SubtitleCell(title: "Duration", subtitle: formatter.string(from: headache.duration) ?? "0 minutes")
+        SubtitleCell(title: "Duration", subtitle: Formatters.dateComponentsFormatter.string(from: headache.duration) ?? "0 min")
+          .id(durationID)
+        
         SubtitleCell(title: "Severity", subtitle: headache.severityDescription)
       }
     }
+    .onAppear(perform: appeared)
+    .onDisappear(perform: disappeared)
   }
+}
+
+extension HeadacheCell {
+  
+  /// Updates the duration view's identifier.
+  func updateDurationID() {
+    DispatchQueue.main.async {
+      withAnimation { durationID = UUID() }
+    }
+  }
+  
+  /// Called when the view appears.
+  func appeared() {
+    if !headache.resolved {
+      updateDurationID()
+      startDurationUpdateTimer()
+    }
+  }
+  
+  /// Called when the view disappears.
+  func disappeared() {
+    stopDurationUpdateTimer()
+  }
+  
+  /// Starts the duration update timer.
+  func startDurationUpdateTimer() {
+    durationUpdateTimer = Timer(timeInterval: 60.0, repeats: true, block: durationUpdateTimerFired)
+    durationUpdateTimer?.tolerance = 60.0 / 10.0
+    RunLoop.main.add(durationUpdateTimer!, forMode: RunLoop.Mode.default)
+  }
+  
+  /// Stops the duration update timer.
+  func stopDurationUpdateTimer() {
+    durationUpdateTimer?.invalidate()
+    durationUpdateTimer = nil
+  }
+  
+  /// Called when the duration update timer fires.
+  func durationUpdateTimerFired(_ timer: Timer) {
+    updateDurationID()
+  }
+  
 }
 
 struct HeadacheCell_Previews: PreviewProvider {

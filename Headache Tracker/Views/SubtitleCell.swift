@@ -7,9 +7,18 @@
 
 import SwiftUI
 
+/// Displays a title with a subtitle in a cell.
 struct SubtitleCell: View {
+  
+  // MARK: Public properties
+  
+  /// The cell's title.
   let title: String
+  
+  /// The cell's subtitle.
   let subtitle: String
+  
+  // MARK: View body
   
   var body: some View {
     HStack(alignment: .top) {

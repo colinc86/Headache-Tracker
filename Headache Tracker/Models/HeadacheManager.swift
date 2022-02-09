@@ -55,7 +55,19 @@ class HeadacheManager: ObservableObject {
   
   // MARK: Private properties
   
+  /// The alert manager to use when adding local notifications.
+  weak var alertManager: AlertManager?
+  
+  // MARK: Private properties
+  
+  /// The Apple Health app integration setting.
   @AppStorage(AppSettings.healthIntegration) private var healthIntegration = false
+  
+  /// The check-in alerts setting.
+  @AppStorage(AppSettings.checkInAlerts) private var checkInAlerts = false
+  
+  /// The check-in interval setting if `checkInAlerts` is true.
+  @AppStorage(AppSettings.checkInInterval) private var checkInInterval = TimeInterval(3600.0)
   
   /// Whether or not the manager is in test mode. If in test mode, it will not
   /// write to or delete from the health kit store.
@@ -147,16 +159,21 @@ extension HeadacheManager {
     // The date interval of the severity to save to health kit
     var severityInterval: SeverityInterval?
     
+    // The headache's identifier to pass to the local notification
+    var headacheIdentifier: UUID?
+    
     // Get the current headache
     currentHeadache { headache, context in
       // Add to the current headache or create a new one
       if let headache = headache {
         logDebug("Adding severity to current headache.")
         severityInterval = headache.addSeverity(severity, startTime: Date())
+        headacheIdentifier = headache.identifier
       }
       else {
         logDebug("Creating new headache.")
-        _ = Headache(context: context, initialSeverity: severity, startTime: Date())
+        let newHeadache = Headache(context: context, initialSeverity: severity, startTime: Date())
+        headacheIdentifier = newHeadache.identifier
       }
     } completion: { [weak self] error in
       // If there if an error, then we're done
@@ -165,9 +182,30 @@ extension HeadacheManager {
         return
       }
       
-      // If there wasn't an error, then we should check and add this to health kit
-      if let severityInterval = severityInterval {
-        self.saveSeveritySample(severityInterval: severityInterval, completion: completion)
+      let saveSeverity: (@escaping (Error?) -> Void) -> Void = { block in
+        // If there wasn't an error, then we should check and add this to health kit
+        if let severityInterval = severityInterval {
+          self.saveSeveritySample(severityInterval: severityInterval, completion: block)
+        }
+        else {
+          block(nil)
+        }
+      }
+      
+      let presentCheckIn: (@escaping (Error?) -> Void) -> Void = { block in
+        // Schedule a new notification if this was a non-`not present` severity
+        if severity != .notPresent {
+          self.presentCheckInAlert(with: headacheIdentifier, completion: completion)
+        }
+        else {
+          block(nil)
+        }
+      }
+      
+      saveSeverity { saveError in
+        presentCheckIn { checkInError in
+          completion(saveError ?? checkInError)
+        }
       }
     }
   }
@@ -278,6 +316,37 @@ extension HeadacheManager {
       request.predicate = NSPredicate(format: "ANY severities.endTime = nil")
       try update((try context.fetch(request)).first, context)
     }, completion: completion)
+  }
+  
+  /// Presents a check-in alert in the future.
+  ///
+  /// - Parameters:
+  ///   - headacheIdentifier: The headache identifier.
+  ///   - completion: Called after the alert has been added to notification center.
+  private func presentCheckInAlert(with headacheIdentifier: UUID?, completion: @escaping (Error?) -> Void) {
+    // Only continue if we have an identifier and check-in alerts are turned on
+    guard checkInAlerts, let headacheIdentifier = headacheIdentifier else {
+      completion(nil)
+      return
+    }
+    
+    // Make sure we're on the main queue
+    DispatchQueue.main.async {
+      // Cancel any pending notifications
+      self.alertManager?.removeRequests(pending: true, delivered: false)
+      
+      // Get our date components
+      let futureDate = Date(timeIntervalSinceNow: self.checkInInterval)
+      let components = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: futureDate)
+      
+      // Present the alert
+      logDebug("Presenting alert with components at date \(futureDate).")
+      self.alertManager?.presentAlert(
+        with: HeadacheAlertRequest.checkIn(headacheIdentifier: headacheIdentifier),
+        trigger: UNCalendarNotificationTrigger(dateMatching: components, repeats: false),
+        badgeNumber: 0,
+        completion: completion)
+    }
   }
   
   /// Saves the severity sample.

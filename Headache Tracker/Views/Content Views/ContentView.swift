@@ -11,24 +11,21 @@ import DataController
 import HealthKit
 import Logger
 
+/// The main content view that contains the tab view.
 struct ContentView: View {
+  
+  // MARK: Private properties
+  
+  /// The main view context.
   @Environment(\.managedObjectContext) private var viewContext
+  
+  /// The headache manager.
   @EnvironmentObject private var headacheManager: HeadacheManager
+  
+  /// The alert manager for displaying notifications.
   @EnvironmentObject private var alertManager: AlertManager
-    
-  @FetchRequest(
-    sortDescriptors: [],
-    animation: .default)
-  private var headaches: FetchedResults<Headache>
   
-  private var currentHeadache: Headache? {
-    return headaches.first
-  }
-  
-  @State var alertTitle = ""
-  @State var alertMessage = ""
-  @State var showingAlert = false
-  @State var presentingSettings = false
+  // MARK: View body
   
   var body: some View {
     TabView {

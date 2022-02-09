@@ -7,15 +7,28 @@
 
 import SwiftUI
 
+/// Displays the application's settings.
 struct SettingsView: View {
+  
+  // MARK: Private properties
+  
+  /// The app's headache manager.
   @EnvironmentObject private var headacheManager: HeadacheManager
+  
+  /// The app's alert manager.
   @EnvironmentObject private var alertManager: AlertManager
   
+  /// The health integration setting.
   @AppStorage(AppSettings.healthIntegration) private var healthIntegration = false
+  
+  /// The check-in alert setting.
   @AppStorage(AppSettings.checkInAlerts) private var checkInAlerts = false
+  
+  /// The check-in interval setting to use when `checkInAlerts` is true.
   @AppStorage(AppSettings.checkInInterval) private var checkInInterval = TimeInterval(3600.0)
     
-  /// The health app integration binding. Will authorize health kit if set to true.
+  /// The health app integration binding.
+  /// Will authorize health kit if set to true.
   var healthAppIntegration: Binding<Bool> {
     Binding<Bool> {
       do {
@@ -40,6 +53,8 @@ struct SettingsView: View {
       }
     }
   }
+  
+  // MARK: View body
   
   var body: some View {
     NavigationView {
@@ -78,6 +93,7 @@ struct SettingsView: View {
       .navigationTitle("Settings")
     }
   }
+  
 }
 
 struct SettingsView_Previews: PreviewProvider {

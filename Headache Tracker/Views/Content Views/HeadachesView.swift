@@ -7,14 +7,25 @@
 
 import SwiftUI
 
+/// Shows a list of all unresolved and resolved headaches.
 struct HeadachesView: View {
+  
+  // MARK: Private properties
+  
+  /// The main view context.
   @Environment(\.managedObjectContext) private var viewContext
+  
+  /// The app's headache manager.
   @EnvironmentObject private var headacheManager: HeadacheManager
   
+  /// The headaches fetch request.
+  /// Returns a list of all headaches.
   @FetchRequest(
     sortDescriptors: [NSSortDescriptor(keyPath: \Headache.createdAt, ascending: false)],
     animation: .default)
   private var headaches: FetchedResults<Headache>
+  
+  // MARK: View body
   
   var body: some View {
     NavigationView {
@@ -38,11 +49,21 @@ struct HeadachesView: View {
     }
   }
   
+}
+
+// MARK: Private methods
+
+extension HeadachesView {
+  
+  /// Deletes the items at the given offsets.
+  ///
+  /// - Parameter offsets: The item offsets.
   private func deleteItems(offsets: IndexSet) {
     withAnimation {
       offsets.map { headaches[$0] }.forEach({ headacheManager.deleteHeadache(identifier: $0.identifier ?? UUID()) })
     }
   }
+  
 }
 
 struct HeadachesView_Previews: PreviewProvider {

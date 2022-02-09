@@ -7,30 +7,51 @@
 
 import SwiftUI
 
+/// Displays information about a specific headache.
 struct HeadacheView: View {
-  @Environment(\.presentationMode) var mode: Binding<PresentationMode>
   
-  @EnvironmentObject private var headacheManager: HeadacheManager
+  // MARK: Public properties
   
   @StateObject var headache: Headache
   
-  @State var alertTitle = ""
-  @State var alertMessage = ""
-  @State var showingAlert = false
+  // MARK: Private properties
   
-  private let formatter: DateComponentsFormatter = {
-    let formatter = DateComponentsFormatter()
-    formatter.unitsStyle = .abbreviated
-    formatter.allowedUnits = [.minute, .hour, .day]
-    formatter.maximumUnitCount = 2
-    return formatter
-  }()
+  /// The view's presentation mode.
+  @Environment(\.presentationMode) private var mode: Binding<PresentationMode>
+  
+  /// The app's headache manager.
+  @EnvironmentObject private var headacheManager: HeadacheManager
+  
+  /// The health integration setting.
+  @AppStorage(AppSettings.healthIntegration) private var healthIntegration = false
+  
+  /// The alert's title.
+  @State private var alertTitle = ""
+  
+  /// The alert's message.
+  @State private var alertMessage = ""
+  
+  /// Whether or not the alert is visible.
+  @State private var showingAlert = false
+  
+  /// Whether or not the delete confirmation alert is visible.
+  @State private var showingDeleteConfirmation = false
+  
+  /// The id of the duration view.
+  @State private var durationID = UUID()
+  
+  /// A timer to update the duration view for unresolved headaches.
+  @State private var durationUpdateTimer: Timer?
+  
+  // MARK: View body
   
   var body: some View {
     List {
       Section("Headache") {
         SubtitleCell(title: "Onset", subtitle: headache.startTime?.formatted() ?? "N/A")
-        SubtitleCell(title: "Duration", subtitle: formatter.string(from: headache.duration) ?? "0 minutes")
+        SubtitleCell(title: "Duration", subtitle: Formatters.dateComponentsFormatter.string(from: headache.duration) ?? "0 min")
+          .id(durationID)
+        
         SubtitleCell(title: "Severity", subtitle: headache.severityDescription)
         SubtitleCell(title: "Status", subtitle: headache.resolved ? "Resolved" : "Unresolved")
       }
@@ -44,42 +65,111 @@ struct HeadacheView: View {
       Section {
         HStack {
           Spacer()
-          Button("Delete Headache", action: delete)
+          Button("Delete Headache", action: deleteConfirmation)
             .foregroundColor(.red)
           Spacer()
         }
       }
     }
+    .onAppear(perform: appeared)
+    .onDisappear(perform: disappeared)
     .navigationTitle("Headache")
     .navigationBarTitleDisplayMode(.inline)
-    .alert(alertTitle, isPresented: $showingAlert) {
-      Button("OK", action: { showingAlert = false })
-    } message: {
-      Text(alertMessage)
-    }
+    .confirmationAlert(isPresented: $showingAlert, title: alertTitle, message: alertMessage)
+    .destructiveConfirmationDialog(title: alertTitle, isPresented: $showingDeleteConfirmation, destructiveActionTitle: "Delete", destructiveAction: {
+      delete()
+      withAnimation { showingDeleteConfirmation = false }
+    })
   }
   
 }
 
+// MARK: Private methods
+
 extension HeadacheView {
   
+  /// Shows an alert to the user.
+  ///
+  /// - Parameters:
+  ///   - title: The alert's title.
+  ///   - message: The alert's message.
   private func showAlert(_ title: String, _ message: String) {
     alertTitle = title
     alertMessage = message
-    showingAlert = true
+    withAnimation { showingAlert = true }
   }
   
+  /// Shows a reset confirmation dialog to the user.
+  ///
+  /// - Parameter title: The dialog's title.
+  private func showResetConfirmation(_ title: String, _ message: String) {
+    alertTitle = title
+    alertMessage = message
+    withAnimation { showingDeleteConfirmation = true }
+  }
+  
+  /// Deletes the view's headache.
   private func delete() {
     if let identifier = headache.identifier {
       headacheManager.deleteHeadache(identifier: identifier) { error in
-        if let error = error {
-          showAlert("Unable to Delete Headache", error.localizedDescription)
-        }
-        else {
-          mode.wrappedValue.dismiss()
+        DispatchQueue.main.async {
+          if let error = error {
+            showAlert("Unable to Delete Headache", error.localizedDescription)
+          }
+          else {
+            mode.wrappedValue.dismiss()
+          }
         }
       }
     }
+  }
+  
+  /// Displays a delete confirmation to the user.
+  private func deleteConfirmation() {
+    if healthIntegration {
+      showResetConfirmation("Delete Headache?", "This will permanantly delete the headache and any associated Health app data.")
+    }
+    else {
+      showResetConfirmation("Delete Headache?", "This will permanantly delete the headache.")
+    }
+  }
+  
+  /// Updates the duration view's identifier.
+  func updateDurationID() {
+    DispatchQueue.main.async {
+      withAnimation { durationID = UUID() }
+    }
+  }
+  
+  /// Called when the view appears.
+  func appeared() {
+    if !headache.resolved {
+      updateDurationID()
+      startDurationUpdateTimer()
+    }
+  }
+  
+  /// Called when the view disappears.
+  func disappeared() {
+    stopDurationUpdateTimer()
+  }
+  
+  /// Starts the duration update timer.
+  func startDurationUpdateTimer() {
+    durationUpdateTimer = Timer(timeInterval: 60.0, repeats: true, block: durationUpdateTimerFired)
+    durationUpdateTimer?.tolerance = 60.0 / 10.0
+    RunLoop.main.add(durationUpdateTimer!, forMode: RunLoop.Mode.default)
+  }
+  
+  /// Stops the duration update timer.
+  func stopDurationUpdateTimer() {
+    durationUpdateTimer?.invalidate()
+    durationUpdateTimer = nil
+  }
+  
+  /// Called when the duration update timer fires.
+  func durationUpdateTimerFired(_ timer: Timer) {
+    updateDurationID()
   }
   
 }

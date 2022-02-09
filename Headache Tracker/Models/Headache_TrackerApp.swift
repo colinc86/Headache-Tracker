@@ -18,6 +18,8 @@ struct Headache_TrackerApp: App {
   /// The application's alert manager.
   @StateObject var alertManager = AlertManager()
   
+  // MARK: View body
+  
   var body: some Scene {
     WindowGroup {
       ContentView()
@@ -28,12 +30,19 @@ struct Headache_TrackerApp: App {
     }
   }
   
+  // MARK: Initializers
+  
+  init() {
+    headacheManager.alertManager = alertManager
+  }
+  
 }
 
 // MARK: Private methods
 
 extension Headache_TrackerApp {
   
+  /// Called when the application's view appears.
   private func appeared() {
     // Check our authorization status
     if alertManager.authorizationStatus == .notDetermined {
