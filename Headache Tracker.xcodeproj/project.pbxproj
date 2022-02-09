@@ -19,6 +19,8 @@
 		3B051A9C27B351C70017131D /* Formatters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B051A9B27B351C70017131D /* Formatters.swift */; };
 		3B051A9E27B3555E0017131D /* ConfirmationAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B051A9D27B3555E0017131D /* ConfirmationAlert.swift */; };
 		3B051AA027B3577B0017131D /* DestructiveConfirmationDialog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B051A9F27B3577B0017131D /* DestructiveConfirmationDialog.swift */; };
+		3B051AA527B379DA0017131D /* Bundle+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B051AA427B379DA0017131D /* Bundle+Extensions.swift */; };
+		3B051AA727B37D060017131D /* SeverityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B051AA627B37D060017131D /* SeverityView.swift */; };
 		3B39DAD727ACF67600D39BB5 /* Previewing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B39DAD627ACF67600D39BB5 /* Previewing.swift */; };
 		3B39DAD927ACF74600D39BB5 /* Headache+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B39DAD827ACF74600D39BB5 /* Headache+Extensions.swift */; };
 		3B39DADB27ACFC9C00D39BB5 /* SubtitleCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B39DADA27ACFC9C00D39BB5 /* SubtitleCell.swift */; };
@@ -72,6 +74,8 @@
 		3B051A9D27B3555E0017131D /* ConfirmationAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfirmationAlert.swift; sourceTree = "<group>"; };
 		3B051A9F27B3577B0017131D /* DestructiveConfirmationDialog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DestructiveConfirmationDialog.swift; sourceTree = "<group>"; };
 		3B051AA327B3751B0017131D /* Headache-Tracker-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Headache-Tracker-Info.plist"; sourceTree = SOURCE_ROOT; };
+		3B051AA427B379DA0017131D /* Bundle+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Bundle+Extensions.swift"; sourceTree = "<group>"; };
+		3B051AA627B37D060017131D /* SeverityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeverityView.swift; sourceTree = "<group>"; };
 		3B39DAD627ACF67600D39BB5 /* Previewing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Previewing.swift; sourceTree = "<group>"; };
 		3B39DAD827ACF74600D39BB5 /* Headache+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Headache+Extensions.swift"; sourceTree = "<group>"; };
 		3B39DADA27ACFC9C00D39BB5 /* SubtitleCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubtitleCell.swift; sourceTree = "<group>"; };
@@ -140,6 +144,7 @@
 				3B051A4D27B0E9060017131D /* HeadachesView.swift */,
 				3B051A9027B0FACA0017131D /* HeadacheView.swift */,
 				3B39DAE327AD06EA00D39BB5 /* SettingsView.swift */,
+				3B051AA627B37D060017131D /* SeverityView.swift */,
 			);
 			path = "Content Views";
 			sourceTree = "<group>";
@@ -173,6 +178,7 @@
 			isa = PBXGroup;
 			children = (
 				3B051A4A27B0B4A80017131D /* Core Data */,
+				3B051AA427B379DA0017131D /* Bundle+Extensions.swift */,
 				3BF5316E27ACEAF600056673 /* DataController+Extensions.swift */,
 				3B39DADC27ACFD5A00D39BB5 /* HKCategoryValueSeverity+Extensions.swift */,
 			);
@@ -434,6 +440,7 @@
 				3BF5313927ACE18D00056673 /* ContentView.swift in Sources */,
 				3BF5313727ACE18D00056673 /* Headache_TrackerApp.swift in Sources */,
 				3B051A9527B18E3C0017131D /* HeadacheAlertRequest.swift in Sources */,
+				3B051AA527B379DA0017131D /* Bundle+Extensions.swift in Sources */,
 				3BF5314327ACE18F00056673 /* Headache_Tracker.xcdatamodeld in Sources */,
 				3B051A9E27B3555E0017131D /* ConfirmationAlert.swift in Sources */,
 				3B051A8D27B0F4490017131D /* DescribableError.swift in Sources */,
@@ -442,6 +449,7 @@
 				3B051A9827B1B4EC0017131D /* SeverityLevel.swift in Sources */,
 				3BF5316A27ACE47700056673 /* HeadacheManager.swift in Sources */,
 				3B39DAE427AD06EA00D39BB5 /* SettingsView.swift in Sources */,
+				3B051AA727B37D060017131D /* SeverityView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

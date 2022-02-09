@@ -16,6 +16,9 @@ struct HeadacheView: View {
   
   // MARK: Private properties
   
+  /// The main view context.
+  @Environment(\.managedObjectContext) private var viewContext
+  
   /// The view's presentation mode.
   @Environment(\.presentationMode) private var mode: Binding<PresentationMode>
   
@@ -57,8 +60,26 @@ struct HeadacheView: View {
       }
       
       Section("Progression") {
-        ForEach(headache.severitiesArray, id: \.self) { severity in
-          SubtitleCell(title: severity.severity.title, subtitle: severity.startTime?.formatted() ?? "N/A")
+        if headache.severities?.count ?? 0 > 1 {
+          ForEach(headache.severitiesArray, id: \.self) { severity in
+            NavigationLink {
+              SeverityView(severity: severity, canEditEndTime: severity == headache.severitiesArray.last, canDelete: true)
+                .environment(\.managedObjectContext, viewContext)
+                .environmentObject(headacheManager)
+            } label: {
+              SubtitleCell(title: severity.severity.title, subtitle: severity.startTime?.formatted() ?? "N/A")
+            }
+          }
+          .onDelete(perform: deleteSeverities)
+        }
+        else if let severity = headache.severitiesArray.first {
+          NavigationLink {
+            SeverityView(severity: severity, canEditEndTime: severity == headache.severitiesArray.last, canDelete: false)
+              .environment(\.managedObjectContext, viewContext)
+              .environmentObject(headacheManager)
+          } label: {
+            SubtitleCell(title: severity.severity.title, subtitle: severity.startTime?.formatted() ?? "N/A")
+          }
         }
       }
       
@@ -71,9 +92,20 @@ struct HeadacheView: View {
         }
       }
     }
+    .toolbar {
+      ToolbarItem(placement: .navigationBarTrailing) {
+        Button(action: addSeverity) {
+          Label("Add Severity", systemImage: "plus")
+        }
+      }
+      
+      ToolbarItem(placement: .navigationBarTrailing) {
+        EditButton()
+          .disabled(headache.severities?.count ?? 0 <= 1)
+      }
+    }
     .onAppear(perform: appeared)
     .onDisappear(perform: disappeared)
-    .navigationTitle("Headache")
     .navigationBarTitleDisplayMode(.inline)
     .confirmationAlert(isPresented: $showingAlert, title: alertTitle, message: alertMessage)
     .destructiveConfirmationDialog(title: alertTitle, isPresented: $showingDeleteConfirmation, destructiveActionTitle: "Delete", destructiveAction: {
@@ -107,6 +139,28 @@ extension HeadacheView {
     withAnimation { showingDeleteConfirmation = true }
   }
   
+  /// Adds a severity to the headache.
+  private func addSeverity() {
+    if let identifier = headache.identifier {
+      headacheManager.addSeverityToHeadache(identifier: identifier) { error in
+        DispatchQueue.main.async {
+          if let error = error {
+            showAlert("Unable to Add Severity", error.localizedDescription)
+          }
+        }
+      }
+    }
+  }
+  
+  /// Deletes the severities at the given offsets.
+  ///
+  /// - Parameter offsets: The item offsets.
+  private func deleteSeverities(offsets: IndexSet) {
+    withAnimation {
+      offsets.map { headache.severitiesArray[$0] }.forEach({ headacheManager.deleteSeverity(identifier: $0.identifier ?? UUID()) })
+    }
+  }
+  
   /// Deletes the view's headache.
   private func delete() {
     if let identifier = headache.identifier {
@@ -126,7 +180,7 @@ extension HeadacheView {
   /// Displays a delete confirmation to the user.
   private func deleteConfirmation() {
     if healthIntegration {
-      showResetConfirmation("Are you sure you want to delete the headache and any associated Health app data?")
+      showResetConfirmation("Are you sure you want to delete the headache and its associated Health app data?")
     }
     else {
       showResetConfirmation("Are you sure you want to delete the headache?")

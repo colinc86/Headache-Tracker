@@ -185,17 +185,7 @@ extension HeadacheManager {
       let saveSeverity: (@escaping (Error?) -> Void) -> Void = { block in
         // If there wasn't an error, then we should check and add this to health kit
         if let severityInterval = severityInterval {
-          self.saveSeveritySample(severityInterval: severityInterval, completion: block)
-        }
-        else {
-          block(nil)
-        }
-      }
-      
-      let presentCheckIn: (@escaping (Error?) -> Void) -> Void = { block in
-        // Schedule a new notification if this was a non-`not present` severity
-        if severity != .notPresent {
-          self.presentCheckInAlert(with: headacheIdentifier, completion: completion)
+          self.saveSeveritySamples(intervals: [severityInterval], completion: block)
         }
         else {
           block(nil)
@@ -203,11 +193,64 @@ extension HeadacheManager {
       }
       
       saveSeverity { saveError in
-        presentCheckIn { checkInError in
+        self.presentCheckInAlert(with: headacheIdentifier) { checkInError in
           completion(saveError ?? checkInError)
         }
       }
     }
+  }
+  
+  /// Adds a new severity to the headache with the given identifier.
+  ///
+  /// - Parameters:
+  ///   - identifier: The headache's identifier.
+  ///   - completion: The completion block to call after the severity has been added.
+  func addSeverityToHeadache(identifier: UUID, completion: @escaping (Error?) -> Void) {
+    logDebug("Add severity.")
+    
+    // The date interval of the severity to save to health kit
+    var severityInterval: SeverityInterval?
+    
+    // Get the headache
+    headacheWithIdentifier(identifier: identifier) { headache, context in
+      if let headache = headache {
+        severityInterval = headache.addSeverity(.notPresent, duration: 3600.0)
+      }
+    } completion: { [weak self] error in
+      // If there is an error, then we're done
+      guard let self = self, error == nil else {
+        if let error = error {
+          logError("Error deleting severity: \(error)")
+        }
+        
+        completion(error)
+        return
+      }
+      
+      if let severityInterval = severityInterval {
+        self.saveSeveritySamples(intervals: [severityInterval], completion: completion)
+      }
+      else {
+        completion(nil)
+      }
+    }
+  }
+  
+  /// Resolves the headache.
+  ///
+  /// - Parameter completion: Called after the headache has resolved.
+  func resolve(completion: @escaping (Error?) -> Void) {
+    logDebug("Resolve headache.")
+    
+    // Get the current headache
+    currentHeadache(update: { headache, context in
+      if let headache = headache {
+        headache.resolve(endTime: Date())
+      }
+      else {
+        logWarning("No current headache to resolve.")
+      }
+    }, completion: completion)
   }
   
   /// Deletes the current headache.
@@ -296,7 +339,117 @@ extension HeadacheManager {
         logDebug("Successfully reset headache, but not deleting severity samples.")
       }
     }
-
+  }
+  
+  /// Deletes the severity with the given identifier.
+  ///
+  /// - Parameters:
+  ///   - identifier: The severity's identifier.
+  ///   - completion: The completion block to call.
+  func deleteSeverity(identifier: UUID, completion: ((Error?) -> Void)? = nil) {
+    logDebug("Delete severity.")
+    
+    var originalHeadacheInterval: DateInterval?
+    var newSeveritySamples = [SeverityInterval]()
+    
+    severityWithIdentifier(identifier: identifier) { severity, context in
+      if let severity = severity {
+        let headache = severity.headache
+        originalHeadacheInterval = headache?.dateInterval
+        headache?.removeFromSeverities(severity)
+        context.delete(severity)
+        headache?.reorganize()
+        
+        for severity in headache?.severitiesArray ?? [] {
+          guard let interval = severity.severityInterval else { continue }
+          newSeveritySamples.append(interval)
+        }
+      }
+    } completion: { [weak self] error in
+      // If there is an error, then we're done
+      guard let self = self, error == nil else {
+        if let error = error {
+          logError("Error deleting severity: \(error)")
+        }
+        
+        completion?(error)
+        return
+      }
+      
+      // Check to see if we need to delete and re-add samples
+      if let originalHeadacheInterval = originalHeadacheInterval {
+        self.deleteSeveritySamples(in: originalHeadacheInterval) { error in
+          // If there is an error, then we're done
+          guard error == nil else {
+            if let error = error {
+              logError("Error deleting severity samples: \(error)")
+            }
+            
+            completion?(error)
+            return
+          }
+          
+          // Otherwise re-add the samples
+          self.saveSeveritySamples(intervals: newSeveritySamples, completion: completion)
+        }
+      }
+    }
+  }
+  
+  /// Updates the severity with the given identifier.
+  ///
+  /// - Parameters:
+  ///   - identifier: The severity's identifier.
+  ///   - completion: The completion block to call.
+  func updateSeverity(identifier: UUID, value: HKCategoryValueSeverity, startTime: Date, endTime: Date, completion: ((Error?) -> Void)? = nil) {
+    logDebug("Update severity.")
+    
+    var originalHeadacheInterval: DateInterval?
+    var newSeveritySamples = [SeverityInterval]()
+    
+    severityWithIdentifier(identifier: identifier) { severity, context in
+      if let severity = severity {
+        let headache = severity.headache
+        originalHeadacheInterval = headache?.dateInterval
+        severity.severity = value
+        severity.startTime = startTime
+        severity.endTime = endTime
+        headache?.reorganize()
+        
+        for severity in headache?.severitiesArray ?? [] {
+          guard let interval = severity.severityInterval else { continue }
+          newSeveritySamples.append(interval)
+        }
+      }
+    } completion: { [weak self] error in
+      // If there is an error, then we're done
+      guard let self = self, error == nil else {
+        if let error = error {
+          logError("Error updating severity: \(error)")
+        }
+        
+        completion?(error)
+        return
+      }
+      
+      // Check to see if we need to delete and re-add samples
+      if let originalHeadacheInterval = originalHeadacheInterval {
+        self.deleteSeveritySamples(in: originalHeadacheInterval) { error in
+          // If there is an error, then we're done
+          guard error == nil else {
+            if let error = error {
+              logError("Error deleting severity samples: \(error)")
+            }
+            
+            completion?(error)
+            return
+          }
+          
+          // Otherwise re-add the samples
+          self.saveSeveritySamples(intervals: newSeveritySamples, completion: completion)
+        }
+      }
+    }
   }
   
 }
@@ -314,6 +467,36 @@ extension HeadacheManager {
     DataController.shared.performInBackground(block: { context in
       let request = Headache.fetchRequest()
       request.predicate = NSPredicate(format: "ANY severities.endTime = nil")
+      try update((try context.fetch(request)).first, context)
+    }, completion: completion)
+  }
+  
+  /// Gets the headache and calls it with the update block before
+  /// saving the context and calling the completion block.
+  ///
+  /// - Parameters:
+  ///   - update: Called with the headache to update it. Errors thrown
+  ///     in this block will be received in completion.
+  ///   - completion: Called after the context has been saved.
+  private func headacheWithIdentifier(identifier: UUID, update: @escaping (Headache?, NSManagedObjectContext) throws -> Void, completion: @escaping (Error?) -> Void) {
+    DataController.shared.performInBackground(block: { context in
+      let request = Headache.fetchRequest()
+      request.predicate = NSPredicate(format: "identifier = %@", identifier as NSUUID)
+      try update((try context.fetch(request)).first, context)
+    }, completion: completion)
+  }
+  
+  /// Gets the severity and calls it with the update block before
+  /// saving the context and calling the completion block.
+  ///
+  /// - Parameters:
+  ///   - update: Called with the severity to update it. Errors thrown
+  ///     in this block will be received in completion.
+  ///   - completion: Called after the context has been saved.
+  private func severityWithIdentifier(identifier: UUID, update: @escaping (Severity?, NSManagedObjectContext) throws -> Void, completion: @escaping (Error?) -> Void) {
+    DataController.shared.performInBackground(block: { context in
+      let request = Severity.fetchRequest()
+      request.predicate = NSPredicate(format: "identifier = %@", identifier as NSUUID)
       try update((try context.fetch(request)).first, context)
     }, completion: completion)
   }
@@ -349,36 +532,40 @@ extension HeadacheManager {
     }
   }
   
-  /// Saves the severity sample.
+  /// Saves an array of severity sample.
   ///
   /// - Parameters:
-  ///   - severityInterval: The severity interval.
+  ///   - intervals: The severity intervals to save.
   ///   - completion: The completion block called after the severity has been added.
-  private func saveSeveritySample(severityInterval: SeverityInterval, completion: @escaping (Error?) -> Void) {
+  private func saveSeveritySamples(intervals: [SeverityInterval], completion: ((Error?) -> Void)? = nil) {
     // Only continue if we have health integration turned on
     guard !testing && healthIntegration else {
-      completion(nil)
+      completion?(nil)
       return
     }
     
     // Get the headache type
     guard let headacheType = HKObjectType.categoryType(forIdentifier: .headache) else {
-      completion(SetupError.notAvailable)
+      completion?(SetupError.notAvailable)
       return
     }
     
     // Check our authorization status
     guard store.authorizationStatus(for: headacheType) == .sharingAuthorized else {
-      completion(SetupError.headacheTypeNotAvailable)
+      completion?(SetupError.headacheTypeNotAvailable)
       return
     }
-
-    let sample = HKCategorySample(type: headacheType, value: severityInterval.0.rawValue, start: severityInterval.1.start, end: severityInterval.1.end)
-    store.save(sample) { (success, error) in
+    
+    var samples = [HKObject]()
+    for interval in intervals {
+      samples.append(HKCategorySample(type: headacheType, value: interval.0.rawValue, start: interval.1.start, end: interval.1.end))
+    }
+    
+    store.save(samples) { (success, error) in
       if let error = error {
-        completion(error)
+        completion?(error)
       } else {
-        completion(success ? nil : HealthKitError.save)
+        completion?(success ? nil : HealthKitError.save)
       }
     }
   }

@@ -17,6 +17,9 @@ struct HeadacheCell: View {
   
   // MARK: Private properties
   
+  /// The id of the severity level view.
+  @State private var severityID = UUID()
+  
   /// The id of the duration view.
   @State private var durationID = UUID()
   
@@ -31,6 +34,7 @@ struct HeadacheCell: View {
         .foregroundColor(headache.resolved ? .secondary : .accentColor)
       
       SeverityLevel(headache: headache)
+        .id(severityID)
       
       VStack {
         SubtitleCell(title: "Onset", subtitle: headache.startTime?.formatted() ?? "N/A")
@@ -56,6 +60,10 @@ extension HeadacheCell {
   
   /// Called when the view appears.
   func appeared() {
+    withAnimation {
+      severityID = UUID()
+    }
+    
     if !headache.resolved {
       updateDurationID()
       startDurationUpdateTimer()

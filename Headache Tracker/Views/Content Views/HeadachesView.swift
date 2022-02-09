@@ -33,12 +33,13 @@ struct HeadachesView: View {
         ForEach(headaches) { headache in
           NavigationLink {
             HeadacheView(headache: headache)
+              .environment(\.managedObjectContext, viewContext)
               .environmentObject(headacheManager)
           } label: {
             HeadacheCell(headache: headache)
           }
         }
-        .onDelete(perform: deleteItems)
+        .onDelete(perform: deleteHeadaches)
       }
       .navigationTitle("Headaches")
       .toolbar {
@@ -58,7 +59,7 @@ extension HeadachesView {
   /// Deletes the items at the given offsets.
   ///
   /// - Parameter offsets: The item offsets.
-  private func deleteItems(offsets: IndexSet) {
+  private func deleteHeadaches(offsets: IndexSet) {
     withAnimation {
       offsets.map { headaches[$0] }.forEach({ headacheManager.deleteHeadache(identifier: $0.identifier ?? UUID()) })
     }

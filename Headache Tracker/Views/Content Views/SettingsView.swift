@@ -59,12 +59,14 @@ struct SettingsView: View {
   var body: some View {
     NavigationView {
       Form {
+        // Integrations
         Section("Integrations") {
           Toggle(isOn: healthAppIntegration) {
             Text("Health App Integration")
           }
         }
         
+        // Notifications
         Section {
           Toggle(isOn: $checkInAlerts) {
             Text("Check-Ins")
@@ -89,6 +91,11 @@ struct SettingsView: View {
           }
         }
         .disabled(alertManager.authorizationStatus == .notDetermined || alertManager.authorizationStatus == .denied)
+        
+        // Information
+        Section {
+          SubtitleCell(title: "Version", subtitle: Bundle.main.humanReadableVersionString)
+        }
       }
       .navigationTitle("Settings")
     }

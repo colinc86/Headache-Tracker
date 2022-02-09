@@ -86,6 +86,9 @@ struct CurrentHeadacheView: View {
           .disabled(currentHeadache?.severity == .unspecified)
           
           Button(HKCategoryValueSeverity.notPresent.title) { changeSeverity(to: .notPresent) }
+          .disabled(currentHeadache?.severity == .notPresent)
+          
+          Button("Resolved") { resolve() }
           .disabled(currentHeadache == nil)
         }
       }
@@ -109,9 +112,9 @@ extension CurrentHeadacheView {
   /// - Parameters:
   ///   - title: The alert's title.
   ///   - message: The alert's message.
-  private func showAlert(_ title: String, _ message: String) {
+  private func showAlert(_ title: String, _ error: Error) {
     alertTitle = title
-    alertMessage = message
+    alertMessage = error.localizedDescription
     withAnimation { showingAlert = true }
   }
   
@@ -131,7 +134,17 @@ extension CurrentHeadacheView {
     headacheManager.changeSeverity(to: severity) { error in
       DispatchQueue.main.async {
         if let error = error {
-          showAlert("Unable to Update Severity", error.localizedDescription)
+          showAlert("Unable to Update Severity", error)
+        }
+      }
+    }
+  }
+  
+  private func resolve() {
+    headacheManager.resolve { error in
+      DispatchQueue.main.async {
+        if let error = error {
+          showAlert("Unable to Resolve Headache", error)
         }
       }
     }
@@ -142,7 +155,7 @@ extension CurrentHeadacheView {
     headacheManager.reset { error in
       if let error = error {
         DispatchQueue.main.async {
-          showAlert("Unable to Reset Headache", error.localizedDescription)
+          showAlert("Unable to Reset Headache", error)
         }
       }
     }
