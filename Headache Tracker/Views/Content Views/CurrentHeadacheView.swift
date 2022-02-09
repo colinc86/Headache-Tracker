@@ -151,10 +151,10 @@ extension CurrentHeadacheView {
   /// Displays the reset confirmation alert to the user.
   private func resetConfirmation() {
     if healthIntegration {
-      showResetConfirmation("Reset Headache and any associated Health app data?")
+      showResetConfirmation("Are you sure you want to reset the headache and any associated Health app data?")
     }
     else {
-      showResetConfirmation("Reset Headache?")
+      showResetConfirmation("Are you sure you want to reset the headache?")
     }
   }
   

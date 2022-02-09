@@ -102,9 +102,8 @@ extension HeadacheView {
   /// Shows a reset confirmation dialog to the user.
   ///
   /// - Parameter title: The dialog's title.
-  private func showResetConfirmation(_ title: String, _ message: String) {
+  private func showResetConfirmation(_ title: String) {
     alertTitle = title
-    alertMessage = message
     withAnimation { showingDeleteConfirmation = true }
   }
   
@@ -127,10 +126,10 @@ extension HeadacheView {
   /// Displays a delete confirmation to the user.
   private func deleteConfirmation() {
     if healthIntegration {
-      showResetConfirmation("Delete Headache?", "This will permanantly delete the headache and any associated Health app data.")
+      showResetConfirmation("Are you sure you want to delete the headache and any associated Health app data?")
     }
     else {
-      showResetConfirmation("Delete Headache?", "This will permanantly delete the headache.")
+      showResetConfirmation("Are you sure you want to delete the headache?")
     }
   }
   

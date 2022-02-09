@@ -27,7 +27,7 @@ struct DestructiveConfirmationDialog: ViewModifier {
   
   func body(content: Content) -> some View {
     content
-      .confirmationDialog(title, isPresented: $isPresented) {
+      .confirmationDialog(title, isPresented: $isPresented, titleVisibility: .visible) {
         Button(destructiveActionTitle, role: .destructive, action: destructiveAction)
       }
   }

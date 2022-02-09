@@ -30,12 +30,6 @@ struct Headache_TrackerApp: App {
     }
   }
   
-  // MARK: Initializers
-  
-  init() {
-    headacheManager.alertManager = alertManager
-  }
-  
 }
 
 // MARK: Private methods
@@ -44,6 +38,9 @@ extension Headache_TrackerApp {
   
   /// Called when the application's view appears.
   private func appeared() {
+    // Make sure the headache manager has a reference to the alert manager
+    headacheManager.alertManager = alertManager
+    
     // Check our authorization status
     if alertManager.authorizationStatus == .notDetermined {
       alertManager.setup(options: [.alert, .badge, .sound], completion: nil)
