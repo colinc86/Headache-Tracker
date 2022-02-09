@@ -31,16 +31,20 @@ struct HeadacheCell: View {
   var body: some View {
     HStack(alignment: .top) {
       Image(systemName: "brain.head.profile")
+        .padding(EdgeInsets(top: 4.0, leading: 0.0, bottom: 0.0, trailing: 0.0))
         .foregroundColor(headache.resolved ? .secondary : .accentColor)
       
       SeverityLevel(headache: headache)
+        .padding(EdgeInsets(top: 4.0, leading: 0.0, bottom: 4.0, trailing: 0.0))
+        .frame(width: 20.0)
         .id(severityID)
       
       VStack {
         SubtitleCell(title: "Onset", subtitle: headache.startTime?.formatted() ?? "N/A")
+        Spacer(minLength: 0.0)
         SubtitleCell(title: "Duration", subtitle: Formatters.dateComponentsFormatter.string(from: headache.duration) ?? "0 min")
           .id(durationID)
-        
+        Spacer(minLength: 0.0)
         SubtitleCell(title: "Severity", subtitle: headache.severityDescription)
       }
     }
@@ -98,6 +102,6 @@ extension HeadacheCell {
 struct HeadacheCell_Previews: PreviewProvider {
   static var previews: some View {
     HeadacheCell(headache: Previewing.CoreData.headache)
-      .environment(\.managedObjectContext, Previewing.CoreData.controller.container.viewContext)
+      .previewLayout(.fixed(width: 350.0, height: 75.0))
   }
 }

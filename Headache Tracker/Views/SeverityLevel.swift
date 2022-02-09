@@ -18,19 +18,27 @@ struct SeverityLevel: View {
   // MARK: View body
   
   var body: some View {
-    VStack {
-      Spacer(minLength: 0.0)
-      ForEach(1 ..< 5) { i in
-        if 5 - i < headache.severityRange.0.orderingValue ||
-            5 - i > headache.severityRange.1.orderingValue {
-          Rectangle()
-            .fill(Color.secondary.opacity(0.25))
-            .frame(width: 10.0, height: 10.0)
-        }
-        else {
-          Rectangle()
-            .fill(color(for: 5 - i))
-            .frame(width: 10.0, height: 10.0)
+    GeometryReader { geometry in
+      HStack {
+        Spacer(minLength: 0.0)
+        VStack(spacing: 0.0) {
+          ForEach(0 ..< 5) { i in
+            if 4 - i < headache.severityRange.0.orderingValue ||
+                4 - i > headache.severityRange.1.orderingValue {
+              Rectangle()
+                .fill(Color.secondary.opacity(0.25))
+                .frame(width: 10.0, height: 10.0)
+            }
+            else {
+              Rectangle()
+                .fill(color(for: 4 - i))
+                .frame(width: 10.0, height: 10.0)
+            }
+            
+            if i < 4 {
+              Spacer(minLength: 0.0)
+            }
+          }
         }
         Spacer(minLength: 0.0)
       }
@@ -48,7 +56,8 @@ extension SeverityLevel {
   /// - Returns: A color.
   private func color(for index: Int) -> Color {
     switch index {
-    case 1: return .cyan
+    case 0: return .cyan
+    case 1: return .mint
     case 2: return .yellow
     case 3: return .orange
     case 4: return .red

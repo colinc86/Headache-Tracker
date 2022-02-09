@@ -242,15 +242,35 @@ extension HeadacheManager {
   func resolve(completion: @escaping (Error?) -> Void) {
     logDebug("Resolve headache.")
     
+    // The date interval of the severity to save to health kit
+    var severityInterval: SeverityInterval?
+    
     // Get the current headache
-    currentHeadache(update: { headache, context in
+    currentHeadache { headache, context in
       if let headache = headache {
-        headache.resolve(endTime: Date())
+        severityInterval = headache.resolve(endTime: Date())
       }
       else {
         logWarning("No current headache to resolve.")
       }
-    }, completion: completion)
+    } completion: { [weak self] error in
+      // If there is an error, then we're done
+      guard let self = self, error == nil else {
+        if let error = error {
+          logError("Error deleting severity: \(error)")
+        }
+        
+        completion(error)
+        return
+      }
+      
+      if let severityInterval = severityInterval {
+        self.saveSeveritySamples(intervals: [severityInterval], completion: completion)
+      }
+      else {
+        completion(nil)
+      }
+    }
   }
   
   /// Deletes the current headache.

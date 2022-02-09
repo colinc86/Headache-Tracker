@@ -9,6 +9,7 @@ import Foundation
 
 struct Formatters {
   
+  /// The date components formatter for displaying time intervals.
   static let dateComponentsFormatter: DateComponentsFormatter = {
     let formatter = DateComponentsFormatter()
     formatter.unitsStyle = .abbreviated

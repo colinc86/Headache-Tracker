@@ -182,7 +182,7 @@ extension Headache {
   /// to true.
   ///
   /// - Parameter endTime: The headache's end time.
-  func resolve(endTime: Date) {
+  func resolve(endTime: Date) -> HeadacheManager.SeverityInterval? {
     logDebug("Adding severity \(severity.title) to the headache.")
     
     // Resolve the headache
@@ -194,7 +194,10 @@ extension Headache {
     // Get the previous severity and end it
     if let previousSeverity = severities.last {
       previousSeverity.endTime = endTime
+      return previousSeverity.severityInterval
     }
+    
+    return nil
   }
   
 }

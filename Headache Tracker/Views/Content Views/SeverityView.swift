@@ -218,5 +218,7 @@ extension SeverityView {
 struct SeverityView_Previews: PreviewProvider {
   static var previews: some View {
     SeverityView(severity: Previewing.CoreData.severity, canEditEndTime: false, canDelete: false)
+      .environment(\.managedObjectContext, Previewing.CoreData.controller.container.viewContext)
+      .environmentObject(Previewing.headacheManager)
   }
 }

@@ -22,6 +22,7 @@ extension HKCategoryValueSeverity {
     }
   }
   
+  /// The value's integer value representation.
   var orderingValue: Int {
     switch self {
     case .notPresent: return 0

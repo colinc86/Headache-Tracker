@@ -58,21 +58,14 @@ struct CurrentHeadacheView: View {
   var body: some View {
     NavigationView {
       Form {
-        Section {
-          SubtitleCell(title: "Severity", subtitle: (currentHeadache?.severity ?? .notPresent).title)
-          
-          if let currentHeadache = currentHeadache {
-            SubtitleCell(title: "Last Updated", subtitle: currentHeadache.startTime?.formatted() ?? "N/A")
-            
-            HStack {
-              Spacer()
-              Button("Reset", action: resetConfirmation)
-              Spacer()
-            }
+        if let currentHeadache = currentHeadache {
+          Section {
+            SubtitleCell(title: "Severity", subtitle: currentHeadache.severity.title)
+            SubtitleCell(title: "Last Updated", subtitle: currentHeadache.pendingEndTime?.formatted() ?? "N/A")
           }
         }
         
-        Section("Severity") {
+        Section {
           Button(HKCategoryValueSeverity.severe.title) { changeSeverity(to: .severe) }
           .disabled(currentHeadache?.severity == .severe)
           
@@ -87,9 +80,27 @@ struct CurrentHeadacheView: View {
           
           Button(HKCategoryValueSeverity.notPresent.title) { changeSeverity(to: .notPresent) }
           .disabled(currentHeadache?.severity == .notPresent)
-          
-          Button("Resolved") { resolve() }
-          .disabled(currentHeadache == nil)
+        } footer: {
+          if currentHeadache == nil {
+            Text("Feel a headache coming on? Select a severity level to start tracking it.")
+          }
+        }
+        
+        if currentHeadache != nil {
+          Section {
+            HStack {
+              Spacer()
+              Button("Resolve", action: resolve)
+              Spacer()
+            }
+            
+            HStack {
+              Spacer()
+              Button("Reset", action: resetConfirmation)
+                .foregroundColor(.red)
+              Spacer()
+            }
+          }
         }
       }
       .navigationTitle("Current Headache")
