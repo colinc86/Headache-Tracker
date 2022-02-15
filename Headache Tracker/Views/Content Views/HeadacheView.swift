@@ -97,6 +97,7 @@ struct HeadacheView: View {
         Button(action: addSeverity) {
           Label("Add Severity", systemImage: "plus")
         }
+        .disabled(!headache.resolved)
       }
       
       ToolbarItem(placement: .navigationBarTrailing) {

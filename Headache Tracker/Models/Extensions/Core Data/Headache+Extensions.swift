@@ -69,7 +69,7 @@ extension Headache {
   }
   
   /// The headache's severity range.
-  var severityRange: HeadacheManager.SeverityRange {
+  var severityRange: HealthKitManager.SeverityRange {
     guard let minSeverity = severitiesArray.map({ $0.severity }).min(by: { $0.orderingValue < $1.orderingValue }),
           let maxSeverity = severitiesArray.map({ $0.severity }).max(by: { $0.orderingValue < $1.orderingValue }) else {
             return (.notPresent, .notPresent)
@@ -95,6 +95,26 @@ extension Headache {
   
 }
 
+// MARK: Static methods
+
+extension Headache {
+  
+  /// Creates a fetch request
+  /// 
+  /// - Parameter identifier: The headache's identifier.
+  /// - Returns: A fetch request.
+  static func fetchRequest(withIdentifier identifier: UUID?) -> NSFetchRequest<Headache> {
+    let request = Headache.fetchRequest()
+    if let identifier = identifier {
+      request.predicate = NSPredicate(format: "identifier = %@", identifier as NSUUID)
+    }
+    return request
+  }
+  
+}
+
+// MARK: Public methods
+
 extension Headache {
   
   /// Reorganizes the headache's severities by start time.
@@ -114,14 +134,15 @@ extension Headache {
   /// - Parameters:
   ///   - severity: The severity.
   ///   - startTime: The severity's start time.
-  /// - Returns: A date interval of a completed severity if one's `endTime` was set.
+  /// - Returns: A date interval of a completed severity if one's `endTime` was set, and the identifier
+  ///   of the newly added Severity.
   @discardableResult
-  func addSeverity(_ severity: HKCategoryValueSeverity, startTime: Date) -> HeadacheManager.SeverityInterval? {
+  func addSeverity(_ severity: HKCategoryValueSeverity, startTime: Date) -> (HealthKitManager.SeverityInterval?, UUID?) {
     logDebug("Adding severity \(severity.title) to the headache.")
     
     // Get the context
     guard let context = managedObjectContext else {
-      return nil
+      return (nil, nil)
     }
     
     // Get the severities
@@ -141,10 +162,10 @@ extension Headache {
       addToSeverities(newSeverity)
       
       // Return the updated severity
-      return previousSeverity?.severityInterval
+      return (previousSeverity?.severityInterval, newSeverity.identifier)
     }
     
-    return nil
+    return (nil, nil)
   }
   
   /// Adds the severity to the headache with the given duration. Only use this
@@ -154,7 +175,7 @@ extension Headache {
   ///   - severity: The severity.
   ///   - duration: The severity's duration.
   @discardableResult
-  func addSeverity(_ severity: HKCategoryValueSeverity, duration: TimeInterval) -> HeadacheManager.SeverityInterval? {
+  func addSeverity(_ severity: HKCategoryValueSeverity, duration: TimeInterval) -> HealthKitManager.SeverityInterval? {
     logDebug("Adding severity \(severity.title) with duration \(duration) seconds.")
     
     // Get the context
@@ -182,7 +203,7 @@ extension Headache {
   /// to true.
   ///
   /// - Parameter endTime: The headache's end time.
-  func resolve(endTime: Date) -> HeadacheManager.SeverityInterval? {
+  func resolve(endTime: Date) -> HealthKitManager.SeverityInterval? {
     logDebug("Adding severity \(severity.title) to the headache.")
     
     // Resolve the headache

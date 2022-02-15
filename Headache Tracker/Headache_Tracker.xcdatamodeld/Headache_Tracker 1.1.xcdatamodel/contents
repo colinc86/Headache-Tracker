@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="19574" systemVersion="21D62" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithCloudKit="YES" userDefinedModelVersionIdentifier="">
+    <entity name="Headache" representedClassName="Headache" syncable="YES" codeGenerationType="class">
+        <attribute name="createdAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="identifier" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="resolved" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <relationship name="severities" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Severity" inverseName="headache" inverseEntity="Severity"/>
+    </entity>
+    <entity name="Severity" representedClassName="Severity" syncable="YES" codeGenerationType="class">
+        <attribute name="endTime" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="identifier" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="rawValue" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="startTime" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <relationship name="headache" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Headache" inverseName="severities" inverseEntity="Headache"/>
+    </entity>
+    <elements>
+        <element name="Headache" positionX="-63" positionY="-18" width="128" height="89"/>
+        <element name="Severity" positionX="-63" positionY="9" width="128" height="104"/>
+    </elements>
+</model>

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Logger
 
 /// Displays the application's settings.
 struct SettingsView: View {
@@ -14,6 +15,9 @@ struct SettingsView: View {
   
   /// The app's headache manager.
   @EnvironmentObject private var headacheManager: HeadacheManager
+  
+  /// The health kit manager.
+  @EnvironmentObject private var healthKitManager: HealthKitManager
   
   /// The app's alert manager.
   @EnvironmentObject private var alertManager: AlertManager
@@ -26,28 +30,21 @@ struct SettingsView: View {
   
   /// The check-in interval setting to use when `checkInAlerts` is true.
   @AppStorage(AppSettings.checkInInterval) private var checkInInterval = TimeInterval(3600.0)
+  
+  /// The learn and predict setting.
+  @AppStorage(AppSettings.learnAndPredict) private var learnAndPredict = false
     
   /// The health app integration binding.
   /// Will authorize health kit if set to true.
   var healthAppIntegration: Binding<Bool> {
     Binding<Bool> {
-      do {
-        let status = try headacheManager.authorizationStatus()
-        return status == .sharingAuthorized && healthIntegration
-      }
-      catch {
-        return false
-      }
+      return !healthKitManager.needsAuthorization() && healthIntegration
     } set: { newValue in
       healthIntegration = newValue
       if healthIntegration {
-        headacheManager.authorize { _ in
-          do {
-            let status = try headacheManager.authorizationStatus()
-            healthIntegration = status == .sharingAuthorized
-          }
-          catch {
-            healthIntegration = false
+        healthKitManager.authorize { error in
+          if let error = error {
+            logError("Error authorizing HealthKit: \(error)")
           }
         }
       }
@@ -65,6 +62,18 @@ struct SettingsView: View {
             Text("Health App Integration")
           }
         }
+        
+        // Learning and Prediction
+        Section("Prediction") {
+          Toggle(isOn: $learnAndPredict) {
+            Text("Learn and Predict")
+          }
+//          Button("Reset") {
+//            headacheManager.resetPrediction()
+//          }
+//          .disabled(!learnAndPredict)
+        }
+        .onChange(of: learnAndPredict, perform: learnAndPredictChanged)
         
         // Notifications
         Section {
@@ -98,6 +107,16 @@ struct SettingsView: View {
         }
       }
       .navigationTitle("Settings")
+    }
+  }
+  
+}
+
+extension SettingsView {
+  
+  func learnAndPredictChanged(_ newValue: Bool) {
+    if newValue {
+      logDebug("Motion manager current authorization status: \(MotionManager.authorizationStatus())")
     }
   }
   

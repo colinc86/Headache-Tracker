@@ -20,7 +20,7 @@ extension Severity {
   }
   
   /// The severity's severity interval.
-  var severityInterval: HeadacheManager.SeverityInterval? {
+  var severityInterval: HealthKitManager.SeverityInterval? {
     guard let startTime = startTime, let endTime = endTime else {
       return nil
     }
@@ -40,6 +40,24 @@ extension Severity {
     self.severity = severity
     self.startTime = startTime
     self.identifier = UUID()
+  }
+  
+}
+
+// MARK: Static methods
+
+extension Severity {
+  
+  /// Creates a fetch request
+  ///
+  /// - Parameter identifier: The severity's identifier.
+  /// - Returns: A fetch request.
+  static func fetchRequest(withIdentifier identifier: UUID?) -> NSFetchRequest<Severity> {
+    let request = Severity.fetchRequest()
+    if let identifier = identifier {
+      request.predicate = NSPredicate(format: "identifier = %@", identifier as NSUUID)
+    }
+    return request
   }
   
 }

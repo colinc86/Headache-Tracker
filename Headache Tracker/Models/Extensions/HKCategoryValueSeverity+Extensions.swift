@@ -34,4 +34,15 @@ extension HKCategoryValueSeverity {
     }
   }
   
+  init?(title: String) {
+    switch title {
+    case HKCategoryValueSeverity.notPresent.title: self = .notPresent
+    case HKCategoryValueSeverity.unspecified.title: self = .unspecified
+    case HKCategoryValueSeverity.mild.title: self = .mild
+    case HKCategoryValueSeverity.moderate.title: self = .moderate
+    case HKCategoryValueSeverity.severe.title: self = .severe
+    default: return nil
+    }
+  }
+  
 }

@@ -22,6 +22,12 @@ struct ContentView: View {
   /// The headache manager.
   @EnvironmentObject private var headacheManager: HeadacheManager
   
+  /// The headache predictor.
+  @EnvironmentObject private var headachePredictor: HeadachePredictor
+  
+  /// The health kit manager.
+  @EnvironmentObject private var healthKitManager: HealthKitManager
+  
   /// The alert manager for displaying notifications.
   @EnvironmentObject private var alertManager: AlertManager
   
@@ -32,6 +38,7 @@ struct ContentView: View {
       CurrentHeadacheView()
         .environment(\.managedObjectContext, viewContext)
         .environmentObject(headacheManager)
+        .environmentObject(headachePredictor)
         .environmentObject(alertManager)
         .tabItem {
           Label("Current Headache", systemImage: "brain.head.profile")
@@ -46,6 +53,7 @@ struct ContentView: View {
       
       SettingsView()
         .environmentObject(headacheManager)
+        .environmentObject(healthKitManager)
         .environmentObject(alertManager)
         .tabItem {
           Label("Settings", systemImage: "gear")
