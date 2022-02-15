@@ -9,6 +9,7 @@ import DataController
 import Foundation
 import SwiftUI
 import HealthKit
+import Logger
 
 struct Previewing {
   
@@ -17,6 +18,12 @@ struct Previewing {
   
   /// The preview alert manager.
   static let alertManager = AlertManager()
+  
+  /// The preview health kit manager.
+  static let healthKitManager = HealthKitManager()
+  
+  /// The preview predictor.
+  static let headachePredictor = HeadachePredictor()
   
   struct CoreData {
     
@@ -63,6 +70,12 @@ struct Previewing {
     static var severity: Severity = {
       return headache.severitiesArray.first!
     }()
+    
+    /// Sets up the preview objects.
+    static func setupObjects() {
+      logDebug("Setting up resolved headache with identifier \(headache.identifier?.uuidString ?? "N/A")")
+      logDebug("Setting up unresolved headache with identifier \(unresolvedHeadache.identifier?.uuidString ?? "N/A")")
+    }
     
   }
   

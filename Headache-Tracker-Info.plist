@@ -3,6 +3,8 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleVersion</key>
-	<string>54</string>
+	<string>55</string>
+	<key>OpenWeatherMapAPIKey</key>
+	<string>794fd33715c944915c7094ae47599be6</string>
 </dict>
 </plist>

@@ -14,3 +14,5 @@ struct AppSettings {
   static let checkInInterval = ApplicationKey(from: "checkInInterval")
   static let learnAndPredict = ApplicationKey(from: "learnAndPredict")
 }
+
+//let apiKey = Bundle.main.object(forInfoDictionaryKey: "OpenWeatherMapAPIKey") as? String

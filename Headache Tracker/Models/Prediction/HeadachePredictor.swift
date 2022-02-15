@@ -7,10 +7,13 @@
 
 import ApplicationKey
 import CoreML
-import CreateML
 import Foundation
 import Logger
 import HealthKit
+
+#if !DEBUG
+import CreateML
+#endif
 
 class HeadachePredictor: ObservableObject {
   
@@ -55,8 +58,10 @@ class HeadachePredictor: ObservableObject {
   
   // MARK: Public properties
   
-  @Published var loading: Bool = false
+  /// Whether or not the predictor is training.
   @Published var training: Bool = false
+  
+  /// Whether or not the predictor is ready to predict.
   @Published var ready: Bool = false
   
   // MARK: Private properties
@@ -69,11 +74,13 @@ class HeadachePredictor: ObservableObject {
   /// The queue to do anything with models on.
   private var modelQueue = DispatchQueue(label: ApplicationKey(from: "modelQueue"))
   
+#if !DEBUG
   /// The metadata to save with a model.
   private let metadata = MLModelMetadata(
     author: "Colin Campbell",
     shortDescription: "Predicts the onset, severity and progression of headaches.",
     version: Date().description)
+#endif
   
 }
 
@@ -81,6 +88,9 @@ class HeadachePredictor: ObservableObject {
 
 extension HeadachePredictor {
   
+  /// Loads the predictor's models.
+  ///
+  /// - Parameter completion: Called after the models have been loaded.
   func load(_ completion: @escaping (Error?) -> Void) {
     logDebug("Load classifiers.")
     modelQueue.async { [weak self] in
@@ -112,6 +122,11 @@ extension HeadachePredictor {
     }
   }
   
+  /// Trains the predictor's classifiers.
+  ///
+  /// - Parameters:
+  ///   - trainingData: The training data.
+  ///   - completion: Called after training has completed.
   func train(with trainingData: [TrainingData], completion: @escaping (Error?) -> Void) {
     guard !training else {
       completion(nil)
@@ -129,6 +144,7 @@ extension HeadachePredictor {
           return
         }
         
+#if !DEBUG
         let table = try MLDataTable(dictionary: trainingData.dataTable())
         logDebug("Got table: \(table)")
         
@@ -179,6 +195,7 @@ extension HeadachePredictor {
         }
         try FileManager.default.moveItem(at: lrCompiledModelURL, to: lrNewCompiledModelURL)
         try FileManager.default.removeItem(at: lrModelURL)
+#endif
         
         self.load { error in
           completion(error)
@@ -192,6 +209,7 @@ extension HeadachePredictor {
     }
   }
   
+  /// Resets the predictor and its classifiers.
   func reset() {
     do {
       boostedTreeClassifier = nil
@@ -213,6 +231,10 @@ extension HeadachePredictor {
     DispatchQueue.main.async { self.ready = false }
   }
   
+  /// Makes a prediction.
+  ///
+  /// - Parameter input: The predictor's input.
+  /// - Returns: The predictor's output.
   func predict(_ input: HeadacheClassifierInput) throws -> Prediction {
     guard let btClassifier = boostedTreeClassifier, let dtClassifier = decisionTreeClassifier, let rfClassifier = randomForestClassifier, let lrClassifier = logisticRegressionClassifier else {
       return .empty
@@ -234,14 +256,25 @@ extension HeadachePredictor {
 
 extension HeadachePredictor {
   
+  /// The URL of a model with the given name.
+  ///
+  /// - Parameter name: The name of the model.
+  /// - Returns: The URL of the model.
   private func modelURL(with name: String) -> URL {
     return documentsDirectory().appendingPathComponent("models").appendingPathComponent("\(name).mlmodel")
   }
   
+  /// The URL of a compiled model with the given name.
+  ///
+  /// - Parameter name: The name of the compiled model.
+  /// - Returns: The URL of the compiled model.
   private func compiledModelURL(with name: String) -> URL {
     return documentsDirectory().appendingPathComponent("models").appendingPathComponent("\(name).mlmodelc")
   }
   
+  /// The application's document's directory.
+  ///
+  /// - Returns: A URL.
   private func documentsDirectory() -> URL {
     let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
     return paths[0]

@@ -502,6 +502,11 @@ extension HeadacheManager {
   ///
   /// - Parameter completion: Called when the input struture is ready.
   func getCurrentClassifierInput(_ completion: @escaping (HeadacheClassifierInput?) -> Void) {
+    guard !testing else {
+      completion(nil)
+      return
+    }
+    
     motionManager.barometricPressure { [weak self] pressure, pressureError in
       guard let self = self else {
         logWarning("Self was nil. Returning early.")
@@ -531,10 +536,12 @@ extension HeadacheManager {
   /// - Parameter newSeverityIdentifier: The severity to relate to the new training data.
   ///   Pass `nil` if this training data is for a `notPresent` headche.
   func trainClassifiers(newSeverityIdentifier: UUID? = nil) {
-    logDebug("Train classifiers.")
+    guard !testing else {
+      return
+    }
     
     // Get the barometric pressure
-    logDebug("Getting barometric pressure...")
+    logDebug("Train classifiers. Getting barometric pressure...")
     motionManager.barometricPressure { [weak self] pressure, pressureError in
       guard let self = self else {
         logWarning("Self was nil. Returning early.")

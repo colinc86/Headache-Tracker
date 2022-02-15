@@ -70,5 +70,6 @@ extension SeverityLevel {
 struct SeverityLevel_Previews: PreviewProvider {
   static var previews: some View {
     SeverityLevel(headache: Previewing.CoreData.headache)
+      .previewLayout(PreviewLayout.fixed(width: 20, height: 50))
   }
 }

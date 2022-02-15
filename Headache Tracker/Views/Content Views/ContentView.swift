@@ -69,5 +69,11 @@ struct ContentView_Previews: PreviewProvider {
       .environment(\.managedObjectContext, Previewing.CoreData.controller.container.viewContext)
       .environmentObject(Previewing.headacheManager)
       .environmentObject(Previewing.alertManager)
+      .environmentObject(Previewing.headachePredictor)
+      .environmentObject(Previewing.healthKitManager)
+      .onAppear {
+        _ = Previewing.CoreData.headache
+        _ = Previewing.CoreData.unresolvedHeadache
+      }
   }
 }

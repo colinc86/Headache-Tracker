@@ -126,6 +126,7 @@ struct SettingsView_Previews: PreviewProvider {
   static var previews: some View {
     SettingsView()
       .environmentObject(Previewing.headacheManager)
+      .environmentObject(Previewing.healthKitManager)
       .environmentObject(Previewing.alertManager)
   }
 }

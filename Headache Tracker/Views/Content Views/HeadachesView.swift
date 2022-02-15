@@ -74,6 +74,7 @@ struct HeadachesView_Previews: PreviewProvider {
       .environmentObject(Previewing.headacheManager)
       .onAppear {
         _ = Previewing.CoreData.headache
+        _ = Previewing.CoreData.unresolvedHeadache
       }
   }
 }

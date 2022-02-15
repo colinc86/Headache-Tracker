@@ -33,5 +33,6 @@ struct SubtitleCell: View {
 struct SubtitleCell_Previews: PreviewProvider {
   static var previews: some View {
     SubtitleCell(title: "Title", subtitle: "Subtitle")
+      .previewLayout(PreviewLayout.fixed(width: 428, height: 20))
   }
 }

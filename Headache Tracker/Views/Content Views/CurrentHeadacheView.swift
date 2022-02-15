@@ -316,6 +316,7 @@ struct CurrentHeadacheView_Previews: PreviewProvider {
     CurrentHeadacheView()
       .environment(\.managedObjectContext, Previewing.CoreData.controller.container.viewContext)
       .environmentObject(Previewing.headacheManager)
+      .environmentObject(Previewing.headachePredictor)
       .environmentObject(Previewing.alertManager)
   }
 }
