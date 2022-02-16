@@ -23,6 +23,7 @@
 		3B051AA727B37D060017131D /* SeverityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B051AA627B37D060017131D /* SeverityView.swift */; };
 		3B09190927BC7D8000844F6C /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B09190827BC7D8000844F6C /* Constants.swift */; };
 		3B09190B27BC7E0C00844F6C /* RefreshTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B09190A27BC7E0C00844F6C /* RefreshTask.swift */; };
+		3B09190F27BCA52700844F6C /* BackgroundTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B09190E27BCA52700844F6C /* BackgroundTask.swift */; };
 		3B39DAD727ACF67600D39BB5 /* Previewing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B39DAD627ACF67600D39BB5 /* Previewing.swift */; };
 		3B39DAD927ACF74600D39BB5 /* Headache+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B39DAD827ACF74600D39BB5 /* Headache+Extensions.swift */; };
 		3B39DADB27ACFC9C00D39BB5 /* SubtitleCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B39DADA27ACFC9C00D39BB5 /* SubtitleCell.swift */; };
@@ -91,6 +92,7 @@
 		3B051AA827B4DC4C0017131D /* Headache_Tracker 1.1.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Headache_Tracker 1.1.xcdatamodel"; sourceTree = "<group>"; };
 		3B09190827BC7D8000844F6C /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		3B09190A27BC7E0C00844F6C /* RefreshTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefreshTask.swift; sourceTree = "<group>"; };
+		3B09190E27BCA52700844F6C /* BackgroundTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundTask.swift; sourceTree = "<group>"; };
 		3B39DAD627ACF67600D39BB5 /* Previewing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Previewing.swift; sourceTree = "<group>"; };
 		3B39DAD827ACF74600D39BB5 /* Headache+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Headache+Extensions.swift"; sourceTree = "<group>"; };
 		3B39DADA27ACFC9C00D39BB5 /* SubtitleCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubtitleCell.swift; sourceTree = "<group>"; };
@@ -193,6 +195,7 @@
 				3B4BA70127B762D600F38851 /* HealthKit */,
 				3B4BA70227B762EE00F38851 /* Prediction */,
 				3B39DAE127AD068300D39BB5 /* AppSettings.swift */,
+				3B09190E27BCA52700844F6C /* BackgroundTask.swift */,
 				3B09190827BC7D8000844F6C /* Constants.swift */,
 				3B051A8C27B0F4490017131D /* DescribableError.swift */,
 				3B051A9B27B351C70017131D /* Formatters.swift */,
@@ -509,6 +512,7 @@
 				3B09190B27BC7E0C00844F6C /* RefreshTask.swift in Sources */,
 				3B09190927BC7D8000844F6C /* Constants.swift in Sources */,
 				3BF5313727ACE18D00056673 /* Headache_TrackerApp.swift in Sources */,
+				3B09190F27BCA52700844F6C /* BackgroundTask.swift in Sources */,
 				3B051A9527B18E3C0017131D /* HeadacheAlertRequest.swift in Sources */,
 				3B051AA527B379DA0017131D /* Bundle+Extensions.swift in Sources */,
 				3B4BA70627B7642A00F38851 /* HeadacheClassifierOutput.swift in Sources */,

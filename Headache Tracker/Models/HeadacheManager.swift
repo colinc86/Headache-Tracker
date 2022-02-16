@@ -29,15 +29,6 @@ class HeadacheManager: ObservableObject {
   
   // MARK: Private properties
   
-  /// The manager's motion manager.
-  private let motionManager = MotionManager()
-  
-  /// The refresh task responsible for creating background samples.
-  let predictionRefreshTask = RefreshTask(identifier: Constants.Identifiers.backgroundPredictionTaskIdentifier, type: .appRefresh)
-  
-  /// The refresh task responsible for re-training the machine learning models.
-  let trainingProcessingTask = RefreshTask(identifier: Constants.Identifiers.backgroundTrainingTaskIdentifier, type: .processing)
-  
   /// The Apple Health app integration setting.
   @AppStorage(AppSettings.healthIntegration) private var healthIntegration = false
   
@@ -52,6 +43,21 @@ class HeadacheManager: ObservableObject {
   
   /// The learn and predict setting.
   @AppStorage(AppSettings.learnAndPredict) private var learnAndPredict = false
+  
+  /// The manager's motion manager.
+  private let motionManager = MotionManager()
+  
+  /// The refresh task responsible for creating background samples.
+  private let predictionRefreshTask = RefreshTask(identifier: Constants.Identifiers.backgroundPredictionTaskIdentifier, type: .appRefresh)
+  
+  /// The refresh task responsible for re-training the machine learning models.
+  private let trainingProcessingTask = RefreshTask(identifier: Constants.Identifiers.backgroundTrainingTaskIdentifier, type: .processing)
+  
+  /// The create training data background task.
+  private var createTrainingDataBackgroundTask: BackgroundTask?
+  
+  /// The get current classifier input background task.
+  private var getCurrentClassifierInputBackgroundTask: BackgroundTask?
   
   /// Whether or not the manager is in test mode. If in test mode, it will not
   /// write to or delete from the health kit store.
@@ -122,9 +128,7 @@ extension HeadacheManager {
       }
       
       // Update the CoreML models
-      if self.learnAndPredict, let severityIdentifier = severityIdentifier {
-        self.createTrainingData(newSeverityIdentifier: severityIdentifier)
-      }
+      self.createTrainingData(newSeverityIdentifier: severityIdentifier)
     }
   }
   
@@ -160,9 +164,7 @@ extension HeadacheManager {
       self.healthKitManager?.saveSeveritySamples(intervals: severityInterval == nil ? [] : [severityInterval!], completion: completion)
       
       // Update the CoreML models
-      if self.learnAndPredict {
-        self.createTrainingData()
-      }
+      self.createTrainingData()
     }
   }
   
@@ -546,16 +548,23 @@ extension HeadacheManager {
       return
     }
     
+    getCurrentClassifierInputBackgroundTask = BackgroundTask(identifier: "getCurrentClassifierInput")
+    getCurrentClassifierInputBackgroundTask?.begin { [weak self] in
+      self?.motionManager.cancelReading()
+    }
+    
     motionManager.barometricPressure { [weak self] pressure, pressureError in
       guard let self = self else {
         logWarning("Self was nil. Returning early.")
         completion(nil, pressureError)
+        self?.getCurrentClassifierInputBackgroundTask?.end()
         return
       }
       
       if let pressureError = pressureError {
         logError("Error getting barometric pressure: \(pressureError)")
         completion(nil, pressureError)
+        self.getCurrentClassifierInputBackgroundTask?.end()
       }
       else if let pressure = pressure {
         logDebug("Got barometric pressure: \(pressure.formatted())")
@@ -566,7 +575,10 @@ extension HeadacheManager {
       let now = Date()
       let interval = DateInterval(start: now.addingTimeInterval(-86400.0), end: now)
       let healthKitData = self.healthKitManager?.readHealthKitData(in: interval) ?? [:]
+      
       completion(HeadacheClassifierInput(barometricPressure: barometricPressure, healthKitData: healthKitData, date: now), nil)
+      
+      self.getCurrentClassifierInputBackgroundTask?.end()
     }
   }
   
@@ -580,11 +592,17 @@ extension HeadacheManager {
       return
     }
     
+    createTrainingDataBackgroundTask = BackgroundTask(identifier: "createTrainingData")
+    createTrainingDataBackgroundTask?.begin { [weak self] in
+      self?.motionManager.cancelReading()
+    }
+    
     // Get the barometric pressure
     logDebug("Create training data. Getting barometric pressure...")
     motionManager.barometricPressure { [weak self] pressure, pressureError in
       guard let self = self else {
         logWarning("Self was nil. Returning early.")
+        self?.createTrainingDataBackgroundTask?.end()
         return
       }
       
@@ -626,6 +644,8 @@ extension HeadacheManager {
           else {
             logDebug("Finished saving training data.")
           }
+          
+          self.createTrainingDataBackgroundTask?.end()
         }
       }
     }
@@ -653,7 +673,7 @@ extension HeadacheManager {
   
 }
 
-// MARK: Background methods
+// MARK: - Background methods
 
 extension HeadacheManager {
   

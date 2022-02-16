@@ -26,6 +26,9 @@ struct HeadacheCell: View {
   /// A timer to update the duration view for unresolved headaches.
   @State private var durationUpdateTimer: Timer?
   
+  /// The previous severity range.
+  @State private var previousSeverityRange: HealthKitManager.SeverityRange?
+  
   // MARK: View body
   
   var body: some View {
@@ -60,8 +63,15 @@ extension HeadacheCell {
   
   /// Called when the view appears.
   func appeared() {
-    withAnimation {
-      severityID = UUID()
+    if previousSeverityRange == nil {
+      previousSeverityRange = headache.severityRange
+    }
+    else if let previousSeverityRange = previousSeverityRange, previousSeverityRange != headache.severityRange {
+      self.previousSeverityRange = headache.severityRange
+      
+      withAnimation {
+        severityID = UUID()
+      }
     }
     
     if !headache.resolved {

@@ -70,11 +70,6 @@ struct SettingsView: View {
         }
         
         // Learning and Prediction
-        Section("Prediction") {
-          
-        }
-        
-        
         Section {
           Toggle(isOn: $learnAndPredict) {
             Text("Learn and Predict")
