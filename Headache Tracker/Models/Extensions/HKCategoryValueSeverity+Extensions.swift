@@ -7,6 +7,7 @@
 
 import Foundation
 import HealthKit
+import SwiftUI
 
 extension HKCategoryValueSeverity {
   
@@ -31,6 +32,18 @@ extension HKCategoryValueSeverity {
     case .moderate: return 3
     case .severe: return 4
     default: return -1
+    }
+  }
+  
+  /// The color to use when drawing the value in the user interface.
+  var uiColor: Color {
+    switch orderingValue {
+    case 0: return .cyan
+    case 1: return .mint
+    case 2: return .yellow
+    case 3: return .orange
+    case 4: return .red
+    default: return .cyan
     }
   }
   

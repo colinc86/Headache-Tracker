@@ -18,10 +18,20 @@ struct SubtitleCell: View {
   /// The cell's subtitle.
   let subtitle: String
   
+  /// The system image name to use.
+  var systemImage: String? = nil
+  
+  /// The color of the image.
+  var imageForegroundColor: Color = .accentColor
+  
   // MARK: View body
   
   var body: some View {
     HStack(alignment: .top) {
+      if let systemImage = systemImage {
+        Image(systemName: systemImage)
+          .foregroundColor(imageForegroundColor)
+      }
       Text(title)
       Spacer()
       Text(subtitle)

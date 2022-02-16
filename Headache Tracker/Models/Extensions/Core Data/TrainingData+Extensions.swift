@@ -6,12 +6,9 @@
 //
 
 import CoreData
+import CreateML
 import Foundation
 import Logger
-
-#if !DEBUG
-import CreateML
-#endif
 
 extension TrainingData {
   
@@ -82,7 +79,6 @@ extension TrainingData {
   
 }
 
-#if !DEBUG
 extension Array where Element == TrainingData {
   
   func dataTable() -> [String: MLDataValueConvertible] {
@@ -122,4 +118,3 @@ extension Array where Element == TrainingData {
   }
   
 }
-#endif

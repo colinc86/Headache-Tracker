@@ -158,32 +158,11 @@ struct CurrentHeadacheView: View {
         }
         
         if learnAndPredict, let prediction = prediction {
-          Section {
+          Section("Predictions") {
             SubtitleCell(title: "Boosted Tree", subtitle: prediction.boostedTreeOutput.title)
-              .onTapGesture(perform: { boostedTreeHit = !boostedTreeHit })
-              .background(boostedTreeHit ? Color.green : Color.pink)
-            
             SubtitleCell(title: "Decision Tree", subtitle: prediction.decisionTreeOutput.title)
-              .onTapGesture(perform: { decisionTreeHit = !decisionTreeHit })
-              .background(decisionTreeHit ? Color.green : Color.pink)
-            
             SubtitleCell(title: "Random Forest", subtitle: prediction.randomForestOutput.title)
-              .onTapGesture(perform: { randomForestHit = !randomForestHit })
-              .background(randomForestHit ? Color.green : Color.pink)
-            
             SubtitleCell(title: "Logistic Regression", subtitle: prediction.logisticRegressionOutput.title)
-              .onTapGesture(perform: { logisticRegressionHit = !logisticRegressionHit })
-              .background(logisticRegressionHit ? Color.green : Color.pink)
-            
-            Button("Save") {
-              DataController.shared.performInBackground { context in
-                let validationData = ValidationData(context: context)
-                validationData.boostedTreeHit = boostedTreeHit
-                validationData.decisionTreeHit = decisionTreeHit
-                validationData.randomForestHit = randomForestHit
-                validationData.logisticRegressionHit = logisticRegressionHit
-              }
-            }
           }
           
           Section("Accuracy") {
@@ -327,6 +306,16 @@ extension CurrentHeadacheView {
         
         withAnimation {
           updatingHeadache = false
+        }
+        
+        DataController.shared.performInBackground { context in
+          let validationData = ValidationData(context: context)
+          validationData.boostedTreeHit = prediction?.boostedTreeOutput.severity == severity
+          validationData.decisionTreeHit = prediction?.decisionTreeOutput.severity == severity
+          validationData.randomForestHit = prediction?.randomForestOutput.severity == severity
+          validationData.logisticRegressionHit = prediction?.logisticRegressionOutput.severity == severity
+        } completion: { error in
+          predict()
         }
       }
     }

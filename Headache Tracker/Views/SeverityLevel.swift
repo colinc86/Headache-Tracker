@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import HealthKit
 
 /// Draws a vertical severity level indicator.
 struct SeverityLevel: View {
@@ -55,14 +56,7 @@ extension SeverityLevel {
   /// - Parameter index: The index of the severity.
   /// - Returns: A color.
   private func color(for index: Int) -> Color {
-    switch index {
-    case 0: return .cyan
-    case 1: return .mint
-    case 2: return .yellow
-    case 3: return .orange
-    case 4: return .red
-    default: return .cyan
-    }
+    return (HKCategoryValueSeverity(rawValue: index) ?? .notPresent).uiColor
   }
   
 }

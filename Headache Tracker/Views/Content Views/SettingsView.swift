@@ -71,8 +71,19 @@ struct SettingsView: View {
         
         // Learning and Prediction
         Section {
-          Toggle(isOn: $learnAndPredict) {
-            Text("Learn and Predict")
+          if headachePredictor.training {
+            HStack {
+              Text("Learn and Predict")
+              Spacer()
+              ProgressView()
+                .progressViewStyle(DefaultProgressViewStyle())
+            }
+          }
+          else {
+            Toggle(isOn: $learnAndPredict) {
+              Text("Learn and Predict")
+            }
+            .onChange(of: learnAndPredict, perform: learnAndPredictChanged)
           }
         } header: {
           Text("Prediction")
@@ -117,6 +128,26 @@ struct SettingsView: View {
         }
       }
       .navigationTitle("Settings")
+    }
+  }
+  
+}
+
+extension SettingsView {
+  
+  /// Called when the `learnAndPredict` setting changes.
+  ///
+  /// - Parameter newValue: The new `learnAndPredict` value.
+  private func learnAndPredictChanged(_ newValue: Bool) {
+    if newValue {
+      headacheManager.trainClassifiers { error in
+        if let error = error {
+          logError("Error training classifiers: \(error)")
+        }
+      }
+    }
+    else {
+      headacheManager.resetPrediction()
     }
   }
   

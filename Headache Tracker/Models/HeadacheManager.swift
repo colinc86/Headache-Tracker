@@ -493,21 +493,7 @@ extension HeadacheManager {
   
   /// Resets all prediction and learning data.
   func resetPrediction() {
-    DataController.shared.performInBackground { context in
-      let request = TrainingData.fetchRequest()
-      let allTrainingData = try context.fetch(request)
-      for trainingData in allTrainingData {
-        context.delete(trainingData)
-      }
-    } completion: { [weak self] error in
-      if let error = error {
-        logError("Error deleting all training data: \(error)")
-      }
-      else {
-        logDebug("Deleted all training data.")
-        self?.headachePredictor?.reset()
-      }
-    }
+    headachePredictor?.reset()
   }
   
   /// Whether or not the application needs more not present training data.

@@ -41,7 +41,9 @@ struct HeadacheCell: View {
       VStack {
         SubtitleCell(title: "Onset", subtitle: headache.startTime?.formatted() ?? "N/A")
         Spacer(minLength: 0.0)
-        SubtitleCell(title: "Duration", subtitle: Formatters.dateComponentsFormatter.string(from: headache.duration) ?? "0 min")
+        SubtitleCell(
+          title: headache.resolved ? "Duration" : "Duration (unresolved)",
+          subtitle: Formatters.dateComponentsFormatter.string(from: headache.duration) ?? "0 min")
           .id(durationID)
         Spacer(minLength: 0.0)
         SubtitleCell(title: "Severity", subtitle: headache.severityDescription)
@@ -63,17 +65,16 @@ extension HeadacheCell {
   
   /// Called when the view appears.
   func appeared() {
+    // Updates the severty view if the range changes
     if previousSeverityRange == nil {
       previousSeverityRange = headache.severityRange
     }
     else if let previousSeverityRange = previousSeverityRange, previousSeverityRange != headache.severityRange {
       self.previousSeverityRange = headache.severityRange
-      
-      withAnimation {
-        severityID = UUID()
-      }
+      withAnimation { severityID = UUID() }
     }
     
+    // If the headache isn't resolved, then start an update timer
     if !headache.resolved {
       updateDurationID()
       startDurationUpdateTimer()

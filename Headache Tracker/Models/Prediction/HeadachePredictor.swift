@@ -7,36 +7,45 @@
 
 import ApplicationKey
 import CoreML
+import CreateML
 import Foundation
 import Logger
 import HealthKit
-
-#if !DEBUG
-import CreateML
-#endif
 
 class HeadachePredictor: ObservableObject {
   
   // MARK: Types
   
+  /// A headache prediction.
   struct Prediction {
+    
+    /// An empty prediction.
     static let empty = Prediction(
       boostedTreeOutput: .empty,
       decisionTreeOutput: .empty,
       randomForestOutput: .empty,
       logisticRegressionOutput: .empty)
     
+    /// A prediction statistic pairs a severity to a probability.
     struct PredictionStatistic {
+      
+      /// An empty statistic.
       static let empty = PredictionStatistic(
         severity: "",
         probability: 0.0)
       
+      /// The statistic's severity.
       let severity: HKCategoryValueSeverity
+      
+      /// The statistic's probability.
       let probability: Double
       
+      /// The statistic's title.
       var title: String {
         return "\(severity.title) (\(String(format: "%0.f%%", probability * 100.0)))"
       }
+      
+      // MARK: Initializers
       
       init(output: HeadacheClassifierOutput) {
         self.init(
@@ -77,16 +86,17 @@ class HeadachePredictor: ObservableObject {
   /// The queue to do anything with models on.
   private var modelQueue = DispatchQueue(label: ApplicationKey(from: "modelQueue"))
   
+  /// The training background task.
+  private var trainingBackgroundTask: BackgroundTask?
+  
   /// Whether or not training was cancelled.
   private var cancelledTraining = false
   
-#if !DEBUG
   /// The metadata to save with a model.
   private let metadata = MLModelMetadata(
     author: "Colin Campbell",
     shortDescription: "Predicts the onset, severity and progression of headaches.",
     version: Date().description)
-#endif
   
 }
 
@@ -151,20 +161,31 @@ extension HeadachePredictor {
     }
     
     logDebug("Train with \(trainingData.count) training data.")
-    training = true
+    trainingBackgroundTask = BackgroundTask(identifier: "training")
+    trainingBackgroundTask?.begin(expired: cancelTraining)
+    
+    DispatchQueue.main.async { [weak self] in self?.training = true }
     cancelledTraining = false
+    
+    let table: MLDataTable
+    do {
+      table = try MLDataTable(dictionary: trainingData.dataTable())
+    }
+    catch {
+      logError("Error creating data table: \(error)")
+      completion(error)
+      return
+    }
+    logDebug("Got table: \(table)")
     
     modelQueue.async { [weak self] in
       do {
         guard let self = self else {
           completion(nil)
           DispatchQueue.main.async { self?.training = false }
+          self?.trainingBackgroundTask?.end()
           return
         }
-        
-#if !DEBUG
-        let table = try MLDataTable(dictionary: trainingData.dataTable())
-        logDebug("Got table: \(table)")
         
         if !self.cancelledTraining {
           logDebug("Training boosted tree.")
@@ -225,28 +246,30 @@ extension HeadachePredictor {
           try FileManager.default.removeItem(at: lrModelURL)
         }
         
-#endif
-        
         if self.cancelledTraining {
           completion(nil)
           DispatchQueue.main.async { self.training = false }
+          self.trainingBackgroundTask?.end()
         }
         else {
           self.load { error in
             completion(error)
             DispatchQueue.main.async { self.training = false }
+            self.trainingBackgroundTask?.end()
           }
         }
       }
       catch {
         completion(error)
         DispatchQueue.main.async { self?.training = false }
+        self?.trainingBackgroundTask?.end()
       }
     }
   }
   
   /// Cancels the current training session.
   func cancelTraining() {
+    logDebug("Cancel training.")
     cancelledTraining = true
   }
   
@@ -264,6 +287,8 @@ extension HeadachePredictor {
       
       logisticRegressionClassifier = nil
       try FileManager.default.removeItem(at: self.compiledModelURL(with: "lr"))
+      
+      modelUpdatedAt = nil
     }
     catch {
       logError("Error resetting predictor: \(error)")

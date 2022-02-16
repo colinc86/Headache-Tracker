@@ -9,6 +9,7 @@ import Foundation
 import HealthKit
 import CoreData
 import Logger
+import SwiftUI
 
 extension Headache {
   
@@ -75,6 +76,16 @@ extension Headache {
             return (.notPresent, .notPresent)
           }
     return (minSeverity, maxSeverity)
+  }
+  
+  /// The range of colors to use with the headache's severity range.
+  var severityColorRange: [Color] {
+    let range = severityRange
+    var colors = [Color]()
+    for i in range.0.rawValue ... range.1.rawValue {
+      colors.append((HKCategoryValueSeverity(rawValue: i) ?? .notPresent).uiColor)
+    }
+    return colors
   }
   
   /// The headache's severity signal.
