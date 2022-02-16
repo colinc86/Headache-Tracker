@@ -77,6 +77,11 @@ extension Headache {
     return (minSeverity, maxSeverity)
   }
   
+  /// The headache's severity signal.
+  var severitySignal: [(String, Double)] {
+    return severitiesArray.map({ ($0.severity.title, Double($0.severity.orderingValue)) })
+  }
+  
   // MARK: Initializers
   
   /// Initializes a headache.

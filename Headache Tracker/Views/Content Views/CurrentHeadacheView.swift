@@ -42,6 +42,12 @@ struct CurrentHeadacheView: View {
     animation: .default)
   private var headaches: FetchedResults<Headache>
   
+  /// The validations fetch request.
+  @FetchRequest(
+    sortDescriptors: [],
+    animation: .default)
+  private var validations: FetchedResults<ValidationData>
+  
   /// The alert's title.
   @State private var alertTitle = ""
   
@@ -69,11 +75,24 @@ struct CurrentHeadacheView: View {
   /// Whether or not the headache manager needs more not-present headache training data.
   @State private var needsInput: Bool = false
   
+  @State private var boostedTreeHit: Bool = false
+  @State private var boostedTreeAccuracy: Double = 0.0
+  
+  @State private var decisionTreeHit: Bool = false
+  @State private var decisionTreeAccuracy: Double = 0.0
+  
+  @State private var randomForestHit: Bool = false
+  @State private var randomForestAccuracy: Double = 0.0
+  
+  @State private var logisticRegressionHit: Bool = false
+  @State private var logisticRegressionAccuracy: Double = 0.0
+  
   /// The current (unresolved) headache.
   private var currentHeadache: Headache? {
     return headaches.first
   }
   
+  /// Called when the application becomes active.
   private let didBecomeActiveNotificationPublisher = NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)
   
   // MARK: View body
@@ -141,9 +160,37 @@ struct CurrentHeadacheView: View {
         if learnAndPredict, let prediction = prediction {
           Section {
             SubtitleCell(title: "Boosted Tree", subtitle: prediction.boostedTreeOutput.title)
+              .onTapGesture(perform: { boostedTreeHit = !boostedTreeHit })
+              .background(boostedTreeHit ? Color.green : Color.pink)
+            
             SubtitleCell(title: "Decision Tree", subtitle: prediction.decisionTreeOutput.title)
+              .onTapGesture(perform: { decisionTreeHit = !decisionTreeHit })
+              .background(decisionTreeHit ? Color.green : Color.pink)
+            
             SubtitleCell(title: "Random Forest", subtitle: prediction.randomForestOutput.title)
+              .onTapGesture(perform: { randomForestHit = !randomForestHit })
+              .background(randomForestHit ? Color.green : Color.pink)
+            
             SubtitleCell(title: "Logistic Regression", subtitle: prediction.logisticRegressionOutput.title)
+              .onTapGesture(perform: { logisticRegressionHit = !logisticRegressionHit })
+              .background(logisticRegressionHit ? Color.green : Color.pink)
+            
+            Button("Save") {
+              DataController.shared.performInBackground { context in
+                let validationData = ValidationData(context: context)
+                validationData.boostedTreeHit = boostedTreeHit
+                validationData.decisionTreeHit = decisionTreeHit
+                validationData.randomForestHit = randomForestHit
+                validationData.logisticRegressionHit = logisticRegressionHit
+              }
+            }
+          }
+          
+          Section("Accuracy") {
+            SubtitleCell(title: "Boosted Tree", subtitle: String(format: "%0.1f%%", boostedTreeAccuracy * 100.0))
+            SubtitleCell(title: "Decision Tree", subtitle: String(format: "%0.1f%%", decisionTreeAccuracy * 100.0))
+            SubtitleCell(title: "Random Forest", subtitle: String(format: "%0.1f%%", randomForestAccuracy * 100.0))
+            SubtitleCell(title: "Logistic Regression", subtitle: String(format: "%0.1f%%", logisticRegressionAccuracy * 100.0))
           }
         }
         else if let predictionError = predictionError {
@@ -214,9 +261,12 @@ extension CurrentHeadacheView {
     
     // Update the classifier input
     predicting = true
-    headacheManager.getCurrentClassifierInput { input in
+    headacheManager.getCurrentClassifierInput { input, error in
       DispatchQueue.main.async {
-        if let input = input {
+        if let error = error {
+          logError("Error getting classifier input: \(error)")
+        }
+        else if let input = input {
           do {
             prediction = try headachePredictor.predict(input)
           }
@@ -229,6 +279,16 @@ extension CurrentHeadacheView {
         predicting = false
       }
     }
+    
+    let boostedTreeHits = validations.reduce(0.0, { $0 + ($1.boostedTreeHit ? 1.0 : 0.0) })
+    let decisionTreeHits = validations.reduce(0.0, { $0 + ($1.decisionTreeHit ? 1.0 : 0.0) })
+    let randomForestHits = validations.reduce(0.0, { $0 + ($1.randomForestHit ? 1.0 : 0.0) })
+    let logisticRegressionHits = validations.reduce(0.0, { $0 + ($1.logisticRegressionHit ? 1.0 : 0.0) })
+    
+    boostedTreeAccuracy = Double(boostedTreeHits) / Double(validations.count > 0 ? validations.count : 1)
+    decisionTreeAccuracy = Double(decisionTreeHits) / Double(validations.count > 0 ? validations.count : 1)
+    randomForestAccuracy = Double(randomForestHits) / Double(validations.count > 0 ? validations.count : 1)
+    logisticRegressionAccuracy = Double(logisticRegressionHits) / Double(validations.count > 0 ? validations.count : 1)
   }
   
   /// Shows an alert to the user.
@@ -296,7 +356,7 @@ extension CurrentHeadacheView {
   
   /// The action to perform if there is no headache.
   private func noHeadacheAction() {
-    headacheManager.trainClassifiers()
+    headacheManager.createTrainingData()
   }
   
   /// Displays the reset confirmation alert to the user.

@@ -53,6 +53,7 @@ struct ContentView: View {
       
       SettingsView()
         .environmentObject(headacheManager)
+        .environmentObject(headachePredictor)
         .environmentObject(healthKitManager)
         .environmentObject(alertManager)
         .tabItem {

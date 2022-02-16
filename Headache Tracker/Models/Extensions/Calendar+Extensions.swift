@@ -39,4 +39,12 @@ extension Calendar {
     return component(.weekday, from: date)
   }
   
+  /// Returns the date of midnight after the given date.
+  ///
+  /// - Parameter date: The date.
+  /// - Returns: The date that represents midnight after `date`.
+  func midnightAfter(_ date: Date) -> Date {
+    return startOfDay(for: date.addingTimeInterval(86400.0))
+  }
+  
 }

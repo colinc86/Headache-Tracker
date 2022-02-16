@@ -6,6 +6,7 @@
 //
 
 import ApplicationKey
+import BackgroundTasks
 import CoreData
 import DataController
 import Foundation
@@ -31,11 +32,20 @@ class HeadacheManager: ObservableObject {
   /// The manager's motion manager.
   private let motionManager = MotionManager()
   
+  /// The refresh task responsible for creating background samples.
+  let predictionRefreshTask = RefreshTask(identifier: Constants.Identifiers.backgroundPredictionTaskIdentifier, type: .appRefresh)
+  
+  /// The refresh task responsible for re-training the machine learning models.
+  let trainingProcessingTask = RefreshTask(identifier: Constants.Identifiers.backgroundTrainingTaskIdentifier, type: .processing)
+  
   /// The Apple Health app integration setting.
   @AppStorage(AppSettings.healthIntegration) private var healthIntegration = false
   
   /// The check-in alerts setting.
   @AppStorage(AppSettings.checkInAlerts) private var checkInAlerts = false
+  
+  /// The real-time alerts setting.
+  @AppStorage(AppSettings.realTimeAlerts) private var realTimeAlerts = false
   
   /// The check-in interval setting if `checkInAlerts` is true.
   @AppStorage(AppSettings.checkInInterval) private var checkInInterval = TimeInterval(3600.0)
@@ -113,7 +123,7 @@ extension HeadacheManager {
       
       // Update the CoreML models
       if self.learnAndPredict, let severityIdentifier = severityIdentifier {
-        self.trainClassifiers(newSeverityIdentifier: severityIdentifier)
+        self.createTrainingData(newSeverityIdentifier: severityIdentifier)
       }
     }
   }
@@ -151,7 +161,7 @@ extension HeadacheManager {
       
       // Update the CoreML models
       if self.learnAndPredict {
-        self.trainClassifiers()
+        self.createTrainingData()
       }
     }
   }
@@ -449,6 +459,30 @@ extension HeadacheManager {
     }
   }
   
+  /// Presents a prediction alert now.
+  ///
+  /// - Parameters:
+  ///   - prediction: The prediction.
+  ///   - completion: Called after the alert has been added to notification center.
+  private func presentPredictionAlert(with prediction: HeadachePredictor.Prediction?, completion: @escaping (Error?) -> Void) {
+    // Only continue if we have a prediction and prediction alerts are turned on
+    guard checkInAlerts, let prediction = prediction, prediction.randomForestOutput.severity != .notPresent else {
+      completion(nil)
+      return
+    }
+    
+    // Make sure we're on the main queue
+    DispatchQueue.main.async {
+      // Present the alert
+      logDebug("Presenting alert for predicted severity: \(prediction.randomForestOutput.severity.title).")
+      self.alertManager?.presentAlert(
+        with: HeadacheAlertRequest.prediction(severity: prediction.randomForestOutput.severity),
+        trigger: UNTimeIntervalNotificationTrigger(timeInterval: 0.0, repeats: false),
+        badgeNumber: 0,
+        completion: completion)
+    }
+  }
+  
 }
 
 // MARK: Prediction
@@ -498,24 +532,30 @@ extension HeadacheManager {
     }
   }
   
+  /// Cancels the current classification input reading.
+  func cancelClassificationInput() {
+    motionManager.cancelReading()
+  }
+  
   /// Gets classifier input appropriate for prediction.
   ///
   /// - Parameter completion: Called when the input struture is ready.
-  func getCurrentClassifierInput(_ completion: @escaping (HeadacheClassifierInput?) -> Void) {
+  func getCurrentClassifierInput(_ completion: @escaping (HeadacheClassifierInput?, Error?) -> Void) {
     guard !testing else {
-      completion(nil)
+      completion(nil, nil)
       return
     }
     
     motionManager.barometricPressure { [weak self] pressure, pressureError in
       guard let self = self else {
         logWarning("Self was nil. Returning early.")
-        completion(nil)
+        completion(nil, pressureError)
         return
       }
       
       if let pressureError = pressureError {
         logError("Error getting barometric pressure: \(pressureError)")
+        completion(nil, pressureError)
       }
       else if let pressure = pressure {
         logDebug("Got barometric pressure: \(pressure.formatted())")
@@ -526,22 +566,22 @@ extension HeadacheManager {
       let now = Date()
       let interval = DateInterval(start: now.addingTimeInterval(-86400.0), end: now)
       let healthKitData = self.healthKitManager?.readHealthKitData(in: interval) ?? [:]
-      completion(HeadacheClassifierInput(barometricPressure: barometricPressure, healthKitData: healthKitData, date: now))
+      completion(HeadacheClassifierInput(barometricPressure: barometricPressure, healthKitData: healthKitData, date: now), nil)
     }
   }
   
-  /// Trains the classifiers by creating training data, fetching all training data,
-  /// training the classifiers, and then saving/loading them for use.
+  /// Create new training data and sets its `severity` relationship to the severity
+  /// with the given identifier. If no identifier is present, then the training data is
+  /// still created but orphaned (a not-present severity).
   ///
-  /// - Parameter newSeverityIdentifier: The severity to relate to the new training data.
-  ///   Pass `nil` if this training data is for a `notPresent` headche.
-  func trainClassifiers(newSeverityIdentifier: UUID? = nil) {
+  /// - Parameter newSeverityIdentifier: The new severity identifier.
+  func createTrainingData(newSeverityIdentifier: UUID? = nil) {
     guard !testing else {
       return
     }
     
     // Get the barometric pressure
-    logDebug("Train classifiers. Getting barometric pressure...")
+    logDebug("Create training data. Getting barometric pressure...")
     motionManager.barometricPressure { [weak self] pressure, pressureError in
       guard let self = self else {
         logWarning("Self was nil. Returning early.")
@@ -563,7 +603,7 @@ extension HeadacheManager {
         // Create the training data
         let now = Date()
         let interval = DateInterval(start: now.addingTimeInterval(-86400.0), end: now)
-        let trainingData = self.learnAndPredict ? TrainingData(context: context, healthKitData: self.healthKitManager?.readHealthKitData(in: interval) ?? [:], barometricPressure: barometricPressure) : nil
+        let trainingData = TrainingData(context: context, healthKitData: self.healthKitManager?.readHealthKitData(in: interval) ?? [:], barometricPressure: barometricPressure)
         
         logDebug("Created training data.")
         
@@ -584,22 +624,181 @@ extension HeadacheManager {
             logError("Error saving training data: \(error)")
           }
           else {
-            logDebug("Finished creating training data. Fetching all training data...")
-            let request = TrainingData.fetchRequest()
-            let allTrainingData = (try? context.fetch(request)) ?? []
-            
-            logDebug("Training classifiers...")
-            self.headachePredictor?.train(with: allTrainingData, completion: { error in
-              if let error = error {
-                logError("Error training classifiers: \(error)")
-              }
-              else {
-                logDebug("Finished training classifiers.")
-              }
-            })
+            logDebug("Finished saving training data.")
           }
         }
       }
+    }
+  }
+  
+  /// Trains the classifiers.
+  ///
+  /// - Parameter completion: Called when training is complete.
+  func trainClassifiers(_ completion: @escaping (Error?) -> Void) {
+    guard !testing else {
+      return
+    }
+    
+    self.trainingQueue.async {
+      let context = DataController.shared.newNestedBackgroundContext()
+      
+      logDebug("Fetching all training data...")
+      let request = TrainingData.fetchRequest()
+      let allTrainingData = (try? context.fetch(request)) ?? []
+      
+      logDebug("Training classifiers...")
+      self.headachePredictor?.train(with: allTrainingData, completion: completion)
+    }
+  }
+  
+}
+
+// MARK: Background methods
+
+extension HeadacheManager {
+  
+  /// Sets up the refresh task by registering it.
+  func setupPredictionRefreshTask() {
+    logDebug("Registering prediction refresh task handler.")
+    predictionRefreshTask.register(handlePredictionRefreshTask)
+  }
+  
+  /// Sets up the processing task by registering it.
+  func setupTrainingProcessingTask() {
+    logDebug("Registering training processing task handler.")
+    trainingProcessingTask.register(handleTrainingProcessingTask)
+  }
+  
+  /// Cancels the refresh task.
+  func cancelPredictionRefreshTask() {
+    logDebug("Cancelling prediction refresh task.")
+    predictionRefreshTask.cancel()
+  }
+  
+  /// Cancels the processing task.
+  func cancelTrainingProcessingTask() {
+    logDebug("Cancelling training processing task.")
+    trainingProcessingTask.cancel()
+  }
+  
+  /// Schedules the refresh task.
+  func schedulePredictionRefreshTask() {
+    logDebug("Scheduling prediction refresh task with interval \(Constants.backgroundPredictionInterval).")
+    
+    predictionRefreshTask.schedule(interval: Constants.backgroundPredictionInterval) { error in
+      if let error = error {
+        logError("Unable to schedule prediction task: \(error)")
+      }
+      else {
+        logDebug("Successfully scheduled prediction refresh task.")
+      }
+    }
+  }
+  
+  /// Schedulees the processing task.
+  func scheduleTrainingRefreshTask() {
+    let midnight = Calendar.current.midnightAfter(Date())
+    
+    logDebug("Scheduling training refresh task for date \(midnight)")
+    trainingProcessingTask.schedule(date: midnight) { error in
+      if let error = error {
+        logError("Error scheduling training processing task: \(error)")
+      }
+      else {
+        logDebug("Successfully scheduled training procecssing task.")
+      }
+    }
+  }
+  
+  /// Handles the refresh task.
+  private func handlePredictionRefreshTask(_ task: BGTask) {
+    logDebug("Handle prediction refresh task.")
+    
+    // Schedule the next task
+    predictionRefreshTask.schedule(interval: Constants.backgroundPredictionInterval, completion: { error in
+      if let error = error {
+        logError("Unable to schedule prediction task: \(error)")
+      }
+    })
+    
+    // Set the task's expiration handler
+    task.expirationHandler = { [weak task, weak self] in
+      // Cancel the prediction
+      self?.cancelClassificationInput()
+      task?.setTaskCompleted(success: false)
+    }
+    
+    // Get the current headache
+    currentHeadache { [weak self] headache, context in
+      if headache == nil {
+        // There's no current headache, so run a prediction
+        self?.getCurrentClassifierInput { input, error in
+          if let error = error {
+            // There was an error with getting the input
+            logError("Error getting classifier input: \(error)")
+            task.setTaskCompleted(success: false)
+          }
+          else if let input = input {
+            // We got the input, so present the prediction
+            do {
+              self?.presentPredictionAlert(with: try self?.headachePredictor?.predict(input), completion: { error in
+                if let error = error {
+                  logError("Error presenting alert: \(error)")
+                }
+                task.setTaskCompleted(success: error == nil)
+              })
+            }
+            catch {
+              // There was an error predicting
+              logError("Error getting prediction: \(error)")
+              task.setTaskCompleted(success: false)
+            }
+          }
+          else {
+            // Something else went wrong
+            task.setTaskCompleted(success: false)
+          }
+        }
+      }
+      else {
+        // We have a current headache, so stop here
+        task.setTaskCompleted(success: true)
+      }
+    } completion: { error in
+      if let error = error {
+        logError("Error getting current headache: \(error)")
+      }
+    }
+  }
+  
+  /// Handles the processing task.
+  private func handleTrainingProcessingTask(_ task: BGTask) {
+    logDebug("Handle training processing task.")
+    
+    // Schedule the next task
+    trainingProcessingTask.schedule(date: Calendar.current.midnightAfter(Date()), completion: { error in
+      if let error = error {
+        logError("Unable to schedule prediction task: \(error)")
+      }
+    })
+    
+    // Set the task's expiration handler
+    task.expirationHandler = { [weak task, weak self] in
+      // Cancel the prediction
+      self?.headachePredictor?.cancelTraining()
+      task?.setTaskCompleted(success: false)
+    }
+    
+    // Train
+    trainClassifiers { error in
+      if let error = error {
+        logError("Error training classifiers: \(error)")
+      }
+      else {
+        logDebug("Successfully trained classifiers.")
+      }
+      
+      task.setTaskCompleted(success: error == nil)
     }
   }
   

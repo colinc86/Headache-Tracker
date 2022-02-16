@@ -16,6 +16,9 @@ struct SettingsView: View {
   /// The app's headache manager.
   @EnvironmentObject private var headacheManager: HeadacheManager
   
+  /// The app's headache predictor.
+  @EnvironmentObject private var headachePredictor: HeadachePredictor
+  
   /// The health kit manager.
   @EnvironmentObject private var healthKitManager: HealthKitManager
   
@@ -30,6 +33,9 @@ struct SettingsView: View {
   
   /// The check-in interval setting to use when `checkInAlerts` is true.
   @AppStorage(AppSettings.checkInInterval) private var checkInInterval = TimeInterval(3600.0)
+  
+  /// The real-time alerts setting.
+  @AppStorage(AppSettings.realTimeAlerts) private var realTimeAlerts = false
   
   /// The learn and predict setting.
   @AppStorage(AppSettings.learnAndPredict) private var learnAndPredict = false
@@ -65,18 +71,27 @@ struct SettingsView: View {
         
         // Learning and Prediction
         Section("Prediction") {
+          
+        }
+        
+        
+        Section {
           Toggle(isOn: $learnAndPredict) {
             Text("Learn and Predict")
           }
-//          Button("Reset") {
-//            headacheManager.resetPrediction()
-//          }
-//          .disabled(!learnAndPredict)
+        } header: {
+          Text("Prediction")
+        } footer: {
+          Text("Models last updated at \(headachePredictor.modelUpdatedAt?.formatted() ?? "N/A")")
         }
-        .onChange(of: learnAndPredict, perform: learnAndPredictChanged)
         
         // Notifications
         Section {
+          Toggle(isOn: $realTimeAlerts) {
+            Text("Predictions")
+          }
+          .disabled(!learnAndPredict)
+          
           Toggle(isOn: $checkInAlerts) {
             Text("Check-Ins")
           }
@@ -112,20 +127,11 @@ struct SettingsView: View {
   
 }
 
-extension SettingsView {
-  
-  func learnAndPredictChanged(_ newValue: Bool) {
-    if newValue {
-      logDebug("Motion manager current authorization status: \(MotionManager.authorizationStatus())")
-    }
-  }
-  
-}
-
 struct SettingsView_Previews: PreviewProvider {
   static var previews: some View {
     SettingsView()
       .environmentObject(Previewing.headacheManager)
+      .environmentObject(Previewing.headachePredictor)
       .environmentObject(Previewing.healthKitManager)
       .environmentObject(Previewing.alertManager)
   }

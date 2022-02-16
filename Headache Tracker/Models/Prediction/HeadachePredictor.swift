@@ -64,6 +64,9 @@ class HeadachePredictor: ObservableObject {
   /// Whether or not the predictor is ready to predict.
   @Published var ready: Bool = false
   
+  /// The model's last updated at date.
+  @Published var modelUpdatedAt: Date?
+  
   // MARK: Private properties
   
   private var boostedTreeClassifier: HeadacheClassifier?
@@ -73,6 +76,9 @@ class HeadachePredictor: ObservableObject {
   
   /// The queue to do anything with models on.
   private var modelQueue = DispatchQueue(label: ApplicationKey(from: "modelQueue"))
+  
+  /// Whether or not training was cancelled.
+  private var cancelledTraining = false
   
 #if !DEBUG
   /// The metadata to save with a model.
@@ -101,7 +107,8 @@ extension HeadachePredictor {
       
       do {
         logDebug("Loading boosted tree.")
-        self.boostedTreeClassifier = try HeadacheClassifier(contentsOf: self.compiledModelURL(with: "bt"))
+        let boostedTreeModelURL = self.compiledModelURL(with: "bt")
+        self.boostedTreeClassifier = try HeadacheClassifier(contentsOf: boostedTreeModelURL)
         
         logDebug("Loading decision tree.")
         self.decisionTreeClassifier = try HeadacheClassifier(contentsOf: self.compiledModelURL(with: "dt"))
@@ -111,6 +118,16 @@ extension HeadachePredictor {
         
         logDebug("Loading logistic regression.")
         self.logisticRegressionClassifier = try HeadacheClassifier(contentsOf: self.compiledModelURL(with: "lr"))
+        
+        logDebug("Getting creation date.")
+        let attributes = try FileManager.default.attributesOfItem(atPath: boostedTreeModelURL.path)
+        if let creationDate = attributes[.creationDate] as? Date {
+          logDebug("Got creation date: \(creationDate.description)")
+          DispatchQueue.main.async { self.modelUpdatedAt = creationDate }
+        }
+        else {
+          logWarning("Unable to get recent model creation date.")
+        }
         
         completion(nil)
         DispatchQueue.main.async { self.ready = true }
@@ -135,6 +152,7 @@ extension HeadachePredictor {
     
     logDebug("Train with \(trainingData.count) training data.")
     training = true
+    cancelledTraining = false
     
     modelQueue.async { [weak self] in
       do {
@@ -148,58 +166,76 @@ extension HeadachePredictor {
         let table = try MLDataTable(dictionary: trainingData.dataTable())
         logDebug("Got table: \(table)")
         
-        logDebug("Training boosted tree.")
-        let btClassifier = try MLBoostedTreeClassifier(trainingData: table, targetColumn: HeadacheClassifierOutput.FeatureName.severity)
-        let btModelURL = self.modelURL(with: "bt")
-        try btClassifier.write(to: btModelURL, metadata: self.metadata)
-        let btCompiledModelURL = try MLModel.compileModel(at: btModelURL)
-        let btNewCompiledModelURL = self.compiledModelURL(with: "bt")
-        if FileManager.default.isDeletableFile(atPath: btNewCompiledModelURL.path) && FileManager.default.fileExists(atPath: btNewCompiledModelURL.path) {
-          try FileManager.default.removeItem(at: btNewCompiledModelURL)
+        if !self.cancelledTraining {
+          logDebug("Training boosted tree.")
+          let btClassifier = try MLBoostedTreeClassifier(trainingData: table, targetColumn: HeadacheClassifierOutput.FeatureName.severity)
+          let btModelURL = self.modelURL(with: "bt")
+          try btClassifier.write(to: btModelURL, metadata: self.metadata)
+          let btCompiledModelURL = try MLModel.compileModel(at: btModelURL)
+          let btNewCompiledModelURL = self.compiledModelURL(with: "bt")
+          if FileManager.default.isDeletableFile(atPath: btNewCompiledModelURL.path) && FileManager.default.fileExists(atPath: btNewCompiledModelURL.path) {
+            try FileManager.default.removeItem(at: btNewCompiledModelURL)
+          }
+          try FileManager.default.moveItem(at: btCompiledModelURL, to: btNewCompiledModelURL)
+          try FileManager.default.removeItem(at: btModelURL)
         }
-        try FileManager.default.moveItem(at: btCompiledModelURL, to: btNewCompiledModelURL)
-        try FileManager.default.removeItem(at: btModelURL)
         
-        logDebug("Training decision tree.")
-        let dtClassifier = try MLDecisionTreeClassifier(trainingData: table, targetColumn: HeadacheClassifierOutput.FeatureName.severity)
-        let dtModelURL = self.modelURL(with: "dt")
-        try dtClassifier.write(to: dtModelURL, metadata: self.metadata)
-        let dtCompiledModelURL = try MLModel.compileModel(at: dtModelURL)
-        let dtNewCompiledModelURL = self.compiledModelURL(with: "dt")
-        if FileManager.default.isDeletableFile(atPath: dtNewCompiledModelURL.path) && FileManager.default.fileExists(atPath: dtNewCompiledModelURL.path) {
-          try FileManager.default.removeItem(at: dtNewCompiledModelURL)
-        }
-        try FileManager.default.moveItem(at: dtCompiledModelURL, to: dtNewCompiledModelURL)
-        try FileManager.default.removeItem(at: dtModelURL)
         
-        logDebug("Training random forest.")
-        let rfClassifier = try MLRandomForestClassifier(trainingData: table, targetColumn: HeadacheClassifierOutput.FeatureName.severity)
-        let rfModelURL = self.modelURL(with: "rf")
-        try rfClassifier.write(to: rfModelURL, metadata: self.metadata)
-        let rfCompiledModelURL = try MLModel.compileModel(at: rfModelURL)
-        let rfNewCompiledModelURL = self.compiledModelURL(with: "rf")
-        if FileManager.default.isDeletableFile(atPath: rfNewCompiledModelURL.path) && FileManager.default.fileExists(atPath: rfNewCompiledModelURL.path) {
-          try FileManager.default.removeItem(at: rfNewCompiledModelURL)
+        if !self.cancelledTraining {
+          logDebug("Training decision tree.")
+          let dtClassifier = try MLDecisionTreeClassifier(trainingData: table, targetColumn: HeadacheClassifierOutput.FeatureName.severity)
+          let dtModelURL = self.modelURL(with: "dt")
+          try dtClassifier.write(to: dtModelURL, metadata: self.metadata)
+          let dtCompiledModelURL = try MLModel.compileModel(at: dtModelURL)
+          let dtNewCompiledModelURL = self.compiledModelURL(with: "dt")
+          if FileManager.default.isDeletableFile(atPath: dtNewCompiledModelURL.path) && FileManager.default.fileExists(atPath: dtNewCompiledModelURL.path) {
+            try FileManager.default.removeItem(at: dtNewCompiledModelURL)
+          }
+          try FileManager.default.moveItem(at: dtCompiledModelURL, to: dtNewCompiledModelURL)
+          try FileManager.default.removeItem(at: dtModelURL)
         }
-        try FileManager.default.moveItem(at: rfCompiledModelURL, to: rfNewCompiledModelURL)
-        try FileManager.default.removeItem(at: rfModelURL)
         
-        logDebug("Training logistic regression.")
-        let lrClassifier = try MLLogisticRegressionClassifier(trainingData: table, targetColumn: HeadacheClassifierOutput.FeatureName.severity)
-        let lrModelURL = self.modelURL(with: "lr")
-        try lrClassifier.write(to: lrModelURL, metadata: self.metadata)
-        let lrCompiledModelURL = try MLModel.compileModel(at: lrModelURL)
-        let lrNewCompiledModelURL = self.compiledModelURL(with: "lr")
-        if FileManager.default.isDeletableFile(atPath: lrNewCompiledModelURL.path) && FileManager.default.fileExists(atPath: lrNewCompiledModelURL.path) {
-          try FileManager.default.removeItem(at: lrNewCompiledModelURL)
+        
+        if !self.cancelledTraining {
+          logDebug("Training random forest.")
+          let rfClassifier = try MLRandomForestClassifier(trainingData: table, targetColumn: HeadacheClassifierOutput.FeatureName.severity)
+          let rfModelURL = self.modelURL(with: "rf")
+          try rfClassifier.write(to: rfModelURL, metadata: self.metadata)
+          let rfCompiledModelURL = try MLModel.compileModel(at: rfModelURL)
+          let rfNewCompiledModelURL = self.compiledModelURL(with: "rf")
+          if FileManager.default.isDeletableFile(atPath: rfNewCompiledModelURL.path) && FileManager.default.fileExists(atPath: rfNewCompiledModelURL.path) {
+            try FileManager.default.removeItem(at: rfNewCompiledModelURL)
+          }
+          try FileManager.default.moveItem(at: rfCompiledModelURL, to: rfNewCompiledModelURL)
+          try FileManager.default.removeItem(at: rfModelURL)
         }
-        try FileManager.default.moveItem(at: lrCompiledModelURL, to: lrNewCompiledModelURL)
-        try FileManager.default.removeItem(at: lrModelURL)
+        
+        
+        if !self.cancelledTraining {
+          logDebug("Training logistic regression.")
+          let lrClassifier = try MLLogisticRegressionClassifier(trainingData: table, targetColumn: HeadacheClassifierOutput.FeatureName.severity)
+          let lrModelURL = self.modelURL(with: "lr")
+          try lrClassifier.write(to: lrModelURL, metadata: self.metadata)
+          let lrCompiledModelURL = try MLModel.compileModel(at: lrModelURL)
+          let lrNewCompiledModelURL = self.compiledModelURL(with: "lr")
+          if FileManager.default.isDeletableFile(atPath: lrNewCompiledModelURL.path) && FileManager.default.fileExists(atPath: lrNewCompiledModelURL.path) {
+            try FileManager.default.removeItem(at: lrNewCompiledModelURL)
+          }
+          try FileManager.default.moveItem(at: lrCompiledModelURL, to: lrNewCompiledModelURL)
+          try FileManager.default.removeItem(at: lrModelURL)
+        }
+        
 #endif
         
-        self.load { error in
-          completion(error)
+        if self.cancelledTraining {
+          completion(nil)
           DispatchQueue.main.async { self.training = false }
+        }
+        else {
+          self.load { error in
+            completion(error)
+            DispatchQueue.main.async { self.training = false }
+          }
         }
       }
       catch {
@@ -207,6 +243,11 @@ extension HeadachePredictor {
         DispatchQueue.main.async { self?.training = false }
       }
     }
+  }
+  
+  /// Cancels the current training session.
+  func cancelTraining() {
+    cancelledTraining = true
   }
   
   /// Resets the predictor and its classifiers.

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import HealthKit
 import UserNotifications
 
 enum HeadacheAlertRequest: AlertRequest {
@@ -13,11 +14,14 @@ enum HeadacheAlertRequest: AlertRequest {
   static let headacheIdentifierUserInfoKey = "headacheIdentifier"
   
   case checkIn(headacheIdentifier: UUID)
+  case prediction(severity: HKCategoryValueSeverity)
   
   public var title: String {
     switch self {
     case .checkIn:
       return "How's your headache?"
+    case .prediction:
+      return "New Headache Prediction"
     }
   }
   
@@ -25,6 +29,8 @@ enum HeadacheAlertRequest: AlertRequest {
     switch self {
     case .checkIn(_):
       return "Tap here to give an update on your headache."
+    case .prediction(let severity):
+      return "You may have a \(severity.title.lowercased()) headache. Tap here to give an update."
     }
   }
   
@@ -32,6 +38,7 @@ enum HeadacheAlertRequest: AlertRequest {
     switch self {
     case .checkIn(let headacheIdentifier):
       return [HeadacheAlertRequest.headacheIdentifierUserInfoKey: headacheIdentifier.uuidString]
+    default: return nil
     }
   }
   

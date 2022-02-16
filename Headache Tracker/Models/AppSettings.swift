@@ -12,7 +12,6 @@ struct AppSettings {
   static let healthIntegration = ApplicationKey(from: "healthIntegration")
   static let checkInAlerts = ApplicationKey(from: "checkInAlerts")
   static let checkInInterval = ApplicationKey(from: "checkInInterval")
+  static let realTimeAlerts = ApplicationKey(from: "realTimeAlerts")
   static let learnAndPredict = ApplicationKey(from: "learnAndPredict")
 }
-
-//let apiKey = Bundle.main.object(forInfoDictionaryKey: "OpenWeatherMapAPIKey") as? String

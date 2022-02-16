@@ -36,9 +36,17 @@
         <attribute name="walkingHeartRateAverage" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <relationship name="severity" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Severity" inverseName="trainingData" inverseEntity="Severity"/>
     </entity>
+    <entity name="ValidationData" representedClassName="ValidationData" syncable="YES" codeGenerationType="class">
+        <attribute name="boostedTreeHit" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="decisionTreeHit" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="logisticRegressionHit" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="randomForestHit" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="timestamp" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+    </entity>
     <elements>
         <element name="Headache" positionX="-63" positionY="-18" width="128" height="14"/>
         <element name="Severity" positionX="-63" positionY="9" width="128" height="14"/>
         <element name="TrainingData" positionX="-45" positionY="54" width="128" height="329"/>
+        <element name="ValidationData" positionX="-54" positionY="144" width="128" height="104"/>
     </elements>
 </model>

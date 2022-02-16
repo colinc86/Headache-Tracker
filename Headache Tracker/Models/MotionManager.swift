@@ -17,6 +17,7 @@ class MotionManager {
   enum MotionManagerError: Error {
     case userNotPermitted
     case notAvailable
+    case cancelled
   }
   
   // MARK: Private properties
@@ -26,6 +27,8 @@ class MotionManager {
   
   /// The altimeter.
   private let altimeter = CMAltimeter()
+  
+  private var completionBlock: ((Measurement<UnitPressure>?, Error?) -> Void)?
   
   /// The manager's operation queue.
   private lazy var operationQueue: OperationQueue = {
@@ -50,6 +53,13 @@ extension MotionManager {
 // MARK: Public methods
 extension MotionManager {
   
+  /// Cancels the current barometric pressure reading.
+  func cancelReading() {
+    altimeter.stopRelativeAltitudeUpdates()
+    completionBlock?(nil, MotionManagerError.cancelled)
+    completionBlock = nil
+  }
+  
   /// Gets the current barometric pressure at the device.
   ///
   /// - Parameter completion: Called when the pressure has been fetched.
@@ -64,6 +74,7 @@ extension MotionManager {
       return
     }
     
+    completionBlock = completion
     altimeter.startRelativeAltitudeUpdates(to: operationQueue) { [weak self] relativeAltitudeData, error in
       if let relativeAltitudeData = relativeAltitudeData {
         completion(Measurement(value: relativeAltitudeData.pressure.doubleValue, unit: .kilopascals), error)
@@ -72,6 +83,7 @@ extension MotionManager {
         completion(nil, error)
       }
       
+      self?.completionBlock = nil
       self?.altimeter.stopRelativeAltitudeUpdates()
     }
   }
