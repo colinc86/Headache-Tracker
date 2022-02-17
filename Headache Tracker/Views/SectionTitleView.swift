@@ -9,6 +9,7 @@ import SwiftUI
 
 struct SectionTitleView: View {
   
+  /// The view's title.
   let title: String
   
   var body: some View {

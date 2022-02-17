@@ -31,7 +31,7 @@ struct HorizontalSeverityLevel: View {
         ForEach(0 ..< 5) { i in
           SeverityButton(
             severity: severity(for: i),
-            selected: currentSeverity?.orderingValue == i,
+            selectedSeverity: currentSeverity,
             collapsed: collapsed,
             action: action)
           
@@ -49,6 +49,10 @@ struct HorizontalSeverityLevel: View {
 
 extension HorizontalSeverityLevel {
   
+  /// The severity for a given index.
+  ///
+  /// - Parameter index: The severity's index.
+  /// - Returns: A severity.
   private func severity(for index: Int) -> HKCategoryValueSeverity {
     return HKCategoryValueSeverity(orderingValue: index) ?? .notPresent
   }

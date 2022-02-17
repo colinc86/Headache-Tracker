@@ -119,12 +119,6 @@ struct CurrentHeadacheView: View {
           }
           // Current Headache Information
           else if let currentHeadache = currentHeadache {
-            // Resolve the Headache
-            Button("Resolve", action: resolveConfirmation)
-              .font(.title)
-              .foregroundColor(.accentColor)
-              .cell(title: "Resolve Headache", systemImage: "cross.circle.fill", foregroundColor: .teal)
-            
             // Onset
             OnsetView(headache: currentHeadache)
               .cell(title: "Onset", systemImage: "clock", foregroundColor: .purple)
@@ -139,6 +133,12 @@ struct CurrentHeadacheView: View {
                 .frame(height: 100)
                 .cell(title: "Progression", systemImage: "chart.xyaxis.line", foregroundColor: .orange)
             }
+            
+            // Resolve the Headache
+            Button("Resolve", action: resolveConfirmation)
+              .font(.title)
+              .foregroundColor(.accentColor)
+              .cell(title: "Resolve Headache", systemImage: "cross.circle.fill", foregroundColor: .teal)
           }
           
           // Predictions

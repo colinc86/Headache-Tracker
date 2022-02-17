@@ -13,6 +13,7 @@ struct HeadacheView: View {
   
   // MARK: Public properties
   
+  /// The view's headache to display.
   @StateObject var headache: Headache
   
   // MARK: Private properties

@@ -9,6 +9,7 @@ import SwiftUI
 
 struct OnsetView: View {
   
+  /// The view's headache.
   @StateObject var headache: Headache
   
   var body: some View {

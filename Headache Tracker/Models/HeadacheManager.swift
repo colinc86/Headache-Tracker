@@ -520,6 +520,26 @@ extension HeadacheManager {
     }
   }
   
+  /// Whether or not the device contains training data that's newer than
+  /// the latest compiled models.
+  ///
+  /// - Parameter completion: Called after the training data has been fetched.
+  func needsTraining(completion: @escaping (Bool) -> Void) {
+    var needs = false
+    let context = DataController.shared.newNestedBackgroundContext()
+    context.perform { [unowned context] in
+      let request = TrainingData.fetchRequest()
+      request.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: true)]
+      let trainingData = (try? context.fetch(request)) ?? []
+      
+      if let date = trainingData.last?.timestamp, let lastTrainingDate = self.headachePredictor?.modelUpdatedAt {
+        needs = date.timeIntervalSince(lastTrainingDate) > 0.0
+      }
+      
+      completion(needs)
+    }
+  }
+  
   /// Cancels the current classification input reading.
   func cancelClassificationInput() {
     motionManager.cancelReading()
@@ -706,15 +726,34 @@ extension HeadacheManager {
   
   /// Schedulees the processing task.
   func scheduleTrainingRefreshTask() {
-    let midnight = Calendar.current.midnightAfter(Date())
-    
-    logDebug("Scheduling training refresh task for date \(midnight)")
-    trainingProcessingTask.schedule(date: midnight) { error in
-      if let error = error {
-        logError("Error scheduling training processing task: \(error)")
+    // Do we need to train the classifiers?
+    needsTraining { [weak self] needs in
+      if needs {
+        // They need to be trained, so pick a time in the future.
+        let now = Date()
+        var futureDate: Date!
+        if Calendar.current.timeIntervalSinceMidnight(now) <= 21600.0 {
+          // If it's between midnight 6am, choose 15 minutes from now.
+          futureDate = now.addingTimeInterval(900.0)
+        }
+        else {
+          // If it's between 6am and midnight, choose midnight.
+          futureDate = Calendar.current.midnightAfter(now)
+        }
+        
+        
+        logDebug("Scheduling training processing task for date \(futureDate.description)")
+        self?.trainingProcessingTask.schedule(date: futureDate) { error in
+          if let error = error {
+            logError("Error scheduling training processing task: \(error)")
+          }
+          else {
+            logDebug("Successfully scheduled training procecssing task.")
+          }
+        }
       }
       else {
-        logDebug("Successfully scheduled training procecssing task.")
+        logDebug("Training not needed. Not scheduling training processing task.")
       }
     }
   }

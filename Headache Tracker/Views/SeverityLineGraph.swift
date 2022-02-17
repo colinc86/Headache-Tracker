@@ -31,7 +31,7 @@ struct SeverityLineGraph: View {
       QuadCurve(unitPoints: pathPoints())
         .trim(from: 0.0, to: trim)
         .stroke(LinearGradient(gradient: gradient, startPoint: .bottom, endPoint: .top), lineWidth: 4.0)
-        .animation(.easeInOut(duration: 0.35), value: trim)
+        .animation(.easeInOut(duration: 0.5), value: trim)
         .onAppear(perform: { trim = 1.0 })
     }
     else {
@@ -45,6 +45,9 @@ struct SeverityLineGraph: View {
 
 extension SeverityLineGraph {
   
+  /// The line graph's points.
+  /// 
+  /// - Returns: An array of unit points.
   func pathPoints() -> [UnitPoint] {
     guard series.count > 1 else {
       return []

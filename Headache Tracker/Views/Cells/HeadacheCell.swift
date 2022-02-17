@@ -42,7 +42,7 @@ struct HeadacheCell: View {
         SubtitleCell(title: "Onset", subtitle: headache.startTime?.formatted() ?? "N/A")
         Spacer(minLength: 0.0)
         SubtitleCell(
-          title: headache.resolved ? "Duration" : "Duration (unresolved)",
+          title: "Duration",
           subtitle: Formatters.dateComponentsFormatter.string(from: headache.duration) ?? "0 min")
           .id(durationID)
         Spacer(minLength: 0.0)

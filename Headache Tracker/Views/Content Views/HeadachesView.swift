@@ -18,28 +18,58 @@ struct HeadachesView: View {
   /// The app's headache manager.
   @EnvironmentObject private var headacheManager: HeadacheManager
   
-  /// The headaches fetch request.
-  /// Returns a list of all headaches.
+  /// The unresolveed headaches fetch request.
+  /// Returns a list of all unresolved headaches.
   @FetchRequest(
     sortDescriptors: [NSSortDescriptor(keyPath: \Headache.createdAt, ascending: false)],
+    predicate: NSPredicate(format: "resolved = %@", NSNumber(booleanLiteral: false)),
     animation: .default)
-  private var headaches: FetchedResults<Headache>
+  private var unresolvedHeadaches: FetchedResults<Headache>
+  
+  /// The resolveed headaches fetch request.
+  /// Returns a list of all resolved headaches.
+  @FetchRequest(
+    sortDescriptors: [NSSortDescriptor(keyPath: \Headache.createdAt, ascending: false)],
+    predicate: NSPredicate(format: "resolved = %@", NSNumber(booleanLiteral: true)),
+    animation: .default)
+  private var resolvedHeadaches: FetchedResults<Headache>
   
   // MARK: View body
   
   var body: some View {
     NavigationView {
       List {
-        ForEach(headaches) { headache in
-          NavigationLink {
-            HeadacheView(headache: headache)
-              .environment(\.managedObjectContext, viewContext)
-              .environmentObject(headacheManager)
-          } label: {
-            HeadacheCell(headache: headache)
+        if unresolvedHeadaches.count > 0 {
+          Section("Unresolved") {
+            ForEach(unresolvedHeadaches) { headache in
+              NavigationLink {
+                HeadacheView(headache: headache)
+                  .environment(\.managedObjectContext, viewContext)
+                  .environmentObject(headacheManager)
+              } label: {
+                HeadacheCell(headache: headache)
+              }
+            }
+            .onDelete(perform: deleteUnresolvedHeadaches)
           }
         }
-        .onDelete(perform: deleteHeadaches)
+        
+        Section {
+          ForEach(resolvedHeadaches) { headache in
+            NavigationLink {
+              HeadacheView(headache: headache)
+                .environment(\.managedObjectContext, viewContext)
+                .environmentObject(headacheManager)
+            } label: {
+              HeadacheCell(headache: headache)
+            }
+          }
+          .onDelete(perform: deleteResolvedHeadaches)
+        } header: {
+          if unresolvedHeadaches.count > 0 {
+            Text("Resolved")
+          }
+        }
       }
       .navigationTitle("Headaches")
       .toolbar {
@@ -59,9 +89,18 @@ extension HeadachesView {
   /// Deletes the items at the given offsets.
   ///
   /// - Parameter offsets: The item offsets.
-  private func deleteHeadaches(offsets: IndexSet) {
+  private func deleteUnresolvedHeadaches(offsets: IndexSet) {
     withAnimation {
-      offsets.map { headaches[$0] }.forEach({ headacheManager.deleteHeadache(identifier: $0.identifier ?? UUID()) })
+      offsets.map { unresolvedHeadaches[$0] }.forEach({ headacheManager.deleteHeadache(identifier: $0.identifier ?? UUID()) })
+    }
+  }
+  
+  /// Deletes the items at the given offsets.
+  ///
+  /// - Parameter offsets: The item offsets.
+  private func deleteResolvedHeadaches(offsets: IndexSet) {
+    withAnimation {
+      offsets.map { resolvedHeadaches[$0] }.forEach({ headacheManager.deleteHeadache(identifier: $0.identifier ?? UUID()) })
     }
   }
   
