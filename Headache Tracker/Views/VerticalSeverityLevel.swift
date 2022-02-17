@@ -25,8 +25,8 @@ struct VerticalSeverityLevel: View {
         Spacer(minLength: 0.0)
         VStack(spacing: 0.0) {
           ForEach(0 ..< 5) { i in
-            if 4 - i < headache.severityRange.0.orderingValue ||
-                4 - i > headache.severityRange.1.orderingValue {
+            if 4 - i < headache.severityRange.lowerBound.orderingValue ||
+                4 - i > headache.severityRange.upperBound.orderingValue {
               Rectangle()
                 .fill(Color.secondary.opacity(0.25))
                 .frame(width: 10.0, height: 10.0)

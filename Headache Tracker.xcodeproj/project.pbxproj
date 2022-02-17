@@ -30,7 +30,7 @@
 		3B09191A27BD58A100844F6C /* HorizontalSeverityLevel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B09191927BD58A100844F6C /* HorizontalSeverityLevel.swift */; };
 		3B09191C27BD5F6F00844F6C /* SeverityButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B09191B27BD5F6F00844F6C /* SeverityButton.swift */; };
 		3B09191F27BD84FE00844F6C /* Shapes in Frameworks */ = {isa = PBXBuildFile; productRef = 3B09191E27BD84FE00844F6C /* Shapes */; };
-		3B09192127BD851700844F6C /* SeverityLineGraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B09192027BD851700844F6C /* SeverityLineGraph.swift */; };
+		3B09192127BD851700844F6C /* LineGraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B09192027BD851700844F6C /* LineGraph.swift */; };
 		3B09192327BD91F400844F6C /* SectionTitleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B09192227BD91F400844F6C /* SectionTitleView.swift */; };
 		3B39DAD727ACF67600D39BB5 /* Previewing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B39DAD627ACF67600D39BB5 /* Previewing.swift */; };
 		3B39DAD927ACF74600D39BB5 /* Headache+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B39DAD827ACF74600D39BB5 /* Headache+Extensions.swift */; };
@@ -48,6 +48,8 @@
 		3B4BA70627B7642A00F38851 /* HeadacheClassifierOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B4BA70527B7642A00F38851 /* HeadacheClassifierOutput.swift */; };
 		3B68BDF727BDF459007AAAC6 /* Color+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BDF627BDF459007AAAC6 /* Color+Extensions.swift */; };
 		3B68BDF927BDFCD3007AAAC6 /* AnalyzeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BDF827BDFCD3007AAAC6 /* AnalyzeView.swift */; };
+		3B68BDFB27BE0F00007AAAC6 /* BarGraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BDFA27BE0F00007AAAC6 /* BarGraph.swift */; };
+		3B68BDFE27BE2B57007AAAC6 /* Numeric+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BDFD27BE2B57007AAAC6 /* Numeric+Extensions.swift */; };
 		3BDCF23E27BC213800334B8B /* Calendar+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BDCF23D27BC213800334B8B /* Calendar+Extensions.swift */; };
 		3BF5313727ACE18D00056673 /* Headache_TrackerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF5313627ACE18D00056673 /* Headache_TrackerApp.swift */; };
 		3BF5313927ACE18D00056673 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF5313827ACE18D00056673 /* ContentView.swift */; };
@@ -107,7 +109,7 @@
 		3B09191527BCD38300844F6C /* DurationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DurationView.swift; sourceTree = "<group>"; };
 		3B09191927BD58A100844F6C /* HorizontalSeverityLevel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HorizontalSeverityLevel.swift; sourceTree = "<group>"; };
 		3B09191B27BD5F6F00844F6C /* SeverityButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeverityButton.swift; sourceTree = "<group>"; };
-		3B09192027BD851700844F6C /* SeverityLineGraph.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeverityLineGraph.swift; sourceTree = "<group>"; };
+		3B09192027BD851700844F6C /* LineGraph.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineGraph.swift; sourceTree = "<group>"; };
 		3B09192227BD91F400844F6C /* SectionTitleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SectionTitleView.swift; sourceTree = "<group>"; };
 		3B39DAD627ACF67600D39BB5 /* Previewing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Previewing.swift; sourceTree = "<group>"; };
 		3B39DAD827ACF74600D39BB5 /* Headache+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Headache+Extensions.swift"; sourceTree = "<group>"; };
@@ -126,6 +128,8 @@
 		3B4BA70527B7642A00F38851 /* HeadacheClassifierOutput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeadacheClassifierOutput.swift; sourceTree = "<group>"; };
 		3B68BDF627BDF459007AAAC6 /* Color+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Extensions.swift"; sourceTree = "<group>"; };
 		3B68BDF827BDFCD3007AAAC6 /* AnalyzeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyzeView.swift; sourceTree = "<group>"; };
+		3B68BDFA27BE0F00007AAAC6 /* BarGraph.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarGraph.swift; sourceTree = "<group>"; };
+		3B68BDFD27BE2B57007AAAC6 /* Numeric+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Numeric+Extensions.swift"; sourceTree = "<group>"; };
 		3BDCF23D27BC213800334B8B /* Calendar+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar+Extensions.swift"; sourceTree = "<group>"; };
 		3BF5313327ACE18D00056673 /* Headache Tracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Headache Tracker.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3BF5313627ACE18D00056673 /* Headache_TrackerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Headache_TrackerApp.swift; sourceTree = "<group>"; };
@@ -246,6 +250,7 @@
 				3B68BDF627BDF459007AAAC6 /* Color+Extensions.swift */,
 				3BF5316E27ACEAF600056673 /* DataController+Extensions.swift */,
 				3B39DADC27ACFD5A00D39BB5 /* HKCategoryValueSeverity+Extensions.swift */,
+				3B68BDFD27BE2B57007AAAC6 /* Numeric+Extensions.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -255,13 +260,13 @@
 			children = (
 				3B09191027BCC9B200844F6C /* Cells */,
 				3B051A9627B198CB0017131D /* Content Views */,
+				3B68BDFC27BE0FF0007AAAC6 /* Graphs */,
 				3B051AA127B357830017131D /* Modifiers */,
 				3B09191527BCD38300844F6C /* DurationView.swift */,
 				3B09191927BD58A100844F6C /* HorizontalSeverityLevel.swift */,
 				3B09191127BCCE1C00844F6C /* OnsetView.swift */,
 				3B09192227BD91F400844F6C /* SectionTitleView.swift */,
 				3B09191B27BD5F6F00844F6C /* SeverityButton.swift */,
-				3B09192027BD851700844F6C /* SeverityLineGraph.swift */,
 				3B051A9727B1B4EC0017131D /* VerticalSeverityLevel.swift */,
 			);
 			path = Views;
@@ -294,6 +299,15 @@
 				3B4BA6FA27B6449F00F38851 /* HeadachePredictor.swift */,
 			);
 			path = Prediction;
+			sourceTree = "<group>";
+		};
+		3B68BDFC27BE0FF0007AAAC6 /* Graphs */ = {
+			isa = PBXGroup;
+			children = (
+				3B68BDFA27BE0F00007AAAC6 /* BarGraph.swift */,
+				3B09192027BD851700844F6C /* LineGraph.swift */,
+			);
+			path = Graphs;
 			sourceTree = "<group>";
 		};
 		3BF5312A27ACE18D00056673 = {
@@ -529,6 +543,7 @@
 				3B051A8F27B0FA9B0017131D /* HeadacheCell.swift in Sources */,
 				3B4BA6F927B6352300F38851 /* MotionManager.swift in Sources */,
 				3BF5316F27ACEAF700056673 /* DataController+Extensions.swift in Sources */,
+				3B68BDFB27BE0F00007AAAC6 /* BarGraph.swift in Sources */,
 				3B09191227BCCE1C00844F6C /* OnsetView.swift in Sources */,
 				3B051A4C27B0B4CC0017131D /* Severity+Extensions.swift in Sources */,
 				3B09191427BCCF9500844F6C /* Cell.swift in Sources */,
@@ -542,6 +557,7 @@
 				3B4BA6F727B632A800F38851 /* TrainingData+Extensions.swift in Sources */,
 				3B39DADB27ACFC9C00D39BB5 /* SubtitleCell.swift in Sources */,
 				3B39DAD927ACF74600D39BB5 /* Headache+Extensions.swift in Sources */,
+				3B68BDFE27BE2B57007AAAC6 /* Numeric+Extensions.swift in Sources */,
 				3B4BA6F227B5E96500F38851 /* HealthKitManager.swift in Sources */,
 				3B051A9327B18ABF0017131D /* AlertManager.swift in Sources */,
 				3B39DAD727ACF67600D39BB5 /* Previewing.swift in Sources */,
@@ -554,7 +570,7 @@
 				3B09191A27BD58A100844F6C /* HorizontalSeverityLevel.swift in Sources */,
 				3B09190F27BCA52700844F6C /* BackgroundTask.swift in Sources */,
 				3B051A9527B18E3C0017131D /* HeadacheAlertRequest.swift in Sources */,
-				3B09192127BD851700844F6C /* SeverityLineGraph.swift in Sources */,
+				3B09192127BD851700844F6C /* LineGraph.swift in Sources */,
 				3B051AA527B379DA0017131D /* Bundle+Extensions.swift in Sources */,
 				3B4BA70627B7642A00F38851 /* HeadacheClassifierOutput.swift in Sources */,
 				3BF5314327ACE18F00056673 /* Headache_Tracker.xcdatamodeld in Sources */,

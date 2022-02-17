@@ -44,20 +44,6 @@ extension Headache {
     return (endTime ?? Date()).timeIntervalSince(startTime)
   }
   
-  /// A textual description of the severity.
-  var severityDescription: String {
-    guard let minSeverity = severitiesArray.map({ $0.severity }).min(by: { $0.orderingValue < $1.orderingValue }),
-          let maxSeverity = severitiesArray.map({ $0.severity }).max(by: { $0.orderingValue < $1.orderingValue }) else {
-            return HKCategoryValueSeverity.notPresent.title
-          }
-    
-    if minSeverity != maxSeverity {
-      return "\(minSeverity.title) - \(maxSeverity.title)"
-    }
-    
-    return minSeverity.title
-  }
-  
   /// The start time of the last severity _if it's `endTime` is `nil`_.
   var pendingEndTime: Date? {
     let last = severitiesArray.last
@@ -73,16 +59,16 @@ extension Headache {
   var severityRange: HealthKitManager.SeverityRange {
     guard let minSeverity = severitiesArray.map({ $0.severity }).min(by: { $0.orderingValue < $1.orderingValue }),
           let maxSeverity = severitiesArray.map({ $0.severity }).max(by: { $0.orderingValue < $1.orderingValue }) else {
-            return (.notPresent, .notPresent)
+            return HealthKitManager.SeverityRange(lowerBound: .notPresent, upperBound: .notPresent)
           }
-    return (minSeverity, maxSeverity)
+    return HealthKitManager.SeverityRange(lowerBound: minSeverity, upperBound: maxSeverity)
   }
   
   /// The range of colors to use with the headache's severity range.
   var severityColorRange: [Color] {
     let range = severityRange
     var colors = [Color]()
-    for i in range.0.orderingValue ... range.1.orderingValue {
+    for i in range.lowerBound.orderingValue ... range.upperBound.orderingValue {
       colors.append((HKCategoryValueSeverity(orderingValue: i) ?? .notPresent).uiColor)
     }
     return colors

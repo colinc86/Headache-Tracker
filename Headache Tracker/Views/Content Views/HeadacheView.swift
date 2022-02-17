@@ -57,12 +57,12 @@ struct HeadacheView: View {
         SubtitleCell(title: "Duration", subtitle: Formatters.dateComponentsFormatter.string(from: headache.duration) ?? "0 min")
           .id(durationID)
         
-        SubtitleCell(title: "Severity", subtitle: headache.severityDescription)
+        SubtitleCell(title: "Severity", subtitle: headache.severityRange.description)
         SubtitleCell(title: "Status", subtitle: headache.resolved ? "Resolved" : "Unresolved")
       }
       
       Section("Progression") {
-        SeverityLineGraph(series: headache.severitySignal, gradient: Gradient(colors: headache.severityColorRange))
+        LineGraph(series: headache.severitySignal, gradient: Gradient(colors: headache.severityColorRange))
           .frame(height: 100.0)
         
         if headache.severities?.count ?? 0 > 1 {

@@ -18,8 +18,32 @@ class HealthKitManager: ObservableObject {
   /// Pairs a severity value with a date interval.
   typealias SeverityInterval = (HKCategoryValueSeverity, DateInterval)
   
-  /// Pairs two severity values together.
-  typealias SeverityRange = (HKCategoryValueSeverity, HKCategoryValueSeverity)
+  /// Pairs two severity values together as a closed range.
+  struct SeverityRange: CustomStringConvertible, Equatable {
+    let lowerBound: HKCategoryValueSeverity
+    let upperBound: HKCategoryValueSeverity
+    
+    var description: String {
+      if lowerBound == upperBound {
+        return lowerBound.title
+      }
+      return "\(lowerBound.title) - \(upperBound.title)"
+    }
+    
+    var average: Double {
+      return Double(lowerBound.orderingValue + upperBound.orderingValue) / 2.0
+    }
+    
+    init(lowerBound: HKCategoryValueSeverity, upperBound: HKCategoryValueSeverity) {
+      self.lowerBound = lowerBound
+      self.upperBound = upperBound
+    }
+    
+    static func == (lhs: SeverityRange, rhs: SeverityRange) -> Bool {
+      return lhs.lowerBound.orderingValue == rhs.lowerBound.orderingValue &&
+        lhs.upperBound.orderingValue == rhs.upperBound.orderingValue
+    }
+  }
   
   /// A health kit error.
   enum HealthKitError: DescribableError {

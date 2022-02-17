@@ -46,7 +46,7 @@ struct HeadacheCell: View {
           subtitle: Formatters.dateComponentsFormatter.string(from: headache.duration) ?? "0 min")
           .id(durationID)
         Spacer(minLength: 0.0)
-        SubtitleCell(title: "Severity", subtitle: headache.severityDescription)
+        SubtitleCell(title: "Severity", subtitle: headache.severityRange.description)
       }
     }
     .onAppear(perform: appeared)

@@ -1,5 +1,5 @@
 //
-//  SeverityLineGraph.swift
+//  LineGraph.swift
 //  Headache Tracker
 //
 //  Created by Colin Campbell on 2/16/22.
@@ -9,7 +9,7 @@ import Shapes
 import SwiftUI
 import HealthKit
 
-struct SeverityLineGraph: View {
+struct LineGraph: View {
   
   // MARK: Public properties
   
@@ -43,7 +43,7 @@ struct SeverityLineGraph: View {
 
 // MARK: Private methods
 
-extension SeverityLineGraph {
+extension LineGraph {
   
   /// The line graph's points.
   /// 
@@ -66,9 +66,9 @@ extension SeverityLineGraph {
   
 }
 
-struct SeverityLineGraph_Previews: PreviewProvider {
+struct LineGraph_Previews: PreviewProvider {
   static var previews: some View {
-    SeverityLineGraph(series: [
+    LineGraph(series: [
       .mild, .notPresent, .unspecified
     ], gradient: Gradient(colors: [.cyan, .purple]))
   }

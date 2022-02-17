@@ -73,6 +73,9 @@ struct CurrentHeadacheView: View {
   /// Whether or not the headache manager needs more not-present headache training data.
   @State private var needsInput: Bool = false
   
+  /// Whether or not we are handling headache training data.
+  @State private var handlingInput: Bool = false
+  
   @State private var boostedTreeHit: Bool = false
   @State private var boostedTreeAccuracy: Double = 0.0
   
@@ -102,7 +105,7 @@ struct CurrentHeadacheView: View {
         Section {
           // New/Current Severity
           HorizontalSeverityLevel(currentSeverity: currentHeadache?.severity, collapsed: false, action: changeSeverity)
-            .cell(title: "Severity", systemImage: "brain.head.profile", foregroundColor: .cyan)
+            .cell(title: "Severity", systemImage: "dial.max.fill", foregroundColor: .cyan)
         } header: {
           SectionTitleView(title: currentHeadache == nil ? "New Headache" : "Current Headache")
         } footer: {
@@ -128,7 +131,7 @@ struct CurrentHeadacheView: View {
           // Onset
           Section {
             OnsetView(headache: currentHeadache)
-              .cell(title: "Onset", systemImage: "clock", foregroundColor: .purple)
+              .cell(title: "Onset", systemImage: "clock.fill", foregroundColor: .purple)
           }
           
           // Duration
@@ -140,7 +143,7 @@ struct CurrentHeadacheView: View {
           // Progression
           if currentHeadache.severitiesArray.count > 1 {
             Section {
-              SeverityLineGraph(series: currentHeadache.severitySignal, gradient: Gradient(colors: currentHeadache.severityColorRange))
+              LineGraph(series: currentHeadache.severitySignal, gradient: Gradient(colors: currentHeadache.severityColorRange))
                 .frame(height: 100)
                 .cell(title: "Progression", systemImage: "chart.xyaxis.line", foregroundColor: .orange)
             }
@@ -226,14 +229,18 @@ extension CurrentHeadacheView {
   private func predict() {
     logDebug("Predict.")
     guard learnAndPredict else {
-      needsInput = false
+      withAnimation {
+        needsInput = false
+      }
       return
     }
     
     // Check if we should show the not-present training data cell
     headacheManager.needsNotPresentTrainingData { needsTrainingData in
       DispatchQueue.main.async {
-        self.needsInput = needsTrainingData
+        withAnimation {
+          self.needsInput = needsTrainingData
+        }
       }
     }
     
@@ -251,7 +258,9 @@ extension CurrentHeadacheView {
           }
           catch {
             logError("Error getting prediction: \(error)")
-            prediction = nil
+            withAnimation {
+              prediction = nil
+            }
           }
         }
       }
@@ -328,15 +337,24 @@ extension CurrentHeadacheView {
   
   /// The action to perform if there is no headache.
   private func noHeadacheAction() {
+    guard !handlingInput else {
+      return
+    }
+    
+    handlingInput = true
     headacheManager.createTrainingData { error in
       if let error = error {
+        handlingInput = false
         showAlert("Error Saving Data", error)
       }
       else {
         // Check if we should show the not-present training data cell
         headacheManager.needsNotPresentTrainingData { needsTrainingData in
           DispatchQueue.main.async {
-            self.needsInput = needsTrainingData
+            withAnimation {
+              handlingInput = false
+              needsInput = needsTrainingData
+            }
           }
         }
       }
