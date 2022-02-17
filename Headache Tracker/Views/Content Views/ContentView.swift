@@ -41,7 +41,7 @@ struct ContentView: View {
         .environmentObject(headachePredictor)
         .environmentObject(alertManager)
         .tabItem {
-          Label("Current Headache", systemImage: "brain.head.profile")
+          Label("Track", systemImage: "brain.head.profile")
         }
       
       HeadachesView()

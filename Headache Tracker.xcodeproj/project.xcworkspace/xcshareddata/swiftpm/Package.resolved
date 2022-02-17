@@ -11,15 +11,6 @@
         }
       },
       {
-        "package": "SwiftUICharts",
-        "repositoryURL": "git@github.com:AppPear/ChartView.git",
-        "state": {
-          "branch": null,
-          "revision": "caa75ecbc0d68f2b50d714909566406f80214186",
-          "version": "2.0.0-beta.2"
-        }
-      },
-      {
         "package": "DataController",
         "repositoryURL": "git@github.com:colinc86/DataController.git",
         "state": {
@@ -44,6 +35,15 @@
           "branch": null,
           "revision": "5d66f7ba25daf4f94100e7022febf3c75e37a6c7",
           "version": "1.4.2"
+        }
+      },
+      {
+        "package": "Shapes",
+        "repositoryURL": "git@github.com:spacenation/swiftui-shapes.git",
+        "state": {
+          "branch": null,
+          "revision": "c58b15c37eae9bd20525c6daa93a06a689ca75cb",
+          "version": "1.1.0"
         }
       }
     ]

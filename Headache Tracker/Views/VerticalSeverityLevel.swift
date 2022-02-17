@@ -1,5 +1,5 @@
 //
-//  SeverityLevel.swift
+//  VerticalSeverityLevel.swift
 //  Headache Tracker
 //
 //  Created by Colin Campbell on 2/7/22.
@@ -7,9 +7,10 @@
 
 import SwiftUI
 import HealthKit
+import Logger
 
 /// Draws a vertical severity level indicator.
-struct SeverityLevel: View {
+struct VerticalSeverityLevel: View {
   
   // MARK: Public properties
   
@@ -49,21 +50,21 @@ struct SeverityLevel: View {
 
 // MARK: Private methods
 
-extension SeverityLevel {
+extension VerticalSeverityLevel {
   
   /// Gets the color for the severity index.
   ///
   /// - Parameter index: The index of the severity.
   /// - Returns: A color.
   private func color(for index: Int) -> Color {
-    return (HKCategoryValueSeverity(rawValue: index) ?? .notPresent).uiColor
+    return (HKCategoryValueSeverity(orderingValue: index) ?? .notPresent).uiColor
   }
   
 }
 
-struct SeverityLevel_Previews: PreviewProvider {
+struct VerticalSeverityLevel_Previews: PreviewProvider {
   static var previews: some View {
-    SeverityLevel(headache: Previewing.CoreData.headache)
+    VerticalSeverityLevel(headache: Previewing.CoreData.headache)
       .previewLayout(PreviewLayout.fixed(width: 20, height: 50))
   }
 }

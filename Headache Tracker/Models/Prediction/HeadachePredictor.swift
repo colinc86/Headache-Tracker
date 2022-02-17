@@ -87,7 +87,7 @@ class HeadachePredictor: ObservableObject {
   private var modelQueue = DispatchQueue(label: ApplicationKey(from: "modelQueue"))
   
   /// The training background task.
-  private var trainingBackgroundTask: BackgroundTask?
+  private var trainingBackgroundTask = BackgroundTask(identifier: "training")
   
   /// Whether or not training was cancelled.
   private var cancelledTraining = false
@@ -161,8 +161,7 @@ extension HeadachePredictor {
     }
     
     logDebug("Train with \(trainingData.count) training data.")
-    trainingBackgroundTask = BackgroundTask(identifier: "training")
-    trainingBackgroundTask?.begin(expired: cancelTraining)
+    trainingBackgroundTask.begin(expired: cancelTraining)
     
     DispatchQueue.main.async { [weak self] in self?.training = true }
     cancelledTraining = false
@@ -183,7 +182,7 @@ extension HeadachePredictor {
         guard let self = self else {
           completion(nil)
           DispatchQueue.main.async { self?.training = false }
-          self?.trainingBackgroundTask?.end()
+          self?.trainingBackgroundTask.end()
           return
         }
         
@@ -249,20 +248,20 @@ extension HeadachePredictor {
         if self.cancelledTraining {
           completion(nil)
           DispatchQueue.main.async { self.training = false }
-          self.trainingBackgroundTask?.end()
+          self.trainingBackgroundTask.end()
         }
         else {
           self.load { error in
             completion(error)
             DispatchQueue.main.async { self.training = false }
-            self.trainingBackgroundTask?.end()
+            self.trainingBackgroundTask.end()
           }
         }
       }
       catch {
         completion(error)
         DispatchQueue.main.async { self?.training = false }
-        self?.trainingBackgroundTask?.end()
+        self?.trainingBackgroundTask.end()
       }
     }
   }

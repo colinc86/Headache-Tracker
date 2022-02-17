@@ -9,6 +9,7 @@ import Accelerate
 import CoreMotion
 import Foundation
 import SwiftUI
+import Logger
 
 class MotionManager {
   
@@ -27,15 +28,15 @@ class MotionManager {
   
   /// The altimeter.
   private let altimeter = CMAltimeter()
-  
-  private var completionBlock: ((Measurement<UnitPressure>?, Error?) -> Void)?
-  
+    
   /// The manager's operation queue.
   private lazy var operationQueue: OperationQueue = {
     let queue = OperationQueue()
     queue.maxConcurrentOperationCount = 1
     return queue
   }()
+  
+  private var updateCount = 0
   
 }
 
@@ -55,36 +56,50 @@ extension MotionManager {
   
   /// Cancels the current barometric pressure reading.
   func cancelReading() {
-    altimeter.stopRelativeAltitudeUpdates()
-    completionBlock?(nil, MotionManagerError.cancelled)
-    completionBlock = nil
+    logDebug("Cancel barometer reading.")
+    updateCount -= 1
+    if updateCount == 0 {
+      altimeter.stopRelativeAltitudeUpdates()
+    }
   }
   
   /// Gets the current barometric pressure at the device.
   ///
   /// - Parameter completion: Called when the pressure has been fetched.
   func barometricPressure(completion: @escaping (Measurement<UnitPressure>?, Error?) -> Void) {
+    logDebug("Get barometric pressure.")
+    
     guard learnAndPredict else {
+      logWarning("Not learning and predicting.")
       completion(nil, MotionManagerError.userNotPermitted)
       return
     }
     
     guard CMAltimeter.isRelativeAltitudeAvailable() else {
+      logWarning("Relative altitude not available.")
       completion(nil, MotionManagerError.notAvailable)
       return
     }
     
-    completionBlock = completion
+    updateCount += 1
     altimeter.startRelativeAltitudeUpdates(to: operationQueue) { [weak self] relativeAltitudeData, error in
       if let relativeAltitudeData = relativeAltitudeData {
+        logDebug("Got relative altitude data.")
         completion(Measurement(value: relativeAltitudeData.pressure.doubleValue, unit: .kilopascals), error)
       }
       else {
+        if let error = error {
+          logError("Error getting relative altitude data: \(error)")
+        }
+        
         completion(nil, error)
       }
       
-      self?.completionBlock = nil
-      self?.altimeter.stopRelativeAltitudeUpdates()
+      self?.updateCount -= 1
+      if self?.updateCount == 0 {
+        self?.altimeter.stopRelativeAltitudeUpdates()
+      }
+      logDebug("Finished barometer updates.")
     }
   }
   

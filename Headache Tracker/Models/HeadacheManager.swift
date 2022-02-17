@@ -54,10 +54,10 @@ class HeadacheManager: ObservableObject {
   private let trainingProcessingTask = RefreshTask(identifier: Constants.Identifiers.backgroundTrainingTaskIdentifier, type: .processing)
   
   /// The create training data background task.
-  private var createTrainingDataBackgroundTask: BackgroundTask?
+  private var createTrainingDataBackgroundTask = BackgroundTask(identifier: "createTrainingData")
   
   /// The get current classifier input background task.
-  private var getCurrentClassifierInputBackgroundTask: BackgroundTask?
+  private var getCurrentClassifierInputBackgroundTask = BackgroundTask(identifier: "getCurrentClassifierInput")
   
   /// Whether or not the manager is in test mode. If in test mode, it will not
   /// write to or delete from the health kit store.
@@ -534,8 +534,7 @@ extension HeadacheManager {
       return
     }
     
-    getCurrentClassifierInputBackgroundTask = BackgroundTask(identifier: "getCurrentClassifierInput")
-    getCurrentClassifierInputBackgroundTask?.begin { [weak self] in
+    getCurrentClassifierInputBackgroundTask.begin { [weak self] in
       self?.motionManager.cancelReading()
     }
     
@@ -543,14 +542,15 @@ extension HeadacheManager {
       guard let self = self else {
         logWarning("Self was nil. Returning early.")
         completion(nil, pressureError)
-        self?.getCurrentClassifierInputBackgroundTask?.end()
+        self?.getCurrentClassifierInputBackgroundTask.end()
         return
       }
       
       if let pressureError = pressureError {
         logError("Error getting barometric pressure: \(pressureError)")
         completion(nil, pressureError)
-        self.getCurrentClassifierInputBackgroundTask?.end()
+        self.getCurrentClassifierInputBackgroundTask.end()
+        return
       }
       else if let pressure = pressure {
         logDebug("Got barometric pressure: \(pressure.formatted())")
@@ -563,8 +563,7 @@ extension HeadacheManager {
       let healthKitData = self.healthKitManager?.readHealthKitData(in: interval) ?? [:]
       
       completion(HeadacheClassifierInput(barometricPressure: barometricPressure, healthKitData: healthKitData, date: now), nil)
-      
-      self.getCurrentClassifierInputBackgroundTask?.end()
+      self.getCurrentClassifierInputBackgroundTask.end()
     }
   }
   
@@ -572,14 +571,16 @@ extension HeadacheManager {
   /// with the given identifier. If no identifier is present, then the training data is
   /// still created but orphaned (a not-present severity).
   ///
-  /// - Parameter newSeverityIdentifier: The new severity identifier.
-  func createTrainingData(newSeverityIdentifier: UUID? = nil) {
+  /// - Parameters:
+  ///   - newSeverityIdentifier: The new severity identifier.
+  ///   - completion: The completion block to call after the training data has been created.
+  func createTrainingData(newSeverityIdentifier: UUID? = nil, completion: ((Error?) -> Void)? = nil) {
     guard !testing else {
+      completion?(nil)
       return
     }
     
-    createTrainingDataBackgroundTask = BackgroundTask(identifier: "createTrainingData")
-    createTrainingDataBackgroundTask?.begin { [weak self] in
+    createTrainingDataBackgroundTask.begin { [weak self] in
       self?.motionManager.cancelReading()
     }
     
@@ -588,7 +589,8 @@ extension HeadacheManager {
     motionManager.barometricPressure { [weak self] pressure, pressureError in
       guard let self = self else {
         logWarning("Self was nil. Returning early.")
-        self?.createTrainingDataBackgroundTask?.end()
+        self?.createTrainingDataBackgroundTask.end()
+        completion?(nil)
         return
       }
       
@@ -631,7 +633,8 @@ extension HeadacheManager {
             logDebug("Finished saving training data.")
           }
           
-          self.createTrainingDataBackgroundTask?.end()
+          completion?(error)
+          self.createTrainingDataBackgroundTask.end()
         }
       }
     }

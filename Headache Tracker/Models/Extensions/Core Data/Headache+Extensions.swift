@@ -82,15 +82,15 @@ extension Headache {
   var severityColorRange: [Color] {
     let range = severityRange
     var colors = [Color]()
-    for i in range.0.rawValue ... range.1.rawValue {
-      colors.append((HKCategoryValueSeverity(rawValue: i) ?? .notPresent).uiColor)
+    for i in range.0.orderingValue ... range.1.orderingValue {
+      colors.append((HKCategoryValueSeverity(orderingValue: i) ?? .notPresent).uiColor)
     }
     return colors
   }
   
   /// The headache's severity signal.
-  var severitySignal: [(String, Double)] {
-    return severitiesArray.map({ ($0.severity.title, Double($0.severity.orderingValue)) })
+  var severitySignal: [HKCategoryValueSeverity] {
+    return severitiesArray.map({ $0.severity })
   }
   
   // MARK: Initializers

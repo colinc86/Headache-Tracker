@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftUICharts
 import CoreData
 import DataController
 import HealthKit
@@ -57,17 +58,14 @@ struct CurrentHeadacheView: View {
   /// Whether or not the alert is visible.
   @State private var showingAlert = false
   
-  /// Whether or not the reset confirmation alert is visible.
-  @State private var showingResetConfirmation = false
+  /// Whether or not the resolve confirmation alert is visible.
+  @State private var showingResolveConfirmation = false
   
   /// True iff the current headache is being updated.
   @State private var updatingHeadache = false
   
   /// The classifier's current prediction.
   @State private var prediction: HeadachePredictor.Prediction?
-  
-  /// Whether or not the classifier input is being updated.
-  @State private var predicting: Bool = false
   
   /// The last error produced by prediction.
   @State private var predictionError: Error? = nil
@@ -99,112 +97,101 @@ struct CurrentHeadacheView: View {
   
   var body: some View {
     NavigationView {
-      Form {
-        if let currentHeadache = currentHeadache {
-          Section {
-            SubtitleCell(title: "Severity", subtitle: currentHeadache.severity.title)
-            SubtitleCell(title: "Last Updated", subtitle: currentHeadache.pendingEndTime?.formatted() ?? "N/A")
-          }
-        }
-        
-        Section {
-          Button(HKCategoryValueSeverity.severe.title) { changeSeverity(to: .severe) }
-          .disabled(currentHeadache?.severity == .severe)
-          .disabled(updatingHeadache)
+      ScrollView(.vertical, showsIndicators: true) {
+        VStack(alignment: .leading) {
+          // New/Current Headache Title
+          SectionTitleView(title: currentHeadache == nil ? "New Headache" : "Current Headache")
           
-          Button(HKCategoryValueSeverity.moderate.title) { changeSeverity(to: .moderate) }
-          .disabled(currentHeadache?.severity == .moderate)
-          .disabled(updatingHeadache)
+          // New/Current Severity
+          HorizontalSeverityLevel(currentSeverity: currentHeadache?.severity, collapsed: false, action: changeSeverity)
+            .cell(
+              title: "Severity",
+              footnote: currentHeadache == nil ? "Feel a headache coming on? Select a severity level to start tracking it." : nil,
+              systemImage: "brain.head.profile",
+              foregroundColor: .cyan)
           
-          Button(HKCategoryValueSeverity.mild.title) { changeSeverity(to: .mild) }
-          .disabled(currentHeadache?.severity == .mild)
-          .disabled(updatingHeadache)
-          
-          Button(HKCategoryValueSeverity.unspecified.title) { changeSeverity(to: .unspecified) }
-          .disabled(currentHeadache?.severity == .unspecified)
-          .disabled(updatingHeadache)
-          
-          Button(HKCategoryValueSeverity.notPresent.title) { changeSeverity(to: .notPresent) }
-          .disabled(currentHeadache?.severity == .notPresent)
-          .disabled(updatingHeadache)
-        } footer: {
-          if currentHeadache == nil {
-            Text("Feel a headache coming on? Select a severity level to start tracking it.")
-          }
-        }
-        
-        if learnAndPredict && currentHeadache == nil && needsInput {
-          Section {
+          // No Headache
+          if learnAndPredict && currentHeadache == nil && needsInput {
             Button("No Headache", action: noHeadacheAction)
+              .font(.title)
+              .foregroundColor(.accentColor)
+              .cell(title: "No Headache?", footnote: "No Headache? Tap above to let the app know.", systemImage: "checkmark.circle.fill", foregroundColor: .teal)
           }
-        }
-        else if currentHeadache != nil {
-          Section {
-            HStack {
-              Spacer()
-              Button("Resolve", action: resolve)
-                .disabled(updatingHeadache)
-              Spacer()
-            }
+          // Current Headache Information
+          else if let currentHeadache = currentHeadache {
+            // Resolve the Headache
+            Button("Resolve", action: resolveConfirmation)
+              .font(.title)
+              .foregroundColor(.accentColor)
+              .cell(title: "Resolve Headache", systemImage: "cross.circle.fill", foregroundColor: .teal)
             
-            HStack {
-              Spacer()
-              Button("Reset", action: resetConfirmation)
-                .disabled(updatingHeadache)
-                .foregroundColor(.red)
-              Spacer()
+            // Onset
+            OnsetView(headache: currentHeadache)
+              .cell(title: "Onset", systemImage: "clock", foregroundColor: .purple)
+            
+            // Duration
+            DurationView(headache: currentHeadache)
+              .cell(title: "Duration", systemImage: "timer", foregroundColor: .green)
+            
+            // Progression
+            if currentHeadache.severitiesArray.count > 1 {
+              SeverityLineGraph(series: currentHeadache.severitySignal, gradient: Gradient(colors: currentHeadache.severityColorRange))
+                .frame(height: 100)
+                .cell(title: "Progression", systemImage: "chart.xyaxis.line", foregroundColor: .orange)
             }
-          }
-        }
-        
-        if learnAndPredict, let prediction = prediction {
-          Section("Predictions") {
-            SubtitleCell(title: "Boosted Tree", subtitle: prediction.boostedTreeOutput.title)
-            SubtitleCell(title: "Decision Tree", subtitle: prediction.decisionTreeOutput.title)
-            SubtitleCell(title: "Random Forest", subtitle: prediction.randomForestOutput.title)
-            SubtitleCell(title: "Logistic Regression", subtitle: prediction.logisticRegressionOutput.title)
           }
           
-          Section("Accuracy") {
-            SubtitleCell(title: "Boosted Tree", subtitle: String(format: "%0.1f%%", boostedTreeAccuracy * 100.0))
-            SubtitleCell(title: "Decision Tree", subtitle: String(format: "%0.1f%%", decisionTreeAccuracy * 100.0))
-            SubtitleCell(title: "Random Forest", subtitle: String(format: "%0.1f%%", randomForestAccuracy * 100.0))
-            SubtitleCell(title: "Logistic Regression", subtitle: String(format: "%0.1f%%", logisticRegressionAccuracy * 100.0))
-          }
-        }
-        else if let predictionError = predictionError {
-          Section {
-            HStack {
-              Spacer()
-              Image(systemName: "exclamationmark.triangle")
-                .foregroundColor(.yellow)
-              Spacer()
-            }
+          // Predictions
+          if learnAndPredict, let prediction = prediction {
+            SectionTitleView(title: "Predictions")
             
-            Text(predictionError.localizedDescription)
+            VStack {
+              HorizontalSeverityLevel(currentSeverity: prediction.boostedTreeOutput.severity, collapsed: true, action: nil)
+              Divider().padding(0)
+              SubtitleCell(title: "Probability", subtitle: String(format: "%0.f%%", prediction.boostedTreeOutput.probability * 100.0))
+              Divider().padding(0)
+              SubtitleCell(title: "Accuracy", subtitle: String(format: "%0.f%%", boostedTreeAccuracy * 100.0))
+            }
+            .cell(title: "Boosted Tree", systemImage: "chart.bar.xaxis", foregroundColor: .indigo)
+            
+            VStack {
+              HorizontalSeverityLevel(currentSeverity: prediction.decisionTreeOutput.severity, collapsed: true, action: nil)
+              Divider().padding(0)
+              SubtitleCell(title: "Probability", subtitle: String(format: "%0.f%%", prediction.decisionTreeOutput.probability * 100.0))
+              Divider().padding(0)
+              SubtitleCell(title: "Accuracy", subtitle: String(format: "%0.f%%", decisionTreeAccuracy * 100.0))
+            }
+            .cell(title: "Decision Tree", systemImage: "chart.bar.xaxis", foregroundColor: .indigo)
+            
+            VStack {
+              HorizontalSeverityLevel(currentSeverity: prediction.randomForestOutput.severity, collapsed: true, action: nil)
+              Divider().padding(0)
+              SubtitleCell(title: "Probability", subtitle: String(format: "%0.f%%", prediction.randomForestOutput.probability * 100.0))
+              Divider().padding(0)
+              SubtitleCell(title: "Accuracy", subtitle: String(format: "%0.f%%", randomForestAccuracy * 100.0))
+            }
+            .cell(title: "Random Forest", systemImage: "chart.bar.xaxis", foregroundColor: .indigo)
+            
+            VStack {
+              HorizontalSeverityLevel(currentSeverity: prediction.logisticRegressionOutput.severity, collapsed: true, action: nil)
+              Divider().padding(0)
+              SubtitleCell(title: "Probability", subtitle: String(format: "%0.f%%", prediction.logisticRegressionOutput.probability * 100.0))
+              Divider().padding(0)
+              SubtitleCell(title: "Accuracy", subtitle: String(format: "%0.f%%", logisticRegressionAccuracy * 100.0))
+            }
+            .cell(title: "Logistic Regression", systemImage: "chart.bar.xaxis", foregroundColor: .indigo)
           }
         }
       }
-      .navigationTitle("Current Headache")
-      .toolbar {
-        ToolbarItem(placement: .navigationBarTrailing) {
-          if updatingHeadache || predicting {
-            ProgressView()
-              .progressViewStyle(DefaultProgressViewStyle())
-          }
-          else {
-            EmptyView()
-          }
-        }
-      }
+      .background(Color(UIColor.systemGroupedBackground))
+      .navigationTitle("Track")
     }
     .onReceive(didBecomeActiveNotificationPublisher, perform: didBecomeActive)
     .onAppear(perform: onAppear)
     .confirmationAlert(isPresented: $showingAlert, title: alertTitle, message: alertMessage)
-    .destructiveConfirmationDialog(title: alertTitle, isPresented: $showingResetConfirmation, destructiveActionTitle: "Reset", destructiveAction: {
-      reset()
-      withAnimation { showingResetConfirmation = false }
-    })
+    .confirmationDialog("Resolve Headache? It will be available in the Headaches tab.", isPresented: $showingResolveConfirmation, titleVisibility: .visible) {
+      Button("Resolve", role: .destructive, action: resolve)
+    }
   }
   
 }
@@ -215,18 +202,20 @@ extension CurrentHeadacheView {
   
   /// Called when the app becomes active.
   private func didBecomeActive(_ notification: NotificationCenter.Publisher.Output) {
+    logDebug("Did become active.")
     predict()
   }
   
   /// Called when the view appears and reloads the classifier input.
   private func onAppear() {
+    logDebug("On appear.")
     predict()
   }
   
   /// Updates the classifier input.
   private func predict() {
+    logDebug("Predict.")
     guard learnAndPredict else {
-      predicting = false
       needsInput = false
       return
     }
@@ -239,7 +228,6 @@ extension CurrentHeadacheView {
     }
     
     // Update the classifier input
-    predicting = true
     headacheManager.getCurrentClassifierInput { input, error in
       DispatchQueue.main.async {
         if let error = error {
@@ -247,15 +235,15 @@ extension CurrentHeadacheView {
         }
         else if let input = input {
           do {
-            prediction = try headachePredictor.predict(input)
+            try withAnimation {
+              prediction = try headachePredictor.predict(input)
+            }
           }
           catch {
+            logError("Error getting prediction: \(error)")
             prediction = nil
-            predictionError = error
           }
         }
-        
-        predicting = false
       }
     }
     
@@ -270,6 +258,11 @@ extension CurrentHeadacheView {
     logisticRegressionAccuracy = Double(logisticRegressionHits) / Double(validations.count > 0 ? validations.count : 1)
   }
   
+  /// Displays the reset confirmation alert to the user.
+  private func resolveConfirmation() {
+    withAnimation { showingResolveConfirmation = true }
+  }
+  
   /// Shows an alert to the user.
   ///
   /// - Parameters:
@@ -279,14 +272,6 @@ extension CurrentHeadacheView {
     alertTitle = title
     alertMessage = error.localizedDescription
     withAnimation { showingAlert = true }
-  }
-  
-  /// Shows a reset confirmation dialog to the user.
-  ///
-  /// - Parameter title: The dialog's title.
-  private func showResetConfirmation(_ title: String) {
-    alertTitle = title
-    withAnimation { showingResetConfirmation = true }
   }
   
   /// Changes the current headache's severity or creates a new headache if one
@@ -314,8 +299,6 @@ extension CurrentHeadacheView {
           validationData.decisionTreeHit = prediction?.decisionTreeOutput.severity == severity
           validationData.randomForestHit = prediction?.randomForestOutput.severity == severity
           validationData.logisticRegressionHit = prediction?.logisticRegressionOutput.severity == severity
-        } completion: { error in
-          predict()
         }
       }
     }
@@ -323,6 +306,7 @@ extension CurrentHeadacheView {
   
   /// Resolves the current headache.
   private func resolve() {
+    logDebug("Resolve current headache.")
     headacheManager.resolve { error in
       DispatchQueue.main.async {
         if let error = error {
@@ -332,29 +316,20 @@ extension CurrentHeadacheView {
     }
   }
   
-  /// Resets the current headache by deleting it.
-  private func reset() {
-    headacheManager.reset { error in
-      if let error = error {
-        DispatchQueue.main.async {
-          showAlert("Unable to Reset Headache", error)
-        }
-      }
-    }
-  }
-  
   /// The action to perform if there is no headache.
   private func noHeadacheAction() {
-    headacheManager.createTrainingData()
-  }
-  
-  /// Displays the reset confirmation alert to the user.
-  private func resetConfirmation() {
-    if healthIntegration {
-      showResetConfirmation("Are you sure you want to reset the headache and any associated Health app data?")
-    }
-    else {
-      showResetConfirmation("Are you sure you want to reset the headache?")
+    headacheManager.createTrainingData { error in
+      if let error = error {
+        showAlert("Error Saving Data", error)
+      }
+      else {
+        // Check if we should show the not-present training data cell
+        headacheManager.needsNotPresentTrainingData { needsTrainingData in
+          DispatchQueue.main.async {
+            self.needsInput = needsTrainingData
+          }
+        }
+      }
     }
   }
   

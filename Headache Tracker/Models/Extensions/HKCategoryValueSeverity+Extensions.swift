@@ -47,6 +47,17 @@ extension HKCategoryValueSeverity {
     }
   }
   
+  init?(orderingValue: Int) {
+    switch orderingValue {
+    case 0: self = .notPresent
+    case 1: self = .unspecified
+    case 2: self = .mild
+    case 3: self = .moderate
+    case 4: self = .severe
+    default: return nil
+    }
+  }
+  
   init?(title: String) {
     switch title {
     case HKCategoryValueSeverity.notPresent.title: self = .notPresent

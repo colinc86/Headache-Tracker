@@ -15,7 +15,7 @@
 		3B051A9127B0FACA0017131D /* HeadacheView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B051A9027B0FACA0017131D /* HeadacheView.swift */; };
 		3B051A9327B18ABF0017131D /* AlertManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B051A9227B18ABF0017131D /* AlertManager.swift */; };
 		3B051A9527B18E3C0017131D /* HeadacheAlertRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B051A9427B18E3C0017131D /* HeadacheAlertRequest.swift */; };
-		3B051A9827B1B4EC0017131D /* SeverityLevel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B051A9727B1B4EC0017131D /* SeverityLevel.swift */; };
+		3B051A9827B1B4EC0017131D /* VerticalSeverityLevel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B051A9727B1B4EC0017131D /* VerticalSeverityLevel.swift */; };
 		3B051A9C27B351C70017131D /* Formatters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B051A9B27B351C70017131D /* Formatters.swift */; };
 		3B051A9E27B3555E0017131D /* ConfirmationAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B051A9D27B3555E0017131D /* ConfirmationAlert.swift */; };
 		3B051AA027B3577B0017131D /* DestructiveConfirmationDialog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B051A9F27B3577B0017131D /* DestructiveConfirmationDialog.swift */; };
@@ -24,6 +24,14 @@
 		3B09190927BC7D8000844F6C /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B09190827BC7D8000844F6C /* Constants.swift */; };
 		3B09190B27BC7E0C00844F6C /* RefreshTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B09190A27BC7E0C00844F6C /* RefreshTask.swift */; };
 		3B09190F27BCA52700844F6C /* BackgroundTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B09190E27BCA52700844F6C /* BackgroundTask.swift */; };
+		3B09191227BCCE1C00844F6C /* OnsetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B09191127BCCE1C00844F6C /* OnsetView.swift */; };
+		3B09191427BCCF9500844F6C /* Cell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B09191327BCCF9500844F6C /* Cell.swift */; };
+		3B09191627BCD38300844F6C /* DurationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B09191527BCD38300844F6C /* DurationView.swift */; };
+		3B09191A27BD58A100844F6C /* HorizontalSeverityLevel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B09191927BD58A100844F6C /* HorizontalSeverityLevel.swift */; };
+		3B09191C27BD5F6F00844F6C /* SeverityButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B09191B27BD5F6F00844F6C /* SeverityButton.swift */; };
+		3B09191F27BD84FE00844F6C /* Shapes in Frameworks */ = {isa = PBXBuildFile; productRef = 3B09191E27BD84FE00844F6C /* Shapes */; };
+		3B09192127BD851700844F6C /* SeverityLineGraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B09192027BD851700844F6C /* SeverityLineGraph.swift */; };
+		3B09192327BD91F400844F6C /* SectionTitleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B09192227BD91F400844F6C /* SectionTitleView.swift */; };
 		3B39DAD727ACF67600D39BB5 /* Previewing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B39DAD627ACF67600D39BB5 /* Previewing.swift */; };
 		3B39DAD927ACF74600D39BB5 /* Headache+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B39DAD827ACF74600D39BB5 /* Headache+Extensions.swift */; };
 		3B39DADB27ACFC9C00D39BB5 /* SubtitleCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B39DADA27ACFC9C00D39BB5 /* SubtitleCell.swift */; };
@@ -39,7 +47,6 @@
 		3B4BA70427B7640F00F38851 /* HeadacheClassifierInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B4BA70327B7640F00F38851 /* HeadacheClassifierInput.swift */; };
 		3B4BA70627B7642A00F38851 /* HeadacheClassifierOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B4BA70527B7642A00F38851 /* HeadacheClassifierOutput.swift */; };
 		3BDCF23E27BC213800334B8B /* Calendar+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BDCF23D27BC213800334B8B /* Calendar+Extensions.swift */; };
-		3BDCF24127BC5FD000334B8B /* SwiftUICharts in Frameworks */ = {isa = PBXBuildFile; productRef = 3BDCF24027BC5FD000334B8B /* SwiftUICharts */; };
 		3BF5313727ACE18D00056673 /* Headache_TrackerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF5313627ACE18D00056673 /* Headache_TrackerApp.swift */; };
 		3BF5313927ACE18D00056673 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF5313827ACE18D00056673 /* ContentView.swift */; };
 		3BF5313B27ACE18F00056673 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3BF5313A27ACE18F00056673 /* Assets.xcassets */; };
@@ -82,7 +89,7 @@
 		3B051A9027B0FACA0017131D /* HeadacheView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeadacheView.swift; sourceTree = "<group>"; };
 		3B051A9227B18ABF0017131D /* AlertManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertManager.swift; sourceTree = "<group>"; };
 		3B051A9427B18E3C0017131D /* HeadacheAlertRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeadacheAlertRequest.swift; sourceTree = "<group>"; };
-		3B051A9727B1B4EC0017131D /* SeverityLevel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeverityLevel.swift; sourceTree = "<group>"; };
+		3B051A9727B1B4EC0017131D /* VerticalSeverityLevel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerticalSeverityLevel.swift; sourceTree = "<group>"; };
 		3B051A9B27B351C70017131D /* Formatters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Formatters.swift; sourceTree = "<group>"; };
 		3B051A9D27B3555E0017131D /* ConfirmationAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfirmationAlert.swift; sourceTree = "<group>"; };
 		3B051A9F27B3577B0017131D /* DestructiveConfirmationDialog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DestructiveConfirmationDialog.swift; sourceTree = "<group>"; };
@@ -93,6 +100,13 @@
 		3B09190827BC7D8000844F6C /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		3B09190A27BC7E0C00844F6C /* RefreshTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefreshTask.swift; sourceTree = "<group>"; };
 		3B09190E27BCA52700844F6C /* BackgroundTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundTask.swift; sourceTree = "<group>"; };
+		3B09191127BCCE1C00844F6C /* OnsetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnsetView.swift; sourceTree = "<group>"; };
+		3B09191327BCCF9500844F6C /* Cell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cell.swift; sourceTree = "<group>"; };
+		3B09191527BCD38300844F6C /* DurationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DurationView.swift; sourceTree = "<group>"; };
+		3B09191927BD58A100844F6C /* HorizontalSeverityLevel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HorizontalSeverityLevel.swift; sourceTree = "<group>"; };
+		3B09191B27BD5F6F00844F6C /* SeverityButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeverityButton.swift; sourceTree = "<group>"; };
+		3B09192027BD851700844F6C /* SeverityLineGraph.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeverityLineGraph.swift; sourceTree = "<group>"; };
+		3B09192227BD91F400844F6C /* SectionTitleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SectionTitleView.swift; sourceTree = "<group>"; };
 		3B39DAD627ACF67600D39BB5 /* Previewing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Previewing.swift; sourceTree = "<group>"; };
 		3B39DAD827ACF74600D39BB5 /* Headache+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Headache+Extensions.swift"; sourceTree = "<group>"; };
 		3B39DADA27ACFC9C00D39BB5 /* SubtitleCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubtitleCell.swift; sourceTree = "<group>"; };
@@ -132,8 +146,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				3BF5317227ACEC7900056673 /* Logger in Frameworks */,
-				3BDCF24127BC5FD000334B8B /* SwiftUICharts in Frameworks */,
 				3BF5316D27ACEAC600056673 /* DataController in Frameworks */,
+				3B09191F27BD84FE00844F6C /* Shapes in Frameworks */,
 				3BF5316827ACE1DA00056673 /* HealthKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -181,10 +195,20 @@
 		3B051AA127B357830017131D /* Modifiers */ = {
 			isa = PBXGroup;
 			children = (
+				3B09191327BCCF9500844F6C /* Cell.swift */,
 				3B051A9D27B3555E0017131D /* ConfirmationAlert.swift */,
 				3B051A9F27B3577B0017131D /* DestructiveConfirmationDialog.swift */,
 			);
 			path = Modifiers;
+			sourceTree = "<group>";
+		};
+		3B09191027BCC9B200844F6C /* Cells */ = {
+			isa = PBXGroup;
+			children = (
+				3B051A8E27B0FA9B0017131D /* HeadacheCell.swift */,
+				3B39DADA27ACFC9C00D39BB5 /* SubtitleCell.swift */,
+			);
+			path = Cells;
 			sourceTree = "<group>";
 		};
 		3B39DADE27AD009F00D39BB5 /* Models */ = {
@@ -223,11 +247,16 @@
 		3B39DAE027AD00B700D39BB5 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				3B09191027BCC9B200844F6C /* Cells */,
 				3B051A9627B198CB0017131D /* Content Views */,
 				3B051AA127B357830017131D /* Modifiers */,
-				3B051A8E27B0FA9B0017131D /* HeadacheCell.swift */,
-				3B051A9727B1B4EC0017131D /* SeverityLevel.swift */,
-				3B39DADA27ACFC9C00D39BB5 /* SubtitleCell.swift */,
+				3B09191527BCD38300844F6C /* DurationView.swift */,
+				3B09191927BD58A100844F6C /* HorizontalSeverityLevel.swift */,
+				3B09191127BCCE1C00844F6C /* OnsetView.swift */,
+				3B09192227BD91F400844F6C /* SectionTitleView.swift */,
+				3B09191B27BD5F6F00844F6C /* SeverityButton.swift */,
+				3B09192027BD851700844F6C /* SeverityLineGraph.swift */,
+				3B051A9727B1B4EC0017131D /* VerticalSeverityLevel.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -349,7 +378,7 @@
 			packageProductDependencies = (
 				3BF5316C27ACEAC600056673 /* DataController */,
 				3BF5317127ACEC7900056673 /* Logger */,
-				3BDCF24027BC5FD000334B8B /* SwiftUICharts */,
+				3B09191E27BD84FE00844F6C /* Shapes */,
 			);
 			productName = "Headache Tracker";
 			productReference = 3BF5313327ACE18D00056673 /* Headache Tracker.app */;
@@ -426,7 +455,7 @@
 			packageReferences = (
 				3BF5316B27ACEAC600056673 /* XCRemoteSwiftPackageReference "DataController" */,
 				3BF5317027ACEC7900056673 /* XCRemoteSwiftPackageReference "Logger" */,
-				3BDCF23F27BC5FD000334B8B /* XCRemoteSwiftPackageReference "ChartView" */,
+				3B09191D27BD84FD00844F6C /* XCRemoteSwiftPackageReference "swiftui-shapes" */,
 			);
 			productRefGroup = 3BF5313427ACE18D00056673 /* Products */;
 			projectDirPath = "";
@@ -494,8 +523,11 @@
 				3B051A8F27B0FA9B0017131D /* HeadacheCell.swift in Sources */,
 				3B4BA6F927B6352300F38851 /* MotionManager.swift in Sources */,
 				3BF5316F27ACEAF700056673 /* DataController+Extensions.swift in Sources */,
+				3B09191227BCCE1C00844F6C /* OnsetView.swift in Sources */,
 				3B051A4C27B0B4CC0017131D /* Severity+Extensions.swift in Sources */,
+				3B09191427BCCF9500844F6C /* Cell.swift in Sources */,
 				3B051A4E27B0E9060017131D /* HeadachesView.swift in Sources */,
+				3B09192327BD91F400844F6C /* SectionTitleView.swift in Sources */,
 				3B051A9127B0FACA0017131D /* HeadacheView.swift in Sources */,
 				3B39DADD27ACFD5A00D39BB5 /* HKCategoryValueSeverity+Extensions.swift in Sources */,
 				3B4BA6F527B6313B00F38851 /* HealthKitData.swift in Sources */,
@@ -512,8 +544,10 @@
 				3B09190B27BC7E0C00844F6C /* RefreshTask.swift in Sources */,
 				3B09190927BC7D8000844F6C /* Constants.swift in Sources */,
 				3BF5313727ACE18D00056673 /* Headache_TrackerApp.swift in Sources */,
+				3B09191A27BD58A100844F6C /* HorizontalSeverityLevel.swift in Sources */,
 				3B09190F27BCA52700844F6C /* BackgroundTask.swift in Sources */,
 				3B051A9527B18E3C0017131D /* HeadacheAlertRequest.swift in Sources */,
+				3B09192127BD851700844F6C /* SeverityLineGraph.swift in Sources */,
 				3B051AA527B379DA0017131D /* Bundle+Extensions.swift in Sources */,
 				3B4BA70627B7642A00F38851 /* HeadacheClassifierOutput.swift in Sources */,
 				3BF5314327ACE18F00056673 /* Headache_Tracker.xcdatamodeld in Sources */,
@@ -521,9 +555,11 @@
 				3B051A9E27B3555E0017131D /* ConfirmationAlert.swift in Sources */,
 				3BDCF23E27BC213800334B8B /* Calendar+Extensions.swift in Sources */,
 				3B051A8D27B0F4490017131D /* DescribableError.swift in Sources */,
+				3B09191627BCD38300844F6C /* DurationView.swift in Sources */,
+				3B09191C27BD5F6F00844F6C /* SeverityButton.swift in Sources */,
 				3B39DAE227AD068300D39BB5 /* AppSettings.swift in Sources */,
 				3B051A5027B0E9410017131D /* CurrentHeadacheView.swift in Sources */,
-				3B051A9827B1B4EC0017131D /* SeverityLevel.swift in Sources */,
+				3B051A9827B1B4EC0017131D /* VerticalSeverityLevel.swift in Sources */,
 				3BF5316A27ACE47700056673 /* HeadacheManager.swift in Sources */,
 				3B4BA6FB27B6449F00F38851 /* HeadachePredictor.swift in Sources */,
 				3B39DAE427AD06EA00D39BB5 /* SettingsView.swift in Sources */,
@@ -866,12 +902,12 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		3BDCF23F27BC5FD000334B8B /* XCRemoteSwiftPackageReference "ChartView" */ = {
+		3B09191D27BD84FD00844F6C /* XCRemoteSwiftPackageReference "swiftui-shapes" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "git@github.com:AppPear/ChartView.git";
+			repositoryURL = "git@github.com:spacenation/swiftui-shapes.git";
 			requirement = {
-				kind = exactVersion;
-				version = "2.0.0-beta.2";
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.1.0;
 			};
 		};
 		3BF5316B27ACEAC600056673 /* XCRemoteSwiftPackageReference "DataController" */ = {
@@ -893,10 +929,10 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		3BDCF24027BC5FD000334B8B /* SwiftUICharts */ = {
+		3B09191E27BD84FE00844F6C /* Shapes */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 3BDCF23F27BC5FD000334B8B /* XCRemoteSwiftPackageReference "ChartView" */;
-			productName = SwiftUICharts;
+			package = 3B09191D27BD84FD00844F6C /* XCRemoteSwiftPackageReference "swiftui-shapes" */;
+			productName = Shapes;
 		};
 		3BF5316C27ACEAC600056673 /* DataController */ = {
 			isa = XCSwiftPackageProductDependency;

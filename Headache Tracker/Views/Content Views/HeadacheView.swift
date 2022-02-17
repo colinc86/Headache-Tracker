@@ -61,10 +61,8 @@ struct HeadacheView: View {
       }
       
       Section("Progression") {
-        BarChart()
-          .data(headache.severitySignal)
-          .chartStyle(ChartStyle(backgroundColor: .clear, foregroundColor: ColorGradient(headache.severityColorRange.first!, headache.severityColorRange.last!)))
-          .frame(height: 200.0)
+        SeverityLineGraph(series: headache.severitySignal, gradient: Gradient(colors: headache.severityColorRange))
+          .frame(height: 100.0)
         
         if headache.severities?.count ?? 0 > 1 {
           ForEach(headache.severitiesArray, id: \.self) { severity in
