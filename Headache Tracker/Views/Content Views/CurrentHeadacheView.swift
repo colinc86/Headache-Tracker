@@ -138,7 +138,7 @@ struct CurrentHeadacheView: View {
             Button("Resolve", action: resolveConfirmation)
               .font(.title)
               .foregroundColor(.accentColor)
-              .cell(title: "Resolve Headache", systemImage: "cross.circle.fill", foregroundColor: .teal)
+              .cell(title: "Resolve Headache", systemImage: "face.smiling.fill", foregroundColor: .teal)
           }
           
           // Predictions

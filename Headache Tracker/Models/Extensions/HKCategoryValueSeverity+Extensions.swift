@@ -23,6 +23,29 @@ extension HKCategoryValueSeverity {
     }
   }
   
+  /// The image to use when displaying the severity.
+  var image: Image? {
+    switch self {
+    case .unspecified: return Image(Constants.AssetKeys.headacheSeverityPresent)
+    case .mild: return Image(Constants.AssetKeys.headacheSeverityMild)
+    case .moderate: return Image(Constants.AssetKeys.headacheSeverityModerate)
+    case .severe: return Image(Constants.AssetKeys.headacheSeveritySevere)
+    default: return nil
+    }
+  }
+  
+  /// The color to use when drawing the value in the user interface.
+  var uiColor: Color {
+    switch self {
+    case .notPresent: return Color.headacheSeverityNotPresent
+    case .unspecified: return Color.headacheSeverityPresent
+    case .mild: return Color.headacheSeverityMild
+    case .moderate: return Color.headacheSeverityModerate
+    case .severe: return Color.headacheSeveritySevere
+    default: return Color.headacheSeverityNotPresent
+    }
+  }
+  
   /// The value's integer value representation.
   var orderingValue: Int {
     switch self {
@@ -32,18 +55,6 @@ extension HKCategoryValueSeverity {
     case .moderate: return 3
     case .severe: return 4
     default: return -1
-    }
-  }
-  
-  /// The color to use when drawing the value in the user interface.
-  var uiColor: Color {
-    switch orderingValue {
-    case 0: return .cyan
-    case 1: return .mint
-    case 2: return .yellow
-    case 3: return .orange
-    case 4: return .red
-    default: return .cyan
     }
   }
   

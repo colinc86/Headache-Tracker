@@ -41,13 +41,22 @@ struct SeverityButton: View {
         Button {
           action(severity)
         } label: {
-          RoundedRectangle(cornerRadius: 12)
-            .frame(width: dimension, height: dimension)
-            .foregroundColor(selected ? severity.uiColor : Color.secondary.opacity(0.25))
-            .overlay(
-              RoundedRectangle(cornerRadius: 12)
-                .stroke(severity.uiColor.opacity(0.25), lineWidth: 4.0)
-            )
+          ZStack {
+            RoundedRectangle(cornerRadius: 12)
+              .frame(width: dimension, height: dimension)
+              .foregroundColor(selected ? severity.uiColor : Color.secondary.opacity(0.25))
+              .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                  .stroke(severity.uiColor.opacity(0.25), lineWidth: 4.0)
+              )
+            
+            if let image = severity.image {
+              image
+                .resizable()
+                .frame(width: dimension, height: dimension, alignment: .center)
+                .foregroundColor(selected ? .primary : Color(UIColor.secondarySystemGroupedBackground))
+            }
+          }
         }
         .foregroundColor(selected ? severity.uiColor : Color.secondary.opacity(0.25))
         .cornerRadius(12)
