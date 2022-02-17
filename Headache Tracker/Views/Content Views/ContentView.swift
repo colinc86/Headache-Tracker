@@ -44,11 +44,17 @@ struct ContentView: View {
           Label("Track", systemImage: "brain.head.profile")
         }
       
+      AnalyzeView()
+        .environment(\.managedObjectContext, viewContext)
+        .tabItem {
+          Label("Analyze", systemImage: "chart.bar.xaxis")
+        }
+      
       HeadachesView()
         .environment(\.managedObjectContext, viewContext)
         .environmentObject(headacheManager)
         .tabItem {
-          Label("Headaches", systemImage: "heart.text.square")
+          Label("Headaches", systemImage: "list.bullet")
         }
       
       SettingsView()
