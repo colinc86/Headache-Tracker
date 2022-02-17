@@ -18,7 +18,7 @@ struct Cell: ViewModifier {
   let title: String
   
   /// The cell's footnote.
-  var footnote: String? = nil
+//  var footnote: String? = nil
   
   /// The cell's foreground color.
   var foregroundColor: Color
@@ -34,32 +34,19 @@ struct Cell: ViewModifier {
           Spacer()
         }
         .foregroundColor(foregroundColor)
-        .padding([.top, .leading, .trailing])
-        .padding(.bottom, 4)
+        .padding(.bottom, 8)
         
         content
-          .padding([.bottom, .leading, .trailing])
-      }
-      .background(Color(UIColor.secondarySystemGroupedBackground))
-      .cornerRadius(12)
-      
-    
-      if let footnote = footnote {
-        Text(footnote)
-          .font(.footnote)
-          .foregroundColor(.secondary)
-          .padding([.leading, .trailing])
       }
     }
-    .padding([.leading, .trailing])
-    .padding(.bottom, 10)
+    .padding([.top, .bottom], 10)
   }
 }
 
 extension View {
-  func cell(title: String, footnote: String? = nil, systemImage: String, foregroundColor: Color = .accentColor) -> some View {
+  func cell(title: String, systemImage: String, foregroundColor: Color = .accentColor) -> some View {
     modifier(
-      Cell(systemImage: systemImage, title: title, footnote: footnote, foregroundColor: foregroundColor)
+      Cell(systemImage: systemImage, title: title, foregroundColor: foregroundColor)
     )
   }
 }

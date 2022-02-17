@@ -12,14 +12,17 @@ struct SectionTitleView: View {
   /// The view's title.
   let title: String
   
+  // MARK: View body
+  
   var body: some View {
-    HStack {
-      Text(title)
-        .font(.headline)
-      Spacer()
-    }
-    .padding([.leading, .trailing, .top])
-    .padding(.bottom, 10)
+    Text(title)
+      .font(.headline)
+      .fontWeight(.heavy)
+      .textCase(.none)
+      .foregroundColor(.white)
+      .padding(.top, 0)
+      .padding(.bottom, 4)
+      .offset(x: -16)
   }
 }
 

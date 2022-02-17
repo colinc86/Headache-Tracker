@@ -97,89 +97,99 @@ struct CurrentHeadacheView: View {
   
   var body: some View {
     NavigationView {
-      ScrollView(.vertical, showsIndicators: true) {
-        VStack(alignment: .leading) {
-          // New/Current Headache Title
-          SectionTitleView(title: currentHeadache == nil ? "New Headache" : "Current Headache")
-          
+      List {
+        // New/Current Headache
+        Section {
           // New/Current Severity
           HorizontalSeverityLevel(currentSeverity: currentHeadache?.severity, collapsed: false, action: changeSeverity)
-            .cell(
-              title: "Severity",
-              footnote: currentHeadache == nil ? "Feel a headache coming on? Select a severity level to start tracking it." : nil,
-              systemImage: "brain.head.profile",
-              foregroundColor: .cyan)
-          
-          // No Headache
-          if learnAndPredict && currentHeadache == nil && needsInput {
-            Button("No Headache", action: noHeadacheAction)
-              .font(.title)
-              .foregroundColor(.accentColor)
-              .cell(title: "No Headache?", footnote: "No Headache? Tap above to let the app know.", systemImage: "checkmark.circle.fill", foregroundColor: .teal)
+            .cell(title: "Severity", systemImage: "brain.head.profile", foregroundColor: .cyan)
+        } header: {
+          SectionTitleView(title: currentHeadache == nil ? "New Headache" : "Current Headache")
+        } footer: {
+          if currentHeadache == nil {
+            Text("Feel a headache coming on? Select a severity level to start tracking it.")
           }
-          // Current Headache Information
-          else if let currentHeadache = currentHeadache {
-            // Onset
+        }
+        
+        // No Headache
+        if learnAndPredict && currentHeadache == nil && needsInput {
+          Section {
+            Button("No Headache", action: noHeadacheAction)
+              .buttonStyle(BorderlessButtonStyle())
+              .font(.title)
+              .foregroundColor(.teal)
+              .cell(title: "No Headache?", systemImage: "checkmark.circle.fill", foregroundColor: .teal)
+          } footer: {
+            Text("No Headache? Tap above to let the app know.")
+          }
+        }
+        // Current Headache Information
+        else if let currentHeadache = currentHeadache {
+          // Onset
+          Section {
             OnsetView(headache: currentHeadache)
               .cell(title: "Onset", systemImage: "clock", foregroundColor: .purple)
-            
-            // Duration
+          }
+          
+          // Duration
+          Section {
             DurationView(headache: currentHeadache)
               .cell(title: "Duration", systemImage: "timer", foregroundColor: .green)
-            
-            // Progression
-            if currentHeadache.severitiesArray.count > 1 {
+          }
+          
+          // Progression
+          if currentHeadache.severitiesArray.count > 1 {
+            Section {
               SeverityLineGraph(series: currentHeadache.severitySignal, gradient: Gradient(colors: currentHeadache.severityColorRange))
                 .frame(height: 100)
                 .cell(title: "Progression", systemImage: "chart.xyaxis.line", foregroundColor: .orange)
             }
-            
-            // Resolve the Headache
-            Button("Resolve", action: resolveConfirmation)
-              .font(.title)
-              .foregroundColor(.accentColor)
-              .cell(title: "Resolve Headache", systemImage: "face.smiling.fill", foregroundColor: .teal)
           }
           
-          // Predictions
-          if learnAndPredict, let prediction = prediction {
+          // Resolve the Headache
+          Section {
+            Button("Resolve", action: resolveConfirmation)
+              .buttonStyle(BorderlessButtonStyle())
+              .font(.title)
+              .foregroundColor(.teal)
+              .cell(title: "Resolve Headache", systemImage: "face.smiling.fill", foregroundColor: .teal)
+          }
+        }
+        
+        // Predictions
+        if learnAndPredict, let prediction = prediction {
+          Section {
+            HorizontalSeverityLevel(currentSeverity: prediction.boostedTreeOutput.severity, collapsed: true, action: nil)
+              .cell(title: "Boosted Tree", systemImage: "chart.bar.xaxis", foregroundColor: .indigo)
+            
+            SubtitleCell(title: "Probability", subtitle: String(format: "%0.f%%", prediction.boostedTreeOutput.probability * 100.0))
+            SubtitleCell(title: "Accuracy", subtitle: String(format: "%0.f%%", boostedTreeAccuracy * 100.0))
+          } header: {
             SectionTitleView(title: "Predictions")
+          }
+          
+          Section {
+            HorizontalSeverityLevel(currentSeverity: prediction.decisionTreeOutput.severity, collapsed: true, action: nil)
+              .cell(title: "Decision Tree", systemImage: "chart.bar.xaxis", foregroundColor: .indigo)
             
-            VStack {
-              HorizontalSeverityLevel(currentSeverity: prediction.boostedTreeOutput.severity, collapsed: true, action: nil)
-              Divider().padding(0)
-              SubtitleCell(title: "Probability", subtitle: String(format: "%0.f%%", prediction.boostedTreeOutput.probability * 100.0))
-              Divider().padding(0)
-              SubtitleCell(title: "Accuracy", subtitle: String(format: "%0.f%%", boostedTreeAccuracy * 100.0))
-            }
-            .cell(title: "Boosted Tree", systemImage: "chart.bar.xaxis", foregroundColor: .indigo)
+            SubtitleCell(title: "Probability", subtitle: String(format: "%0.f%%", prediction.decisionTreeOutput.probability * 100.0))
+            SubtitleCell(title: "Accuracy", subtitle: String(format: "%0.f%%", decisionTreeAccuracy * 100.0))
+          }
+          
+          Section {
+            HorizontalSeverityLevel(currentSeverity: prediction.randomForestOutput.severity, collapsed: true, action: nil)
+              .cell(title: "Random Forest", systemImage: "chart.bar.xaxis", foregroundColor: .indigo)
             
-            VStack {
-              HorizontalSeverityLevel(currentSeverity: prediction.decisionTreeOutput.severity, collapsed: true, action: nil)
-              Divider().padding(0)
-              SubtitleCell(title: "Probability", subtitle: String(format: "%0.f%%", prediction.decisionTreeOutput.probability * 100.0))
-              Divider().padding(0)
-              SubtitleCell(title: "Accuracy", subtitle: String(format: "%0.f%%", decisionTreeAccuracy * 100.0))
-            }
-            .cell(title: "Decision Tree", systemImage: "chart.bar.xaxis", foregroundColor: .indigo)
+            SubtitleCell(title: "Probability", subtitle: String(format: "%0.f%%", prediction.randomForestOutput.probability * 100.0))
+            SubtitleCell(title: "Accuracy", subtitle: String(format: "%0.f%%", randomForestAccuracy * 100.0))
+          }
+          
+          Section {
+            HorizontalSeverityLevel(currentSeverity: prediction.logisticRegressionOutput.severity, collapsed: true, action: nil)
+              .cell(title: "Logistic Regression", systemImage: "chart.bar.xaxis", foregroundColor: .indigo)
             
-            VStack {
-              HorizontalSeverityLevel(currentSeverity: prediction.randomForestOutput.severity, collapsed: true, action: nil)
-              Divider().padding(0)
-              SubtitleCell(title: "Probability", subtitle: String(format: "%0.f%%", prediction.randomForestOutput.probability * 100.0))
-              Divider().padding(0)
-              SubtitleCell(title: "Accuracy", subtitle: String(format: "%0.f%%", randomForestAccuracy * 100.0))
-            }
-            .cell(title: "Random Forest", systemImage: "chart.bar.xaxis", foregroundColor: .indigo)
-            
-            VStack {
-              HorizontalSeverityLevel(currentSeverity: prediction.logisticRegressionOutput.severity, collapsed: true, action: nil)
-              Divider().padding(0)
-              SubtitleCell(title: "Probability", subtitle: String(format: "%0.f%%", prediction.logisticRegressionOutput.probability * 100.0))
-              Divider().padding(0)
-              SubtitleCell(title: "Accuracy", subtitle: String(format: "%0.f%%", logisticRegressionAccuracy * 100.0))
-            }
-            .cell(title: "Logistic Regression", systemImage: "chart.bar.xaxis", foregroundColor: .indigo)
+            SubtitleCell(title: "Probability", subtitle: String(format: "%0.f%%", prediction.logisticRegressionOutput.probability * 100.0))
+            SubtitleCell(title: "Accuracy", subtitle: String(format: "%0.f%%", logisticRegressionAccuracy * 100.0))
           }
         }
       }

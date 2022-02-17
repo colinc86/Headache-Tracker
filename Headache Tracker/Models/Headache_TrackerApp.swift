@@ -92,6 +92,9 @@ extension Headache_TrackerApp {
     }
     firstAppearance = false
     
+    // Adjust the table view appearance
+    UITableView.appearance().sectionFooterHeight = 0
+    
     // Make sure we register our prediction task
     headacheManager.setupPredictionRefreshTask()
     headacheManager.setupTrainingProcessingTask()

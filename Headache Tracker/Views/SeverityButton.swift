@@ -58,6 +58,7 @@ struct SeverityButton: View {
             }
           }
         }
+        .buttonStyle(BorderlessButtonStyle())
         .foregroundColor(selected ? severity.uiColor : Color.secondary.opacity(0.25))
         .cornerRadius(12)
       }

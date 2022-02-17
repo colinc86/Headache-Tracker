@@ -8,7 +8,7 @@
 		<string>com.cnc.Headache-Tracker.train</string>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>10C</string>
+	<string>132</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>

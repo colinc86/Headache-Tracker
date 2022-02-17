@@ -40,7 +40,7 @@ struct HeadachesView: View {
     NavigationView {
       List {
         if unresolvedHeadaches.count > 0 {
-          Section("Unresolved") {
+          Section {
             ForEach(unresolvedHeadaches) { headache in
               NavigationLink {
                 HeadacheView(headache: headache)
@@ -51,6 +51,8 @@ struct HeadachesView: View {
               }
             }
             .onDelete(perform: deleteUnresolvedHeadaches)
+          } header: {
+            SectionTitleView(title: "Unresolved")
           }
         }
         
@@ -66,9 +68,7 @@ struct HeadachesView: View {
           }
           .onDelete(perform: deleteResolvedHeadaches)
         } header: {
-          if unresolvedHeadaches.count > 0 {
-            Text("Resolved")
-          }
+          SectionTitleView(title: "Resolved")
         }
       }
       .navigationTitle("Headaches")
