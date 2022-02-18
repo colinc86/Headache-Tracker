@@ -548,7 +548,7 @@ extension HeadacheManager {
   /// Gets classifier input appropriate for prediction.
   ///
   /// - Parameter completion: Called when the input struture is ready.
-  func getCurrentClassifierInput(_ completion: @escaping (SeverityClassifierInput?, Error?) -> Void) {
+  func getCurrentClassifierInput(_ completion: @escaping (ModelInput?, Error?) -> Void) {
     guard !testing else {
       completion(nil, nil)
       return
@@ -582,7 +582,7 @@ extension HeadacheManager {
       let interval = DateInterval(start: now.addingTimeInterval(-86400.0), end: now)
       let healthKitData = self.healthKitManager?.readHealthKitData(in: interval) ?? [:]
       
-      completion(SeverityClassifierInput(barometricPressure: barometricPressure, healthKitData: healthKitData, date: now), nil)
+      completion(ModelInput(barometricPressure: barometricPressure, healthKitData: healthKitData, date: now), nil)
       self.getCurrentClassifierInputBackgroundTask.end()
     }
   }

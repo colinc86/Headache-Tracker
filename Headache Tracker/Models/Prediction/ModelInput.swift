@@ -1,5 +1,5 @@
 //
-//  SeverityClassifierInput.swift
+//  ModelInput.swift
 //  Headache Tracker
 //
 //  Created by Colin Campbell on 2/11/22.
@@ -8,7 +8,7 @@
 import CoreML
 
 /// Model Prediction Input Type
-class SeverityClassifierInput: MLFeatureProvider {
+class ModelInput: MLFeatureProvider {
   
   struct FeatureName {
     static let barometricPressure = "Barometric Pressure"

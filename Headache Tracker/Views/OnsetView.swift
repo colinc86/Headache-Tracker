@@ -9,12 +9,12 @@ import SwiftUI
 
 struct OnsetView: View {
   
-  /// The view's headache.
-  @StateObject var headache: Headache
+  /// The view's onset.
+  let onset: Date?
   
   var body: some View {
-    if let startTime = headache.startTime {
-      Text(Calendar.current.relativeDateDescription(startTime))
+    if let onset = onset {
+      Text(Calendar.current.relativeDateDescription(onset))
         .font(.title)
     }
   }
@@ -22,6 +22,6 @@ struct OnsetView: View {
 
 struct OnsetCell_Previews: PreviewProvider {
   static var previews: some View {
-    OnsetView(headache: Previewing.CoreData.headache)
+    OnsetView(onset: Previewing.CoreData.headache.startTime)
   }
 }

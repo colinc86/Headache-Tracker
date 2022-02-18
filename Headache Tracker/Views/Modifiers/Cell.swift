@@ -39,6 +39,7 @@ struct Cell: ViewModifier {
         content
       }
     }
+    .frame(minWidth: 0, minHeight: 70)
     .padding([.top, .bottom], 10)
   }
 }

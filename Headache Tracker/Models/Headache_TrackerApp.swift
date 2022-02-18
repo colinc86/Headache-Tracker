@@ -14,29 +14,8 @@ import SwiftUI
 @main
 struct Headache_TrackerApp: App {
   
-  /// The Apple Health app integration setting.
-  @AppStorage(AppSettings.healthIntegration) private var healthIntegration = false
-  
-  /// The real-time alerts setting.
-  @AppStorage(AppSettings.realTimeAlerts) private var realTimeAlerts = false
-  
-  /// The learn and predict setting.
-  @AppStorage(AppSettings.learnAndPredict) private var learnAndPredict = false
-  
-  /// The application's headache manager.
-  @StateObject var headacheManager = HeadacheManager()
-  
-  /// The application's health kit manager.
-  @StateObject var healthKitManager = HealthKitManager()
-  
-  /// The application's headache predictor.
-  @StateObject var predictor = Predictor()
-  
-  /// The application's alert manager.
-  @StateObject var alertManager = AlertManager()
-  
-  /// If this is the view's first appearance.
-  @State var firstAppearance = true
+  /// The application delegate.
+  @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
   
   // Notification publishers
   private let didBecomeActiveNotificationPublisher = NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)
@@ -48,11 +27,10 @@ struct Headache_TrackerApp: App {
     WindowGroup {
       ContentView()
         .environment(\.managedObjectContext, DataController.shared.container.viewContext)
-        .environmentObject(headacheManager)
-        .environmentObject(predictor)
-        .environmentObject(healthKitManager)
-        .environmentObject(alertManager)
-        .onAppear(perform: appeared)
+        .environmentObject(appDelegate.headacheManager)
+        .environmentObject(appDelegate.predictor)
+        .environmentObject(appDelegate.healthKitManager)
+        .environmentObject(appDelegate.alertManager)
         .onReceive(didBecomeActiveNotificationPublisher, perform: didBecomeActive)
         .onReceive(willResignActiveNotificationPublisher, perform: willResignActive)
     }
@@ -60,15 +38,14 @@ struct Headache_TrackerApp: App {
   
 }
 
-// MARK: Action methods
-
 extension Headache_TrackerApp {
   
   /// Called when the application becomes active.
   private func didBecomeActive(_ output: NotificationCenter.Publisher.Output) {
     logDebug("Application did become active.")
-    headacheManager.cancelPredictionRefreshTask()
-    headacheManager.cancelTrainingProcessingTask()
+    
+    appDelegate.headacheManager.cancelPredictionRefreshTask()
+    appDelegate.headacheManager.cancelTrainingProcessingTask()
   }
   
   /// Called when the application resigns active.
@@ -76,22 +53,47 @@ extension Headache_TrackerApp {
     logDebug("Application will resign active.")
     
     // Schedule our training task if we are learning and predicting
-    if learnAndPredict {
-      headacheManager.scheduleTrainingRefreshTask()
+    if appDelegate.learnAndPredict {
+      appDelegate.headacheManager.scheduleTrainingRefreshTask()
       
       // Schedule our prediction task if real-time alerts are on
-      if realTimeAlerts {
-        headacheManager.schedulePredictionRefreshTask()
+      if appDelegate.realTimeAlerts {
+        appDelegate.headacheManager.schedulePredictionRefreshTask()
       }
     }
   }
   
-  /// Called when the application's view appears.
-  private func appeared() {
-    guard firstAppearance else {
-      return
-    }
-    firstAppearance = false
+}
+
+class AppDelegate: NSObject, UIApplicationDelegate {
+  
+  // MARK: Public properties
+  
+  /// The application's headache manager.
+  var headacheManager = HeadacheManager()
+  
+  /// The application's health kit manager.
+  var healthKitManager = HealthKitManager()
+  
+  /// The application's headache predictor.
+  var predictor = Predictor()
+  
+  /// The application's alert manager.
+  var alertManager = AlertManager()
+    
+  /// The Apple Health app integration setting.
+  @AppStorage(AppSettings.healthIntegration) var healthIntegration = false
+  
+  /// The real-time alerts setting.
+  @AppStorage(AppSettings.realTimeAlerts) var realTimeAlerts = false
+  
+  /// The learn and predict setting.
+  @AppStorage(AppSettings.learnAndPredict) var learnAndPredict = false
+  
+  // MARK: Override methods
+  
+  func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+    logDebug("Application did finish launching.")
     
     // Load firebase if we're not previewing
 #if NON_PREVIEW
@@ -116,13 +118,15 @@ extension Headache_TrackerApp {
     
     // Load our ML classifiers
     loadClassifiers()
+    
+    return true
   }
   
 }
 
 // MARK: Private methods
 
-extension Headache_TrackerApp {
+extension AppDelegate {
   
   /// Sets up the manager's weak references.
   private func setHeadacheManagerReferences() {

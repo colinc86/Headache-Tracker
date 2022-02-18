@@ -129,7 +129,7 @@ struct CurrentHeadacheView: View {
         else if let currentHeadache = currentHeadache {
           // Onset
           Section {
-            OnsetView(headache: currentHeadache)
+            OnsetView(onset: currentHeadache.startTime)
               .cell(title: "Onset", systemImage: "clock.fill", foregroundColor: .purple)
           }
           
@@ -160,14 +160,31 @@ struct CurrentHeadacheView: View {
         
         // Predictions
         if learnAndPredict, let prediction = prediction {
+          // Daily outlook
           Section {
-            HorizontalSeverityLevel(currentSeverity: prediction.severityClassifierOutput.prediction, collapsed: true, action: nil)
-              .cell(title: "Severity", systemImage: "chart.bar.xaxis", foregroundColor: .indigo)
-            
-            SubtitleCell(title: "Probability", subtitle: String(format: "%0.f%%", prediction.severityClassifierOutput.probability * 100.0))
-            SubtitleCell(title: "Accuracy", subtitle: String(format: "%0.f%%", boostedTreeAccuracy * 100.0))
+            Text(prediction.outlookClassifierOutput.prediction ? "Possible Headache" : "No Headache")
+              .font(.title)
+              .cell(title: "Outlook (\(String(format: "%0.f%%", prediction.outlookClassifierOutput.probability * 100.0)))", systemImage: "sun.and.horizon", foregroundColor: .mint)
           } header: {
             SectionTitleView(title: "Predictions")
+          }
+          
+          // Severity Prediction
+          Section {
+            HorizontalSeverityLevel(currentSeverity: prediction.severityClassifierOutput.prediction, collapsed: true, action: nil)
+              .cell(title: "Severity (\(String(format: "%0.f%%", prediction.severityClassifierOutput.probability * 100.0)) / \(String(format: "%0.f%%", boostedTreeAccuracy * 100.0)))", systemImage: "dial.max.fill", foregroundColor: .cyan)
+          }
+          
+          // Onset Prediction
+          Section {
+            OnsetView(onset: prediction.onsetRegressorOutput.prediction)
+              .cell(title: "Onset", systemImage: "clock.fill", foregroundColor: .purple)
+          }
+          
+          // Duration Prediction
+          Section {
+            StaticDurationView(duration: prediction.durationRegressorOutput.prediction)
+              .cell(title: "Duration", systemImage: "timer", foregroundColor: .green)
           }
         }
       }

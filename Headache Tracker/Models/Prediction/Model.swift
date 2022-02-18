@@ -13,7 +13,7 @@ protocol MLFeatureInitializable: MLFeatureProvider {
 }
 
 /// Class for model loading and prediction
-class Model<ModelInput: MLFeatureProvider, ModelOutput: MLFeatureInitializable> {
+class Model<Input: MLFeatureProvider, Output: MLFeatureInitializable> {
   
   let model: MLModel
   
@@ -87,7 +87,7 @@ class Model<ModelInput: MLFeatureProvider, ModelOutput: MLFeatureInitializable> 
    
    - returns: the result of the prediction as ClassifierProtoOutput
    */
-  func prediction(input: ModelInput) throws -> ModelOutput {
+  func prediction(input: Input) throws -> Output {
     return try self.prediction(input: input, options: MLPredictionOptions())
   }
   
@@ -102,9 +102,9 @@ class Model<ModelInput: MLFeatureProvider, ModelOutput: MLFeatureInitializable> 
    
    - returns: the result of the prediction as ClassifierProtoOutput
    */
-  func prediction(input: ModelInput, options: MLPredictionOptions) throws -> ModelOutput {
+  func prediction(input: Input, options: MLPredictionOptions) throws -> Output {
     let outFeatures = try model.prediction(from: input, options:options)
-    return ModelOutput(features: outFeatures)
+    return Output(features: outFeatures)
   }
   
   /**
@@ -118,14 +118,14 @@ class Model<ModelInput: MLFeatureProvider, ModelOutput: MLFeatureInitializable> 
    
    - returns: the result of the prediction as [ClassifierProtoOutput]
    */
-  func predictions(inputs: [ModelInput], options: MLPredictionOptions = MLPredictionOptions()) throws -> [ModelOutput] {
+  func predictions(inputs: [Input], options: MLPredictionOptions = MLPredictionOptions()) throws -> [Output] {
     let batchIn = MLArrayBatchProvider(array: inputs)
     let batchOut = try model.predictions(from: batchIn, options: options)
-    var results: [ModelOutput] = []
+    var results: [Output] = []
     results.reserveCapacity(inputs.count)
     for i in 0..<batchOut.count {
       let outProvider = batchOut.features(at: i)
-      let result = ModelOutput(features: outProvider)
+      let result = Output(features: outProvider)
       results.append(result)
     }
     return results
