@@ -161,37 +161,13 @@ struct CurrentHeadacheView: View {
         // Predictions
         if learnAndPredict, let prediction = prediction {
           Section {
-            HorizontalSeverityLevel(currentSeverity: prediction.boostedTreeOutput.severity, collapsed: true, action: nil)
-              .cell(title: "Boosted Tree", systemImage: "chart.bar.xaxis", foregroundColor: .indigo)
+            HorizontalSeverityLevel(currentSeverity: prediction.severityClassifierOutput.prediction, collapsed: true, action: nil)
+              .cell(title: "Severity", systemImage: "chart.bar.xaxis", foregroundColor: .indigo)
             
-            SubtitleCell(title: "Probability", subtitle: String(format: "%0.f%%", prediction.boostedTreeOutput.probability * 100.0))
+            SubtitleCell(title: "Probability", subtitle: String(format: "%0.f%%", prediction.severityClassifierOutput.probability * 100.0))
             SubtitleCell(title: "Accuracy", subtitle: String(format: "%0.f%%", boostedTreeAccuracy * 100.0))
           } header: {
             SectionTitleView(title: "Predictions")
-          }
-          
-          Section {
-            HorizontalSeverityLevel(currentSeverity: prediction.decisionTreeOutput.severity, collapsed: true, action: nil)
-              .cell(title: "Decision Tree", systemImage: "chart.bar.xaxis", foregroundColor: .indigo)
-            
-            SubtitleCell(title: "Probability", subtitle: String(format: "%0.f%%", prediction.decisionTreeOutput.probability * 100.0))
-            SubtitleCell(title: "Accuracy", subtitle: String(format: "%0.f%%", decisionTreeAccuracy * 100.0))
-          }
-          
-          Section {
-            HorizontalSeverityLevel(currentSeverity: prediction.randomForestOutput.severity, collapsed: true, action: nil)
-              .cell(title: "Random Forest", systemImage: "chart.bar.xaxis", foregroundColor: .indigo)
-            
-            SubtitleCell(title: "Probability", subtitle: String(format: "%0.f%%", prediction.randomForestOutput.probability * 100.0))
-            SubtitleCell(title: "Accuracy", subtitle: String(format: "%0.f%%", randomForestAccuracy * 100.0))
-          }
-          
-          Section {
-            HorizontalSeverityLevel(currentSeverity: prediction.logisticRegressionOutput.severity, collapsed: true, action: nil)
-              .cell(title: "Logistic Regression", systemImage: "chart.bar.xaxis", foregroundColor: .indigo)
-            
-            SubtitleCell(title: "Probability", subtitle: String(format: "%0.f%%", prediction.logisticRegressionOutput.probability * 100.0))
-            SubtitleCell(title: "Accuracy", subtitle: String(format: "%0.f%%", logisticRegressionAccuracy * 100.0))
           }
         }
       }
@@ -313,10 +289,7 @@ extension CurrentHeadacheView {
         
         DataController.shared.performInBackground { context in
           let validationData = ValidationData(context: context)
-          validationData.boostedTreeHit = prediction?.boostedTreeOutput.severity == severity
-          validationData.decisionTreeHit = prediction?.decisionTreeOutput.severity == severity
-          validationData.randomForestHit = prediction?.randomForestOutput.severity == severity
-          validationData.logisticRegressionHit = prediction?.logisticRegressionOutput.severity == severity
+          validationData.boostedTreeHit = prediction?.severityClassifierOutput.prediction == severity
         }
       }
     }

@@ -66,7 +66,7 @@ class Predictor: ObservableObject {
   // MARK: Private properties
   
   /// The classifier for predicting headache severities.
-  private var severityClassifier: SeverityClassifier?
+  private var severityClassifier: Model<SeverityClassifierInput, SeverityClassifierOutput>?
   
   /// The queue to do anything with models on.
   private var modelQueue = DispatchQueue(label: ApplicationKey(from: "modelQueue"))
@@ -106,10 +106,10 @@ extension Predictor {
       do {
         logDebug("Loading severity classifier.")
         let severityClassifierModelURL = self.compiledModelURL(with: Predictor.severityClassifierFileName)
-        self.severityClassifier = try SeverityClassifier(contentsOf: severityClassifierModelURL)
+        self.severityClassifier = try Model<SeverityClassifierInput, SeverityClassifierOutput>(contentsOf: severityClassifierModelURL)
         
         logDebug("Getting creation date.")
-        if let creationDate = try self.creationDateOfFile(with: severityClassifierModelURL) {
+        if let creationDate = try self.trainingDateOfCompiledModel(at: severityClassifierModelURL) {
           logDebug("Got creation date: \(creationDate.description)")
           DispatchQueue.main.async { self.modelUpdatedAt = creationDate }
         }
@@ -133,7 +133,7 @@ extension Predictor {
   ///   - trainingData: The training data.
   ///   - completion: Called after training has completed.
   func train(with trainingData: [TrainingData], completion: @escaping (Error?) -> Void) {
-    guard !training else {
+    guard !training && !trainingData.isEmpty else {
       completion(nil)
       return
     }
@@ -144,6 +144,13 @@ extension Predictor {
     DispatchQueue.main.async { [weak self] in self?.training = true }
     cancelledTraining = false
     
+    let finished: (Error?) -> Void = { [weak self] error in
+      completion(error)
+      DispatchQueue.main.async { self?.training = false }
+      self?.trainingBackgroundTask.end()
+      return
+    }
+    
 #if NON_PREVIEW
     // Get the data table
     let table: MLDataTable
@@ -152,7 +159,7 @@ extension Predictor {
     }
     catch {
       logError("Error creating data table: \(error)")
-      completion(error)
+      finished(error)
       return
     }
     logDebug("Got table: \(table)")
@@ -161,9 +168,7 @@ extension Predictor {
     modelQueue.async { [weak self] in
       do {
         guard let self = self else {
-          completion(nil)
-          DispatchQueue.main.async { self?.training = false }
-          self?.trainingBackgroundTask.end()
+          finished(nil)
           return
         }
         
@@ -178,44 +183,31 @@ extension Predictor {
           try classifier.write(to: modelURL, metadata: self.metadata)
           
           // Compile the model
-          let compiledModelURL = try MLModel.compileModel(at: modelURL)
+          let newCompiledModelURL = try MLModel.compileModel(at: modelURL)
           
-          // Delete the old compiled model
-          let newCompiledModelURL = self.compiledModelURL(with: Predictor.severityClassifierFileName)
-          if FileManager.default.isDeletableFile(atPath: newCompiledModelURL.path) && FileManager.default.fileExists(atPath: newCompiledModelURL.path) {
-            try FileManager.default.removeItem(at: newCompiledModelURL)
-          }
-          
-          // Move the new compiled model to the old location
-          try FileManager.default.moveItem(at: compiledModelURL, to: newCompiledModelURL)
+          // Replace the old compiled model with the new one
+          let compiledModelURL = self.compiledModelURL(with: Predictor.severityClassifierFileName)
+          _ = try FileManager.default.replaceItemAt(compiledModelURL, withItemAt: newCompiledModelURL)
           
           // Remove the pre-compiled model
           try FileManager.default.removeItem(at: modelURL)
         }
         
         if self.cancelledTraining {
-          completion(nil)
-          DispatchQueue.main.async { self.training = false }
-          self.trainingBackgroundTask.end()
+          finished(nil)
         }
         else {
           self.load { error in
-            completion(error)
-            DispatchQueue.main.async { self.training = false }
-            self.trainingBackgroundTask.end()
+            finished(error)
           }
         }
       }
       catch {
-        completion(error)
-        DispatchQueue.main.async { self?.training = false }
-        self?.trainingBackgroundTask.end()
+        finished(error)
       }
     }
 #else
-    completion(nil)
-    DispatchQueue.main.async { [weak self] in self?.training = false }
-    trainingBackgroundTask.end()
+    finished(nil)
 #endif
   }
   
@@ -263,13 +255,13 @@ extension Predictor {
 
 extension Predictor {
   
-  /// The creation date of the file at the given URL.
+  /// The compilation date of the compiled model file with the given url.
   ///
-  /// - Parameter url: The file's URL.
+  /// - Parameter url: The url of the model.
   /// - Returns: The file's creation date.
-  private func creationDateOfFile(with url: URL) throws -> Date? {
+  private func trainingDateOfCompiledModel(at url: URL) throws -> Date? {
     let attributes = try FileManager.default.attributesOfItem(atPath: url.path)
-    return attributes[.creationDate] as? Date
+    return attributes[.modificationDate] as? Date ?? attributes[.creationDate] as? Date
   }
   
   /// The URL of a model with the given name.

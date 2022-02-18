@@ -126,6 +126,17 @@ struct SettingsView: View {
         Section {
           SubtitleCell(title: "Version", subtitle: Bundle.main.humanReadableVersionString)
         }
+        
+        // Debug
+        Section("Debug") {
+          Button("Train") {
+            headacheManager.trainClassifiers { error in
+              if let error = error {
+                logError("Error training classifiers: \(error)")
+              }
+            }
+          }
+        }
       }
       .navigationTitle("Settings")
     }

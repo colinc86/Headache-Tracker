@@ -468,7 +468,7 @@ extension HeadacheManager {
   ///   - completion: Called after the alert has been added to notification center.
   private func presentPredictionAlert(with prediction: Predictor.Prediction?, completion: @escaping (Error?) -> Void) {
     // Only continue if we have a prediction and prediction alerts are turned on
-    guard realTimeAlerts, let prediction = prediction, prediction.randomForestOutput.severity != .notPresent else {
+    guard realTimeAlerts, let prediction = prediction, prediction.severityClassifierOutput.prediction != .notPresent else {
       completion(nil)
       return
     }
@@ -476,9 +476,9 @@ extension HeadacheManager {
     // Make sure we're on the main queue
     DispatchQueue.main.async {
       // Present the alert
-      logDebug("Presenting alert for predicted severity: \(prediction.randomForestOutput.severity.title).")
+      logDebug("Presenting alert for predicted severity: \(prediction.severityClassifierOutput.prediction.title).")
       self.alertManager?.presentAlert(
-        with: HeadacheAlertRequest.prediction(severity: prediction.randomForestOutput.severity),
+        with: HeadacheAlertRequest.prediction(severity: prediction.severityClassifierOutput.prediction),
         trigger: UNTimeIntervalNotificationTrigger(timeInterval: 0.0, repeats: false),
         badgeNumber: 0,
         completion: completion)

@@ -43,7 +43,7 @@
 		3B4BA6F727B632A800F38851 /* TrainingData+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B4BA6F627B632A800F38851 /* TrainingData+Extensions.swift */; };
 		3B4BA6F927B6352300F38851 /* MotionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B4BA6F827B6352300F38851 /* MotionManager.swift */; };
 		3B4BA6FB27B6449F00F38851 /* Predictor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B4BA6FA27B6449F00F38851 /* Predictor.swift */; };
-		3B4BA6FF27B7629800F38851 /* SeverityClassifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B4BA6FE27B7629800F38851 /* SeverityClassifier.swift */; };
+		3B4BA6FF27B7629800F38851 /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B4BA6FE27B7629800F38851 /* Model.swift */; };
 		3B4BA70427B7640F00F38851 /* SeverityClassifierInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B4BA70327B7640F00F38851 /* SeverityClassifierInput.swift */; };
 		3B4BA70627B7642A00F38851 /* SeverityClassifierOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B4BA70527B7642A00F38851 /* SeverityClassifierOutput.swift */; };
 		3B68BDF727BDF459007AAAC6 /* Color+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BDF627BDF459007AAAC6 /* Color+Extensions.swift */; };
@@ -131,7 +131,7 @@
 		3B4BA6F627B632A800F38851 /* TrainingData+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TrainingData+Extensions.swift"; sourceTree = "<group>"; };
 		3B4BA6F827B6352300F38851 /* MotionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionManager.swift; sourceTree = "<group>"; };
 		3B4BA6FA27B6449F00F38851 /* Predictor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Predictor.swift; sourceTree = "<group>"; };
-		3B4BA6FE27B7629800F38851 /* SeverityClassifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeverityClassifier.swift; sourceTree = "<group>"; };
+		3B4BA6FE27B7629800F38851 /* Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
 		3B4BA70327B7640F00F38851 /* SeverityClassifierInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeverityClassifierInput.swift; sourceTree = "<group>"; };
 		3B4BA70527B7642A00F38851 /* SeverityClassifierOutput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeverityClassifierOutput.swift; sourceTree = "<group>"; };
 		3B68BDF627BDF459007AAAC6 /* Color+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Extensions.swift"; sourceTree = "<group>"; };
@@ -308,10 +308,9 @@
 		3B4BA70227B762EE00F38851 /* Prediction */ = {
 			isa = PBXGroup;
 			children = (
+				3B4BA6FE27B7629800F38851 /* Model.swift */,
 				3B4BA6FA27B6449F00F38851 /* Predictor.swift */,
-				3B4BA6FE27B7629800F38851 /* SeverityClassifier.swift */,
-				3B4BA70327B7640F00F38851 /* SeverityClassifierInput.swift */,
-				3B4BA70527B7642A00F38851 /* SeverityClassifierOutput.swift */,
+				3B68BE1A27BF82F9007AAAC6 /* Severity Classifier */,
 			);
 			path = Prediction;
 			sourceTree = "<group>";
@@ -332,6 +331,15 @@
 				3B68BE0527BF2F98007AAAC6 /* Statistic.swift */,
 			);
 			path = Statistics;
+			sourceTree = "<group>";
+		};
+		3B68BE1A27BF82F9007AAAC6 /* Severity Classifier */ = {
+			isa = PBXGroup;
+			children = (
+				3B4BA70327B7640F00F38851 /* SeverityClassifierInput.swift */,
+				3B4BA70527B7642A00F38851 /* SeverityClassifierOutput.swift */,
+			);
+			path = "Severity Classifier";
 			sourceTree = "<group>";
 		};
 		3BF5312A27ACE18D00056673 = {
@@ -610,7 +618,7 @@
 				3B68BE0327BF2548007AAAC6 /* HeadacheStatistics.swift in Sources */,
 				3B4BA70627B7642A00F38851 /* SeverityClassifierOutput.swift in Sources */,
 				3BF5314327ACE18F00056673 /* Headache_Tracker.xcdatamodeld in Sources */,
-				3B4BA6FF27B7629800F38851 /* SeverityClassifier.swift in Sources */,
+				3B4BA6FF27B7629800F38851 /* Model.swift in Sources */,
 				3B051A9E27B3555E0017131D /* ConfirmationAlert.swift in Sources */,
 				3BDCF23E27BC213800334B8B /* Calendar+Extensions.swift in Sources */,
 				3B68BE0627BF2F98007AAAC6 /* Statistic.swift in Sources */,

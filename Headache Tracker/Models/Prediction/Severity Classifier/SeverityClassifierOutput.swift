@@ -8,7 +8,7 @@
 import CoreML
 
 /// Model Prediction Output Type
-class SeverityClassifierOutput: MLFeatureProvider {
+class SeverityClassifierOutput: MLFeatureInitializable {
   
   struct FeatureName {
     static let severity = "Severity"
@@ -39,7 +39,7 @@ class SeverityClassifierOutput: MLFeatureProvider {
     self.provider = try! MLDictionaryFeatureProvider(dictionary: [FeatureName.severity: MLFeatureValue(string: Severity), "SeverityProbability": MLFeatureValue(dictionary: SeverityProbability as [AnyHashable: NSNumber])])
   }
   
-  init(features: MLFeatureProvider) {
+  required init(features: MLFeatureProvider) {
     self.provider = features
   }
 }

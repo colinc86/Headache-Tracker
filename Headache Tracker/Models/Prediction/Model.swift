@@ -7,9 +7,13 @@
 
 import CoreML
 
+/// An object that can be initialized with a feature provider.
+protocol MLFeatureInitializable: MLFeatureProvider {
+  init(features: MLFeatureProvider)
+}
 
 /// Class for model loading and prediction
-class SeverityClassifier {
+class Model<ModelInput: MLFeatureProvider, ModelOutput: MLFeatureInitializable> {
   
   let model: MLModel
   
@@ -47,13 +51,13 @@ class SeverityClassifier {
    - configuration: the desired model configuration
    - handler: the completion handler to be called when the model loading completes successfully or unsuccessfully
    */
-  class func load(contentsOf modelURL: URL, configuration: MLModelConfiguration = MLModelConfiguration(), completionHandler handler: @escaping (Swift.Result<SeverityClassifier, Error>) -> Void) {
+  class func load(contentsOf modelURL: URL, configuration: MLModelConfiguration = MLModelConfiguration(), completionHandler handler: @escaping (Swift.Result<Model, Error>) -> Void) {
     MLModel.load(contentsOf: modelURL, configuration: configuration) { result in
       switch result {
       case .failure(let error):
         handler(.failure(error))
       case .success(let model):
-        handler(.success(SeverityClassifier(model: model)))
+        handler(.success(Model(model: model)))
       }
     }
   }
@@ -68,9 +72,9 @@ class SeverityClassifier {
    - configuration: the desired model configuration
    */
   @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
-  class func load(contentsOf modelURL: URL, configuration: MLModelConfiguration = MLModelConfiguration()) async throws -> SeverityClassifier {
+  class func load(contentsOf modelURL: URL, configuration: MLModelConfiguration = MLModelConfiguration()) async throws -> Model {
     let model = try await MLModel.load(contentsOf: modelURL, configuration: configuration)
-    return SeverityClassifier(model: model)
+    return Model(model: model)
   }
   
   /**
@@ -83,7 +87,7 @@ class SeverityClassifier {
    
    - returns: the result of the prediction as ClassifierProtoOutput
    */
-  func prediction(input: SeverityClassifierInput) throws -> SeverityClassifierOutput {
+  func prediction(input: ModelInput) throws -> ModelOutput {
     return try self.prediction(input: input, options: MLPredictionOptions())
   }
   
@@ -98,9 +102,9 @@ class SeverityClassifier {
    
    - returns: the result of the prediction as ClassifierProtoOutput
    */
-  func prediction(input: SeverityClassifierInput, options: MLPredictionOptions) throws -> SeverityClassifierOutput {
+  func prediction(input: ModelInput, options: MLPredictionOptions) throws -> ModelOutput {
     let outFeatures = try model.prediction(from: input, options:options)
-    return SeverityClassifierOutput(features: outFeatures)
+    return ModelOutput(features: outFeatures)
   }
   
   /**
@@ -114,14 +118,14 @@ class SeverityClassifier {
    
    - returns: the result of the prediction as [ClassifierProtoOutput]
    */
-  func predictions(inputs: [SeverityClassifierInput], options: MLPredictionOptions = MLPredictionOptions()) throws -> [SeverityClassifierOutput] {
+  func predictions(inputs: [ModelInput], options: MLPredictionOptions = MLPredictionOptions()) throws -> [ModelOutput] {
     let batchIn = MLArrayBatchProvider(array: inputs)
     let batchOut = try model.predictions(from: batchIn, options: options)
-    var results: [SeverityClassifierOutput] = []
+    var results: [ModelOutput] = []
     results.reserveCapacity(inputs.count)
     for i in 0..<batchOut.count {
       let outProvider = batchOut.features(at: i)
-      let result =  SeverityClassifierOutput(features: outProvider)
+      let result = ModelOutput(features: outProvider)
       results.append(result)
     }
     return results

@@ -33,6 +33,10 @@ class SeverityClassifierInput: MLFeatureProvider {
     static let weekday = "Weekday"
   }
   
+  /// The input sample's timestamp.
+  /// Not directly used as input.
+  var timestamp: Date
+  
   /// Barometric Pressure as double value
   var Barometric_Pressure: Double
   
@@ -205,11 +209,12 @@ class SeverityClassifierInput: MLFeatureProvider {
       Environment_Audio_Exposure: healthKitData[HealthKitData.environmentalAudioExposure] ?? 0.0,
       Step_Count: healthKitData[HealthKitData.stepCount] ?? 0.0,
       Seconds_Since_Midnight: Calendar.current.timeIntervalSinceMidnight(date),
-      Weekday: Double(Calendar.current.dayOfWeek(date))
+      Weekday: Double(Calendar.current.dayOfWeek(date)),
+      timestamp: date
     )
   }
   
-  init(Barometric_Pressure: Double, Heart_Rate: Double, Mindful_Session: Double, Sleep_Analysis: Double, UV_Exposure: Double, Dietary_Water: Double, Blood_Glucose: Double, Respiratory_Rate: Double, Blood_Prerssure_Systolic: Double, Blood_Prerssure_Diastolic: Double, Body_Temperature: Double, Oxygen_Saturation: Double, Heart_Rate_Variability: Double, Walking_Heart_Rate_Average: Double, Resting_Heart_Rate: Double, Headphone_Audio_Exposure: Double, Environment_Audio_Exposure: Double, Step_Count: Double, Seconds_Since_Midnight: Double, Weekday: Double) {
+  init(Barometric_Pressure: Double, Heart_Rate: Double, Mindful_Session: Double, Sleep_Analysis: Double, UV_Exposure: Double, Dietary_Water: Double, Blood_Glucose: Double, Respiratory_Rate: Double, Blood_Prerssure_Systolic: Double, Blood_Prerssure_Diastolic: Double, Body_Temperature: Double, Oxygen_Saturation: Double, Heart_Rate_Variability: Double, Walking_Heart_Rate_Average: Double, Resting_Heart_Rate: Double, Headphone_Audio_Exposure: Double, Environment_Audio_Exposure: Double, Step_Count: Double, Seconds_Since_Midnight: Double, Weekday: Double, timestamp: Date) {
     self.Barometric_Pressure = Barometric_Pressure
     self.Heart_Rate = Heart_Rate
     self.Mindful_Session = Mindful_Session
@@ -230,6 +235,7 @@ class SeverityClassifierInput: MLFeatureProvider {
     self.Step_Count = Step_Count
     self.Seconds_Since_Midnight = Seconds_Since_Midnight
     self.Weekday = Weekday
+    self.timestamp = timestamp
   }
   
 }

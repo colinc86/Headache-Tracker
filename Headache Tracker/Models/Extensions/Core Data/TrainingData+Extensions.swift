@@ -6,6 +6,7 @@
 //
 
 import CoreData
+import CoreML
 import Foundation
 import Logger
 
@@ -77,13 +78,18 @@ extension TrainingData {
       Environment_Audio_Exposure: environmentalAudioExposure,
       Step_Count: stepCount,
       Seconds_Since_Midnight: secondsSinceMidnight,
-      Weekday: weekday)
+      Weekday: weekday,
+      timestamp: timestamp ?? Date(timeIntervalSince1970: 0))
   }
   
 }
 
 #if NON_PREVIEW
 extension Array where Element == TrainingData {
+  
+  func batchProvider() -> MLArrayBatchProvider {
+    return MLArrayBatchProvider(array: map({ $0.classifierInput() }))
+  }
   
   func dataTable() -> [String: MLDataValueConvertible] {
     var table = [String: MLDataValueConvertible]()
