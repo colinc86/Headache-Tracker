@@ -25,7 +25,7 @@ class HeadacheManager: ObservableObject {
   weak var healthKitManager: HealthKitManager?
   
   /// The headache predictor.
-  weak var headachePredictor: HeadachePredictor?
+  weak var predictor: Predictor?
   
   // MARK: Private properties
   
@@ -466,7 +466,7 @@ extension HeadacheManager {
   /// - Parameters:
   ///   - prediction: The prediction.
   ///   - completion: Called after the alert has been added to notification center.
-  private func presentPredictionAlert(with prediction: HeadachePredictor.Prediction?, completion: @escaping (Error?) -> Void) {
+  private func presentPredictionAlert(with prediction: Predictor.Prediction?, completion: @escaping (Error?) -> Void) {
     // Only continue if we have a prediction and prediction alerts are turned on
     guard realTimeAlerts, let prediction = prediction, prediction.randomForestOutput.severity != .notPresent else {
       completion(nil)
@@ -493,7 +493,7 @@ extension HeadacheManager {
   
   /// Resets all prediction and learning data.
   func resetPrediction() {
-    headachePredictor?.reset()
+    predictor?.reset()
   }
   
   /// Whether or not the application needs more not present training data.
@@ -532,7 +532,7 @@ extension HeadacheManager {
       request.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: true)]
       let trainingData = (try? context.fetch(request)) ?? []
       
-      if let date = trainingData.last?.timestamp, let lastTrainingDate = self.headachePredictor?.modelUpdatedAt {
+      if let date = trainingData.last?.timestamp, let lastTrainingDate = self.predictor?.modelUpdatedAt {
         needs = date.timeIntervalSince(lastTrainingDate) > 0.0
       }
       
@@ -548,7 +548,7 @@ extension HeadacheManager {
   /// Gets classifier input appropriate for prediction.
   ///
   /// - Parameter completion: Called when the input struture is ready.
-  func getCurrentClassifierInput(_ completion: @escaping (HeadacheClassifierInput?, Error?) -> Void) {
+  func getCurrentClassifierInput(_ completion: @escaping (SeverityClassifierInput?, Error?) -> Void) {
     guard !testing else {
       completion(nil, nil)
       return
@@ -582,7 +582,7 @@ extension HeadacheManager {
       let interval = DateInterval(start: now.addingTimeInterval(-86400.0), end: now)
       let healthKitData = self.healthKitManager?.readHealthKitData(in: interval) ?? [:]
       
-      completion(HeadacheClassifierInput(barometricPressure: barometricPressure, healthKitData: healthKitData, date: now), nil)
+      completion(SeverityClassifierInput(barometricPressure: barometricPressure, healthKitData: healthKitData, date: now), nil)
       self.getCurrentClassifierInputBackgroundTask.end()
     }
   }
@@ -676,7 +676,7 @@ extension HeadacheManager {
       let allTrainingData = (try? context.fetch(request)) ?? []
       
       logDebug("Training classifiers...")
-      self.headachePredictor?.train(with: allTrainingData, completion: completion)
+      self.predictor?.train(with: allTrainingData, completion: completion)
     }
   }
   
@@ -799,7 +799,7 @@ extension HeadacheManager {
         else if let input = input {
           // We got the input, so present the prediction
           do {
-            self?.presentPredictionAlert(with: try self?.headachePredictor?.predict(input), completion: { error in
+            self?.presentPredictionAlert(with: try self?.predictor?.predict(input), completion: { error in
               if let error = error {
                 logError("Error presenting alert: \(error)")
               }
@@ -834,7 +834,7 @@ extension HeadacheManager {
     // Set the task's expiration handler
     task.expirationHandler = { [weak task, weak self] in
       // Cancel the prediction
-      self?.headachePredictor?.cancelTraining()
+      self?.predictor?.cancelTraining()
       task?.setTaskCompleted(success: false)
     }
     

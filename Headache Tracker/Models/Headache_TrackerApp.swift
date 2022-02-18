@@ -30,7 +30,7 @@ struct Headache_TrackerApp: App {
   @StateObject var healthKitManager = HealthKitManager()
   
   /// The application's headache predictor.
-  @StateObject var headachePredictor = HeadachePredictor()
+  @StateObject var predictor = Predictor()
   
   /// The application's alert manager.
   @StateObject var alertManager = AlertManager()
@@ -49,7 +49,7 @@ struct Headache_TrackerApp: App {
       ContentView()
         .environment(\.managedObjectContext, DataController.shared.container.viewContext)
         .environmentObject(headacheManager)
-        .environmentObject(headachePredictor)
+        .environmentObject(predictor)
         .environmentObject(healthKitManager)
         .environmentObject(alertManager)
         .onAppear(perform: appeared)
@@ -128,7 +128,7 @@ extension Headache_TrackerApp {
   private func setHeadacheManagerReferences() {
     headacheManager.alertManager = alertManager
     headacheManager.healthKitManager = healthKitManager
-    headacheManager.headachePredictor = headachePredictor
+    headacheManager.predictor = predictor
   }
   
   /// Setup alerts.
@@ -155,7 +155,7 @@ extension Headache_TrackerApp {
   
   /// Loads the ML classifiers and get's them ready for use.
   private func loadClassifiers() {
-    headachePredictor.load { error in
+    predictor.load { error in
       if let error = error {
         logError("Error loading classifiers: \(error)")
       }

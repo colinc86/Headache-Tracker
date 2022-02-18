@@ -1,5 +1,5 @@
 //
-//  HeadacheClassifierOutput.swift
+//  SeverityClassifierOutput.swift
 //  Headache Tracker
 //
 //  Created by Colin Campbell on 2/11/22.
@@ -8,7 +8,7 @@
 import CoreML
 
 /// Model Prediction Output Type
-class HeadacheClassifierOutput: MLFeatureProvider {
+class SeverityClassifierOutput: MLFeatureProvider {
   
   struct FeatureName {
     static let severity = "Severity"

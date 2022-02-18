@@ -49,7 +49,7 @@ extension TrainingData {
     }
   }
   
-  func classifierInput() -> HeadacheClassifierInput {
+  func classifierInput() -> SeverityClassifierInput {
     var secondsSinceMidnight = 0.0
     var weekday = 0.0
     if let timestamp = timestamp {
@@ -57,7 +57,7 @@ extension TrainingData {
       weekday = Double(Calendar.current.dayOfWeek(timestamp))
     }
     
-    return HeadacheClassifierInput(
+    return SeverityClassifierInput(
       Barometric_Pressure: barometricPressure,
       Heart_Rate: heartRate,
       Mindful_Session: mindfulSeconds,
@@ -87,37 +87,37 @@ extension Array where Element == TrainingData {
   
   func dataTable() -> [String: MLDataValueConvertible] {
     var table = [String: MLDataValueConvertible]()
-    table[HeadacheClassifierInput.FeatureName.barometricPressure] = map({ $0.barometricPressure })
-    table[HeadacheClassifierInput.FeatureName.heartRate] = map({ $0.heartRate })
-    table[HeadacheClassifierInput.FeatureName.mindfulSession] = map({ $0.mindfulSeconds })
-    table[HeadacheClassifierInput.FeatureName.sleepAnalysis] = map({ $0.sleepSeconds })
-    table[HeadacheClassifierInput.FeatureName.uvExposure] = map({ $0.uvExposure })
-    table[HeadacheClassifierInput.FeatureName.dietaryWater] = map({ $0.dietaryWater })
-    table[HeadacheClassifierInput.FeatureName.bloodGlucose] = map({ $0.bloodGlucose })
-    table[HeadacheClassifierInput.FeatureName.respiratoryRate] = map({ $0.respiratoryRate })
-    table[HeadacheClassifierInput.FeatureName.bloodPressureSystolic] = map({ $0.bloodPressureSystolic })
-    table[HeadacheClassifierInput.FeatureName.bloodPressureDiastolic] = map({ $0.bloodPressureDiastolic })
-    table[HeadacheClassifierInput.FeatureName.bodyTemperature] = map({ $0.bodyTemperature })
-    table[HeadacheClassifierInput.FeatureName.oxygenSaturation] = map({ $0.oxygenSaturation })
-    table[HeadacheClassifierInput.FeatureName.heartRateVariability] = map({ $0.heartRateVariability })
-    table[HeadacheClassifierInput.FeatureName.walkingHeartRateAverage] = map({ $0.walkingHeartRateAverage })
-    table[HeadacheClassifierInput.FeatureName.restingHeartRate] = map({ $0.restingHeartRate })
-    table[HeadacheClassifierInput.FeatureName.headphoneAudioExposure] = map({ $0.headphoneAudioExposure })
-    table[HeadacheClassifierInput.FeatureName.environmentAudioExposure] = map({ $0.environmentalAudioExposure })
-    table[HeadacheClassifierInput.FeatureName.stepCount] = map({ $0.stepCount })
-    table[HeadacheClassifierInput.FeatureName.secondsSinceMidnight] = map({ data -> Double in
+    table[SeverityClassifierInput.FeatureName.barometricPressure] = map({ $0.barometricPressure })
+    table[SeverityClassifierInput.FeatureName.heartRate] = map({ $0.heartRate })
+    table[SeverityClassifierInput.FeatureName.mindfulSession] = map({ $0.mindfulSeconds })
+    table[SeverityClassifierInput.FeatureName.sleepAnalysis] = map({ $0.sleepSeconds })
+    table[SeverityClassifierInput.FeatureName.uvExposure] = map({ $0.uvExposure })
+    table[SeverityClassifierInput.FeatureName.dietaryWater] = map({ $0.dietaryWater })
+    table[SeverityClassifierInput.FeatureName.bloodGlucose] = map({ $0.bloodGlucose })
+    table[SeverityClassifierInput.FeatureName.respiratoryRate] = map({ $0.respiratoryRate })
+    table[SeverityClassifierInput.FeatureName.bloodPressureSystolic] = map({ $0.bloodPressureSystolic })
+    table[SeverityClassifierInput.FeatureName.bloodPressureDiastolic] = map({ $0.bloodPressureDiastolic })
+    table[SeverityClassifierInput.FeatureName.bodyTemperature] = map({ $0.bodyTemperature })
+    table[SeverityClassifierInput.FeatureName.oxygenSaturation] = map({ $0.oxygenSaturation })
+    table[SeverityClassifierInput.FeatureName.heartRateVariability] = map({ $0.heartRateVariability })
+    table[SeverityClassifierInput.FeatureName.walkingHeartRateAverage] = map({ $0.walkingHeartRateAverage })
+    table[SeverityClassifierInput.FeatureName.restingHeartRate] = map({ $0.restingHeartRate })
+    table[SeverityClassifierInput.FeatureName.headphoneAudioExposure] = map({ $0.headphoneAudioExposure })
+    table[SeverityClassifierInput.FeatureName.environmentAudioExposure] = map({ $0.environmentalAudioExposure })
+    table[SeverityClassifierInput.FeatureName.stepCount] = map({ $0.stepCount })
+    table[SeverityClassifierInput.FeatureName.secondsSinceMidnight] = map({ data -> Double in
       if let timestamp = data.timestamp {
         return Double(Calendar.current.timeIntervalSinceMidnight(timestamp))
       }
       return Double(0.0)
     })
-    table[HeadacheClassifierInput.FeatureName.weekday] = map({ data -> Double in
+    table[SeverityClassifierInput.FeatureName.weekday] = map({ data -> Double in
       if let timestamp = data.timestamp {
         return Double(Calendar.current.dayOfWeek(timestamp))
       }
       return Double(0.0)
     })
-    table[HeadacheClassifierOutput.FeatureName.severity] = map({ ($0.severity?.severity ?? .notPresent).title })
+    table[SeverityClassifierOutput.FeatureName.severity] = map({ ($0.severity?.severity ?? .notPresent).title })
     return table
   }
   

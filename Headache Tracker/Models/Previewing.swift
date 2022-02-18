@@ -23,7 +23,7 @@ struct Previewing {
   static let healthKitManager = HealthKitManager()
   
   /// The preview predictor.
-  static let headachePredictor = HeadachePredictor()
+  static let predictor = Predictor()
   
   struct CoreData {
     

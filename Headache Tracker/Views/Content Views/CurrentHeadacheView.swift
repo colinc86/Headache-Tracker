@@ -23,7 +23,7 @@ struct CurrentHeadacheView: View {
   @EnvironmentObject private var headacheManager: HeadacheManager
   
   /// The app's headache predictor.
-  @EnvironmentObject private var headachePredictor: HeadachePredictor
+  @EnvironmentObject private var predictor: Predictor
   
   /// The app's alert manager for displaying notifications.
   @EnvironmentObject private var alertManager: AlertManager
@@ -64,7 +64,7 @@ struct CurrentHeadacheView: View {
   @State private var updatingHeadache = false
   
   /// The classifier's current prediction.
-  @State private var prediction: HeadachePredictor.Prediction?
+  @State private var prediction: Predictor.Prediction?
   
   /// The last error produced by prediction.
   @State private var predictionError: Error? = nil
@@ -252,7 +252,7 @@ extension CurrentHeadacheView {
         else if let input = input {
           do {
             try withAnimation {
-              prediction = try headachePredictor.predict(input)
+              prediction = try predictor.predict(input)
             }
           }
           catch {
@@ -367,7 +367,7 @@ struct CurrentHeadacheView_Previews: PreviewProvider {
     CurrentHeadacheView()
       .environment(\.managedObjectContext, Previewing.CoreData.controller.container.viewContext)
       .environmentObject(Previewing.headacheManager)
-      .environmentObject(Previewing.headachePredictor)
+      .environmentObject(Previewing.predictor)
       .environmentObject(Previewing.alertManager)
   }
 }

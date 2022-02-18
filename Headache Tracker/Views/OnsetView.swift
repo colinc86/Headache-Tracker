@@ -13,8 +13,10 @@ struct OnsetView: View {
   @StateObject var headache: Headache
   
   var body: some View {
-    Text(headache.severitiesArray.first?.startTime?.formatted() ?? "N/A")
-      .font(.title)
+    if let startTime = headache.startTime {
+      Text(Calendar.current.relativeDateDescription(startTime))
+        .font(.title)
+    }
   }
 }
 

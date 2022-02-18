@@ -17,7 +17,7 @@ struct SettingsView: View {
   @EnvironmentObject private var headacheManager: HeadacheManager
   
   /// The app's headache predictor.
-  @EnvironmentObject private var headachePredictor: HeadachePredictor
+  @EnvironmentObject private var predictor: Predictor
   
   /// The health kit manager.
   @EnvironmentObject private var healthKitManager: HealthKitManager
@@ -71,7 +71,7 @@ struct SettingsView: View {
         
         // Learning and Prediction
         Section {
-          if headachePredictor.training {
+          if predictor.training {
             HStack {
               Text("Learn and Predict")
               Spacer()
@@ -88,7 +88,7 @@ struct SettingsView: View {
         } header: {
           Text("Prediction")
         } footer: {
-          Text("Models last updated at \(headachePredictor.modelUpdatedAt?.formatted() ?? "N/A")")
+          Text("Models last updated at \(predictor.modelUpdatedAt?.formatted() ?? "N/A")")
         }
         
         // Notifications
@@ -157,7 +157,7 @@ struct SettingsView_Previews: PreviewProvider {
   static var previews: some View {
     SettingsView()
       .environmentObject(Previewing.headacheManager)
-      .environmentObject(Previewing.headachePredictor)
+      .environmentObject(Previewing.predictor)
       .environmentObject(Previewing.healthKitManager)
       .environmentObject(Previewing.alertManager)
   }

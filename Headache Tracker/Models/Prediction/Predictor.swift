@@ -1,5 +1,5 @@
 //
-//  HeadachePredictor.swift
+//  Predictor.swift
 //  Headache Tracker
 //
 //  Created by Colin Campbell on 2/11/22.
@@ -15,7 +15,7 @@ import HealthKit
 import CreateML
 #endif
 
-class HeadachePredictor: ObservableObject {
+class Predictor: ObservableObject {
   
   // MARK: Types
   
@@ -50,7 +50,7 @@ class HeadachePredictor: ObservableObject {
       
       // MARK: Initializers
       
-      init(output: HeadacheClassifierOutput) {
+      init(output: SeverityClassifierOutput) {
         self.init(
           severity: output.Severity,
           probability: output.SeverityProbability[output.Severity] ?? 0.0)
@@ -81,10 +81,10 @@ class HeadachePredictor: ObservableObject {
   
   // MARK: Private properties
   
-  private var boostedTreeClassifier: HeadacheClassifier?
-  private var decisionTreeClassifier: HeadacheClassifier?
-  private var randomForestClassifier: HeadacheClassifier?
-  private var logisticRegressionClassifier: HeadacheClassifier?
+  private var boostedTreeClassifier: SeverityClassifier?
+  private var decisionTreeClassifier: SeverityClassifier?
+  private var randomForestClassifier: SeverityClassifier?
+  private var logisticRegressionClassifier: SeverityClassifier?
   
   /// The queue to do anything with models on.
   private var modelQueue = DispatchQueue(label: ApplicationKey(from: "modelQueue"))
@@ -107,7 +107,7 @@ class HeadachePredictor: ObservableObject {
 
 // MARK: Public methods
 
-extension HeadachePredictor {
+extension Predictor {
   
   /// Loads the predictor's models.
   ///
@@ -123,16 +123,16 @@ extension HeadachePredictor {
       do {
         logDebug("Loading boosted tree.")
         let boostedTreeModelURL = self.compiledModelURL(with: "bt")
-        self.boostedTreeClassifier = try HeadacheClassifier(contentsOf: boostedTreeModelURL)
+        self.boostedTreeClassifier = try SeverityClassifier(contentsOf: boostedTreeModelURL)
         
         logDebug("Loading decision tree.")
-        self.decisionTreeClassifier = try HeadacheClassifier(contentsOf: self.compiledModelURL(with: "dt"))
+        self.decisionTreeClassifier = try SeverityClassifier(contentsOf: self.compiledModelURL(with: "dt"))
         
         logDebug("Loading random forest.")
-        self.randomForestClassifier = try HeadacheClassifier(contentsOf: self.compiledModelURL(with: "rf"))
+        self.randomForestClassifier = try SeverityClassifier(contentsOf: self.compiledModelURL(with: "rf"))
         
         logDebug("Loading logistic regression.")
-        self.logisticRegressionClassifier = try HeadacheClassifier(contentsOf: self.compiledModelURL(with: "lr"))
+        self.logisticRegressionClassifier = try SeverityClassifier(contentsOf: self.compiledModelURL(with: "lr"))
         
         logDebug("Getting creation date.")
         let attributes = try FileManager.default.attributesOfItem(atPath: boostedTreeModelURL.path)
@@ -194,7 +194,7 @@ extension HeadachePredictor {
         
         if !self.cancelledTraining {
           logDebug("Training boosted tree.")
-          let btClassifier = try MLBoostedTreeClassifier(trainingData: table, targetColumn: HeadacheClassifierOutput.FeatureName.severity)
+          let btClassifier = try MLBoostedTreeClassifier(trainingData: table, targetColumn: SeverityClassifierOutput.FeatureName.severity)
           let btModelURL = self.modelURL(with: "bt")
           try btClassifier.write(to: btModelURL, metadata: self.metadata)
           let btCompiledModelURL = try MLModel.compileModel(at: btModelURL)
@@ -209,7 +209,7 @@ extension HeadachePredictor {
 
         if !self.cancelledTraining {
           logDebug("Training decision tree.")
-          let dtClassifier = try MLDecisionTreeClassifier(trainingData: table, targetColumn: HeadacheClassifierOutput.FeatureName.severity)
+          let dtClassifier = try MLDecisionTreeClassifier(trainingData: table, targetColumn: SeverityClassifierOutput.FeatureName.severity)
           let dtModelURL = self.modelURL(with: "dt")
           try dtClassifier.write(to: dtModelURL, metadata: self.metadata)
           let dtCompiledModelURL = try MLModel.compileModel(at: dtModelURL)
@@ -224,7 +224,7 @@ extension HeadachePredictor {
 
         if !self.cancelledTraining {
           logDebug("Training random forest.")
-          let rfClassifier = try MLRandomForestClassifier(trainingData: table, targetColumn: HeadacheClassifierOutput.FeatureName.severity)
+          let rfClassifier = try MLRandomForestClassifier(trainingData: table, targetColumn: SeverityClassifierOutput.FeatureName.severity)
           let rfModelURL = self.modelURL(with: "rf")
           try rfClassifier.write(to: rfModelURL, metadata: self.metadata)
           let rfCompiledModelURL = try MLModel.compileModel(at: rfModelURL)
@@ -239,7 +239,7 @@ extension HeadachePredictor {
 
         if !self.cancelledTraining {
           logDebug("Training logistic regression.")
-          let lrClassifier = try MLLogisticRegressionClassifier(trainingData: table, targetColumn: HeadacheClassifierOutput.FeatureName.severity)
+          let lrClassifier = try MLLogisticRegressionClassifier(trainingData: table, targetColumn: SeverityClassifierOutput.FeatureName.severity)
           let lrModelURL = self.modelURL(with: "lr")
           try lrClassifier.write(to: lrModelURL, metadata: self.metadata)
           let lrCompiledModelURL = try MLModel.compileModel(at: lrModelURL)
@@ -311,7 +311,7 @@ extension HeadachePredictor {
   ///
   /// - Parameter input: The predictor's input.
   /// - Returns: The predictor's output.
-  func predict(_ input: HeadacheClassifierInput) throws -> Prediction {
+  func predict(_ input: SeverityClassifierInput) throws -> Prediction {
     guard let btClassifier = boostedTreeClassifier, let dtClassifier = decisionTreeClassifier, let rfClassifier = randomForestClassifier, let lrClassifier = logisticRegressionClassifier else {
       return .empty
     }
@@ -330,7 +330,7 @@ extension HeadachePredictor {
   
 }
 
-extension HeadachePredictor {
+extension Predictor {
   
   /// The URL of a model with the given name.
   ///

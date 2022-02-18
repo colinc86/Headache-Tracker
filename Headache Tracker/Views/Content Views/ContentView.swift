@@ -23,7 +23,7 @@ struct ContentView: View {
   @EnvironmentObject private var headacheManager: HeadacheManager
   
   /// The headache predictor.
-  @EnvironmentObject private var headachePredictor: HeadachePredictor
+  @EnvironmentObject private var predictor: Predictor
   
   /// The health kit manager.
   @EnvironmentObject private var healthKitManager: HealthKitManager
@@ -38,7 +38,7 @@ struct ContentView: View {
       CurrentHeadacheView()
         .environment(\.managedObjectContext, viewContext)
         .environmentObject(headacheManager)
-        .environmentObject(headachePredictor)
+        .environmentObject(predictor)
         .environmentObject(alertManager)
         .tabItem {
           Label("Track", systemImage: "brain.head.profile")
@@ -59,7 +59,7 @@ struct ContentView: View {
       
       SettingsView()
         .environmentObject(headacheManager)
-        .environmentObject(headachePredictor)
+        .environmentObject(predictor)
         .environmentObject(healthKitManager)
         .environmentObject(alertManager)
         .tabItem {
@@ -76,7 +76,7 @@ struct ContentView_Previews: PreviewProvider {
       .environment(\.managedObjectContext, Previewing.CoreData.controller.container.viewContext)
       .environmentObject(Previewing.headacheManager)
       .environmentObject(Previewing.alertManager)
-      .environmentObject(Previewing.headachePredictor)
+      .environmentObject(Previewing.predictor)
       .environmentObject(Previewing.healthKitManager)
       .onAppear {
         _ = Previewing.CoreData.headache

@@ -63,11 +63,11 @@ struct HeadacheView: View {
       }
       
       Section {
-        LineGraph(series: headache.severitySignal, gradient: Gradient(colors: headache.severityColorRange))
-          .frame(height: 100.0)
-          .padding([.top, .bottom], 10)
-        
         if headache.severities?.count ?? 0 > 1 {
+          LineGraph(series: headache.severitySignal, gradient: Gradient(colors: headache.severityColorRange))
+            .frame(height: 100.0)
+            .padding([.top, .bottom], 10)
+          
           ForEach(headache.severitiesArray, id: \.self) { severity in
             NavigationLink {
               SeverityView(severity: severity, canEditEndTime: severity == headache.severitiesArray.last, canDelete: true)

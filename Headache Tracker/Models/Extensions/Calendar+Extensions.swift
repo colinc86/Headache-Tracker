@@ -47,4 +47,30 @@ extension Calendar {
     return startOfDay(for: date.addingTimeInterval(86400.0))
   }
   
+  /// A description of the date relative to now.
+  ///
+  /// - Parameter date: The date to describe.
+  /// - Returns: A string.
+  func relativeDateDescription(_ date: Date) -> String {
+    let timeString = Formatters.timeFormatter.string(from: date)
+    let days = numberOfDaysBetween(date, and: Date())
+    
+    var dayString = ""
+    if days == 1 {
+      dayString = "Yesterday at "
+    }
+    else if days > 1 {
+      dayString = "\(days) days ago at "
+    }
+    else if days == -1 {
+      dayString = "Tomorrow at "
+    }
+    else if days < -1 {
+      dayString = "In \(days) days at "
+    }
+    
+    return dayString + timeString
+  }
+  
+  
 }
