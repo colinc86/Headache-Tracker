@@ -7,10 +7,13 @@
 
 import ApplicationKey
 import CoreML
-import CreateML
 import Foundation
 import Logger
 import HealthKit
+
+#if NON_PREVIEW
+import CreateML
+#endif
 
 class HeadachePredictor: ObservableObject {
   
@@ -92,11 +95,13 @@ class HeadachePredictor: ObservableObject {
   /// Whether or not training was cancelled.
   private var cancelledTraining = false
   
+#if NON_PREVIEW
   /// The metadata to save with a model.
   private let metadata = MLModelMetadata(
     author: "Colin Campbell",
     shortDescription: "Predicts the onset, severity and progression of headaches.",
     version: Date().description)
+#endif
   
 }
 
@@ -165,7 +170,7 @@ extension HeadachePredictor {
     
     DispatchQueue.main.async { [weak self] in self?.training = true }
     cancelledTraining = false
-    
+#if NON_PREVIEW
     let table: MLDataTable
     do {
       table = try MLDataTable(dictionary: trainingData.dataTable())
@@ -177,6 +182,7 @@ extension HeadachePredictor {
     }
     logDebug("Got table: \(table)")
     
+
     modelQueue.async { [weak self] in
       do {
         guard let self = self else {
@@ -264,6 +270,11 @@ extension HeadachePredictor {
         self?.trainingBackgroundTask.end()
       }
     }
+#else
+    completion(nil)
+    DispatchQueue.main.async { [weak self] in self?.training = false }
+    trainingBackgroundTask.end()
+#endif
   }
   
   /// Cancels the current training session.

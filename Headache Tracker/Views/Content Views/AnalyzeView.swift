@@ -35,7 +35,7 @@ struct AnalyzeView: View {
         if let statistics = statistics {
           Section {
             BarGraph(
-              series: statistics.peaks.signal,
+              statistic: statistics.peaks,
               yAxis: ["Not Present", "Present", "Mild", "Moderate", "Severe"],
               gradient: Gradient(colors: [.cyan, .teal]),
               staticCount: 28,
@@ -49,7 +49,7 @@ struct AnalyzeView: View {
           
           Section {
             BarGraph(
-              series: statistics.averages.signal,
+              statistic: statistics.averages,
               yAxis: ["Not Present", "Present", "Mild", "Moderate", "Severe"],
               gradient: Gradient(colors: [.cyan, .teal]),
               staticCount: 28,
@@ -61,7 +61,7 @@ struct AnalyzeView: View {
           
           Section {
             BarGraph(
-              series: statistics.onsets.signal,
+              statistic: statistics.onsets,
               yAxis: ["12 AM", "6 AM", "12 PM", "6 PM", "12 AM"],
               gradient: Gradient(colors: [.purple, .indigo]),
               staticCount: 28,
@@ -75,7 +75,7 @@ struct AnalyzeView: View {
           
           Section {
             BarGraph(
-              series: statistics.durations.signal,
+              statistic: statistics.durations,
               yAxis: ["0m", Formatters.dateComponentsFormatter.string(from: statistics.durations.max ) ?? "-"],
               gradient: Gradient(colors: [.green, .mint]),
               staticCount: 28)

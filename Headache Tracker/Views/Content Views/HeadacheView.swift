@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import SwiftUICharts
 
 /// Displays information about a specific headache.
 struct HeadacheView: View {

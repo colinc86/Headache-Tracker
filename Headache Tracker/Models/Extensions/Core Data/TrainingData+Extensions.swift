@@ -6,9 +6,12 @@
 //
 
 import CoreData
-import CreateML
 import Foundation
 import Logger
+
+#if NON_PREVIEW
+import CreateML
+#endif
 
 extension TrainingData {
   
@@ -79,6 +82,7 @@ extension TrainingData {
   
 }
 
+#if NON_PREVIEW
 extension Array where Element == TrainingData {
   
   func dataTable() -> [String: MLDataValueConvertible] {
@@ -118,3 +122,4 @@ extension Array where Element == TrainingData {
   }
   
 }
+#endif
