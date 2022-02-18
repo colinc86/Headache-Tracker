@@ -53,6 +53,11 @@
 		3B68BE0127BEF949007AAAC6 /* Surge in Frameworks */ = {isa = PBXBuildFile; productRef = 3B68BE0027BEF949007AAAC6 /* Surge */; };
 		3B68BE0327BF2548007AAAC6 /* HeadacheStatistics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BE0227BF2548007AAAC6 /* HeadacheStatistics.swift */; };
 		3B68BE0627BF2F98007AAAC6 /* Statistic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BE0527BF2F98007AAAC6 /* Statistic.swift */; };
+		3B68BE0C27BF5899007AAAC6 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B68BE0B27BF5899007AAAC6 /* GoogleService-Info.plist */; };
+		3B68BE0D27BF58A7007AAAC6 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B68BE0B27BF5899007AAAC6 /* GoogleService-Info.plist */; };
+		3B68BE0E27BF58A8007AAAC6 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B68BE0B27BF5899007AAAC6 /* GoogleService-Info.plist */; };
+		3B68BE1127BF599F007AAAC6 /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */ = {isa = PBXBuildFile; productRef = 3B68BE1027BF599F007AAAC6 /* FirebaseAnalyticsWithoutAdIdSupport */; };
+		3B68BE1327BF599F007AAAC6 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 3B68BE1227BF599F007AAAC6 /* FirebaseCrashlytics */; };
 		3BDCF23E27BC213800334B8B /* Calendar+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BDCF23D27BC213800334B8B /* Calendar+Extensions.swift */; };
 		3BF5313727ACE18D00056673 /* Headache_TrackerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF5313627ACE18D00056673 /* Headache_TrackerApp.swift */; };
 		3BF5313927ACE18D00056673 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF5313827ACE18D00056673 /* ContentView.swift */; };
@@ -135,6 +140,7 @@
 		3B68BDFD27BE2B57007AAAC6 /* Numeric+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Numeric+Extensions.swift"; sourceTree = "<group>"; };
 		3B68BE0227BF2548007AAAC6 /* HeadacheStatistics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeadacheStatistics.swift; sourceTree = "<group>"; };
 		3B68BE0527BF2F98007AAAC6 /* Statistic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Statistic.swift; sourceTree = "<group>"; };
+		3B68BE0B27BF5899007AAAC6 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		3BDCF23D27BC213800334B8B /* Calendar+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar+Extensions.swift"; sourceTree = "<group>"; };
 		3BF5313327ACE18D00056673 /* Headache Tracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Headache Tracker.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3BF5313627ACE18D00056673 /* Headache_TrackerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Headache_TrackerApp.swift; sourceTree = "<group>"; };
@@ -159,7 +165,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				3BF5317227ACEC7900056673 /* Logger in Frameworks */,
+				3B68BE1127BF599F007AAAC6 /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */,
 				3B68BE0127BEF949007AAAC6 /* Surge in Frameworks */,
+				3B68BE1327BF599F007AAAC6 /* FirebaseCrashlytics in Frameworks */,
 				3BF5316D27ACEAC600056673 /* DataController in Frameworks */,
 				3B09191F27BD84FE00844F6C /* Shapes in Frameworks */,
 				3BF5316827ACE1DA00056673 /* HealthKit.framework in Frameworks */,
@@ -355,6 +363,7 @@
 				3B39DADE27AD009F00D39BB5 /* Models */,
 				3B39DAE027AD00B700D39BB5 /* Views */,
 				3BF5313A27ACE18F00056673 /* Assets.xcassets */,
+				3B68BE0B27BF5899007AAAC6 /* GoogleService-Info.plist */,
 				3BF5314127ACE18F00056673 /* Headache_Tracker.xcdatamodeld */,
 				3BF5313C27ACE18F00056673 /* Preview Content */,
 			);
@@ -404,7 +413,7 @@
 				3BF5312F27ACE18D00056673 /* Sources */,
 				3BF5313027ACE18D00056673 /* Frameworks */,
 				3BF5313127ACE18D00056673 /* Resources */,
-				3B051AA227B373AE0017131D /* Increment Build Number */,
+				3B68BE1427BF5B12007AAAC6 /* Upload dSYM to Crashlytics */,
 			);
 			buildRules = (
 			);
@@ -416,6 +425,8 @@
 				3BF5317127ACEC7900056673 /* Logger */,
 				3B09191E27BD84FE00844F6C /* Shapes */,
 				3B68BE0027BEF949007AAAC6 /* Surge */,
+				3B68BE1027BF599F007AAAC6 /* FirebaseAnalyticsWithoutAdIdSupport */,
+				3B68BE1227BF599F007AAAC6 /* FirebaseCrashlytics */,
 			);
 			productName = "Headache Tracker";
 			productReference = 3BF5313327ACE18D00056673 /* Headache Tracker.app */;
@@ -494,6 +505,7 @@
 				3BF5317027ACEC7900056673 /* XCRemoteSwiftPackageReference "Logger" */,
 				3B09191D27BD84FD00844F6C /* XCRemoteSwiftPackageReference "swiftui-shapes" */,
 				3B68BDFF27BEF949007AAAC6 /* XCRemoteSwiftPackageReference "Surge" */,
+				3B68BE0F27BF599F007AAAC6 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			productRefGroup = 3BF5313427ACE18D00056673 /* Products */;
 			projectDirPath = "";
@@ -513,6 +525,7 @@
 			files = (
 				3BF5313E27ACE18F00056673 /* Preview Assets.xcassets in Resources */,
 				3BF5313B27ACE18F00056673 /* Assets.xcassets in Resources */,
+				3B68BE0C27BF5899007AAAC6 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -520,6 +533,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3B68BE0D27BF58A7007AAAC6 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -527,13 +541,14 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3B68BE0E27BF58A8007AAAC6 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		3B051AA227B373AE0017131D /* Increment Build Number */ = {
+		3B68BE1427BF5B12007AAAC6 /* Upload dSYM to Crashlytics */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -541,15 +556,17 @@
 			inputFileListPaths = (
 			);
 			inputPaths = (
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${TARGET_NAME}",
+				"$(SRCROOT)/$(BUILT_PRODUCTS_DIR)/$(INFOPLIST_PATH)",
 			);
-			name = "Increment Build Number";
+			name = "Upload dSYM to Crashlytics";
 			outputFileListPaths = (
 			);
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [ $ENABLE_PREVIEWS == \"NO\" ]\nthen\n  buildNumber=$(/usr/libexec/PlistBuddy -c \"Print CFBundleVersion\" \"$INFOPLIST_FILE\")\n  buildNumber=$((0x$buildNumber))\n  buildNumber=$(($buildNumber + 1))\n  buildNumber=$(printf \"%X\" $buildNumber)\n  /usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $buildNumber\" \"$INFOPLIST_FILE\"\nelse\n  echo \"Skipping build number increment.\"\nfi\n";
+			shellScript = "\"${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -713,7 +730,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "Headache Tracker/Headache Tracker.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 194;
 				DEVELOPMENT_ASSET_PATHS = "\"Headache Tracker/Preview Content\"";
 				DEVELOPMENT_TEAM = 4WS4246RA4;
 				ENABLE_PREVIEWS = YES;
@@ -903,7 +920,8 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "Headache Tracker/Headache Tracker.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 194;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_ASSET_PATHS = "\"Headache Tracker/Preview Content\"";
 				DEVELOPMENT_TEAM = 4WS4246RA4;
 				ENABLE_PREVIEWS = YES;
@@ -937,7 +955,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "Headache Tracker/Headache Tracker.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 194;
 				DEVELOPMENT_ASSET_PATHS = "\"Headache Tracker/Preview Content\"";
 				DEVELOPMENT_TEAM = 4WS4246RA4;
 				ENABLE_PREVIEWS = YES;
@@ -1102,6 +1120,14 @@
 				minimumVersion = 2.3.0;
 			};
 		};
+		3B68BE0F27BF599F007AAAC6 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.12.1;
+			};
+		};
 		3BF5316B27ACEAC600056673 /* XCRemoteSwiftPackageReference "DataController" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "git@github.com:colinc86/DataController.git";
@@ -1130,6 +1156,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 3B68BDFF27BEF949007AAAC6 /* XCRemoteSwiftPackageReference "Surge" */;
 			productName = Surge;
+		};
+		3B68BE1027BF599F007AAAC6 /* FirebaseAnalyticsWithoutAdIdSupport */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3B68BE0F27BF599F007AAAC6 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalyticsWithoutAdIdSupport;
+		};
+		3B68BE1227BF599F007AAAC6 /* FirebaseCrashlytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3B68BE0F27BF599F007AAAC6 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCrashlytics;
 		};
 		3BF5316C27ACEAC600056673 /* DataController */ = {
 			isa = XCSwiftPackageProductDependency;

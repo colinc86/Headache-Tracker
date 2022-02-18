@@ -107,5 +107,6 @@ extension AnalyzeView {
 struct AnalyzeView_Previews: PreviewProvider {
   static var previews: some View {
     AnalyzeView()
+      .environment(\.managedObjectContext, Previewing.CoreData.controller.container.viewContext)
   }
 }

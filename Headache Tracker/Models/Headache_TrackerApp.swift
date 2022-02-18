@@ -7,6 +7,7 @@
 
 import BackgroundTasks
 import DataController
+import Firebase
 import Logger
 import SwiftUI
 
@@ -91,6 +92,11 @@ extension Headache_TrackerApp {
       return
     }
     firstAppearance = false
+    
+    // Load firebase if we're not previewing
+#if NON_PREVIEW
+    FirebaseApp.configure()
+#endif
     
     // Adjust the table view appearance
     UITableView.appearance().sectionFooterHeight = 0
