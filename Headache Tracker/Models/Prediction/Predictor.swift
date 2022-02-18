@@ -23,50 +23,34 @@ class Predictor: ObservableObject {
   struct Prediction {
     
     /// An empty prediction.
-    static let empty = Prediction(
-      boostedTreeOutput: .empty,
-      decisionTreeOutput: .empty,
-      randomForestOutput: .empty,
-      logisticRegressionOutput: .empty)
+    static let empty = Prediction(severityClassifierOutput: PredictionStatistic<HKCategoryValueSeverity>(prediction: .notPresent, probability: 0.0))
     
     /// A prediction statistic pairs a severity to a probability.
-    struct PredictionStatistic {
-      
-      /// An empty statistic.
-      static let empty = PredictionStatistic(
-        severity: "",
-        probability: 0.0)
+    struct PredictionStatistic<T> {
       
       /// The statistic's severity.
-      let severity: HKCategoryValueSeverity
+      let prediction: T
       
       /// The statistic's probability.
       let probability: Double
       
-      /// The statistic's title.
-      var title: String {
-        return "\(severity.title) (\(String(format: "%0.f%%", probability * 100.0)))"
-      }
-      
       // MARK: Initializers
       
-      init(output: SeverityClassifierOutput) {
-        self.init(
-          severity: output.Severity,
-          probability: output.SeverityProbability[output.Severity] ?? 0.0)
-      }
-      
-      init(severity: String, probability: Double) {
-        self.severity = HKCategoryValueSeverity(title: severity) ?? .notPresent
+      init(prediction: T, probability: Double) {
+        self.prediction = prediction
         self.probability = probability
       }
     }
     
-    let boostedTreeOutput: PredictionStatistic
-    let decisionTreeOutput: PredictionStatistic
-    let randomForestOutput: PredictionStatistic
-    let logisticRegressionOutput: PredictionStatistic
+    /// The severity classifier's output.
+    let severityClassifierOutput: PredictionStatistic<HKCategoryValueSeverity>
+    
   }
+  
+  // MARK: Static properties
+  
+  /// The filename to use for the severity classifier.
+  private static let severityClassifierFileName = "sc"
   
   // MARK: Public properties
   
@@ -81,10 +65,8 @@ class Predictor: ObservableObject {
   
   // MARK: Private properties
   
-  private var boostedTreeClassifier: SeverityClassifier?
-  private var decisionTreeClassifier: SeverityClassifier?
-  private var randomForestClassifier: SeverityClassifier?
-  private var logisticRegressionClassifier: SeverityClassifier?
+  /// The classifier for predicting headache severities.
+  private var severityClassifier: SeverityClassifier?
   
   /// The queue to do anything with models on.
   private var modelQueue = DispatchQueue(label: ApplicationKey(from: "modelQueue"))
@@ -113,7 +95,8 @@ extension Predictor {
   ///
   /// - Parameter completion: Called after the models have been loaded.
   func load(_ completion: @escaping (Error?) -> Void) {
-    logDebug("Load classifiers.")
+    logDebug("Load models.")
+    
     modelQueue.async { [weak self] in
       guard let self = self else {
         completion(nil)
@@ -121,22 +104,12 @@ extension Predictor {
       }
       
       do {
-        logDebug("Loading boosted tree.")
-        let boostedTreeModelURL = self.compiledModelURL(with: "bt")
-        self.boostedTreeClassifier = try SeverityClassifier(contentsOf: boostedTreeModelURL)
-        
-        logDebug("Loading decision tree.")
-        self.decisionTreeClassifier = try SeverityClassifier(contentsOf: self.compiledModelURL(with: "dt"))
-        
-        logDebug("Loading random forest.")
-        self.randomForestClassifier = try SeverityClassifier(contentsOf: self.compiledModelURL(with: "rf"))
-        
-        logDebug("Loading logistic regression.")
-        self.logisticRegressionClassifier = try SeverityClassifier(contentsOf: self.compiledModelURL(with: "lr"))
+        logDebug("Loading severity classifier.")
+        let severityClassifierModelURL = self.compiledModelURL(with: Predictor.severityClassifierFileName)
+        self.severityClassifier = try SeverityClassifier(contentsOf: severityClassifierModelURL)
         
         logDebug("Getting creation date.")
-        let attributes = try FileManager.default.attributesOfItem(atPath: boostedTreeModelURL.path)
-        if let creationDate = attributes[.creationDate] as? Date {
+        if let creationDate = try self.creationDateOfFile(with: severityClassifierModelURL) {
           logDebug("Got creation date: \(creationDate.description)")
           DispatchQueue.main.async { self.modelUpdatedAt = creationDate }
         }
@@ -170,7 +143,9 @@ extension Predictor {
     
     DispatchQueue.main.async { [weak self] in self?.training = true }
     cancelledTraining = false
+    
 #if NON_PREVIEW
+    // Get the data table
     let table: MLDataTable
     do {
       table = try MLDataTable(dictionary: trainingData.dataTable())
@@ -182,7 +157,7 @@ extension Predictor {
     }
     logDebug("Got table: \(table)")
     
-
+    // Train the models
     modelQueue.async { [weak self] in
       do {
         guard let self = self else {
@@ -192,63 +167,30 @@ extension Predictor {
           return
         }
         
+        // Train the severity classifier
         if !self.cancelledTraining {
-          logDebug("Training boosted tree.")
-          let btClassifier = try MLBoostedTreeClassifier(trainingData: table, targetColumn: SeverityClassifierOutput.FeatureName.severity)
-          let btModelURL = self.modelURL(with: "bt")
-          try btClassifier.write(to: btModelURL, metadata: self.metadata)
-          let btCompiledModelURL = try MLModel.compileModel(at: btModelURL)
-          let btNewCompiledModelURL = self.compiledModelURL(with: "bt")
-          if FileManager.default.isDeletableFile(atPath: btNewCompiledModelURL.path) && FileManager.default.fileExists(atPath: btNewCompiledModelURL.path) {
-            try FileManager.default.removeItem(at: btNewCompiledModelURL)
+          logDebug("Training severity classifier.")
+          // Train the classifier
+          let classifier = try MLBoostedTreeClassifier(trainingData: table, targetColumn: SeverityClassifierOutput.FeatureName.severity)
+          
+          // Write the trained model to file
+          let modelURL = self.modelURL(with: Predictor.severityClassifierFileName)
+          try classifier.write(to: modelURL, metadata: self.metadata)
+          
+          // Compile the model
+          let compiledModelURL = try MLModel.compileModel(at: modelURL)
+          
+          // Delete the old compiled model
+          let newCompiledModelURL = self.compiledModelURL(with: Predictor.severityClassifierFileName)
+          if FileManager.default.isDeletableFile(atPath: newCompiledModelURL.path) && FileManager.default.fileExists(atPath: newCompiledModelURL.path) {
+            try FileManager.default.removeItem(at: newCompiledModelURL)
           }
-          try FileManager.default.moveItem(at: btCompiledModelURL, to: btNewCompiledModelURL)
-          try FileManager.default.removeItem(at: btModelURL)
-        }
-
-
-        if !self.cancelledTraining {
-          logDebug("Training decision tree.")
-          let dtClassifier = try MLDecisionTreeClassifier(trainingData: table, targetColumn: SeverityClassifierOutput.FeatureName.severity)
-          let dtModelURL = self.modelURL(with: "dt")
-          try dtClassifier.write(to: dtModelURL, metadata: self.metadata)
-          let dtCompiledModelURL = try MLModel.compileModel(at: dtModelURL)
-          let dtNewCompiledModelURL = self.compiledModelURL(with: "dt")
-          if FileManager.default.isDeletableFile(atPath: dtNewCompiledModelURL.path) && FileManager.default.fileExists(atPath: dtNewCompiledModelURL.path) {
-            try FileManager.default.removeItem(at: dtNewCompiledModelURL)
-          }
-          try FileManager.default.moveItem(at: dtCompiledModelURL, to: dtNewCompiledModelURL)
-          try FileManager.default.removeItem(at: dtModelURL)
-        }
-
-
-        if !self.cancelledTraining {
-          logDebug("Training random forest.")
-          let rfClassifier = try MLRandomForestClassifier(trainingData: table, targetColumn: SeverityClassifierOutput.FeatureName.severity)
-          let rfModelURL = self.modelURL(with: "rf")
-          try rfClassifier.write(to: rfModelURL, metadata: self.metadata)
-          let rfCompiledModelURL = try MLModel.compileModel(at: rfModelURL)
-          let rfNewCompiledModelURL = self.compiledModelURL(with: "rf")
-          if FileManager.default.isDeletableFile(atPath: rfNewCompiledModelURL.path) && FileManager.default.fileExists(atPath: rfNewCompiledModelURL.path) {
-            try FileManager.default.removeItem(at: rfNewCompiledModelURL)
-          }
-          try FileManager.default.moveItem(at: rfCompiledModelURL, to: rfNewCompiledModelURL)
-          try FileManager.default.removeItem(at: rfModelURL)
-        }
-
-
-        if !self.cancelledTraining {
-          logDebug("Training logistic regression.")
-          let lrClassifier = try MLLogisticRegressionClassifier(trainingData: table, targetColumn: SeverityClassifierOutput.FeatureName.severity)
-          let lrModelURL = self.modelURL(with: "lr")
-          try lrClassifier.write(to: lrModelURL, metadata: self.metadata)
-          let lrCompiledModelURL = try MLModel.compileModel(at: lrModelURL)
-          let lrNewCompiledModelURL = self.compiledModelURL(with: "lr")
-          if FileManager.default.isDeletableFile(atPath: lrNewCompiledModelURL.path) && FileManager.default.fileExists(atPath: lrNewCompiledModelURL.path) {
-            try FileManager.default.removeItem(at: lrNewCompiledModelURL)
-          }
-          try FileManager.default.moveItem(at: lrCompiledModelURL, to: lrNewCompiledModelURL)
-          try FileManager.default.removeItem(at: lrModelURL)
+          
+          // Move the new compiled model to the old location
+          try FileManager.default.moveItem(at: compiledModelURL, to: newCompiledModelURL)
+          
+          // Remove the pre-compiled model
+          try FileManager.default.removeItem(at: modelURL)
         }
         
         if self.cancelledTraining {
@@ -286,18 +228,11 @@ extension Predictor {
   /// Resets the predictor and its classifiers.
   func reset() {
     do {
-      boostedTreeClassifier = nil
-      try FileManager.default.removeItem(at: self.compiledModelURL(with: "bt"))
+      // Delete the compiled models
+      try FileManager.default.removeItem(at: self.compiledModelURL(with: Predictor.severityClassifierFileName))
+      severityClassifier = nil
       
-      decisionTreeClassifier = nil
-      try FileManager.default.removeItem(at: self.compiledModelURL(with: "dt"))
-      
-      randomForestClassifier = nil
-      try FileManager.default.removeItem(at: self.compiledModelURL(with: "rf"))
-      
-      logisticRegressionClassifier = nil
-      try FileManager.default.removeItem(at: self.compiledModelURL(with: "lr"))
-      
+      // Reset the rest of our variables
       modelUpdatedAt = nil
     }
     catch {
@@ -312,25 +247,30 @@ extension Predictor {
   /// - Parameter input: The predictor's input.
   /// - Returns: The predictor's output.
   func predict(_ input: SeverityClassifierInput) throws -> Prediction {
-    guard let btClassifier = boostedTreeClassifier, let dtClassifier = decisionTreeClassifier, let rfClassifier = randomForestClassifier, let lrClassifier = logisticRegressionClassifier else {
+    guard let severityClassifier = severityClassifier else {
       return .empty
     }
     
-    let btPrediction = try btClassifier.prediction(input: input)
-    let dtPrediction = try dtClassifier.prediction(input: input)
-    let rfPrediction = try rfClassifier.prediction(input: input)
-    let lrPrediction = try lrClassifier.prediction(input: input)
+    let severityPrediction = try severityClassifier.prediction(input: input)
     
     return Prediction(
-      boostedTreeOutput: Prediction.PredictionStatistic(output: btPrediction),
-      decisionTreeOutput: Prediction.PredictionStatistic(output: dtPrediction),
-      randomForestOutput: Prediction.PredictionStatistic(output: rfPrediction),
-      logisticRegressionOutput: Prediction.PredictionStatistic(output: lrPrediction))
+      severityClassifierOutput: Prediction.PredictionStatistic(
+        prediction: HKCategoryValueSeverity(title: severityPrediction.Severity)!,
+        probability: severityPrediction.SeverityProbability[severityPrediction.Severity] ?? 0.0))
   }
   
 }
 
 extension Predictor {
+  
+  /// The creation date of the file at the given URL.
+  ///
+  /// - Parameter url: The file's URL.
+  /// - Returns: The file's creation date.
+  private func creationDateOfFile(with url: URL) throws -> Date? {
+    let attributes = try FileManager.default.attributesOfItem(atPath: url.path)
+    return attributes[.creationDate] as? Date
+  }
   
   /// The URL of a model with the given name.
   ///
