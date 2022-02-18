@@ -50,6 +50,9 @@
 		3B68BDF927BDFCD3007AAAC6 /* AnalyzeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BDF827BDFCD3007AAAC6 /* AnalyzeView.swift */; };
 		3B68BDFB27BE0F00007AAAC6 /* BarGraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BDFA27BE0F00007AAAC6 /* BarGraph.swift */; };
 		3B68BDFE27BE2B57007AAAC6 /* Numeric+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BDFD27BE2B57007AAAC6 /* Numeric+Extensions.swift */; };
+		3B68BE0127BEF949007AAAC6 /* Surge in Frameworks */ = {isa = PBXBuildFile; productRef = 3B68BE0027BEF949007AAAC6 /* Surge */; };
+		3B68BE0327BF2548007AAAC6 /* HeadacheStatistics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BE0227BF2548007AAAC6 /* HeadacheStatistics.swift */; };
+		3B68BE0627BF2F98007AAAC6 /* Statistic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BE0527BF2F98007AAAC6 /* Statistic.swift */; };
 		3BDCF23E27BC213800334B8B /* Calendar+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BDCF23D27BC213800334B8B /* Calendar+Extensions.swift */; };
 		3BF5313727ACE18D00056673 /* Headache_TrackerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF5313627ACE18D00056673 /* Headache_TrackerApp.swift */; };
 		3BF5313927ACE18D00056673 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF5313827ACE18D00056673 /* ContentView.swift */; };
@@ -130,6 +133,8 @@
 		3B68BDF827BDFCD3007AAAC6 /* AnalyzeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyzeView.swift; sourceTree = "<group>"; };
 		3B68BDFA27BE0F00007AAAC6 /* BarGraph.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarGraph.swift; sourceTree = "<group>"; };
 		3B68BDFD27BE2B57007AAAC6 /* Numeric+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Numeric+Extensions.swift"; sourceTree = "<group>"; };
+		3B68BE0227BF2548007AAAC6 /* HeadacheStatistics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeadacheStatistics.swift; sourceTree = "<group>"; };
+		3B68BE0527BF2F98007AAAC6 /* Statistic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Statistic.swift; sourceTree = "<group>"; };
 		3BDCF23D27BC213800334B8B /* Calendar+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar+Extensions.swift"; sourceTree = "<group>"; };
 		3BF5313327ACE18D00056673 /* Headache Tracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Headache Tracker.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3BF5313627ACE18D00056673 /* Headache_TrackerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Headache_TrackerApp.swift; sourceTree = "<group>"; };
@@ -154,6 +159,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3BF5317227ACEC7900056673 /* Logger in Frameworks */,
+				3B68BE0127BEF949007AAAC6 /* Surge in Frameworks */,
 				3BF5316D27ACEAC600056673 /* DataController in Frameworks */,
 				3B09191F27BD84FE00844F6C /* Shapes in Frameworks */,
 				3BF5316827ACE1DA00056673 /* HealthKit.framework in Frameworks */,
@@ -227,6 +233,7 @@
 				3B39DADF27AD00A900D39BB5 /* Extensions */,
 				3B4BA70127B762D600F38851 /* HealthKit */,
 				3B4BA70227B762EE00F38851 /* Prediction */,
+				3B68BE0427BF2F83007AAAC6 /* Statistics */,
 				3B39DAE127AD068300D39BB5 /* AppSettings.swift */,
 				3B09190E27BCA52700844F6C /* BackgroundTask.swift */,
 				3B09190827BC7D8000844F6C /* Constants.swift */,
@@ -308,6 +315,15 @@
 				3B09192027BD851700844F6C /* LineGraph.swift */,
 			);
 			path = Graphs;
+			sourceTree = "<group>";
+		};
+		3B68BE0427BF2F83007AAAC6 /* Statistics */ = {
+			isa = PBXGroup;
+			children = (
+				3B68BE0227BF2548007AAAC6 /* HeadacheStatistics.swift */,
+				3B68BE0527BF2F98007AAAC6 /* Statistic.swift */,
+			);
+			path = Statistics;
 			sourceTree = "<group>";
 		};
 		3BF5312A27ACE18D00056673 = {
@@ -399,6 +415,7 @@
 				3BF5316C27ACEAC600056673 /* DataController */,
 				3BF5317127ACEC7900056673 /* Logger */,
 				3B09191E27BD84FE00844F6C /* Shapes */,
+				3B68BE0027BEF949007AAAC6 /* Surge */,
 			);
 			productName = "Headache Tracker";
 			productReference = 3BF5313327ACE18D00056673 /* Headache Tracker.app */;
@@ -476,6 +493,7 @@
 				3BF5316B27ACEAC600056673 /* XCRemoteSwiftPackageReference "DataController" */,
 				3BF5317027ACEC7900056673 /* XCRemoteSwiftPackageReference "Logger" */,
 				3B09191D27BD84FD00844F6C /* XCRemoteSwiftPackageReference "swiftui-shapes" */,
+				3B68BDFF27BEF949007AAAC6 /* XCRemoteSwiftPackageReference "Surge" */,
 			);
 			productRefGroup = 3BF5313427ACE18D00056673 /* Products */;
 			projectDirPath = "";
@@ -572,11 +590,13 @@
 				3B051A9527B18E3C0017131D /* HeadacheAlertRequest.swift in Sources */,
 				3B09192127BD851700844F6C /* LineGraph.swift in Sources */,
 				3B051AA527B379DA0017131D /* Bundle+Extensions.swift in Sources */,
+				3B68BE0327BF2548007AAAC6 /* HeadacheStatistics.swift in Sources */,
 				3B4BA70627B7642A00F38851 /* HeadacheClassifierOutput.swift in Sources */,
 				3BF5314327ACE18F00056673 /* Headache_Tracker.xcdatamodeld in Sources */,
 				3B4BA6FF27B7629800F38851 /* HeadacheClassifier.swift in Sources */,
 				3B051A9E27B3555E0017131D /* ConfirmationAlert.swift in Sources */,
 				3BDCF23E27BC213800334B8B /* Calendar+Extensions.swift in Sources */,
+				3B68BE0627BF2F98007AAAC6 /* Statistic.swift in Sources */,
 				3B68BDF927BDFCD3007AAAC6 /* AnalyzeView.swift in Sources */,
 				3B051A8D27B0F4490017131D /* DescribableError.swift in Sources */,
 				3B09191627BCD38300844F6C /* DurationView.swift in Sources */,
@@ -934,6 +954,14 @@
 				minimumVersion = 1.1.0;
 			};
 		};
+		3B68BDFF27BEF949007AAAC6 /* XCRemoteSwiftPackageReference "Surge" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "git@github.com:Jounce/Surge.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.3.0;
+			};
+		};
 		3BF5316B27ACEAC600056673 /* XCRemoteSwiftPackageReference "DataController" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "git@github.com:colinc86/DataController.git";
@@ -957,6 +985,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 3B09191D27BD84FD00844F6C /* XCRemoteSwiftPackageReference "swiftui-shapes" */;
 			productName = Shapes;
+		};
+		3B68BE0027BEF949007AAAC6 /* Surge */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3B68BDFF27BEF949007AAAC6 /* XCRemoteSwiftPackageReference "Surge" */;
+			productName = Surge;
 		};
 		3BF5316C27ACEAC600056673 /* DataController */ = {
 			isa = XCSwiftPackageProductDependency;

@@ -5,6 +5,7 @@
 //  Created by Colin Campbell on 2/16/22.
 //
 
+import Surge
 import SwiftUI
 import HealthKit
 
@@ -15,124 +16,90 @@ struct AnalyzeView: View {
   /// The main view context.
   @Environment(\.managedObjectContext) private var viewContext
   
-  /// The resolveed headaches fetch request.
+  /// The resolved headaches fetch request.
   /// Returns a list of all resolved headaches.
   @FetchRequest(
-    sortDescriptors: [NSSortDescriptor(keyPath: \Headache.createdAt, ascending: false)],
+    sortDescriptors: [NSSortDescriptor(keyPath: \Headache.createdAt, ascending: true)],
     predicate: NSPredicate(format: "resolved = %@", NSNumber(booleanLiteral: true)),
     animation: .default)
   private var resolvedHeadaches: FetchedResults<Headache>
   
-  private var peakSeverities: [Double] {
-    return resolvedHeadaches.map({ Double($0.severityRange.upperBound.orderingValue) })
-  }
-  
-  private var peakSeverityAverage: Double {
-    guard peakSeverities.count > 0 else { return 0.0 }
-    return peakSeverities.reduce(0.0, +) / Double(peakSeverities.count)
-  }
-  
-  private var peakSeverityAverageString: String {
-    let roundedPeakSeverity = peakSeverityAverage.round(nearest: 0.5)
-    let lowerBound = Int(floor(roundedPeakSeverity))
-    let upperBound = Int(ceil(roundedPeakSeverity))
-    guard let lowerSeverity = HKCategoryValueSeverity(orderingValue: lowerBound),
-          let upperSeverity = HKCategoryValueSeverity(orderingValue: upperBound) else {
-            return ""
-          }
-    return HealthKitManager.SeverityRange(lowerBound: lowerSeverity, upperBound: upperSeverity).description
-  }
-  
-  private var averageSeverities: [Double] {
-    return resolvedHeadaches.map({ Double($0.severityRange.average) })
-  }
-  
-  private var averageSeverityAverage: Double {
-    guard averageSeverities.count > 0 else { return 0.0 }
-    return averageSeverities.reduce(0.0, +) / Double(averageSeverities.count)
-  }
-  
-  private var averageSeverityAverageString: String {
-    let roundedPeakSeverity = averageSeverityAverage.round(nearest: 0.5)
-    let lowerBound = Int(floor(roundedPeakSeverity))
-    let upperBound = Int(ceil(roundedPeakSeverity))
-    guard let lowerSeverity = HKCategoryValueSeverity(orderingValue: lowerBound),
-          let upperSeverity = HKCategoryValueSeverity(orderingValue: upperBound) else {
-            return ""
-          }
-    return HealthKitManager.SeverityRange(lowerBound: lowerSeverity, upperBound: upperSeverity).description
-  }
-  
-  private var onsets: [Double] {
-    return resolvedHeadaches.map { headache in
-      guard let startTime = headache.startTime else {
-        return 0.0
-      }
-      return Calendar.current.timeIntervalSinceMidnight(startTime)
-    }
-  }
-  
-  private var onsetAverage: Double {
-    guard onsets.count > 0 else { return 0.0 }
-    return onsets.reduce(0.0, +) / Double(onsets.count)
-  }
-  
-  private var onsetAverageDate: Date {
-    return Calendar.current.startOfDay(for: Date()).addingTimeInterval(onsetAverage)
-  }
-  
-  private var durations: [Double] {
-    return resolvedHeadaches.map({ $0.duration })
-  }
-  
-  private var durationAverage: Double {
-    guard durations.count > 0 else { return 0.0 }
-    return durations.reduce(0.0, +) / Double(durations.count)
-  }
+  /// The headache statistics to display.
+  @State private var statistics: HeadacheStatistics?
   
   // MARK: View body
   
   var body: some View {
     NavigationView {
       List {
-        Section {
-          BarGraph(series: peakSeverities, average: peakSeverityAverage, gradient: Gradient(colors: [.cyan, .teal]))
-            .frame(height: 100)
-            .cell(title: "Peak Severity", systemImage: "dial.max.fill", foregroundColor: .cyan)
-          SubtitleCell(title: "Average", subtitle: peakSeverityAverageString)
-        } header: {
-          SectionTitleView(title: "Severity")
-        }
-        
-        Section {
-          BarGraph(series: averageSeverities, average: averageSeverityAverage, gradient: Gradient(colors: [.cyan, .teal]))
-            .frame(height: 100)
-            .cell(title: "Average Severity", systemImage: "dial.max.fill", foregroundColor: .cyan)
-          SubtitleCell(title: "Average", subtitle: averageSeverityAverageString)
-        }
-        
-        Section {
-          BarGraph(series: onsets, average: onsetAverage, gradient: Gradient(colors: [.purple, .indigo]))
-            .frame(height: 100)
-            .cell(title: "Onset", systemImage: "clock.fill", foregroundColor: .purple)
-          SubtitleCell(title: "Average", subtitle: onsetAverageDate.formatted(date: .omitted, time: .standard))
-        } header: {
-          SectionTitleView(title: "Onset")
-        }
-        
-        Section {
-          BarGraph(series: durations, average: durationAverage, gradient: Gradient(colors: [.green, .mint]))
-            .frame(height: 100)
-            .cell(title: "Duration", systemImage: "timer", foregroundColor: .green)
-          if let formattedAverage = Formatters.dateComponentsFormatter.string(from: durationAverage) {
-            SubtitleCell(title: "Average", subtitle: formattedAverage)
+        if let statistics = statistics {
+          Section {
+            BarGraph(
+              series: statistics.peaks.signal,
+              yAxis: ["Not Present", "Present", "Mild", "Moderate", "Severe"],
+              gradient: Gradient(colors: [.cyan, .teal]),
+              staticCount: 28,
+              staticMax: 4)
+              .frame(height: 100)
+              .cell(title: "Peak Severity", systemImage: "dial.max.fill", foregroundColor: .cyan)
+            SubtitleCell(title: "Average", subtitle: statistics.peaks.meanDescription)
+          } header: {
+            SectionTitleView(title: "Severity")
           }
-        } header: {
-          SectionTitleView(title: "Duration")
+          
+          Section {
+            BarGraph(
+              series: statistics.averages.signal,
+              yAxis: ["Not Present", "Present", "Mild", "Moderate", "Severe"],
+              gradient: Gradient(colors: [.cyan, .teal]),
+              staticCount: 28,
+              staticMax: 4)
+              .frame(height: 100)
+              .cell(title: "Average Severity", systemImage: "dial.max.fill", foregroundColor: .cyan)
+            SubtitleCell(title: "Average", subtitle: statistics.averages.meanDescription)
+          }
+          
+          Section {
+            BarGraph(
+              series: statistics.onsets.signal,
+              yAxis: ["12 AM", "6 AM", "12 PM", "6 PM", "12 AM"],
+              gradient: Gradient(colors: [.purple, .indigo]),
+              staticCount: 28,
+              staticMax: 86400)
+              .frame(height: 100)
+              .cell(title: "Onset", systemImage: "clock.fill", foregroundColor: .purple)
+            SubtitleCell(title: "Average", subtitle: statistics.onsets.meanDescription)
+          } header: {
+            SectionTitleView(title: "Onset")
+          }
+          
+          Section {
+            BarGraph(
+              series: statistics.durations.signal,
+              yAxis: ["0m", Formatters.dateComponentsFormatter.string(from: statistics.durations.max ) ?? "-"],
+              gradient: Gradient(colors: [.green, .mint]),
+              staticCount: 28)
+              .frame(height: 100)
+              .cell(title: "Duration", systemImage: "timer", foregroundColor: .green)
+            SubtitleCell(title: "Average", subtitle: statistics.durations.meanDescription)
+          } header: {
+            SectionTitleView(title: "Duration")
+          }
         }
       }
       .navigationTitle("Analyze")
     }
+    .onAppear(perform: appeared)
+  }
+  
+}
+
+extension AnalyzeView {
+  
+  /// Called when the view appears.
+  func appeared() {
+    let now = Date()
+    statistics = HeadacheStatistics(headaches: resolvedHeadaches.sorted(by: { $0.startTime ?? now < $1.startTime ?? now }))
   }
   
 }

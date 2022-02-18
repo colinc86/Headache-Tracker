@@ -18,4 +18,11 @@ struct Formatters {
     return formatter
   }()
   
+  /// The date formatter to use when displaying times from dates.
+  static let timeFormatter: DateFormatter = {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "h:mm a"
+    return formatter
+  }()
+  
 }

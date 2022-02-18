@@ -27,15 +27,28 @@ struct LineGraph: View {
   // MARK: View body
   
   var body: some View {
-    if series.count > 1 {
+    HStack {
+      VStack(alignment: .trailing) {
+        Text(HKCategoryValueSeverity.severe.title)
+        Spacer()
+        Text(HKCategoryValueSeverity.moderate.title)
+        Spacer()
+        Text(HKCategoryValueSeverity.mild.title)
+        Spacer()
+        Text(HKCategoryValueSeverity.unspecified.title)
+        Spacer()
+        Text(HKCategoryValueSeverity.notPresent.title)
+      }
+      .font(.caption)
+      .foregroundColor(.secondary)
+      
+      Divider().padding(0)
+      
       QuadCurve(unitPoints: pathPoints())
         .trim(from: 0.0, to: trim)
         .stroke(LinearGradient(gradient: gradient, startPoint: .bottom, endPoint: .top), lineWidth: 4.0)
         .animation(.easeInOut(duration: 0.5), value: trim)
         .onAppear(perform: { trim = 1.0 })
-    }
-    else {
-      EmptyView()
     }
   }
   
@@ -71,5 +84,6 @@ struct LineGraph_Previews: PreviewProvider {
     LineGraph(series: [
       .mild, .notPresent, .unspecified
     ], gradient: Gradient(colors: [.cyan, .purple]))
+    .previewLayout(.fixed(width: 428, height: 200))
   }
 }

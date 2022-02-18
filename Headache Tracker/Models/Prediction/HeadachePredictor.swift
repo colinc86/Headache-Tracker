@@ -199,8 +199,8 @@ extension HeadachePredictor {
           try FileManager.default.moveItem(at: btCompiledModelURL, to: btNewCompiledModelURL)
           try FileManager.default.removeItem(at: btModelURL)
         }
-        
-        
+
+
         if !self.cancelledTraining {
           logDebug("Training decision tree.")
           let dtClassifier = try MLDecisionTreeClassifier(trainingData: table, targetColumn: HeadacheClassifierOutput.FeatureName.severity)
@@ -214,8 +214,8 @@ extension HeadachePredictor {
           try FileManager.default.moveItem(at: dtCompiledModelURL, to: dtNewCompiledModelURL)
           try FileManager.default.removeItem(at: dtModelURL)
         }
-        
-        
+
+
         if !self.cancelledTraining {
           logDebug("Training random forest.")
           let rfClassifier = try MLRandomForestClassifier(trainingData: table, targetColumn: HeadacheClassifierOutput.FeatureName.severity)
@@ -229,8 +229,8 @@ extension HeadachePredictor {
           try FileManager.default.moveItem(at: rfCompiledModelURL, to: rfNewCompiledModelURL)
           try FileManager.default.removeItem(at: rfModelURL)
         }
-        
-        
+
+
         if !self.cancelledTraining {
           logDebug("Training logistic regression.")
           let lrClassifier = try MLLogisticRegressionClassifier(trainingData: table, targetColumn: HeadacheClassifierOutput.FeatureName.severity)

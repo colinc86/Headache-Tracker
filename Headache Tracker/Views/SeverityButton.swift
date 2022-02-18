@@ -50,12 +50,12 @@ struct SeverityButton: View {
                   .stroke(severity.uiColor.opacity(0.25), lineWidth: 4.0)
               )
             
-            if let image = severity.image {
-              image
-                .resizable()
-                .frame(width: dimension, height: dimension, alignment: .center)
-                .foregroundColor(selected ? .primary : Color(UIColor.secondarySystemGroupedBackground))
-            }
+//            if let image = severity.image {
+//              image
+//                .resizable()
+//                .frame(width: dimension, height: dimension, alignment: .center)
+//                .foregroundColor(selected ? .primary : Color(UIColor.secondarySystemGroupedBackground))
+//            }
           }
         }
         .buttonStyle(BorderlessButtonStyle())

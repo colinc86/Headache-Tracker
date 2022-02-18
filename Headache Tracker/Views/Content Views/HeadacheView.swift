@@ -52,18 +52,21 @@ struct HeadacheView: View {
   
   var body: some View {
     List {
-      Section("Headache") {
+      Section {
         SubtitleCell(title: "Onset", subtitle: headache.startTime?.formatted() ?? "N/A")
         SubtitleCell(title: "Duration", subtitle: Formatters.dateComponentsFormatter.string(from: headache.duration) ?? "0 min")
           .id(durationID)
         
         SubtitleCell(title: "Severity", subtitle: headache.severityRange.description)
         SubtitleCell(title: "Status", subtitle: headache.resolved ? "Resolved" : "Unresolved")
+      } header: {
+        SectionTitleView(title: "Headache")
       }
       
-      Section("Progression") {
+      Section {
         LineGraph(series: headache.severitySignal, gradient: Gradient(colors: headache.severityColorRange))
           .frame(height: 100.0)
+          .padding([.top, .bottom], 10)
         
         if headache.severities?.count ?? 0 > 1 {
           ForEach(headache.severitiesArray, id: \.self) { severity in
@@ -86,6 +89,8 @@ struct HeadacheView: View {
             SubtitleCell(title: severity.severity.title, subtitle: severity.startTime?.formatted() ?? "N/A")
           }
         }
+      } header: {
+        SectionTitleView(title: "Progression")
       }
       
       Section {

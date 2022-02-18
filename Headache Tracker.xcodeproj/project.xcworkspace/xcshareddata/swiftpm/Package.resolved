@@ -29,6 +29,15 @@
         }
       },
       {
+        "package": "Surge",
+        "repositoryURL": "git@github.com:Jounce/Surge.git",
+        "state": {
+          "branch": null,
+          "revision": "6e4a47e63da8801afe6188cf039e9f04eb577721",
+          "version": "2.3.2"
+        }
+      },
+      {
         "package": "swift-log",
         "repositoryURL": "https://github.com/apple/swift-log.git",
         "state": {

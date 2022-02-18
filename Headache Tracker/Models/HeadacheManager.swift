@@ -468,7 +468,7 @@ extension HeadacheManager {
   ///   - completion: Called after the alert has been added to notification center.
   private func presentPredictionAlert(with prediction: HeadachePredictor.Prediction?, completion: @escaping (Error?) -> Void) {
     // Only continue if we have a prediction and prediction alerts are turned on
-    guard checkInAlerts, let prediction = prediction, prediction.randomForestOutput.severity != .notPresent else {
+    guard realTimeAlerts, let prediction = prediction, prediction.randomForestOutput.severity != .notPresent else {
       completion(nil)
       return
     }
@@ -770,51 +770,52 @@ extension HeadacheManager {
     })
     
     // Set the task's expiration handler
-    task.expirationHandler = { [weak task, weak self] in
+    task.expirationHandler = { [weak self] in
       // Cancel the prediction
       self?.cancelClassificationInput()
-      task?.setTaskCompleted(success: false)
     }
     
     // Get the current headache
-    currentHeadache { [weak self] headache, context in
-      if headache == nil {
-        // There's no current headache, so run a prediction
-        self?.getCurrentClassifierInput { input, error in
-          if let error = error {
-            // There was an error with getting the input
-            logError("Error getting classifier input: \(error)")
-            task.setTaskCompleted(success: false)
+    var hasCurrentHeadache = false
+    let context = DataController.shared.newNestedBackgroundContext()
+    context.performAndWait { [weak context] in
+      let request = Headache.fetchRequest()
+      request.predicate = NSPredicate(format: "resolved = %@", NSNumber(booleanLiteral: false))
+      hasCurrentHeadache = (try? context?.fetch(request))?.isEmpty == false
+    }
+    
+    if hasCurrentHeadache {
+      // We have a current headache, so stop here
+      task.setTaskCompleted(success: true)
+    }
+    else {
+      // There's no current headache, so run a prediction
+      getCurrentClassifierInput { [weak self] input, error in
+        if let error = error {
+          // There was an error with getting the input
+          logError("Error getting classifier input: \(error)")
+          task.setTaskCompleted(success: false)
+        }
+        else if let input = input {
+          // We got the input, so present the prediction
+          do {
+            self?.presentPredictionAlert(with: try self?.headachePredictor?.predict(input), completion: { error in
+              if let error = error {
+                logError("Error presenting alert: \(error)")
+              }
+              task.setTaskCompleted(success: error == nil)
+            })
           }
-          else if let input = input {
-            // We got the input, so present the prediction
-            do {
-              self?.presentPredictionAlert(with: try self?.headachePredictor?.predict(input), completion: { error in
-                if let error = error {
-                  logError("Error presenting alert: \(error)")
-                }
-                task.setTaskCompleted(success: error == nil)
-              })
-            }
-            catch {
-              // There was an error predicting
-              logError("Error getting prediction: \(error)")
-              task.setTaskCompleted(success: false)
-            }
-          }
-          else {
-            // Something else went wrong
+          catch {
+            // There was an error predicting
+            logError("Error getting prediction: \(error)")
             task.setTaskCompleted(success: false)
           }
         }
-      }
-      else {
-        // We have a current headache, so stop here
-        task.setTaskCompleted(success: true)
-      }
-    } completion: { error in
-      if let error = error {
-        logError("Error getting current headache: \(error)")
+        else {
+          // Something else went wrong
+          task.setTaskCompleted(success: false)
+        }
       }
     }
   }

@@ -19,7 +19,7 @@ struct SectionTitleView: View {
       .font(.headline)
       .fontWeight(.heavy)
       .textCase(.none)
-      .foregroundColor(.white)
+      .foregroundColor(.primary)
       .padding(.top, 0)
       .padding(.bottom, 4)
       .offset(x: -16)
