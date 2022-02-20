@@ -15,6 +15,8 @@ class MotionManager {
   
   // MARK: Types
   
+  typealias BarometricPressureCompletion = (Measurement<UnitPressure>?, Error?) -> Void
+  
   enum MotionManagerError: Error {
     case userNotPermitted
     case notAvailable
@@ -28,6 +30,9 @@ class MotionManager {
   
   /// The altimeter.
   private let altimeter = CMAltimeter()
+  private var isUpdatingPressure = false
+  private var pendingCompletionBlocks = [BarometricPressureCompletion]()
+  private var pendingCompletionBlocksSemaphore = DispatchSemaphore(value: 1)
     
   /// The manager's operation queue.
   private lazy var operationQueue: OperationQueue = {
@@ -35,8 +40,6 @@ class MotionManager {
     queue.maxConcurrentOperationCount = 1
     return queue
   }()
-  
-  private var updateCount = 0
   
 }
 
@@ -56,11 +59,14 @@ extension MotionManager {
   
   /// Cancels the current barometric pressure reading.
   func cancelReading() {
+    pendingCompletionBlocksSemaphore.wait()
+    defer { pendingCompletionBlocksSemaphore.signal() }
+    
     logDebug("Cancel barometer reading.")
-    updateCount -= 1
-    if updateCount == 0 {
-      altimeter.stopRelativeAltitudeUpdates()
-    }
+    pendingCompletionBlocks.removeAll()
+    
+    altimeter.stopRelativeAltitudeUpdates()
+    isUpdatingPressure = false
   }
   
   /// Gets the current barometric pressure at the device.
@@ -81,26 +87,43 @@ extension MotionManager {
       return
     }
     
-    updateCount += 1
-    altimeter.startRelativeAltitudeUpdates(to: operationQueue) { [weak self] relativeAltitudeData, error in
-      if let relativeAltitudeData = relativeAltitudeData {
-        logDebug("Got relative altitude data.")
-        completion(Measurement(value: relativeAltitudeData.pressure.doubleValue, unit: .kilopascals), error)
+    pendingCompletionBlocksSemaphore.wait()
+    defer { pendingCompletionBlocksSemaphore.signal() }
+    
+    pendingCompletionBlocks.append(completion)
+    
+    if !isUpdatingPressure {
+      isUpdatingPressure = true
+      altimeter.startRelativeAltitudeUpdates(to: operationQueue, withHandler: relativeAltitudeUpdate)
+    }
+  }
+  
+}
+
+extension MotionManager {
+  
+  private func relativeAltitudeUpdate(data: CMAltitudeData?, error: Error?) {
+    pendingCompletionBlocksSemaphore.wait()
+    defer { pendingCompletionBlocksSemaphore.signal() }
+    
+    if let data = data {
+      logDebug("Got relative altitude data.")
+      for completion in pendingCompletionBlocks {
+        completion(Measurement(value: data.pressure.doubleValue, unit: .kilopascals), error)
       }
-      else {
-        if let error = error {
-          logError("Error getting relative altitude data: \(error)")
-        }
-        
+    }
+    else {
+      for completion in pendingCompletionBlocks {
         completion(nil, error)
       }
-      
-      self?.updateCount -= 1
-      if self?.updateCount == 0 {
-        self?.altimeter.stopRelativeAltitudeUpdates()
-      }
-      logDebug("Finished barometer updates.")
     }
+    
+    pendingCompletionBlocks.removeAll()
+    
+    altimeter.stopRelativeAltitudeUpdates()
+    isUpdatingPressure = false
+    
+    logDebug("Finished barometer updates.")
   }
   
 }

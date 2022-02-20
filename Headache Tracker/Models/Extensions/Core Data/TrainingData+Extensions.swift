@@ -126,7 +126,7 @@ extension Array where Element == TrainingData {
     
     var outlooks = [String]()
     for i in 0 ..< count {
-      // If we're in a headache thn we're done
+      // If we're in a headache then we're done
       if self[i].severity?.headache != nil {
         outlooks.append(OutlookClassifierOutput.headacheOutlook)
         continue
@@ -138,10 +138,10 @@ extension Array where Element == TrainingData {
         continue
       }
       
-      // Is there a headache today?
+      // Is there a headache later today?
       if contains(where: { data in
-        if data != self[i], let date = data.timestamp {
-          return Calendar.current.numberOfDaysBetween(date, and: timestamp) == 0
+        if let date = data.timestamp, date > timestamp {
+          return Calendar.current.numberOfDaysBetween(date, and: timestamp) == 0 && data.severity?.headache != nil
         }
         return false
       }) {

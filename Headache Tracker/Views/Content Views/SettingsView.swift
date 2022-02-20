@@ -129,10 +129,18 @@ struct SettingsView: View {
         
         // Debug
         Section("Debug") {
-          Button("Train") {
+          Button("Train Models") {
             headacheManager.trainClassifiers { error in
               if let error = error {
                 logError("Error training classifiers: \(error)")
+              }
+            }
+          }
+          
+          Button("Clean Data") {
+            headacheManager.cleanTrainingData { error in
+              if let error = error {
+                logError("Error cleaning data: \(error)")
               }
             }
           }

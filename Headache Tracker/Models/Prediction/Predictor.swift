@@ -181,6 +181,10 @@ extension Predictor {
       return
     }
     
+    for data in trainingData {
+      print("\(data.timestamp ?? Date()): \(data.severity?.headache == nil ? "FALSE" : "TRUE"): \(data.severity == nil ? "-" : data.severity!.severity.title)")
+    }
+    
     logDebug("Train with \(trainingData.count) training data.")
     trainingBackgroundTask.begin(expired: cancelTraining)
     

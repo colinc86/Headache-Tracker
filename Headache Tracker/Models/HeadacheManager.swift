@@ -668,7 +668,7 @@ extension HeadacheManager {
       return
     }
     
-    self.trainingQueue.async {
+    trainingQueue.async { [weak self] in
       let context = DataController.shared.newNestedBackgroundContext()
       
       logDebug("Fetching all training data...")
@@ -676,7 +676,44 @@ extension HeadacheManager {
       let allTrainingData = (try? context.fetch(request)) ?? []
       
       logDebug("Training classifiers...")
-      self.predictor?.train(with: allTrainingData, completion: completion)
+      self?.predictor?.train(with: allTrainingData, completion: completion)
+    }
+  }
+  
+  func cleanTrainingData(_ completion: @escaping (Error?) -> Void) {
+    guard !testing else {
+      return
+    }
+    
+    trainingQueue.async {
+      let context = DataController.shared.newNestedBackgroundContext()
+      
+      logDebug("Fetching all training data...")
+      let request = TrainingData.fetchRequest()
+      let allTrainingData = (try? context.fetch(request)) ?? []
+      
+      logDebug("Cleaning training data...")
+      var currentDate: Date?
+      
+      for data in allTrainingData {
+        guard data.severity?.headache == nil, let timestamp = data.timestamp else {
+          continue
+        }
+        
+        if let date = currentDate {
+          if timestamp.timeIntervalSince(date) > 120.0 {
+            currentDate = timestamp
+          }
+          else {
+            context.delete(data)
+          }
+        }
+        else {
+          currentDate = timestamp
+        }
+      }
+      
+      DataController.shared.saveBackgroundAndViewContexts(context, completion)
     }
   }
   
