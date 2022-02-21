@@ -37,6 +37,12 @@ struct SettingsView: View {
   /// The real-time alerts setting.
   @AppStorage(AppSettings.realTimeAlerts) private var realTimeAlerts = false
   
+  /// The daily outlook alerts setting.
+  @AppStorage(AppSettings.dailyOutlookAlerts) private var dailyOutlookAlerts = false
+  
+  /// The daily outlook alert time.
+  @AppStorage(AppSettings.dailyOutlookTime) private var dailyOutlookTime = TimeInterval(28800.0)
+  
   /// The learn and predict setting.
   @AppStorage(AppSettings.learnAndPredict) private var learnAndPredict = false
     
@@ -54,6 +60,15 @@ struct SettingsView: View {
           }
         }
       }
+    }
+  }
+  
+  /// The binding to modify the daily outlook time.
+  var dailyOutlookDate: Binding<Date> {
+    Binding<Date> {
+      return Calendar.current.startOfDay(for: Date()).addingTimeInterval(dailyOutlookTime)
+    } set: { newValue in
+      dailyOutlookTime = Calendar.current.timeIntervalSinceMidnight(newValue)
     }
   }
   
@@ -93,10 +108,20 @@ struct SettingsView: View {
         
         // Notifications
         Section {
-          Toggle(isOn: $realTimeAlerts) {
-            Text("Predictions")
+          if learnAndPredict {
+            Toggle(isOn: $dailyOutlookAlerts) {
+              Text("Daily Outlook")
+            }
+            .onChange(of: dailyOutlookAlerts, perform: dailyOutlookAlertsChanged)
+            
+            DatePicker("Daily Outlook Time", selection: dailyOutlookDate, displayedComponents: .hourAndMinute)
+              .disabled(!dailyOutlookAlerts)
+            
+            Toggle(isOn: $realTimeAlerts) {
+              Text("Hourly Predictions")
+            }
+            .onChange(of: realTimeAlerts, perform: realTimeAlertsChanged)
           }
-          .disabled(!learnAndPredict)
           
           Toggle(isOn: $checkInAlerts) {
             Text("Check-Ins")
@@ -148,6 +173,7 @@ struct SettingsView: View {
       }
       .navigationTitle("Settings")
     }
+    .navigationViewStyle(StackNavigationViewStyle())
   }
   
 }
@@ -159,6 +185,7 @@ extension SettingsView {
   /// - Parameter newValue: The new `learnAndPredict` value.
   private func learnAndPredictChanged(_ newValue: Bool) {
     if newValue {
+      headacheManager.scheduleTrainingRefreshTask()
       headacheManager.trainClassifiers { error in
         if let error = error {
           logError("Error training classifiers: \(error)")
@@ -166,7 +193,32 @@ extension SettingsView {
       }
     }
     else {
+      headacheManager.cancelTrainingProcessingTask()
       headacheManager.resetPrediction()
+    }
+  }
+  
+  /// Called when the `dailyOutlookAlerts` setting changes.
+  ///
+  /// - Parameter newValue: The new `dailyOutlookAlerts` value.
+  private func dailyOutlookAlertsChanged(_ newValue: Bool) {
+    if newValue && learnAndPredict {
+      headacheManager.scheduleOutlookRefreshTask()
+    }
+    else {
+      headacheManager.cancelOutlookRefreshTask()
+    }
+  }
+  
+  /// Called when the `realTimeAlerts` setting changes.
+  ///
+  /// - Parameter newValue: The new `realTimeAlerts` value.
+  private func realTimeAlertsChanged(_ newValue: Bool) {
+    if newValue && learnAndPredict {
+      headacheManager.schedulePredictionRefreshTask()
+    }
+    else {
+      headacheManager.cancelPredictionRefreshTask()
     }
   }
   

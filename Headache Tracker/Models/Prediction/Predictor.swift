@@ -181,10 +181,6 @@ extension Predictor {
       return
     }
     
-    for data in trainingData {
-      print("\(data.timestamp ?? Date()): \(data.severity?.headache == nil ? "FALSE" : "TRUE"): \(data.severity == nil ? "-" : data.severity!.severity.title)")
-    }
-    
     logDebug("Train with \(trainingData.count) training data.")
     trainingBackgroundTask.begin(expired: cancelTraining)
     
@@ -200,6 +196,7 @@ extension Predictor {
     
 #if NON_PREVIEW
     // Get the data table
+    trainingData.setVolitileVariables()
     let outlookTable: MLDataTable
     let severityTable: MLDataTable
     let onsetTable: MLDataTable
@@ -231,18 +228,7 @@ extension Predictor {
           let classifier = try MLBoostedTreeClassifier(trainingData: outlookTable, targetColumn: OutlookClassifierOutput.FeatureName.outlook)
           
           // Write the trained model to file
-          let modelURL = self.modelURL(with: Predictor.outlookClassifierFileName)
-          try classifier.write(to: modelURL, metadata: self.metadata)
-          
-          // Compile the model
-          let newCompiledModelURL = try MLModel.compileModel(at: modelURL)
-          
-          // Replace the old compiled model with the new one
-          let compiledModelURL = self.compiledModelURL(with: Predictor.outlookClassifierFileName)
-          _ = try FileManager.default.replaceItemAt(compiledModelURL, withItemAt: newCompiledModelURL)
-          
-          // Remove the pre-compiled model
-          try FileManager.default.removeItem(at: modelURL)
+          try self.writeModel(classifier, toFileWithName: Predictor.outlookClassifierFileName)
         }
         
         // Train the severity classifier
@@ -252,18 +238,7 @@ extension Predictor {
           let classifier = try MLBoostedTreeClassifier(trainingData: severityTable, targetColumn: SeverityClassifierOutput.FeatureName.severity)
           
           // Write the trained model to file
-          let modelURL = self.modelURL(with: Predictor.severityClassifierFileName)
-          try classifier.write(to: modelURL, metadata: self.metadata)
-          
-          // Compile the model
-          let newCompiledModelURL = try MLModel.compileModel(at: modelURL)
-          
-          // Replace the old compiled model with the new one
-          let compiledModelURL = self.compiledModelURL(with: Predictor.severityClassifierFileName)
-          _ = try FileManager.default.replaceItemAt(compiledModelURL, withItemAt: newCompiledModelURL)
-          
-          // Remove the pre-compiled model
-          try FileManager.default.removeItem(at: modelURL)
+          try self.writeModel(classifier, toFileWithName: Predictor.severityClassifierFileName)
         }
         
         // Train the onset regressor
@@ -273,18 +248,7 @@ extension Predictor {
           let regressor = try MLBoostedTreeRegressor(trainingData: onsetTable, targetColumn: OnsetRegressorOutput.FeatureName.onset)
           
           // Write the trained model to file
-          let modelURL = self.modelURL(with: Predictor.onsetRegressorFileName)
-          try regressor.write(to: modelURL, metadata: self.metadata)
-          
-          // Compile the model
-          let newCompiledModelURL = try MLModel.compileModel(at: modelURL)
-          
-          // Replace the old compiled model with the new one
-          let compiledModelURL = self.compiledModelURL(with: Predictor.onsetRegressorFileName)
-          _ = try FileManager.default.replaceItemAt(compiledModelURL, withItemAt: newCompiledModelURL)
-          
-          // Remove the pre-compiled model
-          try FileManager.default.removeItem(at: modelURL)
+          try self.writeModel(regressor, toFileWithName: Predictor.onsetRegressorFileName)
         }
         
         // Train the duration regressor
@@ -294,18 +258,7 @@ extension Predictor {
           let regressor = try MLBoostedTreeRegressor(trainingData: durationTable, targetColumn: DurationRegressorOutput.FeatureName.duration)
           
           // Write the trained model to file
-          let modelURL = self.modelURL(with: Predictor.durationRegressorFileName)
-          try regressor.write(to: modelURL, metadata: self.metadata)
-          
-          // Compile the model
-          let newCompiledModelURL = try MLModel.compileModel(at: modelURL)
-          
-          // Replace the old compiled model with the new one
-          let compiledModelURL = self.compiledModelURL(with: Predictor.durationRegressorFileName)
-          _ = try FileManager.default.replaceItemAt(compiledModelURL, withItemAt: newCompiledModelURL)
-          
-          // Remove the pre-compiled model
-          try FileManager.default.removeItem(at: modelURL)
+          try self.writeModel(regressor, toFileWithName: Predictor.durationRegressorFileName)
         }
         
         if self.cancelledTraining {
@@ -377,7 +330,7 @@ extension Predictor {
         prediction: HKCategoryValueSeverity(title: severityPrediction.Severity)!,
         probability: severityPrediction.SeverityProbability[severityPrediction.Severity] ?? 0.0),
       onsetRegressorOutput: Prediction.PredictionStatistic<Date>(
-        prediction: Calendar.current.startOfDay(for: Date()).addingTimeInterval(onsetPrediction.Onset),
+        prediction: Date().addingTimeInterval(onsetPrediction.Onset),
         probability: 0.0),
       durationRegressorOutput: Prediction.PredictionStatistic<TimeInterval>(
         prediction: durationPrediction.Duration,
@@ -387,6 +340,27 @@ extension Predictor {
 }
 
 extension Predictor {
+  
+  /// Writes the model to the file with the given model name.
+  ///
+  /// - Parameters:
+  ///   - model: The model to write to file.
+  ///   - fileName: The filename to use.
+  private func writeModel<T: CoreMLModel>(_ model: T, toFileWithName fileName: String) throws {
+    // Write the trained model to file
+    let modelURL = modelURL(with: fileName)
+    try model.write(to: modelURL, metadata: metadata)
+    
+    // Compile the model
+    let newCompiledModelURL = try MLModel.compileModel(at: modelURL)
+    
+    // Replace the old compiled model with the new one
+    let compiledModelURL = compiledModelURL(with: fileName)
+    _ = try FileManager.default.replaceItemAt(compiledModelURL, withItemAt: newCompiledModelURL)
+    
+    // Remove the pre-compiled model
+    try FileManager.default.removeItem(at: modelURL)
+  }
   
   /// The compilation date of the compiled model file with the given url.
   ///

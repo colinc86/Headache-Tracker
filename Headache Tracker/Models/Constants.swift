@@ -20,6 +20,9 @@ struct Constants {
     
     /// The identifier to use with background prediction tasks.
     static let backgroundPredictionTaskIdentifier = ApplicationKey(from: "predict")
+    
+    /// The identifier to use with daily outlook tasks.
+    static let backgroundOutlookTaskIdentifier = ApplicationKey(from: "outlook")
   }
   
   struct AssetKeys {

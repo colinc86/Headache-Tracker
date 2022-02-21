@@ -38,6 +38,12 @@ class HeadacheManager: ObservableObject {
   /// The real-time alerts setting.
   @AppStorage(AppSettings.realTimeAlerts) private var realTimeAlerts = false
   
+  /// The daily outlook alerts setting.
+  @AppStorage(AppSettings.dailyOutlookAlerts) private var dailyOutlookAlerts = false
+  
+  /// The daily outlook alert time.
+  @AppStorage(AppSettings.dailyOutlookTime) private var dailyOutlookTime = TimeInterval(28800.0)
+  
   /// The check-in interval setting if `checkInAlerts` is true.
   @AppStorage(AppSettings.checkInInterval) private var checkInInterval = TimeInterval(3600.0)
   
@@ -49,6 +55,9 @@ class HeadacheManager: ObservableObject {
   
   /// The refresh task responsible for creating background samples.
   private let predictionRefreshTask = RefreshTask(identifier: Constants.Identifiers.backgroundPredictionTaskIdentifier, type: .appRefresh)
+  
+  /// The refresh task responsible for getting the daily outlook.
+  private let outlookRefreshTask = RefreshTask(identifier: Constants.Identifiers.backgroundOutlookTaskIdentifier, type: .appRefresh)
   
   /// The refresh task responsible for re-training the machine learning models.
   private let trainingProcessingTask = RefreshTask(identifier: Constants.Identifiers.backgroundTrainingTaskIdentifier, type: .processing)
@@ -251,7 +260,7 @@ extension HeadacheManager {
     var startTime: Date?
     var endTime: Date?
     
-    DataController.shared.performInBackground { context in
+    DataController.shared.performInBackground { [weak self] context in
       logDebug("Deleting headache.")
       
       // Get the headache
@@ -261,6 +270,11 @@ extension HeadacheManager {
         startTime = headache.startTime
         endTime = headache.endTime ?? headache.pendingEndTime
         context.delete(headache)
+        
+        // If this headache was the current headache, then cancel any pending check-in notifications
+        if !headache.resolved {
+          self?.alertManager?.removeRequests(pending: true, delivered: false)
+        }
       }
     } completion: { [weak self] error in
       // If there is an error, then we're done
@@ -468,7 +482,7 @@ extension HeadacheManager {
   ///   - completion: Called after the alert has been added to notification center.
   private func presentPredictionAlert(with prediction: Predictor.Prediction?, completion: @escaping (Error?) -> Void) {
     // Only continue if we have a prediction and prediction alerts are turned on
-    guard realTimeAlerts, let prediction = prediction, prediction.severityClassifierOutput.prediction != .notPresent else {
+    guard learnAndPredict && realTimeAlerts, let prediction = prediction, prediction.severityClassifierOutput.prediction != .notPresent else {
       completion(nil)
       return
     }
@@ -479,6 +493,30 @@ extension HeadacheManager {
       logDebug("Presenting alert for predicted severity: \(prediction.severityClassifierOutput.prediction.title).")
       self.alertManager?.presentAlert(
         with: HeadacheAlertRequest.prediction(severity: prediction.severityClassifierOutput.prediction),
+        trigger: UNTimeIntervalNotificationTrigger(timeInterval: 0.0, repeats: false),
+        badgeNumber: 0,
+        completion: completion)
+    }
+  }
+  
+  /// Presents an outlook alert now.
+  ///
+  /// - Parameters:
+  ///   - prediction: The prediction.
+  ///   - completion: Called after the alert has been added to notification center.
+  private func presentOutlookAlert(with prediction: Predictor.Prediction?, completion: @escaping (Error?) -> Void) {
+    // Only continue if we have a prediction and prediction alerts are turned on
+    guard learnAndPredict && dailyOutlookAlerts, let prediction = prediction, prediction.severityClassifierOutput.prediction != .notPresent else {
+      completion(nil)
+      return
+    }
+    
+    // Make sure we're on the main queue
+    DispatchQueue.main.async {
+      // Present the alert
+      logDebug("Presenting alert for outlook: \(prediction.outlookClassifierOutput.prediction).")
+      self.alertManager?.presentAlert(
+        with: HeadacheAlertRequest.outlook(headache: prediction.outlookClassifierOutput.prediction, onset: prediction.onsetRegressorOutput.prediction),
         trigger: UNTimeIntervalNotificationTrigger(timeInterval: 0.0, repeats: false),
         badgeNumber: 0,
         completion: completion)
@@ -511,8 +549,8 @@ extension HeadacheManager {
       var nextHourAllowed = true
       var nextDateAllowed = false
       if let lastNotPresentDate = notPresentTrainigData.last?.timestamp {
-        nextHourAllowed = Date().timeIntervalSince(lastNotPresentDate) > 3600.0
-        nextDateAllowed = Calendar.current.numberOfDaysBetween(lastNotPresentDate, and: Date()) > 0
+        nextHourAllowed = Date().timeIntervalSince(lastNotPresentDate) > 21600.0 // Every 6 hours
+        nextDateAllowed = Date().timeIntervalSince(lastNotPresentDate) > 43200.0 // Every 12 hours
       }
       
       needs = (headacheTrainingDataCount >= notPresentTrainigData.count / 2 && nextHourAllowed) || nextDateAllowed
@@ -719,7 +757,7 @@ extension HeadacheManager {
   
 }
 
-// MARK: - Background methods
+// MARK: - Predictions background refresh methods
 
 extension HeadacheManager {
   
@@ -729,22 +767,10 @@ extension HeadacheManager {
     predictionRefreshTask.register(handlePredictionRefreshTask)
   }
   
-  /// Sets up the processing task by registering it.
-  func setupTrainingProcessingTask() {
-    logDebug("Registering training processing task handler.")
-    trainingProcessingTask.register(handleTrainingProcessingTask)
-  }
-  
   /// Cancels the refresh task.
   func cancelPredictionRefreshTask() {
     logDebug("Cancelling prediction refresh task.")
     predictionRefreshTask.cancel()
-  }
-  
-  /// Cancels the processing task.
-  func cancelTrainingProcessingTask() {
-    logDebug("Cancelling training processing task.")
-    trainingProcessingTask.cancel()
   }
   
   /// Schedules the refresh task.
@@ -761,50 +787,14 @@ extension HeadacheManager {
     }
   }
   
-  /// Schedulees the processing task.
-  func scheduleTrainingRefreshTask() {
-    // Do we need to train the classifiers?
-    needsTraining { [weak self] needs in
-      if needs {
-        // They need to be trained, so pick a time in the future.
-        let now = Date()
-        var futureDate: Date!
-        if Calendar.current.timeIntervalSinceMidnight(now) <= 21600.0 {
-          // If it's between midnight 6am, choose 15 minutes from now.
-          futureDate = now.addingTimeInterval(900.0)
-        }
-        else {
-          // If it's between 6am and midnight, choose midnight.
-          futureDate = Calendar.current.midnightAfter(now)
-        }
-        
-        
-        logDebug("Scheduling training processing task for date \(futureDate.description)")
-        self?.trainingProcessingTask.schedule(date: futureDate) { error in
-          if let error = error {
-            logError("Error scheduling training processing task: \(error)")
-          }
-          else {
-            logDebug("Successfully scheduled training procecssing task.")
-          }
-        }
-      }
-      else {
-        logDebug("Training not needed. Not scheduling training processing task.")
-      }
-    }
-  }
-  
   /// Handles the refresh task.
   private func handlePredictionRefreshTask(_ task: BGTask) {
     logDebug("Handle prediction refresh task.")
     
     // Schedule the next task
-    predictionRefreshTask.schedule(interval: Constants.backgroundPredictionInterval, completion: { error in
-      if let error = error {
-        logError("Unable to schedule prediction task: \(error)")
-      }
-    })
+    if learnAndPredict && realTimeAlerts {
+      schedulePredictionRefreshTask()
+    }
     
     // Set the task's expiration handler
     task.expirationHandler = { [weak self] in
@@ -857,16 +847,141 @@ extension HeadacheManager {
     }
   }
   
+}
+
+// MARK: - Daily outlook background refresh methods
+
+extension HeadacheManager {
+  
+  /// Sets up the refresh task by registering it.
+  func setupOutlookRefreshTask() {
+    logDebug("Registering outlook refresh task handler.")
+    outlookRefreshTask.register(handleOutlookRefreshTask)
+  }
+  
+  /// Cancels the refresh task.
+  func cancelOutlookRefreshTask() {
+    logDebug("Cancelling outlook refresh task.")
+    outlookRefreshTask.cancel()
+  }
+  
+  /// Schedules the refresh task.
+  func scheduleOutlookRefreshTask() {
+    logDebug("Scheduling outlook refresh task with interval \(Constants.backgroundPredictionInterval).")
+    
+    let now = Date()
+    let futureOutlookDate = Calendar.current.midnightAfter(now).addingTimeInterval(dailyOutlookTime)
+    let interval = futureOutlookDate.timeIntervalSince(now)
+    outlookRefreshTask.schedule(interval: interval) { error in
+      if let error = error {
+        logError("Unable to schedule outlook task: \(error)")
+      }
+      else {
+        logDebug("Successfully scheduled outlook refresh task.")
+      }
+    }
+  }
+  
+  /// Handles the refresh task.
+  private func handleOutlookRefreshTask(_ task: BGTask) {
+    logDebug("Handle outlook refresh task.")
+    
+    // Schedule the next task
+    if learnAndPredict && dailyOutlookAlerts {
+      scheduleOutlookRefreshTask()
+    }
+    
+    // Set the task's expiration handler
+    task.expirationHandler = { [weak self] in
+      // Cancel the prediction
+      self?.cancelClassificationInput()
+    }
+    
+    // Get the current headache
+    var hasCurrentHeadache = false
+    let context = DataController.shared.newNestedBackgroundContext()
+    context.performAndWait { [weak context] in
+      let request = Headache.fetchRequest()
+      request.predicate = NSPredicate(format: "resolved = %@", NSNumber(booleanLiteral: false))
+      hasCurrentHeadache = (try? context?.fetch(request))?.isEmpty == false
+    }
+    
+    if hasCurrentHeadache {
+      // We have a current headache, so stop here
+      task.setTaskCompleted(success: true)
+    }
+    else {
+      // There's no current headache, so run a prediction
+      getCurrentClassifierInput { [weak self] input, error in
+        if let error = error {
+          // There was an error with getting the input
+          logError("Error getting classifier input: \(error)")
+          task.setTaskCompleted(success: false)
+        }
+        else if let input = input {
+          // We got the input, so present the outlook
+          do {
+            self?.presentOutlookAlert(with: try self?.predictor?.predict(input), completion: { error in
+              if let error = error {
+                logError("Error presenting alert: \(error)")
+              }
+              task.setTaskCompleted(success: error == nil)
+            })
+          }
+          catch {
+            // There was an error predicting
+            logError("Error getting prediction: \(error)")
+            task.setTaskCompleted(success: false)
+          }
+        }
+        else {
+          // Something else went wrong
+          task.setTaskCompleted(success: false)
+        }
+      }
+    }
+  }
+  
+}
+
+// MARK: Training background processing methods
+
+extension HeadacheManager {
+  
+  /// Sets up the processing task by registering it.
+  func setupTrainingProcessingTask() {
+    logDebug("Registering training processing task handler.")
+    trainingProcessingTask.register(handleTrainingProcessingTask)
+  }
+  
+  /// Cancels the processing task.
+  func cancelTrainingProcessingTask() {
+    logDebug("Cancelling training processing task.")
+    trainingProcessingTask.cancel()
+  }
+  
+  /// Schedulees the processing task.
+  func scheduleTrainingRefreshTask() {
+    let now = Date()
+    let futureDate = Calendar.current.midnightAfter(now)
+    
+    logDebug("Scheduling training processing task for date \(futureDate.description)")
+    trainingProcessingTask.schedule(date: futureDate) { error in
+      if let error = error {
+        logError("Error scheduling training processing task: \(error)")
+      }
+      else {
+        logDebug("Successfully scheduled training procecssing task.")
+      }
+    }
+  }
+  
   /// Handles the processing task.
   private func handleTrainingProcessingTask(_ task: BGTask) {
     logDebug("Handle training processing task.")
     
     // Schedule the next task
-    trainingProcessingTask.schedule(date: Calendar.current.midnightAfter(Date()), completion: { error in
-      if let error = error {
-        logError("Unable to schedule prediction task: \(error)")
-      }
-    })
+    scheduleTrainingRefreshTask()
     
     // Set the task's expiration handler
     task.expirationHandler = { [weak task, weak self] in
@@ -876,15 +991,27 @@ extension HeadacheManager {
     }
     
     // Train
-    trainClassifiers { error in
-      if let error = error {
-        logError("Error training classifiers: \(error)")
-      }
-      else {
-        logDebug("Successfully trained classifiers.")
+    needsTraining { [weak self] needs in
+      guard let self = self else {
+        task.setTaskCompleted(success: false)
+        return
       }
       
-      task.setTaskCompleted(success: error == nil)
+      if needs {
+        self.trainClassifiers { error in
+          if let error = error {
+            logError("Error training classifiers: \(error)")
+          }
+          else {
+            logDebug("Successfully trained classifiers.")
+          }
+          
+          task.setTaskCompleted(success: error == nil)
+        }
+      }
+      else {
+        task.setTaskCompleted(success: true)
+      }
     }
   }
   

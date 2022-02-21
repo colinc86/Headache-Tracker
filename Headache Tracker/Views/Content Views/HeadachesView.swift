@@ -78,6 +78,7 @@ struct HeadachesView: View {
         }
       }
     }
+    .navigationViewStyle(StackNavigationViewStyle())
   }
   
 }

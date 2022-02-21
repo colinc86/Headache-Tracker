@@ -42,12 +42,6 @@ struct CurrentHeadacheView: View {
     animation: .default)
   private var headaches: FetchedResults<Headache>
   
-  /// The validations fetch request.
-  @FetchRequest(
-    sortDescriptors: [],
-    animation: .default)
-  private var validations: FetchedResults<ValidationData>
-  
   /// The alert's title.
   @State private var alertTitle = ""
   
@@ -74,18 +68,6 @@ struct CurrentHeadacheView: View {
   
   /// Whether or not we are handling headache training data.
   @State private var handlingInput: Bool = false
-  
-  @State private var boostedTreeHit: Bool = false
-  @State private var boostedTreeAccuracy: Double = 0.0
-  
-  @State private var decisionTreeHit: Bool = false
-  @State private var decisionTreeAccuracy: Double = 0.0
-  
-  @State private var randomForestHit: Bool = false
-  @State private var randomForestAccuracy: Double = 0.0
-  
-  @State private var logisticRegressionHit: Bool = false
-  @State private var logisticRegressionAccuracy: Double = 0.0
   
   /// The current (unresolved) headache.
   private var currentHeadache: Headache? {
@@ -172,7 +154,7 @@ struct CurrentHeadacheView: View {
           // Severity Prediction
           Section {
             HorizontalSeverityLevel(currentSeverity: prediction.severityClassifierOutput.prediction, collapsed: true, action: nil)
-              .cell(title: "Severity (\(String(format: "%0.f%%", prediction.severityClassifierOutput.probability * 100.0)) / \(String(format: "%0.f%%", boostedTreeAccuracy * 100.0)))", systemImage: "dial.max.fill", foregroundColor: .cyan)
+              .cell(title: "Severity (\(String(format: "%0.f%%", prediction.severityClassifierOutput.probability * 100.0)))", systemImage: "dial.max.fill", foregroundColor: .cyan)
           }
           
           // Onset Prediction
@@ -191,6 +173,7 @@ struct CurrentHeadacheView: View {
       .background(Color(UIColor.systemGroupedBackground))
       .navigationTitle("Track")
     }
+    .navigationViewStyle(StackNavigationViewStyle())
     .onReceive(didBecomeActiveNotificationPublisher, perform: didBecomeActive)
     .onAppear(perform: onAppear)
     .confirmationAlert(isPresented: $showingAlert, title: alertTitle, message: alertMessage)
@@ -219,13 +202,14 @@ extension CurrentHeadacheView {
   
   /// Updates the classifier input.
   private func predict() {
-    logDebug("Predict.")
     guard learnAndPredict else {
       withAnimation {
         needsInput = false
       }
       return
     }
+    
+    logDebug("Predict.")
     
     // Check if we should show the not-present training data cell
     headacheManager.needsNotPresentTrainingData { needsTrainingData in
@@ -257,16 +241,6 @@ extension CurrentHeadacheView {
         }
       }
     }
-    
-    let boostedTreeHits = validations.reduce(0.0, { $0 + ($1.boostedTreeHit ? 1.0 : 0.0) })
-    let decisionTreeHits = validations.reduce(0.0, { $0 + ($1.decisionTreeHit ? 1.0 : 0.0) })
-    let randomForestHits = validations.reduce(0.0, { $0 + ($1.randomForestHit ? 1.0 : 0.0) })
-    let logisticRegressionHits = validations.reduce(0.0, { $0 + ($1.logisticRegressionHit ? 1.0 : 0.0) })
-    
-    boostedTreeAccuracy = Double(boostedTreeHits) / Double(validations.count > 0 ? validations.count : 1)
-    decisionTreeAccuracy = Double(decisionTreeHits) / Double(validations.count > 0 ? validations.count : 1)
-    randomForestAccuracy = Double(randomForestHits) / Double(validations.count > 0 ? validations.count : 1)
-    logisticRegressionAccuracy = Double(logisticRegressionHits) / Double(validations.count > 0 ? validations.count : 1)
   }
   
   /// Displays the reset confirmation alert to the user.
@@ -290,45 +264,42 @@ extension CurrentHeadacheView {
   ///
   /// - Parameter severity: The new severity.
   private func changeSeverity(to severity: HKCategoryValueSeverity) {
-    withAnimation {
-      updatingHeadache = true
-    }
+    guard !updatingHeadache else { return }
+    logDebug("Change severity to \(severity.title).")
     
+    updatingHeadache = true
     headacheManager.changeSeverity(to: severity) { error in
       DispatchQueue.main.async {
         if let error = error {
           showAlert("Unable to Update Severity", error)
         }
         
-        withAnimation {
-          updatingHeadache = false
-        }
-        
-        DataController.shared.performInBackground { context in
-          let validationData = ValidationData(context: context)
-          validationData.boostedTreeHit = prediction?.severityClassifierOutput.prediction == severity
-        }
+        updatingHeadache = false
       }
     }
   }
   
   /// Resolves the current headache.
   private func resolve() {
+    guard !updatingHeadache else { return }
     logDebug("Resolve current headache.")
+    
+    updatingHeadache = true
     headacheManager.resolve { error in
       DispatchQueue.main.async {
         if let error = error {
           showAlert("Unable to Resolve Headache", error)
         }
+        
+        updatingHeadache = false
       }
     }
   }
   
   /// The action to perform if there is no headache.
   private func noHeadacheAction() {
-    guard !handlingInput else {
-      return
-    }
+    guard !handlingInput else { return }
+    logDebug("No headache action.")
     
     handlingInput = true
     headacheManager.createTrainingData { error in

@@ -33,13 +33,7 @@ enum HealthKitData: CaseIterable {
   case walkingHeartRateAverage
   case heartRateVariabilitySDNN
   case oxygenSaturation
-  case bodyTemperature
-  case bloodPressureSystolic
-  case bloodPressureDiastolic
   case respiratoryRate
-  case bloodGlucose
-  case dietaryWater
-  case uvExposure
   
   /// Whether or not this is a sharable type.
   var isShareType: Bool {
@@ -80,13 +74,7 @@ enum HealthKitData: CaseIterable {
     case .walkingHeartRateAverage: return .walkingHeartRateAverage
     case .heartRateVariabilitySDNN: return .heartRateVariabilitySDNN
     case .oxygenSaturation: return .oxygenSaturation
-    case .bodyTemperature: return .bodyTemperature
-    case .bloodPressureSystolic: return .bloodPressureSystolic
-    case .bloodPressureDiastolic: return .bloodPressureDiastolic
     case .respiratoryRate: return .respiratoryRate
-    case .bloodGlucose: return .bloodGlucose
-    case .dietaryWater: return .dietaryWater
-    case .uvExposure: return .uvExposure
     default: return nil
     }
   }
@@ -94,15 +82,11 @@ enum HealthKitData: CaseIterable {
   /// The data's unit.
   var unit: HKUnit? {
     switch self {
-    case .stepCount, .uvExposure: return .count()
+    case .stepCount: return .count()
     case .heartRate, .restingHeartRate, .walkingHeartRateAverage, .respiratoryRate: return .count().unitDivided(by: .minute())
     case .environmentalAudioExposure, .headphoneAudioExposure: return .decibelAWeightedSoundPressureLevel()
     case .heartRateVariabilitySDNN: return .second()
     case .oxygenSaturation: return .percent()
-    case .bodyTemperature: return .degreeCelsius()
-    case .bloodPressureSystolic, .bloodPressureDiastolic: return .millimeterOfMercury()
-    case .bloodGlucose: return .gram()
-    case .dietaryWater: return .liter()
     default: return nil
     }
   }
@@ -130,23 +114,17 @@ enum HealthKitData: CaseIterable {
         .sleepAnalysis,
         .mindfulSession:
       return .sample
-    case .stepCount,
-        .dietaryWater:
+    case .stepCount:
       return .statistics(options: .cumulativeSum)
     case .environmentalAudioExposure,
         .headphoneAudioExposure,
         .heartRate,
         .heartRateVariabilitySDNN,
-        .oxygenSaturation,
-        .uvExposure:
+        .oxygenSaturation:
       return .statistics(options: .discreteAverage)
     case .restingHeartRate,
         .walkingHeartRateAverage,
-        .bodyTemperature,
-        .bloodPressureSystolic,
-        .bloodPressureDiastolic,
-        .respiratoryRate,
-        .bloodGlucose:
+        .respiratoryRate:
       return .statistics(options: .mostRecent)
     }
   }

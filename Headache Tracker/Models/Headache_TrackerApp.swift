@@ -43,9 +43,6 @@ extension Headache_TrackerApp {
   /// Called when the application becomes active.
   private func didBecomeActive(_ output: NotificationCenter.Publisher.Output) {
     logDebug("Application did become active.")
-    
-    appDelegate.headacheManager.cancelPredictionRefreshTask()
-    appDelegate.headacheManager.cancelTrainingProcessingTask()
   }
   
   /// Called when the application resigns active.
@@ -59,6 +56,11 @@ extension Headache_TrackerApp {
       // Schedule our prediction task if real-time alerts are on
       if appDelegate.realTimeAlerts {
         appDelegate.headacheManager.schedulePredictionRefreshTask()
+      }
+      
+      // Schedule our outlook task if real-time alerts are on
+      if appDelegate.dailyOutlookAlerts {
+        appDelegate.headacheManager.scheduleOutlookRefreshTask()
       }
     }
   }
@@ -87,6 +89,9 @@ class AppDelegate: NSObject, UIApplicationDelegate {
   /// The real-time alerts setting.
   @AppStorage(AppSettings.realTimeAlerts) var realTimeAlerts = false
   
+  /// The daily outlook alerts setting.
+  @AppStorage(AppSettings.dailyOutlookAlerts) var dailyOutlookAlerts = false
+  
   /// The learn and predict setting.
   @AppStorage(AppSettings.learnAndPredict) var learnAndPredict = false
   
@@ -103,8 +108,9 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     // Adjust the table view appearance
     UITableView.appearance().sectionFooterHeight = 0
     
-    // Make sure we register our prediction task
+    // Make sure we register our tasks
     headacheManager.setupPredictionRefreshTask()
+    headacheManager.setupOutlookRefreshTask()
     headacheManager.setupTrainingProcessingTask()
     
     // Make sure the headache manager has a reference to the alert and health kit managers

@@ -14,7 +14,7 @@
         <relationship name="headache" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Headache" inverseName="severities" inverseEntity="Headache"/>
         <relationship name="trainingData" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="TrainingData" inverseName="severity" inverseEntity="TrainingData"/>
     </entity>
-    <entity name="TrainingData" representedClassName="TrainingData" syncable="YES" codeGenerationType="class">
+    <entity name="TrainingData" representedClassName="TrainingData" syncable="YES" codeGenerationType="category">
         <attribute name="barometricPressure" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="bloodGlucose" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="bloodPressureDiastolic" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>

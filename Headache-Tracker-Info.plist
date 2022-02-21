@@ -6,6 +6,7 @@
 	<array>
 		<string>com.cnc.Headache-Tracker.predict</string>
 		<string>com.cnc.Headache-Tracker.train</string>
+		<string>com.cnc.Headache-Tracker.outlook</string>
 	</array>
 	<key>UIBackgroundModes</key>
 	<array>

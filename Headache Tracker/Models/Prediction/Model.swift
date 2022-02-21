@@ -6,11 +6,18 @@
 //
 
 import CoreML
+import CreateML
 
 /// An object that can be initialized with a feature provider.
 protocol MLFeatureInitializable: MLFeatureProvider {
   init(features: MLFeatureProvider)
 }
+
+protocol CoreMLModel {
+  func write(to fileURL: URL, metadata: MLModelMetadata?) throws
+}
+extension MLBoostedTreeClassifier: CoreMLModel {}
+extension MLBoostedTreeRegressor: CoreMLModel {}
 
 /// Class for model loading and prediction
 class Model<Input: MLFeatureProvider, Output: MLFeatureInitializable> {

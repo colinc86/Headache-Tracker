@@ -89,6 +89,7 @@ struct AnalyzeView: View {
       }
       .navigationTitle("Analyze")
     }
+    .navigationViewStyle(StackNavigationViewStyle())
     .onAppear(perform: appeared)
   }
   
