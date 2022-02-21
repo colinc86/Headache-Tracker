@@ -18,7 +18,7 @@ struct OutlookView: View {
       Text(outlook.title)
         .font(.title)
       
-      if let onset = onset {
+      if outlook == .headache, let onset = onset {
         Text(onset.formatted(date: .omitted, time: .shortened))
           .font(.subheadline)
           .foregroundColor(.secondary)

@@ -221,9 +221,9 @@ extension CurrentHeadacheView {
             try withAnimation {
               prediction = try predictor.predict(input)
               
+              /// Save this prediction for the widget
               SharedUserDefaults.standard.outlook = prediction?.outlookClassifierOutput.prediction ?? .noHeadache
               SharedUserDefaults.standard.onset = prediction?.onsetRegressorOutput.prediction
-              SharedUserDefaults.standard.lastOutlookUpdate = Date()
             }
           }
           catch {

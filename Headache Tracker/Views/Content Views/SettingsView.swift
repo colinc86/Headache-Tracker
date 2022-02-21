@@ -13,6 +13,9 @@ struct SettingsView: View {
   
   // MARK: Private properties
   
+  /// The main view context.
+  @Environment(\.managedObjectContext) private var viewContext
+  
   /// The app's headache manager.
   @EnvironmentObject private var headacheManager: HeadacheManager
   
@@ -131,6 +134,13 @@ struct SettingsView: View {
         
         // Debug
         Section {
+          NavigationLink {
+            TrainingDataView()
+              .environment(\.managedObjectContext, viewContext)
+          } label: {
+            Text("Training Data")
+          }
+
           Button("Train Models") {
             headacheManager.trainClassifiers { error in
               if let error = error {

@@ -58,6 +58,7 @@ struct ContentView: View {
         }
       
       SettingsView()
+        .environment(\.managedObjectContext, viewContext)
         .environmentObject(headacheManager)
         .environmentObject(predictor)
         .environmentObject(healthKitManager)

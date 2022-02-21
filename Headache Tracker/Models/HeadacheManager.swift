@@ -826,9 +826,9 @@ extension HeadacheManager {
           // We got the input, so present the prediction
           do {
             let prediction = try self?.predictor?.predict(input)
+            
             SharedUserDefaults.standard.outlook = prediction?.outlookClassifierOutput.prediction ?? .noHeadache
             SharedUserDefaults.standard.onset = prediction?.onsetRegressorOutput.prediction
-            SharedUserDefaults.standard.lastOutlookUpdate = Date()
             
             self?.presentPredictionAlert(with: prediction, completion: { error in
               if let error = error {

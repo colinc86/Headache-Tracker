@@ -21,12 +21,7 @@ struct Provider: TimelineProvider {
   }
   
   func getTimeline(in context: Context, completion: @escaping (Timeline<Entry>) -> ()) {
-    var currentEntry: WidgetContent?
-    if let date = SharedUserDefaults.standard.lastOutlookUpdate {
-      currentEntry = WidgetContent(date: date, outlook: SharedUserDefaults.standard.outlook, onset: SharedUserDefaults.standard.onset)
-    }
-    
-    let timeline = Timeline(entries: [currentEntry ?? snapshotEntry], policy: .atEnd)
+    let timeline = Timeline(entries: [WidgetContent(date: Date().addingTimeInterval(60.0), outlook: SharedUserDefaults.standard.outlook, onset: SharedUserDefaults.standard.onset)], policy: .atEnd)
     completion(timeline)
   }
 }
@@ -43,11 +38,12 @@ struct OutlookEntryView: View {
       }
       .font(.headline)
       .foregroundColor(.mint)
+      .padding(.bottom, 8)
       
       Text(entry.outlook.title)
         .font(.title)
       
-      if let onset = entry.onset {
+      if entry.outlook == .headache, let onset = entry.onset {
         Text(onset.formatted(date: .omitted, time: .shortened))
           .font(.subheadline)
           .foregroundColor(.secondary)

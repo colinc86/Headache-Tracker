@@ -12,7 +12,6 @@ class SharedUserDefaults {
   // MARK: Types
   
   struct Keys {
-    static let lastOutlookUpdate = "lastOutlookUpdate"
     static let outlookKey = "outlook"
     static let onset = "onset"
   }
@@ -31,18 +30,6 @@ class SharedUserDefaults {
   private let defaults = UserDefaults(suiteName: SharedUserDefaults.appGroupIdentifier)
   
   // MARK: Public properties
-  
-  /// The last time the outlook was updated.
-  var lastOutlookUpdate: Date? {
-    get {
-      return defaults?.value(forKey: Keys.lastOutlookUpdate) as? Date
-    }
-    
-    set {
-      defaults?.set(newValue, forKey: Keys.lastOutlookUpdate)
-      defaults?.synchronize()
-    }
-  }
   
   /// The current outlook.
   var outlook: Outlook {
