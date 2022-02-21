@@ -383,12 +383,12 @@
 		3BF5313527ACE18D00056673 /* Headache Tracker */ = {
 			isa = PBXGroup;
 			children = (
-				3B051AA327B3751B0017131D /* Headache-Tracker-Info.plist */,
-				3BF5316527ACE1D900056673 /* Headache Tracker.entitlements */,
 				3B39DADE27AD009F00D39BB5 /* Models */,
 				3B39DAE027AD00B700D39BB5 /* Views */,
 				3BF5313A27ACE18F00056673 /* Assets.xcassets */,
 				3B68BE0B27BF5899007AAAC6 /* GoogleService-Info.plist */,
+				3B051AA327B3751B0017131D /* Headache-Tracker-Info.plist */,
+				3BF5316527ACE1D900056673 /* Headache Tracker.entitlements */,
 				3BF5314127ACE18F00056673 /* Headache_Tracker.xcdatamodeld */,
 				3BF5313C27ACE18F00056673 /* Preview Content */,
 			);
