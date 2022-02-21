@@ -87,7 +87,7 @@ struct SettingsView: View {
         }
         
         // Notifications
-        Section("Notifications") {
+        Section {
           Toggle(isOn: $dailyOutlookAlerts) {
             Text("Daily Outlook")
           }
@@ -95,17 +95,11 @@ struct SettingsView: View {
           
           DatePicker("Daily Outlook Time", selection: dailyOutlookDate, displayedComponents: .hourAndMinute)
             .disabled(!dailyOutlookAlerts)
-        }
-        .disabled(alertsDenied)
-        
-        Section {
+          
           Toggle(isOn: $realTimeAlerts) {
             Text("Hourly Predictions")
           }
-        }
-        .disabled(alertsDenied)
-        
-        Section {
+          
           Toggle(isOn: $checkInAlerts) {
             Text("Headache Check-Ins")
           }
@@ -118,6 +112,8 @@ struct SettingsView: View {
             Text("Check-In Interval")
           }
           .disabled(!checkInAlerts)
+        } header: {
+          Text("Notifications")
         } footer: {
           if alertsDenied {
             Text("Visit the Settings app to update the app's notification settings.")
