@@ -24,10 +24,10 @@ class Predictor: ObservableObject {
     
     /// An empty prediction.
     static let empty = Prediction(
-      outlookClassifierOutput: PredictionStatistic<Bool>(prediction: false, probability: 0),
+      outlookClassifierOutput: PredictionStatistic<Outlook>(prediction: .noHeadache, probability: 0),
       severityClassifierOutput: PredictionStatistic<HKCategoryValueSeverity>(prediction: .notPresent, probability: 0),
-      onsetRegressorOutput: PredictionStatistic<Date>(prediction: Date(timeIntervalSince1970: 0), probability: 0),
-      durationRegressorOutput: PredictionStatistic<TimeInterval>(prediction: 0, probability: 0))
+      onsetRegressorOutput: PredictionStatistic<Date>(prediction: Date(timeIntervalSince1970: 0), probability: nil),
+      durationRegressorOutput: PredictionStatistic<TimeInterval>(prediction: 0, probability: nil))
     
     /// A prediction statistic pairs a severity to a probability.
     struct PredictionStatistic<T> {
@@ -36,18 +36,18 @@ class Predictor: ObservableObject {
       let prediction: T
       
       /// The statistic's probability.
-      let probability: Double
+      let probability: Double?
       
       // MARK: Initializers
       
-      init(prediction: T, probability: Double) {
+      init(prediction: T, probability: Double?) {
         self.prediction = prediction
         self.probability = probability
       }
     }
     
     /// The outlook classifier's output
-    let outlookClassifierOutput: PredictionStatistic<Bool>
+    let outlookClassifierOutput: PredictionStatistic<Outlook>
     
     /// The severity classifier's output.
     let severityClassifierOutput: PredictionStatistic<HKCategoryValueSeverity>
@@ -324,17 +324,21 @@ extension Predictor {
         
     return Prediction(
       outlookClassifierOutput: Prediction.PredictionStatistic(
-        prediction: outlookPrediction.Outlook == OutlookClassifierOutput.headacheOutlook,
-        probability: outlookPrediction.OutlookProbability[outlookPrediction.Outlook] ?? 0.0),
+        prediction: Outlook(rawValue: outlookPrediction.Outlook) ?? .noHeadache,
+        probability: outlookPrediction.OutlookProbability[outlookPrediction.Outlook]),
+      
       severityClassifierOutput: Prediction.PredictionStatistic(
         prediction: HKCategoryValueSeverity(title: severityPrediction.Severity)!,
-        probability: severityPrediction.SeverityProbability[severityPrediction.Severity] ?? 0.0),
+        probability: severityPrediction.SeverityProbability[severityPrediction.Severity]),
+      
       onsetRegressorOutput: Prediction.PredictionStatistic<Date>(
         prediction: Date().addingTimeInterval(onsetPrediction.Onset),
-        probability: 0.0),
+        probability: nil),
+      
       durationRegressorOutput: Prediction.PredictionStatistic<TimeInterval>(
         prediction: durationPrediction.Duration,
-        probability: 0))
+        probability: nil)
+    )
   }
   
 }

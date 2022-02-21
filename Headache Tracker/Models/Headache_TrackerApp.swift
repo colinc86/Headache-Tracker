@@ -49,19 +49,13 @@ extension Headache_TrackerApp {
   private func willResignActive(_ output: NotificationCenter.Publisher.Output) {
     logDebug("Application will resign active.")
     
-    // Schedule our training task if we are learning and predicting
-    if appDelegate.learnAndPredict {
-      appDelegate.headacheManager.scheduleTrainingRefreshTask()
-      
-      // Schedule our prediction task if real-time alerts are on
-      if appDelegate.realTimeAlerts {
-        appDelegate.headacheManager.schedulePredictionRefreshTask()
-      }
-      
-      // Schedule our outlook task if real-time alerts are on
-      if appDelegate.dailyOutlookAlerts {
-        appDelegate.headacheManager.scheduleOutlookRefreshTask()
-      }
+    // Schedule our training and prediction tasks
+    appDelegate.headacheManager.scheduleTrainingRefreshTask()
+    appDelegate.headacheManager.schedulePredictionRefreshTask()
+    
+    // Schedule our outlook task
+    if appDelegate.dailyOutlookAlerts {
+      appDelegate.headacheManager.scheduleOutlookRefreshTask()
     }
   }
   
@@ -91,9 +85,6 @@ class AppDelegate: NSObject, UIApplicationDelegate {
   
   /// The daily outlook alerts setting.
   @AppStorage(AppSettings.dailyOutlookAlerts) var dailyOutlookAlerts = false
-  
-  /// The learn and predict setting.
-  @AppStorage(AppSettings.learnAndPredict) var learnAndPredict = false
   
   // MARK: Override methods
   

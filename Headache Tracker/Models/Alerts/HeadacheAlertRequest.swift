@@ -15,7 +15,7 @@ enum HeadacheAlertRequest: AlertRequest {
   
   case checkIn(headacheIdentifier: UUID)
   case prediction(severity: HKCategoryValueSeverity)
-  case outlook(headache: Bool, onset: Date?)
+  case outlook(outlook: Outlook, onset: Date?)
   
   public var title: String {
     switch self {
@@ -34,13 +34,13 @@ enum HeadacheAlertRequest: AlertRequest {
       return "Tap here to give an update on your headache."
     case .prediction(let severity):
       return "You may have a \(severity.title.lowercased()) headache. Tap here to give an update."
-    case .outlook(let headache, let onset):
-      if headache {
+    case .outlook(let outlook, let onset):
+      if outlook == .headache {
         if let onset = onset {
-          return "Your daily headache outlook contains a headache at \(onset.formatted(date: .omitted, time: .shortened))."
+          return "Your daily headache outlook contains a possible headache at \(onset.formatted(date: .omitted, time: .shortened))."
         }
         else {
-          return "Your daily headache outlook contains a headache."
+          return "Your daily headache outlook contains a possible headache."
         }
       }
       else {

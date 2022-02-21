@@ -18,15 +18,11 @@ class MotionManager {
   typealias BarometricPressureCompletion = (Measurement<UnitPressure>?, Error?) -> Void
   
   enum MotionManagerError: Error {
-    case userNotPermitted
     case notAvailable
     case cancelled
   }
   
   // MARK: Private properties
-  
-  /// The learn and predict setting.
-  @AppStorage(AppSettings.learnAndPredict) private var learnAndPredict = false
   
   /// The altimeter.
   private let altimeter = CMAltimeter()
@@ -63,6 +59,10 @@ extension MotionManager {
     defer { pendingCompletionBlocksSemaphore.signal() }
     
     logDebug("Cancel barometer reading.")
+    
+    for block in pendingCompletionBlocks {
+      block(nil, MotionManagerError.cancelled)
+    }
     pendingCompletionBlocks.removeAll()
     
     altimeter.stopRelativeAltitudeUpdates()
@@ -74,12 +74,6 @@ extension MotionManager {
   /// - Parameter completion: Called when the pressure has been fetched.
   func barometricPressure(completion: @escaping (Measurement<UnitPressure>?, Error?) -> Void) {
     logDebug("Get barometric pressure.")
-    
-    guard learnAndPredict else {
-      logWarning("Not learning and predicting.")
-      completion(nil, MotionManagerError.userNotPermitted)
-      return
-    }
     
     guard CMAltimeter.isRelativeAltitudeAvailable() else {
       logWarning("Relative altitude not available.")

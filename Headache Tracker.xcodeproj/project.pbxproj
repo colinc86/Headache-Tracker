@@ -63,6 +63,19 @@
 		3B68BE2527C0294C007AAAC6 /* DurationPredictionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BE2427C0294C007AAAC6 /* DurationPredictionView.swift */; };
 		3B68BE2727C02BCA007AAAC6 /* OutlookClassifierOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BE2627C02BCA007AAAC6 /* OutlookClassifierOutput.swift */; };
 		3B68BE2B27C2FF85007AAAC6 /* TrainingData+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BE2A27C2FF85007AAAC6 /* TrainingData+CoreDataClass.swift */; };
+		3B68BE4E27C349B9007AAAC6 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B68BE4D27C349B9007AAAC6 /* WidgetKit.framework */; };
+		3B68BE5027C349B9007AAAC6 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B68BE4F27C349B9007AAAC6 /* SwiftUI.framework */; };
+		3B68BE5327C349B9007AAAC6 /* Headache_Tracker_Widget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BE5227C349B9007AAAC6 /* Headache_Tracker_Widget.swift */; };
+		3B68BE5527C349BA007AAAC6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3B68BE5427C349BA007AAAC6 /* Assets.xcassets */; };
+		3B68BE5927C349BA007AAAC6 /* Headache Tracker WidgetExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 3B68BE4C27C349B9007AAAC6 /* Headache Tracker WidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		3B68BE6027C34B89007AAAC6 /* WidgetContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BE5F27C34B89007AAAC6 /* WidgetContent.swift */; };
+		3B68BE6127C34B8E007AAAC6 /* WidgetContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BE5F27C34B89007AAAC6 /* WidgetContent.swift */; };
+		3B68BE6427C353FC007AAAC6 /* Outlook.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BE6327C353FC007AAAC6 /* Outlook.swift */; };
+		3B68BE6527C353FF007AAAC6 /* Outlook.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BE6327C353FC007AAAC6 /* Outlook.swift */; };
+		3B68BE6A27C35778007AAAC6 /* OutlookView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BE6627C35644007AAAC6 /* OutlookView.swift */; };
+		3B68BE7027C36834007AAAC6 /* SharedUserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BE6F27C36834007AAAC6 /* SharedUserDefaults.swift */; };
+		3B68BE7327C36928007AAAC6 /* ApplicationKey in Frameworks */ = {isa = PBXBuildFile; productRef = 3B68BE7227C36928007AAAC6 /* ApplicationKey */; };
+		3B68BE7627C3699C007AAAC6 /* SharedUserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BE6F27C36834007AAAC6 /* SharedUserDefaults.swift */; };
 		3BDCF23E27BC213800334B8B /* Calendar+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BDCF23D27BC213800334B8B /* Calendar+Extensions.swift */; };
 		3BF5313727ACE18D00056673 /* Headache_TrackerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF5313627ACE18D00056673 /* Headache_TrackerApp.swift */; };
 		3BF5313927ACE18D00056673 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF5313827ACE18D00056673 /* ContentView.swift */; };
@@ -80,6 +93,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		3B68BE5727C349BA007AAAC6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3BF5312B27ACE18D00056673 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3B68BE4B27C349B9007AAAC6;
+			remoteInfo = "Headache Tracker WidgetExtension";
+		};
 		3BF5314927ACE18F00056673 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 3BF5312B27ACE18D00056673 /* Project object */;
@@ -95,6 +115,20 @@
 			remoteInfo = "Headache Tracker";
 		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		3B68BE5A27C349BA007AAAC6 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				3B68BE5927C349BA007AAAC6 /* Headache Tracker WidgetExtension.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		3B051A4927B0B3590017131D /* Headache_Tracker 1.0.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Headache_Tracker 1.0.xcdatamodel"; sourceTree = "<group>"; };
@@ -153,6 +187,17 @@
 		3B68BE2A27C2FF85007AAAC6 /* TrainingData+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TrainingData+CoreDataClass.swift"; sourceTree = "<group>"; };
 		3B68BE2C27C30923007AAAC6 /* Headache_Tracker 1.3.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Headache_Tracker 1.3.xcdatamodel"; sourceTree = "<group>"; };
 		3B68BE2D27C33481007AAAC6 /* Headache_Tracker 1.4.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Headache_Tracker 1.4.xcdatamodel"; sourceTree = "<group>"; };
+		3B68BE4C27C349B9007AAAC6 /* Headache Tracker WidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Headache Tracker WidgetExtension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		3B68BE4D27C349B9007AAAC6 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		3B68BE4F27C349B9007AAAC6 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		3B68BE5227C349B9007AAAC6 /* Headache_Tracker_Widget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Headache_Tracker_Widget.swift; sourceTree = "<group>"; };
+		3B68BE5427C349BA007AAAC6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		3B68BE5627C349BA007AAAC6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		3B68BE5F27C34B89007AAAC6 /* WidgetContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetContent.swift; sourceTree = "<group>"; };
+		3B68BE6327C353FC007AAAC6 /* Outlook.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Outlook.swift; sourceTree = "<group>"; };
+		3B68BE6627C35644007AAAC6 /* OutlookView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutlookView.swift; sourceTree = "<group>"; };
+		3B68BE6B27C35EB9007AAAC6 /* Headache Tracker WidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Headache Tracker WidgetExtension.entitlements"; sourceTree = "<group>"; };
+		3B68BE6F27C36834007AAAC6 /* SharedUserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedUserDefaults.swift; sourceTree = "<group>"; };
 		3BDCF23D27BC213800334B8B /* Calendar+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar+Extensions.swift"; sourceTree = "<group>"; };
 		3BF5313327ACE18D00056673 /* Headache Tracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Headache Tracker.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3BF5313627ACE18D00056673 /* Headache_TrackerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Headache_TrackerApp.swift; sourceTree = "<group>"; };
@@ -172,6 +217,15 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		3B68BE4927C349B9007AAAC6 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3B68BE5027C349B9007AAAC6 /* SwiftUI.framework in Frameworks */,
+				3B68BE4E27C349B9007AAAC6 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		3BF5313027ACE18D00056673 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -179,6 +233,7 @@
 				3BF5317227ACEC7900056673 /* Logger in Frameworks */,
 				3B68BE1127BF599F007AAAC6 /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */,
 				3B68BE0127BEF949007AAAC6 /* Surge in Frameworks */,
+				3B68BE7327C36928007AAAC6 /* ApplicationKey in Frameworks */,
 				3B68BE1327BF599F007AAAC6 /* FirebaseCrashlytics in Frameworks */,
 				3BF5316D27ACEAC600056673 /* DataController in Frameworks */,
 				3B09191F27BD84FE00844F6C /* Shapes in Frameworks */,
@@ -293,6 +348,7 @@
 				3B09191527BCD38300844F6C /* DurationView.swift */,
 				3B09191927BD58A100844F6C /* HorizontalSeverityLevel.swift */,
 				3B09191127BCCE1C00844F6C /* OnsetView.swift */,
+				3B68BE6627C35644007AAAC6 /* OutlookView.swift */,
 				3B09192227BD91F400844F6C /* SectionTitleView.swift */,
 				3B09191B27BD5F6F00844F6C /* SeverityButton.swift */,
 				3B68BE2427C0294C007AAAC6 /* DurationPredictionView.swift */,
@@ -359,13 +415,36 @@
 			path = Outputs;
 			sourceTree = "<group>";
 		};
+		3B68BE5127C349B9007AAAC6 /* Headache Tracker Widget */ = {
+			isa = PBXGroup;
+			children = (
+				3B68BE5227C349B9007AAAC6 /* Headache_Tracker_Widget.swift */,
+				3B68BE5427C349BA007AAAC6 /* Assets.xcassets */,
+				3B68BE5627C349BA007AAAC6 /* Info.plist */,
+			);
+			path = "Headache Tracker Widget";
+			sourceTree = "<group>";
+		};
+		3B68BE6227C3534B007AAAC6 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				3B68BE6327C353FC007AAAC6 /* Outlook.swift */,
+				3B68BE6F27C36834007AAAC6 /* SharedUserDefaults.swift */,
+				3B68BE5F27C34B89007AAAC6 /* WidgetContent.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
 		3BF5312A27ACE18D00056673 = {
 			isa = PBXGroup;
 			children = (
+				3B68BE6B27C35EB9007AAAC6 /* Headache Tracker WidgetExtension.entitlements */,
 				3BF5313527ACE18D00056673 /* Headache Tracker */,
 				3BF5314B27ACE18F00056673 /* Headache TrackerTests */,
 				3BF5315527ACE18F00056673 /* Headache TrackerUITests */,
+				3B68BE5127C349B9007AAAC6 /* Headache Tracker Widget */,
 				3BF5313427ACE18D00056673 /* Products */,
+				3B68BE6227C3534B007AAAC6 /* Shared */,
 				3BF5316627ACE1DA00056673 /* Frameworks */,
 			);
 			sourceTree = "<group>";
@@ -376,6 +455,7 @@
 				3BF5313327ACE18D00056673 /* Headache Tracker.app */,
 				3BF5314827ACE18F00056673 /* Headache TrackerTests.xctest */,
 				3BF5315227ACE18F00056673 /* Headache TrackerUITests.xctest */,
+				3B68BE4C27C349B9007AAAC6 /* Headache Tracker WidgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -424,6 +504,8 @@
 			isa = PBXGroup;
 			children = (
 				3BF5316727ACE1DA00056673 /* HealthKit.framework */,
+				3B68BE4D27C349B9007AAAC6 /* WidgetKit.framework */,
+				3B68BE4F27C349B9007AAAC6 /* SwiftUI.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -431,6 +513,25 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		3B68BE4B27C349B9007AAAC6 /* Headache Tracker WidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3B68BE5E27C349BA007AAAC6 /* Build configuration list for PBXNativeTarget "Headache Tracker WidgetExtension" */;
+			buildPhases = (
+				3B68BE4827C349B9007AAAC6 /* Sources */,
+				3B68BE4927C349B9007AAAC6 /* Frameworks */,
+				3B68BE4A27C349B9007AAAC6 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Headache Tracker WidgetExtension";
+			packageProductDependencies = (
+			);
+			productName = "Headache Tracker WidgetExtension";
+			productReference = 3B68BE4C27C349B9007AAAC6 /* Headache Tracker WidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		3BF5313227ACE18D00056673 /* Headache Tracker */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 3BF5315C27ACE18F00056673 /* Build configuration list for PBXNativeTarget "Headache Tracker" */;
@@ -439,10 +540,12 @@
 				3BF5313027ACE18D00056673 /* Frameworks */,
 				3BF5313127ACE18D00056673 /* Resources */,
 				3B68BE1427BF5B12007AAAC6 /* Upload dSYM to Crashlytics */,
+				3B68BE5A27C349BA007AAAC6 /* Embed App Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				3B68BE5827C349BA007AAAC6 /* PBXTargetDependency */,
 			);
 			name = "Headache Tracker";
 			packageProductDependencies = (
@@ -452,6 +555,7 @@
 				3B68BE0027BEF949007AAAC6 /* Surge */,
 				3B68BE1027BF599F007AAAC6 /* FirebaseAnalyticsWithoutAdIdSupport */,
 				3B68BE1227BF599F007AAAC6 /* FirebaseCrashlytics */,
+				3B68BE7227C36928007AAAC6 /* ApplicationKey */,
 			);
 			productName = "Headache Tracker";
 			productReference = 3BF5313327ACE18D00056673 /* Headache Tracker.app */;
@@ -503,6 +607,9 @@
 				LastSwiftUpdateCheck = 1320;
 				LastUpgradeCheck = 1320;
 				TargetAttributes = {
+					3B68BE4B27C349B9007AAAC6 = {
+						CreatedOnToolsVersion = 13.2;
+					};
 					3BF5313227ACE18D00056673 = {
 						CreatedOnToolsVersion = 13.2;
 					};
@@ -531,6 +638,7 @@
 				3B09191D27BD84FD00844F6C /* XCRemoteSwiftPackageReference "swiftui-shapes" */,
 				3B68BDFF27BEF949007AAAC6 /* XCRemoteSwiftPackageReference "Surge" */,
 				3B68BE0F27BF599F007AAAC6 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				3B68BE7127C36928007AAAC6 /* XCRemoteSwiftPackageReference "ApplicationKey" */,
 			);
 			productRefGroup = 3BF5313427ACE18D00056673 /* Products */;
 			projectDirPath = "";
@@ -539,11 +647,20 @@
 				3BF5313227ACE18D00056673 /* Headache Tracker */,
 				3BF5314727ACE18F00056673 /* Headache TrackerTests */,
 				3BF5315127ACE18F00056673 /* Headache TrackerUITests */,
+				3B68BE4B27C349B9007AAAC6 /* Headache Tracker WidgetExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		3B68BE4A27C349B9007AAAC6 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3B68BE5527C349BA007AAAC6 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		3BF5313127ACE18D00056673 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -596,6 +713,17 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		3B68BE4827C349B9007AAAC6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3B68BE6527C353FF007AAAC6 /* Outlook.swift in Sources */,
+				3B68BE7627C3699C007AAAC6 /* SharedUserDefaults.swift in Sources */,
+				3B68BE5327C349B9007AAAC6 /* Headache_Tracker_Widget.swift in Sources */,
+				3B68BE6127C34B8E007AAAC6 /* WidgetContent.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		3BF5312F27ACE18D00056673 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -605,6 +733,7 @@
 				3B68BE1F27BF99D2007AAAC6 /* OnsetRegressorOutput.swift in Sources */,
 				3BF5316F27ACEAF700056673 /* DataController+Extensions.swift in Sources */,
 				3B68BDFB27BE0F00007AAAC6 /* BarGraph.swift in Sources */,
+				3B68BE6027C34B89007AAAC6 /* WidgetContent.swift in Sources */,
 				3B09191227BCCE1C00844F6C /* OnsetView.swift in Sources */,
 				3B051A4C27B0B4CC0017131D /* Severity+Extensions.swift in Sources */,
 				3B09191427BCCF9500844F6C /* Cell.swift in Sources */,
@@ -621,11 +750,13 @@
 				3B68BDFE27BE2B57007AAAC6 /* Numeric+Extensions.swift in Sources */,
 				3B4BA6F227B5E96500F38851 /* HealthKitManager.swift in Sources */,
 				3B051A9327B18ABF0017131D /* AlertManager.swift in Sources */,
+				3B68BE6A27C35778007AAAC6 /* OutlookView.swift in Sources */,
 				3B39DAD727ACF67600D39BB5 /* Previewing.swift in Sources */,
 				3B4BA70427B7640F00F38851 /* ModelInput.swift in Sources */,
 				3B68BDF727BDF459007AAAC6 /* Color+Extensions.swift in Sources */,
 				3BF5313927ACE18D00056673 /* ContentView.swift in Sources */,
 				3B09190B27BC7E0C00844F6C /* RefreshTask.swift in Sources */,
+				3B68BE6427C353FC007AAAC6 /* Outlook.swift in Sources */,
 				3B09190927BC7D8000844F6C /* Constants.swift in Sources */,
 				3B68BE2327C026BB007AAAC6 /* DurationRegressorOutput.swift in Sources */,
 				3BF5313727ACE18D00056673 /* Headache_TrackerApp.swift in Sources */,
@@ -648,6 +779,7 @@
 				3B09191627BCD38300844F6C /* DurationView.swift in Sources */,
 				3B09191C27BD5F6F00844F6C /* SeverityButton.swift in Sources */,
 				3B39DAE227AD068300D39BB5 /* AppSettings.swift in Sources */,
+				3B68BE7027C36834007AAAC6 /* SharedUserDefaults.swift in Sources */,
 				3B68BE2727C02BCA007AAAC6 /* OutlookClassifierOutput.swift in Sources */,
 				3B051A5027B0E9410017131D /* CurrentHeadacheView.swift in Sources */,
 				3B051A9827B1B4EC0017131D /* VerticalSeverityLevel.swift in Sources */,
@@ -678,6 +810,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		3B68BE5827C349BA007AAAC6 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3B68BE4B27C349B9007AAAC6 /* Headache Tracker WidgetExtension */;
+			targetProxy = 3B68BE5727C349BA007AAAC6 /* PBXContainerItemProxy */;
+		};
 		3BF5314A27ACE18F00056673 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 3BF5313227ACE18D00056673 /* Headache Tracker */;
@@ -756,6 +893,7 @@
 		3B68BE0827BF4C54007AAAC6 /* Preview */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "Headache Tracker/Headache Tracker.entitlements";
@@ -824,6 +962,90 @@
 				TEST_TARGET_NAME = "Headache Tracker";
 			};
 			name = Preview;
+		};
+		3B68BE5B27C349BA007AAAC6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = "Headache Tracker WidgetExtension.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 194;
+				DEVELOPMENT_TEAM = 4WS4246RA4;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Headache Tracker Widget/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Headache Tracker Widget";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.cnc.Headache-Tracker.Headache-Tracker-Widget";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		3B68BE5C27C349BA007AAAC6 /* Preview */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = "Headache Tracker WidgetExtension.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 194;
+				DEVELOPMENT_TEAM = 4WS4246RA4;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Headache Tracker Widget/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Headache Tracker Widget";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.cnc.Headache-Tracker.Headache-Tracker-Widget";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Preview;
+		};
+		3B68BE5D27C349BA007AAAC6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = "Headache Tracker WidgetExtension.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 194;
+				DEVELOPMENT_TEAM = 4WS4246RA4;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Headache Tracker Widget/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Headache Tracker Widget";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.cnc.Headache-Tracker.Headache-Tracker-Widget";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
 		};
 		3BF5315A27ACE18F00056673 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -946,6 +1168,7 @@
 		3BF5315D27ACE18F00056673 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "Headache Tracker/Headache Tracker.entitlements";
@@ -981,6 +1204,7 @@
 		3BF5315E27ACE18F00056673 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "Headache Tracker/Headache Tracker.entitlements";
@@ -1091,6 +1315,16 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		3B68BE5E27C349BA007AAAC6 /* Build configuration list for PBXNativeTarget "Headache Tracker WidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3B68BE5B27C349BA007AAAC6 /* Debug */,
+				3B68BE5C27C349BA007AAAC6 /* Preview */,
+				3B68BE5D27C349BA007AAAC6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		3BF5312E27ACE18D00056673 /* Build configuration list for PBXProject "Headache Tracker" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -1158,6 +1392,14 @@
 				minimumVersion = 8.12.1;
 			};
 		};
+		3B68BE7127C36928007AAAC6 /* XCRemoteSwiftPackageReference "ApplicationKey" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/colinc86/ApplicationKey";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.1.1;
+			};
+		};
 		3BF5316B27ACEAC600056673 /* XCRemoteSwiftPackageReference "DataController" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "git@github.com:colinc86/DataController.git";
@@ -1196,6 +1438,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 3B68BE0F27BF599F007AAAC6 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseCrashlytics;
+		};
+		3B68BE7227C36928007AAAC6 /* ApplicationKey */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3B68BE7127C36928007AAAC6 /* XCRemoteSwiftPackageReference "ApplicationKey" */;
+			productName = ApplicationKey;
 		};
 		3BF5316C27ACEAC600056673 /* DataController */ = {
 			isa = XCSwiftPackageProductDependency;

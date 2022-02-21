@@ -42,13 +42,10 @@ struct SettingsView: View {
   
   /// The daily outlook alert time.
   @AppStorage(AppSettings.dailyOutlookTime) private var dailyOutlookTime = TimeInterval(28800.0)
-  
-  /// The learn and predict setting.
-  @AppStorage(AppSettings.learnAndPredict) private var learnAndPredict = false
     
   /// The health app integration binding.
   /// Will authorize health kit if set to true.
-  var healthAppIntegration: Binding<Bool> {
+  private var healthAppIntegration: Binding<Bool> {
     Binding<Bool> {
       return !healthKitManager.needsAuthorization() && healthIntegration
     } set: { newValue in
@@ -64,12 +61,17 @@ struct SettingsView: View {
   }
   
   /// The binding to modify the daily outlook time.
-  var dailyOutlookDate: Binding<Date> {
+  private var dailyOutlookDate: Binding<Date> {
     Binding<Date> {
       return Calendar.current.startOfDay(for: Date()).addingTimeInterval(dailyOutlookTime)
     } set: { newValue in
       dailyOutlookTime = Calendar.current.timeIntervalSinceMidnight(newValue)
     }
+  }
+  
+  /// Whether or not alerts are authorized.
+  private var alertsDenied: Bool {
+    return alertManager.authorizationStatus == .notDetermined || alertManager.authorizationStatus == .denied
   }
   
   // MARK: View body
@@ -84,47 +86,28 @@ struct SettingsView: View {
           }
         }
         
-        // Learning and Prediction
-        Section {
-          if predictor.training {
-            HStack {
-              Text("Learn and Predict")
-              Spacer()
-              ProgressView()
-                .progressViewStyle(DefaultProgressViewStyle())
-            }
-          }
-          else {
-            Toggle(isOn: $learnAndPredict) {
-              Text("Learn and Predict")
-            }
-            .onChange(of: learnAndPredict, perform: learnAndPredictChanged)
-          }
-        } header: {
-          Text("Prediction")
-        } footer: {
-          Text("Models last updated at \(predictor.modelUpdatedAt?.formatted() ?? "N/A")")
-        }
-        
         // Notifications
-        Section {
-          if learnAndPredict {
-            Toggle(isOn: $dailyOutlookAlerts) {
-              Text("Daily Outlook")
-            }
-            .onChange(of: dailyOutlookAlerts, perform: dailyOutlookAlertsChanged)
-            
-            DatePicker("Daily Outlook Time", selection: dailyOutlookDate, displayedComponents: .hourAndMinute)
-              .disabled(!dailyOutlookAlerts)
-            
-            Toggle(isOn: $realTimeAlerts) {
-              Text("Hourly Predictions")
-            }
-            .onChange(of: realTimeAlerts, perform: realTimeAlertsChanged)
+        Section("Notifications") {
+          Toggle(isOn: $dailyOutlookAlerts) {
+            Text("Daily Outlook")
           }
+          .onChange(of: dailyOutlookAlerts, perform: dailyOutlookAlertsChanged)
           
+          DatePicker("Daily Outlook Time", selection: dailyOutlookDate, displayedComponents: .hourAndMinute)
+            .disabled(!dailyOutlookAlerts)
+        }
+        .disabled(alertsDenied)
+        
+        Section {
+          Toggle(isOn: $realTimeAlerts) {
+            Text("Hourly Predictions")
+          }
+        }
+        .disabled(alertsDenied)
+        
+        Section {
           Toggle(isOn: $checkInAlerts) {
-            Text("Check-Ins")
+            Text("Headache Check-Ins")
           }
           
           Picker(selection: $checkInInterval) {
@@ -135,17 +118,15 @@ struct SettingsView: View {
             Text("Check-In Interval")
           }
           .disabled(!checkInAlerts)
-        } header: {
-          Text("Notifications")
         } footer: {
-          if alertManager.authorizationStatus == .notDetermined || alertManager.authorizationStatus == .denied {
+          if alertsDenied {
             Text("Visit the Settings app to update the app's notification settings.")
           }
           else {
             Text("Send a notification to check in to the app the specified number of hours after your last update. The notification will only be sent once per update.")
           }
         }
-        .disabled(alertManager.authorizationStatus == .notDetermined || alertManager.authorizationStatus == .denied)
+        .disabled(alertsDenied)
         
         // Information
         Section {
@@ -153,7 +134,7 @@ struct SettingsView: View {
         }
         
         // Debug
-        Section("Debug") {
+        Section {
           Button("Train Models") {
             headacheManager.trainClassifiers { error in
               if let error = error {
@@ -169,6 +150,10 @@ struct SettingsView: View {
               }
             }
           }
+        } header: {
+          Text("Debug")
+        } footer: {
+          Text("Models last updated at \(predictor.modelUpdatedAt?.formatted() ?? "N/A")")
         }
       }
       .navigationTitle("Settings")
@@ -180,45 +165,15 @@ struct SettingsView: View {
 
 extension SettingsView {
   
-  /// Called when the `learnAndPredict` setting changes.
-  ///
-  /// - Parameter newValue: The new `learnAndPredict` value.
-  private func learnAndPredictChanged(_ newValue: Bool) {
-    if newValue {
-      headacheManager.scheduleTrainingRefreshTask()
-      headacheManager.trainClassifiers { error in
-        if let error = error {
-          logError("Error training classifiers: \(error)")
-        }
-      }
-    }
-    else {
-      headacheManager.cancelTrainingProcessingTask()
-      headacheManager.resetPrediction()
-    }
-  }
-  
   /// Called when the `dailyOutlookAlerts` setting changes.
   ///
   /// - Parameter newValue: The new `dailyOutlookAlerts` value.
   private func dailyOutlookAlertsChanged(_ newValue: Bool) {
-    if newValue && learnAndPredict {
+    if newValue {
       headacheManager.scheduleOutlookRefreshTask()
     }
     else {
       headacheManager.cancelOutlookRefreshTask()
-    }
-  }
-  
-  /// Called when the `realTimeAlerts` setting changes.
-  ///
-  /// - Parameter newValue: The new `realTimeAlerts` value.
-  private func realTimeAlertsChanged(_ newValue: Bool) {
-    if newValue && learnAndPredict {
-      headacheManager.schedulePredictionRefreshTask()
-    }
-    else {
-      headacheManager.cancelPredictionRefreshTask()
     }
   }
   

@@ -47,9 +47,6 @@ class HeadacheManager: ObservableObject {
   /// The check-in interval setting if `checkInAlerts` is true.
   @AppStorage(AppSettings.checkInInterval) private var checkInInterval = TimeInterval(3600.0)
   
-  /// The learn and predict setting.
-  @AppStorage(AppSettings.learnAndPredict) private var learnAndPredict = false
-  
   /// The manager's motion manager.
   private let motionManager = MotionManager()
   
@@ -482,7 +479,7 @@ extension HeadacheManager {
   ///   - completion: Called after the alert has been added to notification center.
   private func presentPredictionAlert(with prediction: Predictor.Prediction?, completion: @escaping (Error?) -> Void) {
     // Only continue if we have a prediction and prediction alerts are turned on
-    guard learnAndPredict && realTimeAlerts, let prediction = prediction, prediction.severityClassifierOutput.prediction != .notPresent else {
+    guard realTimeAlerts, let prediction = prediction, prediction.severityClassifierOutput.prediction != .notPresent else {
       completion(nil)
       return
     }
@@ -506,7 +503,7 @@ extension HeadacheManager {
   ///   - completion: Called after the alert has been added to notification center.
   private func presentOutlookAlert(with prediction: Predictor.Prediction?, completion: @escaping (Error?) -> Void) {
     // Only continue if we have a prediction and prediction alerts are turned on
-    guard learnAndPredict && dailyOutlookAlerts, let prediction = prediction, prediction.severityClassifierOutput.prediction != .notPresent else {
+    guard dailyOutlookAlerts, let prediction = prediction, prediction.severityClassifierOutput.prediction != .notPresent else {
       completion(nil)
       return
     }
@@ -516,7 +513,7 @@ extension HeadacheManager {
       // Present the alert
       logDebug("Presenting alert for outlook: \(prediction.outlookClassifierOutput.prediction).")
       self.alertManager?.presentAlert(
-        with: HeadacheAlertRequest.outlook(headache: prediction.outlookClassifierOutput.prediction, onset: prediction.onsetRegressorOutput.prediction),
+        with: HeadacheAlertRequest.outlook(outlook: prediction.outlookClassifierOutput.prediction, onset: prediction.onsetRegressorOutput.prediction),
         trigger: UNTimeIntervalNotificationTrigger(timeInterval: 0.0, repeats: false),
         badgeNumber: 0,
         completion: completion)
@@ -788,9 +785,7 @@ extension HeadacheManager {
     logDebug("Handle prediction refresh task.")
     
     // Schedule the next task
-    if learnAndPredict && realTimeAlerts {
-      schedulePredictionRefreshTask()
-    }
+    schedulePredictionRefreshTask()
     
     // Set the task's expiration handler
     task.expirationHandler = { [weak self] in
@@ -830,7 +825,12 @@ extension HeadacheManager {
         else if let input = input {
           // We got the input, so present the prediction
           do {
-            self?.presentPredictionAlert(with: try self?.predictor?.predict(input), completion: { error in
+            let prediction = try self?.predictor?.predict(input)
+            SharedUserDefaults.standard.outlook = prediction?.outlookClassifierOutput.prediction ?? .noHeadache
+            SharedUserDefaults.standard.onset = prediction?.onsetRegressorOutput.prediction
+            SharedUserDefaults.standard.lastOutlookUpdate = Date()
+            
+            self?.presentPredictionAlert(with: prediction, completion: { error in
               if let error = error {
                 logError("Error presenting alert: \(error)")
               }
@@ -891,7 +891,7 @@ extension HeadacheManager {
     logDebug("Handle outlook refresh task.")
     
     // Schedule the next task
-    if learnAndPredict && dailyOutlookAlerts {
+    if dailyOutlookAlerts {
       scheduleOutlookRefreshTask()
     }
     

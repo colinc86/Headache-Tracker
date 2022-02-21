@@ -23,10 +23,12 @@ class Statistic {
   
   /// The mean value's description.
   var meanDescription: String {
+    guard !signal.isEmpty else { return "" }
     return description(for: mean)
   }
   
   var maxDescription: String {
+    guard !signal.isEmpty else { return "" }
     return description(for: max)
   }
   
@@ -37,8 +39,15 @@ class Statistic {
   /// - Parameter signal: The signal.
   init(signal: [Double]) {
     self.signal = signal
-    self.mean = Surge.mean(signal)
-    self.max = Surge.max(signal)
+    
+    if signal.isEmpty {
+      self.mean = 0.0
+      self.max = 0.0
+    }
+    else {
+      self.mean = Surge.mean(signal)
+      self.max = Surge.max(signal)
+    }
   }
   
   // MARK: Overridable methods

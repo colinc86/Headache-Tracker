@@ -10,9 +10,6 @@ import CoreML
 /// Model Prediction Output Type
 class OutlookClassifierOutput: MLFeatureInitializable {
   
-  static let noHeadacheOutlook = "No Headache"
-  static let headacheOutlook = "Headache"
-  
   struct FeatureName {
     static let outlook = "Outlook"
   }

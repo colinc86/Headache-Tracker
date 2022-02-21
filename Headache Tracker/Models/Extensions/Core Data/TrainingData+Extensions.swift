@@ -140,13 +140,13 @@ extension Array where Element == TrainingData {
     for i in 0 ..< count {
       // If we're in a headache then we're done
       if self[i].severity?.headache != nil {
-        outlooks.append(OutlookClassifierOutput.headacheOutlook)
+        outlooks.append(Outlook.headache.rawValue)
         continue
       }
       
       // Get the current timestamp
       guard let timestamp = self[i].timestamp else {
-        outlooks.append(OutlookClassifierOutput.noHeadacheOutlook)
+        outlooks.append(Outlook.noHeadache.rawValue)
         continue
       }
       
@@ -157,10 +157,10 @@ extension Array where Element == TrainingData {
         }
         return false
       }) {
-        outlooks.append(OutlookClassifierOutput.headacheOutlook)
+        outlooks.append(Outlook.headache.rawValue)
       }
       else {
-        outlooks.append(OutlookClassifierOutput.noHeadacheOutlook)
+        outlooks.append(Outlook.noHeadache.rawValue)
       }
     }
     table[OutlookClassifierOutput.FeatureName.outlook] = outlooks

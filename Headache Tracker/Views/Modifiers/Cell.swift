@@ -17,11 +17,8 @@ struct Cell: ViewModifier {
   /// The cell's title.
   let title: String
   
-  /// The cell's footnote.
-//  var footnote: String? = nil
-  
   /// The cell's foreground color.
-  var foregroundColor: Color
+  let foregroundColor: Color
   
   // MARK: Body content
   

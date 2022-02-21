@@ -30,9 +30,6 @@ struct CurrentHeadacheView: View {
   
   /// The Apple Health integration setting.
   @AppStorage(AppSettings.healthIntegration) private var healthIntegration = false
-  
-  /// The learn and predict setting.
-  @AppStorage(AppSettings.learnAndPredict) private var learnAndPredict = false
     
   /// The headaches fetch request.
   /// Should only return one headache.
@@ -96,7 +93,7 @@ struct CurrentHeadacheView: View {
         }
         
         // No Headache
-        if learnAndPredict && currentHeadache == nil && needsInput {
+        if currentHeadache == nil && needsInput {
           Section {
             Button("No Headache", action: noHeadacheAction)
               .buttonStyle(BorderlessButtonStyle())
@@ -141,11 +138,13 @@ struct CurrentHeadacheView: View {
         }
         
         // Predictions
-        if learnAndPredict, let prediction = prediction {
+        if let prediction = prediction {
           // Severity Prediction
           Section {
             HorizontalSeverityLevel(currentSeverity: prediction.severityClassifierOutput.prediction, collapsed: true, action: nil)
-              .cell(title: "Current Severity (\(String(format: "%0.f%%", prediction.severityClassifierOutput.probability * 100.0)))", systemImage: "dial.max.fill", foregroundColor: .cyan)
+              .cell(
+                title: prediction.severityClassifierOutput.probability == nil ? "Current Severity" : "Current Severity (\(String(format: "%0.f%%", prediction.severityClassifierOutput.probability! * 100.0)))",
+                systemImage: "dial.max.fill", foregroundColor: .cyan)
           } header: {
             SectionTitleView(title: "Predictions")
           }
@@ -153,24 +152,17 @@ struct CurrentHeadacheView: View {
           if currentHeadache == nil {
             // Daily outlook
             Section {
-              Text(prediction.outlookClassifierOutput.prediction ? "Possible Headache" : "No Headache")
-                .font(.title)
-                .cell(title: "Outlook (\(String(format: "%0.f%%", prediction.outlookClassifierOutput.probability * 100.0)))", systemImage: "sun.and.horizon", foregroundColor: .mint)
-            }
-            
-            if prediction.outlookClassifierOutput.prediction {
-              // Onset Prediction
-              Section {
-                OnsetView(onset: prediction.onsetRegressorOutput.prediction)
-                  .cell(title: "Onset", systemImage: "clock.fill", foregroundColor: .purple)
-              }
+              OutlookView(outlook: prediction.outlookClassifierOutput.prediction, onset: prediction.onsetRegressorOutput.prediction)
+                .cell(
+                  title: prediction.outlookClassifierOutput.probability == nil ? "Outlook" : "Outlook (\(String(format: "%0.f%%", prediction.outlookClassifierOutput.probability! * 100.0)))",
+                  systemImage: "sun.and.horizon", foregroundColor: .mint)
             }
           }
           else {
             // Duration Prediction
             Section {
               DurationPredictionView(duration: prediction.durationRegressorOutput.prediction)
-                .cell(title: "Time Remaining", systemImage: "timer", foregroundColor: .green)
+                .cell(title: "Estimated Time Remaining", systemImage: "timer", foregroundColor: .green)
             }
           }
         }
@@ -207,13 +199,6 @@ extension CurrentHeadacheView {
   
   /// Updates the classifier input.
   private func predict() {
-    guard learnAndPredict else {
-      withAnimation {
-        needsInput = false
-      }
-      return
-    }
-    
     logDebug("Predict.")
     
     // Check if we should show the not-present training data cell
@@ -235,6 +220,10 @@ extension CurrentHeadacheView {
           do {
             try withAnimation {
               prediction = try predictor.predict(input)
+              
+              SharedUserDefaults.standard.outlook = prediction?.outlookClassifierOutput.prediction ?? .noHeadache
+              SharedUserDefaults.standard.onset = prediction?.onsetRegressorOutput.prediction
+              SharedUserDefaults.standard.lastOutlookUpdate = Date()
             }
           }
           catch {
