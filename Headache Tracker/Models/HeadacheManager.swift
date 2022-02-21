@@ -538,7 +538,6 @@ extension HeadacheManager {
   ///
   /// - Returns: A boolean indicating if the app should ask for more training data.
   func needsNotPresentTrainingData(completion: @escaping (Bool) -> Void) {
-    var needs = false
     let context = DataController.shared.newNestedBackgroundContext()
     context.perform { [unowned context] in
       let request = TrainingData.fetchRequest()
@@ -546,15 +545,12 @@ extension HeadacheManager {
       let notPresentTrainigData = trainingData.filter({ $0.severity == nil })
       let headacheTrainingDataCount = trainingData.count - notPresentTrainigData.count
       
-      var nextHourAllowed = true
       var nextDateAllowed = false
       if let lastNotPresentDate = notPresentTrainigData.last?.timestamp {
-        nextHourAllowed = Date().timeIntervalSince(lastNotPresentDate) > 21600.0 // Every 6 hours
         nextDateAllowed = Date().timeIntervalSince(lastNotPresentDate) > 43200.0 // Every 12 hours
       }
       
-      needs = (headacheTrainingDataCount >= notPresentTrainigData.count / 2 && nextHourAllowed) || nextDateAllowed
-      completion(needs)
+      completion(headacheTrainingDataCount >= notPresentTrainigData.count / 2 && nextDateAllowed)
     }
   }
   
