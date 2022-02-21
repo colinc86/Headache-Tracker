@@ -18,6 +18,11 @@ extension Headache {
     return (severities?.sortedArray(using: [NSSortDescriptor(key: "startTime", ascending: true)]) as? [Severity]) ?? []
   }
   
+  /// The headache's current severity. If the headache is resolved, this property is nil.
+  var currentSeverity: Severity? {
+    return resolved ? nil : severitiesArray.last
+  }
+  
   /// The start time of the first severity in the headache.
   var startTime: Date? {
     return severitiesArray.first?.startTime

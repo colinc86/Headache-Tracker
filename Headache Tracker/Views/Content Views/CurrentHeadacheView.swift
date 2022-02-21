@@ -142,31 +142,36 @@ struct CurrentHeadacheView: View {
         
         // Predictions
         if learnAndPredict, let prediction = prediction {
-          // Daily outlook
+          // Severity Prediction
           Section {
-            Text(prediction.outlookClassifierOutput.prediction ? "Possible Headache" : "No Headache")
-              .font(.title)
-              .cell(title: "Outlook (\(String(format: "%0.f%%", prediction.outlookClassifierOutput.probability * 100.0)))", systemImage: "sun.and.horizon", foregroundColor: .mint)
+            HorizontalSeverityLevel(currentSeverity: prediction.severityClassifierOutput.prediction, collapsed: true, action: nil)
+              .cell(title: "Current Severity (\(String(format: "%0.f%%", prediction.severityClassifierOutput.probability * 100.0)))", systemImage: "dial.max.fill", foregroundColor: .cyan)
           } header: {
             SectionTitleView(title: "Predictions")
           }
           
-          // Severity Prediction
-          Section {
-            HorizontalSeverityLevel(currentSeverity: prediction.severityClassifierOutput.prediction, collapsed: true, action: nil)
-              .cell(title: "Severity (\(String(format: "%0.f%%", prediction.severityClassifierOutput.probability * 100.0)))", systemImage: "dial.max.fill", foregroundColor: .cyan)
+          if currentHeadache == nil {
+            // Daily outlook
+            Section {
+              Text(prediction.outlookClassifierOutput.prediction ? "Possible Headache" : "No Headache")
+                .font(.title)
+                .cell(title: "Outlook (\(String(format: "%0.f%%", prediction.outlookClassifierOutput.probability * 100.0)))", systemImage: "sun.and.horizon", foregroundColor: .mint)
+            }
+            
+            if prediction.outlookClassifierOutput.prediction {
+              // Onset Prediction
+              Section {
+                OnsetView(onset: prediction.onsetRegressorOutput.prediction)
+                  .cell(title: "Onset", systemImage: "clock.fill", foregroundColor: .purple)
+              }
+            }
           }
-          
-          // Onset Prediction
-          Section {
-            OnsetView(onset: prediction.onsetRegressorOutput.prediction)
-              .cell(title: "Onset", systemImage: "clock.fill", foregroundColor: .purple)
-          }
-          
-          // Duration Prediction
-          Section {
-            StaticDurationView(duration: prediction.durationRegressorOutput.prediction)
-              .cell(title: "Duration", systemImage: "timer", foregroundColor: .green)
+          else {
+            // Duration Prediction
+            Section {
+              DurationPredictionView(duration: prediction.durationRegressorOutput.prediction)
+                .cell(title: "Time Remaining", systemImage: "timer", foregroundColor: .green)
+            }
           }
         }
       }

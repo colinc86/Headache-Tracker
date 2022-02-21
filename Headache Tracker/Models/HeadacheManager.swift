@@ -671,10 +671,10 @@ extension HeadacheManager {
           logDebug("Setting training data on severity \(newSeverityIdentifier)")
           let request = Severity.fetchRequest(withIdentifier: newSeverityIdentifier)
           if let severity = ((try? context.fetch(request)) ?? []).first {
-            severity.trainingData = trainingData
+            severity.addToTrainingData(trainingData)
           }
           else {
-            logWarning("Unable to set training data on severity with identifier: \(newSeverityIdentifier.uuidString)")
+            logWarning("Unable to add training data to severity with identifier: \(newSeverityIdentifier.uuidString)")
           }
         }
         
@@ -799,17 +799,25 @@ extension HeadacheManager {
     }
     
     // Get the current headache
-    var hasCurrentHeadache = false
+    var currentSeverityID: UUID?
+    
     let context = DataController.shared.newNestedBackgroundContext()
     context.performAndWait { [weak context] in
       let request = Headache.fetchRequest()
       request.predicate = NSPredicate(format: "resolved = %@", NSNumber(booleanLiteral: false))
-      hasCurrentHeadache = (try? context?.fetch(request))?.isEmpty == false
+      let headache = (try? context?.fetch(request))?.last
+      currentSeverityID = headache?.currentSeverity?.identifier
     }
     
-    if hasCurrentHeadache {
-      // We have a current headache, so stop here
-      task.setTaskCompleted(success: true)
+    if let currentSeverityID = currentSeverityID {
+      // We have a current headache and severity, so get some training data
+      createTrainingData(newSeverityIdentifier: currentSeverityID) { error in
+        if let error = error {
+          logError("Error creating training data: \(error)")
+        }
+        
+        task.setTaskCompleted(success: error == nil)
+      }
     }
     else {
       // There's no current headache, so run a prediction

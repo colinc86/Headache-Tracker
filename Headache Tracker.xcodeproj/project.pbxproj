@@ -60,7 +60,7 @@
 		3B68BE1327BF599F007AAAC6 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 3B68BE1227BF599F007AAAC6 /* FirebaseCrashlytics */; };
 		3B68BE1F27BF99D2007AAAC6 /* OnsetRegressorOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BE1E27BF99D2007AAAC6 /* OnsetRegressorOutput.swift */; };
 		3B68BE2327C026BB007AAAC6 /* DurationRegressorOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BE2227C026BB007AAAC6 /* DurationRegressorOutput.swift */; };
-		3B68BE2527C0294C007AAAC6 /* StaticDurationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BE2427C0294C007AAAC6 /* StaticDurationView.swift */; };
+		3B68BE2527C0294C007AAAC6 /* DurationPredictionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BE2427C0294C007AAAC6 /* DurationPredictionView.swift */; };
 		3B68BE2727C02BCA007AAAC6 /* OutlookClassifierOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BE2627C02BCA007AAAC6 /* OutlookClassifierOutput.swift */; };
 		3B68BE2B27C2FF85007AAAC6 /* TrainingData+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BE2A27C2FF85007AAAC6 /* TrainingData+CoreDataClass.swift */; };
 		3BDCF23E27BC213800334B8B /* Calendar+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BDCF23D27BC213800334B8B /* Calendar+Extensions.swift */; };
@@ -148,10 +148,11 @@
 		3B68BE0B27BF5899007AAAC6 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		3B68BE1E27BF99D2007AAAC6 /* OnsetRegressorOutput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnsetRegressorOutput.swift; sourceTree = "<group>"; };
 		3B68BE2227C026BB007AAAC6 /* DurationRegressorOutput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DurationRegressorOutput.swift; sourceTree = "<group>"; };
-		3B68BE2427C0294C007AAAC6 /* StaticDurationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StaticDurationView.swift; sourceTree = "<group>"; };
+		3B68BE2427C0294C007AAAC6 /* DurationPredictionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DurationPredictionView.swift; sourceTree = "<group>"; };
 		3B68BE2627C02BCA007AAAC6 /* OutlookClassifierOutput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutlookClassifierOutput.swift; sourceTree = "<group>"; };
 		3B68BE2A27C2FF85007AAAC6 /* TrainingData+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TrainingData+CoreDataClass.swift"; sourceTree = "<group>"; };
 		3B68BE2C27C30923007AAAC6 /* Headache_Tracker 1.3.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Headache_Tracker 1.3.xcdatamodel"; sourceTree = "<group>"; };
+		3B68BE2D27C33481007AAAC6 /* Headache_Tracker 1.4.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Headache_Tracker 1.4.xcdatamodel"; sourceTree = "<group>"; };
 		3BDCF23D27BC213800334B8B /* Calendar+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar+Extensions.swift"; sourceTree = "<group>"; };
 		3BF5313327ACE18D00056673 /* Headache Tracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Headache Tracker.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3BF5313627ACE18D00056673 /* Headache_TrackerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Headache_TrackerApp.swift; sourceTree = "<group>"; };
@@ -294,7 +295,7 @@
 				3B09191127BCCE1C00844F6C /* OnsetView.swift */,
 				3B09192227BD91F400844F6C /* SectionTitleView.swift */,
 				3B09191B27BD5F6F00844F6C /* SeverityButton.swift */,
-				3B68BE2427C0294C007AAAC6 /* StaticDurationView.swift */,
+				3B68BE2427C0294C007AAAC6 /* DurationPredictionView.swift */,
 				3B051A9727B1B4EC0017131D /* VerticalSeverityLevel.swift */,
 			);
 			path = Views;
@@ -639,7 +640,7 @@
 				3BF5314327ACE18F00056673 /* Headache_Tracker.xcdatamodeld in Sources */,
 				3B4BA6FF27B7629800F38851 /* Model.swift in Sources */,
 				3B051A9E27B3555E0017131D /* ConfirmationAlert.swift in Sources */,
-				3B68BE2527C0294C007AAAC6 /* StaticDurationView.swift in Sources */,
+				3B68BE2527C0294C007AAAC6 /* DurationPredictionView.swift in Sources */,
 				3BDCF23E27BC213800334B8B /* Calendar+Extensions.swift in Sources */,
 				3B68BE0627BF2F98007AAAC6 /* Statistic.swift in Sources */,
 				3B68BDF927BDFCD3007AAAC6 /* AnalyzeView.swift in Sources */,
@@ -1212,13 +1213,14 @@
 		3BF5314127ACE18F00056673 /* Headache_Tracker.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				3B68BE2D27C33481007AAAC6 /* Headache_Tracker 1.4.xcdatamodel */,
 				3B68BE2C27C30923007AAAC6 /* Headache_Tracker 1.3.xcdatamodel */,
 				3B4BA6F327B6289C00F38851 /* Headache_Tracker 1.2.xcdatamodel */,
 				3B051AA827B4DC4C0017131D /* Headache_Tracker 1.1.xcdatamodel */,
 				3B051A4927B0B3590017131D /* Headache_Tracker 1.0.xcdatamodel */,
 				3BF5314227ACE18F00056673 /* Headache_Tracker.xcdatamodel */,
 			);
-			currentVersion = 3B68BE2C27C30923007AAAC6 /* Headache_Tracker 1.3.xcdatamodel */;
+			currentVersion = 3B68BE2D27C33481007AAAC6 /* Headache_Tracker 1.4.xcdatamodel */;
 			path = Headache_Tracker.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;
