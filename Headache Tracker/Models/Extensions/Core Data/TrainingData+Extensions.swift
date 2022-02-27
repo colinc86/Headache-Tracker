@@ -62,38 +62,6 @@ extension TrainingData {
     }
   }
   
-  func classifierInput() -> ModelInput {
-    var secondsSinceMidnight = 0.0
-    var weekday = 0.0
-    if let timestamp = timestamp {
-      secondsSinceMidnight = Calendar.current.timeIntervalSinceMidnight(timestamp)
-      weekday = Double(Calendar.current.dayOfWeek(timestamp))
-    }
-    
-    return ModelInput(
-      Current_Pressure: currentPressure,
-      Current_Humidity: currentHumidity,
-      Current_Temperature: currentTemperature,
-      Sigma_Pressure: sigmaPressure,
-      Sigma_Humidity: sigmaHumidity,
-      Sigma_Temperature: sigmaTemperature,
-      Barometric_Pressure: barometricPressure,
-      Heart_Rate: heartRate,
-      Mindful_Session: mindfulSeconds,
-      Sleep_Analysis: sleepSeconds,
-      Respiratory_Rate: respiratoryRate,
-      Oxygen_Saturation: oxygenSaturation,
-      Heart_Rate_Variability: heartRateVariability,
-      Walking_Heart_Rate_Average: walkingHeartRateAverage,
-      Resting_Heart_Rate: restingHeartRate,
-      Headphone_Audio_Exposure: headphoneAudioExposure,
-      Environment_Audio_Exposure: environmentalAudioExposure,
-      Step_Count: stepCount,
-      Seconds_Since_Midnight: secondsSinceMidnight,
-      Weekday: weekday,
-      timestamp: timestamp ?? Date(timeIntervalSince1970: 0))
-  }
-  
 }
 
 #if NON_PREVIEW
@@ -102,6 +70,7 @@ extension Array where Element == TrainingData {
   /// Sets the volitile training variables.
   func setVolitileVariables() {
     for i in 0 ..< count {
+      // Handle start and end times and outlook
       guard let timestamp = self[i].timestamp else {
         continue
       }
@@ -111,7 +80,16 @@ extension Array where Element == TrainingData {
         if i < count - 1 {
           for j in i + 1 ..< count {
             if let startTime = self[j].severity?.headache?.startTime {
-              self[i].timeIntervalUntilNextHeadacheStart = startTime.timeIntervalSince(timestamp)
+              let interval = startTime.timeIntervalSince(timestamp)
+              self[i].timeIntervalUntilNextHeadacheStart = interval
+              
+              // Is the headache today?
+              if Calendar.current.numberOfDaysBetween(timestamp, and: startTime) == 0 {
+                self[i].outlook = .possibleHeadache
+              }
+              else {
+                self[i].outlook = .noHeadache
+              }
               break
             }
           }
@@ -120,13 +98,9 @@ extension Array where Element == TrainingData {
       else if let endTime = self[i].severity?.headache?.endTime {
         // Set the time to the next headache end
         self[i].timeIntervalUntilNextHeadacheEnd = endTime.timeIntervalSince(timestamp)
+        self[i].outlook = .headache
       }
     }
-  }
-  
-  /// Returns the training data's batch provider.
-  func batchProvider() -> MLArrayBatchProvider {
-    return MLArrayBatchProvider(array: map({ $0.classifierInput() }))
   }
   
   /// Uses all training data to create a table that targets the "Outlook" column.
@@ -135,65 +109,47 @@ extension Array where Element == TrainingData {
   /// window, then it is marked as "Headache" otherwise "No Headache".
   func outlookDataTable() -> [String: MLDataValueConvertible] {
     var table = [String: MLDataValueConvertible]()
-    table[ModelInput.FeatureName.currentPressure] = map({ $0.currentPressure })
-    table[ModelInput.FeatureName.currentHumidity] = map({ $0.currentHumidity })
-    table[ModelInput.FeatureName.currentTemperature] = map({ $0.currentTemperature })
-    table[ModelInput.FeatureName.sigmaPressure] = map({ $0.sigmaPressure })
-    table[ModelInput.FeatureName.sigmaHumidity] = map({ $0.sigmaHumidity })
-    table[ModelInput.FeatureName.sigmaTemperature] = map({ $0.sigmaTemperature })
-    table[ModelInput.FeatureName.barometricPressure] = map({ $0.barometricPressure })
-    table[ModelInput.FeatureName.heartRate] = map({ $0.heartRate })
-    table[ModelInput.FeatureName.mindfulSession] = map({ $0.mindfulSeconds })
-    table[ModelInput.FeatureName.sleepAnalysis] = map({ $0.sleepSeconds })
-    table[ModelInput.FeatureName.respiratoryRate] = map({ $0.respiratoryRate })
-    table[ModelInput.FeatureName.oxygenSaturation] = map({ $0.oxygenSaturation })
-    table[ModelInput.FeatureName.heartRateVariability] = map({ $0.heartRateVariability })
-    table[ModelInput.FeatureName.walkingHeartRateAverage] = map({ $0.walkingHeartRateAverage })
-    table[ModelInput.FeatureName.restingHeartRate] = map({ $0.restingHeartRate })
-    table[ModelInput.FeatureName.headphoneAudioExposure] = map({ $0.headphoneAudioExposure })
-    table[ModelInput.FeatureName.environmentAudioExposure] = map({ $0.environmentalAudioExposure })
-    table[ModelInput.FeatureName.stepCount] = map({ $0.stepCount })
-    table[ModelInput.FeatureName.secondsSinceMidnight] = map({ data -> Double in
+    
+    // Environmental input
+    table[EnvironmentalInput.FeatureName.currentPressure] = map({ $0.currentPressure })
+    table[EnvironmentalInput.FeatureName.currentHumidity] = map({ $0.currentHumidity })
+    table[EnvironmentalInput.FeatureName.currentTemperature] = map({ $0.currentTemperature })
+    table[EnvironmentalInput.FeatureName.sigmaPressure] = map({ $0.sigmaPressure })
+    table[EnvironmentalInput.FeatureName.sigmaHumidity] = map({ $0.sigmaHumidity })
+    table[EnvironmentalInput.FeatureName.sigmaTemperature] = map({ $0.sigmaTemperature })
+    table[EnvironmentalInput.FeatureName.barometricPressure] = map({ $0.barometricPressure })
+    table[EnvironmentalInput.FeatureName.environmentAudioExposure] = map({ $0.environmentalAudioExposure })
+    
+    // Time input
+    table[TimeInput.FeatureName.secondsSinceMidnight] = map({ data -> Double in
       if let timestamp = data.timestamp {
         return Double(Calendar.current.timeIntervalSinceMidnight(timestamp))
       }
       return Double(0.0)
     })
-    table[ModelInput.FeatureName.weekday] = map({ data -> Double in
+    table[TimeInput.FeatureName.weekday] = map({ data -> Double in
       if let timestamp = data.timestamp {
         return Double(Calendar.current.dayOfWeek(timestamp))
       }
       return Double(0.0)
     })
     
-    var outlooks = [String]()
-    for i in 0 ..< count {
-      // If we're in a headache then we're done
-      if self[i].severity?.headache != nil {
-        outlooks.append(Outlook.headache.rawValue)
-        continue
-      }
-      
-      // Get the current timestamp
-      guard let timestamp = self[i].timestamp else {
-        outlooks.append(Outlook.noHeadache.rawValue)
-        continue
-      }
-      
-      // Is there a headache later today?
-      if contains(where: { data in
-        if let date = data.timestamp, date > timestamp {
-          return Calendar.current.numberOfDaysBetween(date, and: timestamp) == 0 && data.severity?.headache != nil
-        }
-        return false
-      }) {
-        outlooks.append(Outlook.headache.rawValue)
-      }
-      else {
-        outlooks.append(Outlook.noHeadache.rawValue)
-      }
-    }
-    table[OutlookClassifierOutput.FeatureName.outlook] = outlooks
+    // Uncontrolled input
+    table[UncontrolledUserInput.FeatureName.heartRate] = map({ $0.heartRate })
+    table[UncontrolledUserInput.FeatureName.respiratoryRate] = map({ $0.respiratoryRate })
+    table[UncontrolledUserInput.FeatureName.oxygenSaturation] = map({ $0.oxygenSaturation })
+    table[UncontrolledUserInput.FeatureName.heartRateVariability] = map({ $0.heartRateVariability })
+    table[UncontrolledUserInput.FeatureName.walkingHeartRateAverage] = map({ $0.walkingHeartRateAverage })
+    table[UncontrolledUserInput.FeatureName.restingHeartRate] = map({ $0.restingHeartRate })
+    
+    // Controlled input
+    table[ControlledUserInput.FeatureName.mindfulSession] = map({ $0.mindfulSeconds })
+    table[ControlledUserInput.FeatureName.sleepAnalysis] = map({ $0.sleepSeconds })
+    table[ControlledUserInput.FeatureName.headphoneAudioExposure] = map({ $0.headphoneAudioExposure })
+    table[ControlledUserInput.FeatureName.stepCount] = map({ $0.stepCount })
+    
+    // Output
+    table[OutlookClassifierOutput.FeatureName.outlook] = map({ ($0.outlook ?? .noHeadache).rawValue })
     return table
   }
   
@@ -203,36 +159,46 @@ extension Array where Element == TrainingData {
   /// that severity, otherwise `notPresent` is used.
   func severityDataTable() -> [String: MLDataValueConvertible] {
     var table = [String: MLDataValueConvertible]()
-    table[ModelInput.FeatureName.currentPressure] = map({ $0.currentPressure })
-    table[ModelInput.FeatureName.currentHumidity] = map({ $0.currentHumidity })
-    table[ModelInput.FeatureName.currentTemperature] = map({ $0.currentTemperature })
-    table[ModelInput.FeatureName.sigmaPressure] = map({ $0.sigmaPressure })
-    table[ModelInput.FeatureName.sigmaHumidity] = map({ $0.sigmaHumidity })
-    table[ModelInput.FeatureName.sigmaTemperature] = map({ $0.sigmaTemperature })
-    table[ModelInput.FeatureName.barometricPressure] = map({ $0.barometricPressure })
-    table[ModelInput.FeatureName.heartRate] = map({ $0.heartRate })
-    table[ModelInput.FeatureName.mindfulSession] = map({ $0.mindfulSeconds })
-    table[ModelInput.FeatureName.sleepAnalysis] = map({ $0.sleepSeconds })
-    table[ModelInput.FeatureName.respiratoryRate] = map({ $0.respiratoryRate })
-    table[ModelInput.FeatureName.oxygenSaturation] = map({ $0.oxygenSaturation })
-    table[ModelInput.FeatureName.heartRateVariability] = map({ $0.heartRateVariability })
-    table[ModelInput.FeatureName.walkingHeartRateAverage] = map({ $0.walkingHeartRateAverage })
-    table[ModelInput.FeatureName.restingHeartRate] = map({ $0.restingHeartRate })
-    table[ModelInput.FeatureName.headphoneAudioExposure] = map({ $0.headphoneAudioExposure })
-    table[ModelInput.FeatureName.environmentAudioExposure] = map({ $0.environmentalAudioExposure })
-    table[ModelInput.FeatureName.stepCount] = map({ $0.stepCount })
-    table[ModelInput.FeatureName.secondsSinceMidnight] = map({ data -> Double in
+    
+    // Environmental input
+    table[EnvironmentalInput.FeatureName.currentPressure] = map({ $0.currentPressure })
+    table[EnvironmentalInput.FeatureName.currentHumidity] = map({ $0.currentHumidity })
+    table[EnvironmentalInput.FeatureName.currentTemperature] = map({ $0.currentTemperature })
+    table[EnvironmentalInput.FeatureName.sigmaPressure] = map({ $0.sigmaPressure })
+    table[EnvironmentalInput.FeatureName.sigmaHumidity] = map({ $0.sigmaHumidity })
+    table[EnvironmentalInput.FeatureName.sigmaTemperature] = map({ $0.sigmaTemperature })
+    table[EnvironmentalInput.FeatureName.barometricPressure] = map({ $0.barometricPressure })
+    table[EnvironmentalInput.FeatureName.environmentAudioExposure] = map({ $0.environmentalAudioExposure })
+    
+    // Time input
+    table[TimeInput.FeatureName.secondsSinceMidnight] = map({ data -> Double in
       if let timestamp = data.timestamp {
         return Double(Calendar.current.timeIntervalSinceMidnight(timestamp))
       }
       return Double(0.0)
     })
-    table[ModelInput.FeatureName.weekday] = map({ data -> Double in
+    table[TimeInput.FeatureName.weekday] = map({ data -> Double in
       if let timestamp = data.timestamp {
         return Double(Calendar.current.dayOfWeek(timestamp))
       }
       return Double(0.0)
     })
+    
+    // Uncontrolled input
+    table[UncontrolledUserInput.FeatureName.heartRate] = map({ $0.heartRate })
+    table[UncontrolledUserInput.FeatureName.respiratoryRate] = map({ $0.respiratoryRate })
+    table[UncontrolledUserInput.FeatureName.oxygenSaturation] = map({ $0.oxygenSaturation })
+    table[UncontrolledUserInput.FeatureName.heartRateVariability] = map({ $0.heartRateVariability })
+    table[UncontrolledUserInput.FeatureName.walkingHeartRateAverage] = map({ $0.walkingHeartRateAverage })
+    table[UncontrolledUserInput.FeatureName.restingHeartRate] = map({ $0.restingHeartRate })
+    
+    // Controlled input
+    table[ControlledUserInput.FeatureName.mindfulSession] = map({ $0.mindfulSeconds })
+    table[ControlledUserInput.FeatureName.sleepAnalysis] = map({ $0.sleepSeconds })
+    table[ControlledUserInput.FeatureName.headphoneAudioExposure] = map({ $0.headphoneAudioExposure })
+    table[ControlledUserInput.FeatureName.stepCount] = map({ $0.stepCount })
+    
+    // Output
     table[SeverityClassifierOutput.FeatureName.severity] = map({ ($0.severity?.severity ?? .notPresent).title })
     return table
   }
@@ -244,36 +210,46 @@ extension Array where Element == TrainingData {
   func onsetTableData() -> [String: MLDataValueConvertible] {
     let filteredData = filter({ $0.timeIntervalUntilNextHeadacheStart != nil })
     var table = [String: MLDataValueConvertible]()
-    table[ModelInput.FeatureName.currentPressure] = filteredData.map({ $0.currentPressure })
-    table[ModelInput.FeatureName.currentHumidity] = filteredData.map({ $0.currentHumidity })
-    table[ModelInput.FeatureName.currentTemperature] = filteredData.map({ $0.currentTemperature })
-    table[ModelInput.FeatureName.sigmaPressure] = filteredData.map({ $0.sigmaPressure })
-    table[ModelInput.FeatureName.sigmaHumidity] = filteredData.map({ $0.sigmaHumidity })
-    table[ModelInput.FeatureName.sigmaTemperature] = filteredData.map({ $0.sigmaTemperature })
-    table[ModelInput.FeatureName.barometricPressure] = filteredData.map({ $0.barometricPressure })
-    table[ModelInput.FeatureName.heartRate] = filteredData.map({ $0.heartRate })
-    table[ModelInput.FeatureName.mindfulSession] = filteredData.map({ $0.mindfulSeconds })
-    table[ModelInput.FeatureName.sleepAnalysis] = filteredData.map({ $0.sleepSeconds })
-    table[ModelInput.FeatureName.respiratoryRate] = filteredData.map({ $0.respiratoryRate })
-    table[ModelInput.FeatureName.oxygenSaturation] = filteredData.map({ $0.oxygenSaturation })
-    table[ModelInput.FeatureName.heartRateVariability] = filteredData.map({ $0.heartRateVariability })
-    table[ModelInput.FeatureName.walkingHeartRateAverage] = filteredData.map({ $0.walkingHeartRateAverage })
-    table[ModelInput.FeatureName.restingHeartRate] = filteredData.map({ $0.restingHeartRate })
-    table[ModelInput.FeatureName.headphoneAudioExposure] = filteredData.map({ $0.headphoneAudioExposure })
-    table[ModelInput.FeatureName.environmentAudioExposure] = filteredData.map({ $0.environmentalAudioExposure })
-    table[ModelInput.FeatureName.stepCount] = filteredData.map({ $0.stepCount })
-    table[ModelInput.FeatureName.secondsSinceMidnight] = filteredData.map({ data -> Double in
+    
+    // Environmental input
+    table[EnvironmentalInput.FeatureName.currentPressure] = filteredData.map({ $0.currentPressure })
+    table[EnvironmentalInput.FeatureName.currentHumidity] = filteredData.map({ $0.currentHumidity })
+    table[EnvironmentalInput.FeatureName.currentTemperature] = filteredData.map({ $0.currentTemperature })
+    table[EnvironmentalInput.FeatureName.sigmaPressure] = filteredData.map({ $0.sigmaPressure })
+    table[EnvironmentalInput.FeatureName.sigmaHumidity] = filteredData.map({ $0.sigmaHumidity })
+    table[EnvironmentalInput.FeatureName.sigmaTemperature] = filteredData.map({ $0.sigmaTemperature })
+    table[EnvironmentalInput.FeatureName.barometricPressure] = filteredData.map({ $0.barometricPressure })
+    table[EnvironmentalInput.FeatureName.environmentAudioExposure] = filteredData.map({ $0.environmentalAudioExposure })
+    
+    // Time input
+    table[TimeInput.FeatureName.secondsSinceMidnight] = filteredData.map({ data -> Double in
       if let timestamp = data.timestamp {
         return Double(Calendar.current.timeIntervalSinceMidnight(timestamp))
       }
       return Double(0.0)
     })
-    table[ModelInput.FeatureName.weekday] = filteredData.map({ data -> Double in
+    table[TimeInput.FeatureName.weekday] = filteredData.map({ data -> Double in
       if let timestamp = data.timestamp {
         return Double(Calendar.current.dayOfWeek(timestamp))
       }
       return Double(0.0)
     })
+    
+    // Uncontrolled input
+    table[UncontrolledUserInput.FeatureName.heartRate] = filteredData.map({ $0.heartRate })
+    table[UncontrolledUserInput.FeatureName.respiratoryRate] = filteredData.map({ $0.respiratoryRate })
+    table[UncontrolledUserInput.FeatureName.oxygenSaturation] = filteredData.map({ $0.oxygenSaturation })
+    table[UncontrolledUserInput.FeatureName.heartRateVariability] = filteredData.map({ $0.heartRateVariability })
+    table[UncontrolledUserInput.FeatureName.walkingHeartRateAverage] = filteredData.map({ $0.walkingHeartRateAverage })
+    table[UncontrolledUserInput.FeatureName.restingHeartRate] = filteredData.map({ $0.restingHeartRate })
+    
+    // Controlled input
+    table[ControlledUserInput.FeatureName.mindfulSession] = filteredData.map({ $0.mindfulSeconds })
+    table[ControlledUserInput.FeatureName.sleepAnalysis] = filteredData.map({ $0.sleepSeconds })
+    table[ControlledUserInput.FeatureName.headphoneAudioExposure] = filteredData.map({ $0.headphoneAudioExposure })
+    table[ControlledUserInput.FeatureName.stepCount] = filteredData.map({ $0.stepCount })
+    
+    // Output
     table[OnsetRegressorOutput.FeatureName.onset] = filteredData.map({ $0.timeIntervalUntilNextHeadacheStart ?? 0.0 })
     return table
   }
@@ -284,36 +260,46 @@ extension Array where Element == TrainingData {
   func durationTableData() -> [String: MLDataValueConvertible] {
     let filteredData = filter({ $0.timeIntervalUntilNextHeadacheEnd != nil })
     var table = [String: MLDataValueConvertible]()
-    table[ModelInput.FeatureName.currentPressure] = filteredData.map({ $0.currentPressure })
-    table[ModelInput.FeatureName.currentHumidity] = filteredData.map({ $0.currentHumidity })
-    table[ModelInput.FeatureName.currentTemperature] = filteredData.map({ $0.currentTemperature })
-    table[ModelInput.FeatureName.sigmaPressure] = filteredData.map({ $0.sigmaPressure })
-    table[ModelInput.FeatureName.sigmaHumidity] = filteredData.map({ $0.sigmaHumidity })
-    table[ModelInput.FeatureName.sigmaTemperature] = filteredData.map({ $0.sigmaTemperature })
-    table[ModelInput.FeatureName.barometricPressure] = filteredData.map({ $0.barometricPressure })
-    table[ModelInput.FeatureName.heartRate] = filteredData.map({ $0.heartRate })
-    table[ModelInput.FeatureName.mindfulSession] = filteredData.map({ $0.mindfulSeconds })
-    table[ModelInput.FeatureName.sleepAnalysis] = filteredData.map({ $0.sleepSeconds })
-    table[ModelInput.FeatureName.respiratoryRate] = filteredData.map({ $0.respiratoryRate })
-    table[ModelInput.FeatureName.oxygenSaturation] = filteredData.map({ $0.oxygenSaturation })
-    table[ModelInput.FeatureName.heartRateVariability] = filteredData.map({ $0.heartRateVariability })
-    table[ModelInput.FeatureName.walkingHeartRateAverage] = filteredData.map({ $0.walkingHeartRateAverage })
-    table[ModelInput.FeatureName.restingHeartRate] = filteredData.map({ $0.restingHeartRate })
-    table[ModelInput.FeatureName.headphoneAudioExposure] = filteredData.map({ $0.headphoneAudioExposure })
-    table[ModelInput.FeatureName.environmentAudioExposure] = filteredData.map({ $0.environmentalAudioExposure })
-    table[ModelInput.FeatureName.stepCount] = filteredData.map({ $0.stepCount })
-    table[ModelInput.FeatureName.secondsSinceMidnight] = filteredData.map({ data -> Double in
+    
+    // Environmental input
+    table[EnvironmentalInput.FeatureName.currentPressure] = filteredData.map({ $0.currentPressure })
+    table[EnvironmentalInput.FeatureName.currentHumidity] = filteredData.map({ $0.currentHumidity })
+    table[EnvironmentalInput.FeatureName.currentTemperature] = filteredData.map({ $0.currentTemperature })
+    table[EnvironmentalInput.FeatureName.sigmaPressure] = filteredData.map({ $0.sigmaPressure })
+    table[EnvironmentalInput.FeatureName.sigmaHumidity] = filteredData.map({ $0.sigmaHumidity })
+    table[EnvironmentalInput.FeatureName.sigmaTemperature] = filteredData.map({ $0.sigmaTemperature })
+    table[EnvironmentalInput.FeatureName.barometricPressure] = filteredData.map({ $0.barometricPressure })
+    table[EnvironmentalInput.FeatureName.environmentAudioExposure] = filteredData.map({ $0.environmentalAudioExposure })
+    
+    // Time input
+    table[TimeInput.FeatureName.secondsSinceMidnight] = filteredData.map({ data -> Double in
       if let timestamp = data.timestamp {
         return Double(Calendar.current.timeIntervalSinceMidnight(timestamp))
       }
       return Double(0.0)
     })
-    table[ModelInput.FeatureName.weekday] = filteredData.map({ data -> Double in
+    table[TimeInput.FeatureName.weekday] = filteredData.map({ data -> Double in
       if let timestamp = data.timestamp {
         return Double(Calendar.current.dayOfWeek(timestamp))
       }
       return Double(0.0)
     })
+    
+    // Uncontrolled input
+    table[UncontrolledUserInput.FeatureName.heartRate] = filteredData.map({ $0.heartRate })
+    table[UncontrolledUserInput.FeatureName.respiratoryRate] = filteredData.map({ $0.respiratoryRate })
+    table[UncontrolledUserInput.FeatureName.oxygenSaturation] = filteredData.map({ $0.oxygenSaturation })
+    table[UncontrolledUserInput.FeatureName.heartRateVariability] = filteredData.map({ $0.heartRateVariability })
+    table[UncontrolledUserInput.FeatureName.walkingHeartRateAverage] = filteredData.map({ $0.walkingHeartRateAverage })
+    table[UncontrolledUserInput.FeatureName.restingHeartRate] = filteredData.map({ $0.restingHeartRate })
+    
+    // Controlled input
+    table[ControlledUserInput.FeatureName.mindfulSession] = filteredData.map({ $0.mindfulSeconds })
+    table[ControlledUserInput.FeatureName.sleepAnalysis] = filteredData.map({ $0.sleepSeconds })
+    table[ControlledUserInput.FeatureName.headphoneAudioExposure] = filteredData.map({ $0.headphoneAudioExposure })
+    table[ControlledUserInput.FeatureName.stepCount] = filteredData.map({ $0.stepCount })
+    
+    // Output
     table[DurationRegressorOutput.FeatureName.duration] = filteredData.map({ $0.timeIntervalUntilNextHeadacheEnd ?? 0.0 })
     return table
   }

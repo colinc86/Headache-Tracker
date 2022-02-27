@@ -15,7 +15,7 @@ struct OutlookView: View {
     
   var body: some View {
     VStack(alignment: .leading) {
-      Text(outlook.title)
+      Text(outlook.rawValue)
         .font(.title)
       
       if outlook == .headache, let onset = onset, onset.timeIntervalSince(Date()) > 0.0 {

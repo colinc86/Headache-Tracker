@@ -40,7 +40,7 @@ struct OutlookEntryView: View {
       .foregroundColor(.mint)
       .padding(.bottom, 8)
       
-      Text(entry.outlook.title)
+      Text(entry.outlook.rawValue)
         .font(.title)
       
       if entry.outlook == .headache, let onset = entry.onset, onset.timeIntervalSince(Date()) > 0.0 {

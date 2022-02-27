@@ -19,6 +19,35 @@ class Predictor: ObservableObject {
   
   // MARK: Types
   
+  /// A prediction input.
+  struct Input {
+    
+    var weather: Weather?
+    var healthKitData: [HealthKitData: Double]
+    var date: Date
+    
+    func fullInput() -> InputUnion {
+      return InputUnion(providers: [controlledUserInput(), environmentalInput(), timeInput(), uncontrolledUserInput()])
+    }
+    
+    func controlledUserInput() -> ControlledUserInput {
+      return ControlledUserInput(healthKitData: healthKitData)
+    }
+    
+    func environmentalInput() -> EnvironmentalInput {
+      return EnvironmentalInput(weather: weather, healthKitData: healthKitData)
+    }
+    
+    func timeInput() -> TimeInput {
+      return TimeInput(date: date)
+    }
+    
+    func uncontrolledUserInput() -> UncontrolledUserInput {
+      return UncontrolledUserInput(healthKitData: healthKitData)
+    }
+    
+  }
+  
   /// A headache prediction.
   struct Prediction {
     
@@ -88,16 +117,16 @@ class Predictor: ObservableObject {
   // MARK: Private properties
   
   /// The classifier for predicting headache outlook.
-  private var outlookClassifier: Model<ModelInput, OutlookClassifierOutput>?
+  private var outlookClassifier: Model<InputUnion, OutlookClassifierOutput>?
   
   /// The classifier for predicting headache severities.
-  private var severityClassifier: Model<ModelInput, SeverityClassifierOutput>?
+  private var severityClassifier: Model<InputUnion, SeverityClassifierOutput>?
   
   /// The regressor for predicting headache onset.
-  private var onsetRegressor: Model<ModelInput, OnsetRegressorOutput>?
+  private var onsetRegressor: Model<InputUnion, OnsetRegressorOutput>?
   
   /// The regressor for predicting headache duration.
-  private var durationRegressor: Model<ModelInput, DurationRegressorOutput>?
+  private var durationRegressor: Model<InputUnion, DurationRegressorOutput>?
   
   /// The queue to do anything with models on.
   private var modelQueue = DispatchQueue(label: ApplicationKey(from: "modelQueue"))
@@ -137,19 +166,19 @@ extension Predictor {
       do {
         logDebug("Loading outlook classifier.")
         let outlookClassifierModelURL = self.compiledModelURL(with: Predictor.outlookClassifierFileName)
-        self.outlookClassifier = try Model<ModelInput, OutlookClassifierOutput>(contentsOf: outlookClassifierModelURL)
+        self.outlookClassifier = try Model<InputUnion, OutlookClassifierOutput>(contentsOf: outlookClassifierModelURL)
         
         logDebug("Loading severity classifier.")
         let severityClassifierModelURL = self.compiledModelURL(with: Predictor.severityClassifierFileName)
-        self.severityClassifier = try Model<ModelInput, SeverityClassifierOutput>(contentsOf: severityClassifierModelURL)
+        self.severityClassifier = try Model<InputUnion, SeverityClassifierOutput>(contentsOf: severityClassifierModelURL)
         
         logDebug("Loading onset regressor.")
         let onsetRegressorModelURL = self.compiledModelURL(with: Predictor.onsetRegressorFileName)
-        self.onsetRegressor = try Model<ModelInput, OnsetRegressorOutput>(contentsOf: onsetRegressorModelURL)
+        self.onsetRegressor = try Model<InputUnion, OnsetRegressorOutput>(contentsOf: onsetRegressorModelURL)
         
         logDebug("Loading duration regressor.")
         let durationRegressorModelURL = self.compiledModelURL(with: Predictor.durationRegressorFileName)
-        self.durationRegressor = try Model<ModelInput, DurationRegressorOutput>(contentsOf: durationRegressorModelURL)
+        self.durationRegressor = try Model<InputUnion, DurationRegressorOutput>(contentsOf: durationRegressorModelURL)
         
         logDebug("Getting creation date.")
         if let creationDate = try self.trainingDateOfCompiledModel(at: severityClassifierModelURL) {
@@ -195,8 +224,10 @@ extension Predictor {
     }
     
 #if NON_PREVIEW
-    // Get the data table
+    // Set the training tags
     trainingData.setVolitileVariables()
+    
+    // Get the data table
     let outlookTable: MLDataTable
     let severityTable: MLDataTable
     let onsetTable: MLDataTable
@@ -309,7 +340,7 @@ extension Predictor {
   ///
   /// - Parameter input: The predictor's input.
   /// - Returns: The predictor's output.
-  func predict(_ input: ModelInput) throws -> Prediction {
+  func predict(_ input: Input) throws -> Prediction {
     guard let outlookClassifier = outlookClassifier,
           let severityClassifier = severityClassifier,
           let onsetRegressor = onsetRegressor,
@@ -317,10 +348,11 @@ extension Predictor {
       return .empty
     }
     
-    let outlookPrediction = try outlookClassifier.prediction(input: input)
-    let severityPrediction = try severityClassifier.prediction(input: input)
-    let onsetPrediction = try onsetRegressor.prediction(input: input)
-    let durationPrediction = try durationRegressor.prediction(input: input)
+    let fullInput = input.fullInput()
+    let outlookPrediction = try outlookClassifier.prediction(input: fullInput)
+    let severityPrediction = try severityClassifier.prediction(input: fullInput)
+    let onsetPrediction = try onsetRegressor.prediction(input: fullInput)
+    let durationPrediction = try durationRegressor.prediction(input: fullInput)
         
     return Prediction(
       outlookClassifierOutput: Prediction.PredictionStatistic(

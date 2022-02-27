@@ -10,16 +10,12 @@ import Foundation
 /// A headache outlook.
 enum Outlook: String {
   
-  /// A headache is forseen.
+  /// A headache is in progress.
   case headache = "Headache"
   
-  /// No headache is forseeen.
-  case noHeadache = "No Headache"
+  /// A headache is possible within the next timeframe.
+  case possibleHeadache = "Possible Headache"
   
-  var title: String {
-    switch self {
-    case .headache: return "Possible Headache"
-    case .noHeadache: return "No Headache"
-    }
-  }
+  /// No headache is forseeen within the next timeframe.
+  case noHeadache = "No Headache"
 }
