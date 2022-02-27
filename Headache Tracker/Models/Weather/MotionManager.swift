@@ -17,7 +17,7 @@ class MotionManager {
   
   typealias BarometricPressureCompletion = (Measurement<UnitPressure>?, Error?) -> Void
   
-  enum MotionManagerError: Error {
+  enum MotionError: Error {
     case notAvailable
     case cancelled
   }
@@ -54,14 +54,14 @@ extension MotionManager {
 extension MotionManager {
   
   /// Cancels the current barometric pressure reading.
-  func cancelReading() {
+  func cancel() {
     pendingCompletionBlocksSemaphore.wait()
     defer { pendingCompletionBlocksSemaphore.signal() }
     
     logDebug("Cancel barometer reading.")
     
     for block in pendingCompletionBlocks {
-      block(nil, MotionManagerError.cancelled)
+      block(nil, MotionError.cancelled)
     }
     pendingCompletionBlocks.removeAll()
     
@@ -77,7 +77,7 @@ extension MotionManager {
     
     guard CMAltimeter.isRelativeAltitudeAvailable() else {
       logWarning("Relative altitude not available.")
-      completion(nil, MotionManagerError.notAvailable)
+      completion(nil, MotionError.notAvailable)
       return
     }
     

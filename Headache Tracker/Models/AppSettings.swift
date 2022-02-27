@@ -15,4 +15,6 @@ struct AppSettings {
   static let realTimeAlerts = ApplicationKey(from: "realTimeAlerts")
   static let dailyOutlookAlerts = ApplicationKey(from: "dailyOutlookAlerts")
   static let dailyOutlookTime = ApplicationKey(from: "dailyOutlookTime")
+  
+  static let debugShowAllViews = ApplicationKey(from: "debugShowAllViews")
 }

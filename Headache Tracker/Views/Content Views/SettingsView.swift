@@ -45,6 +45,13 @@ struct SettingsView: View {
   
   /// The daily outlook alert time.
   @AppStorage(AppSettings.dailyOutlookTime) private var dailyOutlookTime = TimeInterval(28800.0)
+  
+  // MARK: Debug settings
+  
+  /// A debug setting to show all views in the prediction section.
+  @AppStorage(AppSettings.debugShowAllViews) private var debugShowAllViews = false
+  
+  // MARK: Computed properties
     
   /// The health app integration binding.
   /// Will authorize health kit if set to true.
@@ -134,6 +141,8 @@ struct SettingsView: View {
         
         // Debug
         Section {
+          Toggle("Show All Views", isOn: $debugShowAllViews)
+          
           NavigationLink {
             TrainingDataView()
               .environment(\.managedObjectContext, viewContext)

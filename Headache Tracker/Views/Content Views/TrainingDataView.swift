@@ -28,11 +28,26 @@ struct TrainingDataView: View {
       ForEach(trainingData) { data in
         NavigationLink {
           List {
-            SubtitleCell(title: "Severity", subtitle: data.severity?.severity.title ?? "-")
-            SubtitleCell(title: "Timestamp", subtitle: data.timestamp?.formatted() ?? "N/A")
-            SubtitleCell(title: "Barometric Pressuree", subtitle: Measurement(value: data.barometricPressure, unit: UnitPressure.kilopascals).formatted())
-            SubtitleCell(title: "Sleep", subtitle: Measurement(value: data.sleepSeconds, unit: UnitDuration.seconds).formatted())
-            SubtitleCell(title: "Oxygen Saturation", subtitle: String(format: "%0.f%%", data.oxygenSaturation * 100.0))
+            Section {
+              SubtitleCell(title: "Severity", subtitle: data.severity?.severity.title ?? "-")
+              SubtitleCell(title: "Timestamp", subtitle: data.timestamp?.formatted() ?? "N/A")
+            }
+            
+            Section {
+              SubtitleCell(title: "Sleep", subtitle: Measurement(value: data.sleepSeconds, unit: UnitDuration.seconds).formatted())
+              SubtitleCell(title: "Oxygen Saturation", subtitle: String(format: "%0.f%%", data.oxygenSaturation * 100.0))
+              SubtitleCell(title: "Heart Rate", subtitle: String(format: "%0.f%%", data.oxygenSaturation * 100.0))
+            }
+            
+            Section {
+              SubtitleCell(title: "Barometric Pressure", subtitle: data.barometicPressureMeasurement.formatted())
+              SubtitleCell(title: "Current Pressure", subtitle: data.currentPressureMeasurement.formatted())
+              SubtitleCell(title: "Current Humidity", subtitle: String(format: "%0.f%%", data.currentHumidity * 100.0))
+              SubtitleCell(title: "Current Temperature", subtitle: data.currentTemperatureMeasurement.formatted())
+              SubtitleCell(title: "𝚺 Pressure", subtitle: "\(data.sigmaPressure) kPa")
+              SubtitleCell(title: "𝚺 Humidity", subtitle: String(format: "%0.f%%", data.sigmaHumidity * 100.0))
+              SubtitleCell(title: "𝚺 Temperature", subtitle: "\(data.sigmaTemperature)℃")
+            }
           }
         } label: {
           SubtitleCell(title: data.timestamp?.formatted(date: .numeric, time: .shortened) ?? "N/A", subtitle: data.severity?.severity.title ?? "-")

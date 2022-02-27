@@ -16,15 +16,33 @@ import CreateML
 
 extension TrainingData {
   
+  var barometicPressureMeasurement: Measurement<UnitPressure> {
+    return Measurement(value: barometricPressure, unit: .kilopascals)
+  }
+  
+  var currentPressureMeasurement: Measurement<UnitPressure> {
+    return Measurement(value: currentPressure, unit: .kilopascals)
+  }
+  
+  var currentTemperatureMeasurement: Measurement<UnitTemperature> {
+    return Measurement(value: currentTemperature, unit: .celsius)
+  }
+  
   // MARK: Initializers
   
-  convenience init(context: NSManagedObjectContext, healthKitData: [HealthKitData: Double], barometricPressure: Double) {
+  convenience init(context: NSManagedObjectContext, healthKitData: [HealthKitData: Double], weather: Weather?) {
     self.init(context: context)
     
-    logDebug("Creating training data with barometric pressure \(barometricPressure) and data \(healthKitData)")
+    logDebug("Creating training data.")
     
     self.timestamp = Date()
-    self.barometricPressure = barometricPressure
+    self.currentPressure = weather?.currentPressure.converted(to: .kilopascals).value ?? 0.0
+    self.currentHumidity = weather?.currentHumidity ?? 0.0
+    self.currentTemperature = weather?.currentTemperature.converted(to: .celsius).value ?? 0.0
+    self.sigmaPressure = weather?.sigmaPressure ?? 0.0
+    self.sigmaHumidity = weather?.sigmaHumidity ?? 0.0
+    self.sigmaTemperature = weather?.sigmaTemperature ?? 0.0
+    self.barometricPressure = weather?.devicePressure.converted(to: .kilopascals).value ?? 0.0
     
     for (key, value) in healthKitData {
       switch key {
@@ -53,6 +71,12 @@ extension TrainingData {
     }
     
     return ModelInput(
+      Current_Pressure: currentPressure,
+      Current_Humidity: currentHumidity,
+      Current_Temperature: currentTemperature,
+      Sigma_Pressure: sigmaPressure,
+      Sigma_Humidity: sigmaHumidity,
+      Sigma_Temperature: sigmaTemperature,
       Barometric_Pressure: barometricPressure,
       Heart_Rate: heartRate,
       Mindful_Session: mindfulSeconds,
@@ -111,6 +135,12 @@ extension Array where Element == TrainingData {
   /// window, then it is marked as "Headache" otherwise "No Headache".
   func outlookDataTable() -> [String: MLDataValueConvertible] {
     var table = [String: MLDataValueConvertible]()
+    table[ModelInput.FeatureName.currentPressure] = map({ $0.currentPressure })
+    table[ModelInput.FeatureName.currentHumidity] = map({ $0.currentHumidity })
+    table[ModelInput.FeatureName.currentTemperature] = map({ $0.currentTemperature })
+    table[ModelInput.FeatureName.sigmaPressure] = map({ $0.sigmaPressure })
+    table[ModelInput.FeatureName.sigmaHumidity] = map({ $0.sigmaHumidity })
+    table[ModelInput.FeatureName.sigmaTemperature] = map({ $0.sigmaTemperature })
     table[ModelInput.FeatureName.barometricPressure] = map({ $0.barometricPressure })
     table[ModelInput.FeatureName.heartRate] = map({ $0.heartRate })
     table[ModelInput.FeatureName.mindfulSession] = map({ $0.mindfulSeconds })
@@ -173,6 +203,12 @@ extension Array where Element == TrainingData {
   /// that severity, otherwise `notPresent` is used.
   func severityDataTable() -> [String: MLDataValueConvertible] {
     var table = [String: MLDataValueConvertible]()
+    table[ModelInput.FeatureName.currentPressure] = map({ $0.currentPressure })
+    table[ModelInput.FeatureName.currentHumidity] = map({ $0.currentHumidity })
+    table[ModelInput.FeatureName.currentTemperature] = map({ $0.currentTemperature })
+    table[ModelInput.FeatureName.sigmaPressure] = map({ $0.sigmaPressure })
+    table[ModelInput.FeatureName.sigmaHumidity] = map({ $0.sigmaHumidity })
+    table[ModelInput.FeatureName.sigmaTemperature] = map({ $0.sigmaTemperature })
     table[ModelInput.FeatureName.barometricPressure] = map({ $0.barometricPressure })
     table[ModelInput.FeatureName.heartRate] = map({ $0.heartRate })
     table[ModelInput.FeatureName.mindfulSession] = map({ $0.mindfulSeconds })
@@ -208,6 +244,12 @@ extension Array where Element == TrainingData {
   func onsetTableData() -> [String: MLDataValueConvertible] {
     let filteredData = filter({ $0.timeIntervalUntilNextHeadacheStart != nil })
     var table = [String: MLDataValueConvertible]()
+    table[ModelInput.FeatureName.currentPressure] = filteredData.map({ $0.currentPressure })
+    table[ModelInput.FeatureName.currentHumidity] = filteredData.map({ $0.currentHumidity })
+    table[ModelInput.FeatureName.currentTemperature] = filteredData.map({ $0.currentTemperature })
+    table[ModelInput.FeatureName.sigmaPressure] = filteredData.map({ $0.sigmaPressure })
+    table[ModelInput.FeatureName.sigmaHumidity] = filteredData.map({ $0.sigmaHumidity })
+    table[ModelInput.FeatureName.sigmaTemperature] = filteredData.map({ $0.sigmaTemperature })
     table[ModelInput.FeatureName.barometricPressure] = filteredData.map({ $0.barometricPressure })
     table[ModelInput.FeatureName.heartRate] = filteredData.map({ $0.heartRate })
     table[ModelInput.FeatureName.mindfulSession] = filteredData.map({ $0.mindfulSeconds })
@@ -242,6 +284,12 @@ extension Array where Element == TrainingData {
   func durationTableData() -> [String: MLDataValueConvertible] {
     let filteredData = filter({ $0.timeIntervalUntilNextHeadacheEnd != nil })
     var table = [String: MLDataValueConvertible]()
+    table[ModelInput.FeatureName.currentPressure] = filteredData.map({ $0.currentPressure })
+    table[ModelInput.FeatureName.currentHumidity] = filteredData.map({ $0.currentHumidity })
+    table[ModelInput.FeatureName.currentTemperature] = filteredData.map({ $0.currentTemperature })
+    table[ModelInput.FeatureName.sigmaPressure] = filteredData.map({ $0.sigmaPressure })
+    table[ModelInput.FeatureName.sigmaHumidity] = filteredData.map({ $0.sigmaHumidity })
+    table[ModelInput.FeatureName.sigmaTemperature] = filteredData.map({ $0.sigmaTemperature })
     table[ModelInput.FeatureName.barometricPressure] = filteredData.map({ $0.barometricPressure })
     table[ModelInput.FeatureName.heartRate] = filteredData.map({ $0.heartRate })
     table[ModelInput.FeatureName.mindfulSession] = filteredData.map({ $0.mindfulSeconds })

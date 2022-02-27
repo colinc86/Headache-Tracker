@@ -30,6 +30,9 @@ struct CurrentHeadacheView: View {
   
   /// The Apple Health integration setting.
   @AppStorage(AppSettings.healthIntegration) private var healthIntegration = false
+  
+  /// A debug setting to show all views in the prediction section.
+  @AppStorage(AppSettings.debugShowAllViews) private var debugShowAllViews = false
     
   /// The headaches fetch request.
   /// Should only return one headache.
@@ -65,6 +68,9 @@ struct CurrentHeadacheView: View {
   
   /// Whether or not we are handling headache training data.
   @State private var handlingInput: Bool = false
+  
+  /// The application's first appearance.
+  @State private var firstAppearance: Bool = true
   
   /// The current (unresolved) headache.
   private var currentHeadache: Headache? {
@@ -139,30 +145,57 @@ struct CurrentHeadacheView: View {
         
         // Predictions
         if let prediction = prediction {
-          // Severity Prediction
-          Section {
-            HorizontalSeverityLevel(currentSeverity: prediction.severityClassifierOutput.prediction, collapsed: true, action: nil)
-              .cell(
-                title: prediction.severityClassifierOutput.probability == nil ? "Current Severity" : "Current Severity (\(String(format: "%0.f%%", prediction.severityClassifierOutput.probability! * 100.0)))",
-                systemImage: "dial.max.fill", foregroundColor: .cyan)
-          } header: {
-            SectionTitleView(title: "Predictions")
-          }
+          let dailyOutlook = OutlookView(outlook: prediction.outlookClassifierOutput.prediction, onset: prediction.onsetRegressorOutput.prediction)
+            .cell(
+              title: prediction.outlookClassifierOutput.probability == nil ? "Outlook" : "Outlook (\(String(format: "%0.f%%", prediction.outlookClassifierOutput.probability! * 100.0)))",
+              systemImage: "sun.and.horizon", foregroundColor: .mint)
           
-          if currentHeadache == nil {
+          let severityPrediction = HorizontalSeverityLevel(currentSeverity: prediction.severityClassifierOutput.prediction, collapsed: true, action: nil)
+            .cell(
+              title: prediction.severityClassifierOutput.probability == nil ? "Current Severity" : "Current Severity (\(String(format: "%0.f%%", prediction.severityClassifierOutput.probability! * 100.0)))",
+              systemImage: "dial.max.fill", foregroundColor: .cyan)
+          
+          let durationPrediction = DurationPredictionView(duration: prediction.durationRegressorOutput.prediction)
+            .cell(title: "Estimated Time Remaining", systemImage: "timer", foregroundColor: .green)
+          
+          if debugShowAllViews {
+            Section {
+              dailyOutlook
+            } header: {
+              SectionTitleView(title: "Predictions")
+            }
+            
+            Section {
+              severityPrediction
+            }
+            
+            Section {
+              durationPrediction
+            }
+          }
+          else if currentHeadache == nil {
             // Daily outlook
             Section {
-              OutlookView(outlook: prediction.outlookClassifierOutput.prediction, onset: prediction.onsetRegressorOutput.prediction)
-                .cell(
-                  title: prediction.outlookClassifierOutput.probability == nil ? "Outlook" : "Outlook (\(String(format: "%0.f%%", prediction.outlookClassifierOutput.probability! * 100.0)))",
-                  systemImage: "sun.and.horizon", foregroundColor: .mint)
+              dailyOutlook
+            } header: {
+              SectionTitleView(title: "Predictions")
+            }
+            
+            if prediction.outlookClassifierOutput.prediction == .headache {
+              severityPrediction
             }
           }
           else {
+            // Severity Prediction
+            Section {
+              severityPrediction
+            } header: {
+              SectionTitleView(title: "Predictions")
+            }
+            
             // Duration Prediction
             Section {
-              DurationPredictionView(duration: prediction.durationRegressorOutput.prediction)
-                .cell(title: "Estimated Time Remaining", systemImage: "timer", foregroundColor: .green)
+              durationPrediction
             }
           }
         }
@@ -193,6 +226,11 @@ extension CurrentHeadacheView {
   
   /// Called when the view appears and reloads the classifier input.
   private func onAppear() {
+    guard !firstAppearance else {
+      firstAppearance = false
+      return
+    }
+    
     logDebug("On appear.")
     predict()
   }

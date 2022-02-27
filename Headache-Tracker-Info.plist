@@ -13,7 +13,10 @@
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>
+		<string>location</string>
 		<string>processing</string>
 	</array>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Your location is used to get weather information to help predict headaches.</string>
 </dict>
 </plist>

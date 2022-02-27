@@ -11,6 +11,22 @@ import HealthKit
 
 struct AnalyzeView: View {
   
+  enum FilterUnit: String {
+    case day
+    case week
+    case month
+    case year
+    
+    var filterCountRange: Range<Int> {
+      switch self {
+      case .day: return 1 ..< 8
+      case .week: return 1 ..< 32
+      case .month: return 1 ..< 13
+      case .year: return 1 ..< 11
+      }
+    }
+  }
+  
   // MARK: Private properties
   
   /// The main view context.
@@ -26,6 +42,9 @@ struct AnalyzeView: View {
   
   /// The headache statistics to display.
   @State private var statistics: HeadacheStatistics?
+  
+  @State private var filterCount: Int = 1
+  @State private var filterUnit: FilterUnit = .day
   
   // MARK: View body
   
@@ -88,6 +107,46 @@ struct AnalyzeView: View {
         }
       }
       .navigationTitle("Analyze")
+      .toolbar {
+        ToolbarItem(placement: .bottomBar) {
+          HStack {
+            Text("Analyze the last")
+            
+            Picker("\(filterCount)", selection: $filterCount) {
+              ForEach(filterUnit.filterCountRange) { i in
+                Text("\(i)").tag(i)
+              }
+            }
+            .background(RoundedRectangle(cornerRadius: 8)
+                          .fill(Color.secondary.opacity(0.25)))
+            
+            Picker("\(filterUnit.rawValue)\(filterCount == 1 ? "" : "s")", selection: $filterUnit) {
+              Text(FilterUnit.day.rawValue).tag(FilterUnit.day)
+              Text(FilterUnit.week.rawValue).tag(FilterUnit.week)
+              Text(FilterUnit.month.rawValue).tag(FilterUnit.month)
+              Text(FilterUnit.year.rawValue).tag(FilterUnit.year)
+            }
+            .background(RoundedRectangle(cornerRadius: 8)
+                          .fill(Color.secondary.opacity(0.25)))
+            .onChange(of: filterUnit, perform: changedFilterUnit)
+            
+            
+//            Picker("\(filterUnit.rawValue)\(filterCount == 1 ? "" : "s")", selection: $filterUnit) {
+//              Text(FilterUnit.day.rawValue).tag(FilterUnit.day)
+//              Text(FilterUnit.week.rawValue).tag(FilterUnit.week)
+//              Text(FilterUnit.month.rawValue).tag(FilterUnit.month)
+//              Text(FilterUnit.year.rawValue).tag(FilterUnit.year)
+//            }
+//            .overlay(
+//              RoundedRectangle(cornerRadius: 8)
+//                .fill(Color.secondary.opacity(0.25))
+//            )
+            
+            
+            Text(".")
+          }
+        }
+      }
     }
     .navigationViewStyle(StackNavigationViewStyle())
     .onAppear(perform: appeared)
@@ -101,6 +160,16 @@ extension AnalyzeView {
   func appeared() {
     let now = Date()
     statistics = HeadacheStatistics(headaches: resolvedHeadaches.sorted(by: { $0.startTime ?? now < $1.startTime ?? now }))
+  }
+  
+  /// Called when the filter unit changes.
+  func changedFilterUnit(_ newValue: FilterUnit) {
+    if filterCount < newValue.filterCountRange.lowerBound {
+      filterCount = newValue.filterCountRange.lowerBound
+    }
+    else if filterCount > newValue.filterCountRange.upperBound - 1 {
+      filterCount = newValue.filterCountRange.upperBound - 1
+    }
   }
   
 }

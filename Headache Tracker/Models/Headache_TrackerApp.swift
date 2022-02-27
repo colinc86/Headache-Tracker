@@ -76,6 +76,9 @@ class AppDelegate: NSObject, UIApplicationDelegate {
   
   /// The application's alert manager.
   var alertManager = AlertManager()
+  
+  /// The application's weather manager.
+  var weatherManager = WeatherManager()
     
   /// The Apple Health app integration setting.
   @AppStorage(AppSettings.healthIntegration) var healthIntegration = false
@@ -113,6 +116,9 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     // Check our health kit authorization status
     checkHealthKitAuthorizationStatus()
     
+    // Check our location authorization status
+    checkLocationAuthorizationStatus()
+    
     // Load our ML classifiers
     loadClassifiers()
     
@@ -130,6 +136,7 @@ extension AppDelegate {
     headacheManager.alertManager = alertManager
     headacheManager.healthKitManager = healthKitManager
     headacheManager.predictor = predictor
+    headacheManager.weatherManager = weatherManager
   }
   
   /// Setup alerts.
@@ -152,6 +159,10 @@ extension AppDelegate {
         }
       }
     }
+  }
+  
+  private func checkLocationAuthorizationStatus() {
+    weatherManager.setup()
   }
   
   /// Loads the ML classifiers and get's them ready for use.
