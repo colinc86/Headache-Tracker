@@ -144,7 +144,7 @@ struct SettingsView: View {
           Toggle("Show All Views", isOn: $debugShowAllViews)
           
           NavigationLink {
-            TrainingDataView()
+            TrainingDataListView()
               .environment(\.managedObjectContext, viewContext)
           } label: {
             Text("Training Data")

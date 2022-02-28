@@ -2,7 +2,7 @@
 //  TrainingDataView.swift
 //  Headache Tracker
 //
-//  Created by Colin Campbell on 2/21/22.
+//  Created by Colin Campbell on 2/27/22.
 //
 
 import SwiftUI
@@ -10,77 +10,87 @@ import SwiftUI
 /// Shows a list of all unresolved and resolved headaches.
 struct TrainingDataView: View {
   
+  @StateObject var trainingData: TrainingData
+  
   // MARK: Private properties
   
   /// The main view context.
   @Environment(\.managedObjectContext) private var viewContext
   
-  /// The application's training data.
-  @FetchRequest(
-    sortDescriptors: [NSSortDescriptor(keyPath: \TrainingData.timestamp, ascending: false)],
-    animation: .default)
-  private var trainingData: FetchedResults<TrainingData>
+  /// Whether or not the view is editing.
+  @State var editing: Bool = false
   
   // MARK: View body
   
   var body: some View {
     List {
-      ForEach(trainingData) { data in
-        NavigationLink {
-          List {
-            Section {
-              SubtitleCell(title: "Severity", subtitle: data.severity?.severity.title ?? "-")
-              SubtitleCell(title: "Timestamp", subtitle: data.timestamp?.formatted() ?? "N/A")
-            }
-            
-            Section {
-              SubtitleCell(title: "Sleep", subtitle: Measurement(value: data.sleepSeconds, unit: UnitDuration.seconds).formatted())
-              SubtitleCell(title: "Oxygen Saturation", subtitle: String(format: "%0.f%%", data.oxygenSaturation * 100.0))
-              SubtitleCell(title: "Heart Rate", subtitle: String(format: "%0.f%%", data.oxygenSaturation * 100.0))
-            }
-            
-            Section {
-              SubtitleCell(title: "Barometric Pressure", subtitle: data.barometicPressureMeasurement.formatted())
-              SubtitleCell(title: "Current Pressure", subtitle: data.currentPressureMeasurement.formatted())
-              SubtitleCell(title: "Current Humidity", subtitle: String(format: "%0.f%%", data.currentHumidity * 100.0))
-              SubtitleCell(title: "Current Temperature", subtitle: data.currentTemperatureMeasurement.formatted())
-              SubtitleCell(title: "𝚺 Pressure", subtitle: "\(data.sigmaPressure) kPa")
-              SubtitleCell(title: "𝚺 Humidity", subtitle: String(format: "%0.f%%", data.sigmaHumidity * 100.0))
-              SubtitleCell(title: "𝚺 Temperature", subtitle: "\(data.sigmaTemperature)℃")
-            }
-          }
-        } label: {
-          SubtitleCell(title: data.timestamp?.formatted(date: .numeric, time: .shortened) ?? "N/A", subtitle: data.severity?.severity.title ?? "-")
+      Section {
+        SubtitleCell(title: "Severity", subtitle: trainingData.severity?.severity.title ?? "-")
+        SubtitleCell(title: "Timestamp", subtitle: trainingData.timestamp?.formatted() ?? "N/A")
+      }
+      
+      Section {
+        SubtitleCell(title: "Sleep", subtitle: Measurement(value: trainingData.sleepSeconds, unit: UnitDuration.seconds).formatted())
+        SubtitleCell(title: "Oxygen Saturation", subtitle: String(format: "%0.f%%", trainingData.oxygenSaturation * 100.0))
+        SubtitleCell(title: "Heart Rate", subtitle: String(format: "%0.f%%", trainingData.oxygenSaturation * 100.0))
+      }
+      
+      Section {
+        if editing {
+          TextField("Barometric Pressure", value: $trainingData.barometricPressure, format: .number, prompt: Text("Barometric Pressure"))
+          TextField("Current Pressure", value: $trainingData.currentPressure, format: .number, prompt: Text("Current Pressure"))
+          TextField("Current Humidity", value: $trainingData.currentHumidity, format: .number, prompt: Text("Current Humidity"))
+          TextField("Current Temperature", value: $trainingData.currentTemperature, format: .number, prompt: Text("Current Temperature"))
+          TextField("𝚺 Pressure", value: $trainingData.sigmaPressure, format: .number, prompt: Text("𝚺 Pressure"))
+          TextField("𝚺 Humidity", value: $trainingData.sigmaHumidity, format: .number, prompt: Text("𝚺 Humidity"))
+          TextField("𝚺 Temperature", value: $trainingData.sigmaTemperature, format: .number, prompt: Text("𝚺 Temperature"))
+        }
+        else {
+          SubtitleCell(title: "Barometric Pressure", subtitle: trainingData.barometicPressureMeasurement.formatted())
+          SubtitleCell(title: "Current Pressure", subtitle: trainingData.currentPressureMeasurement.formatted())
+          SubtitleCell(title: "Current Humidity", subtitle: String(format: "%0.f%%", trainingData.currentHumidity * 100.0))
+          SubtitleCell(title: "Current Temperature", subtitle: trainingData.currentTemperatureMeasurement.formatted())
+          SubtitleCell(title: "𝚺 Pressure", subtitle: "\(trainingData.sigmaPressure) kPa")
+          SubtitleCell(title: "𝚺 Humidity", subtitle: String(format: "%0.f%%", trainingData.sigmaHumidity * 100.0))
+          SubtitleCell(title: "𝚺 Temperature", subtitle: "\(trainingData.sigmaTemperature)℃")
         }
       }
-      .onDelete(perform: deleteTrainingData)
     }
-    .navigationTitle("Training Data")
     .toolbar {
-      ToolbarItem(placement: .navigationBarTrailing) {
-        EditButton()
+      ToolbarItemGroup(placement: .navigationBarTrailing) {
+        if editing {
+          Button("Cancel", action: cancel)
+          Button("Save", action: save)
+        }
+        else {
+          Button("Edit", action: edit)
+        }
       }
     }
   }
   
 }
-
-// MARK: Private methods
 
 extension TrainingDataView {
   
-  private func deleteTrainingData(offsets: IndexSet) {
+  private func save() {
     withAnimation {
-      offsets.map { trainingData[$0] }.forEach({ viewContext.delete($0) })
+      editing = false
+      try? viewContext.save()
+    }
+  }
+  
+  private func cancel() {
+    withAnimation {
+      editing = false
+      viewContext.refresh(trainingData, mergeChanges: false)
+    }
+  }
+  
+  private func edit() {
+    withAnimation {
+      editing = true
     }
   }
   
 }
-
-struct TrainingDataView_Previews: PreviewProvider {
-  static var previews: some View {
-    TrainingDataView()
-      .environment(\.managedObjectContext, Previewing.CoreData.controller.container.viewContext)
-  }
-}
-

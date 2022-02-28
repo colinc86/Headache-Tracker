@@ -576,7 +576,7 @@ extension HeadacheManager {
   /// Gets classifier input appropriate for prediction.
   ///
   /// - Parameter completion: Called when the input struture is ready.
-  func getCurrentClassifierInput(_ completion: @escaping (Predictor.Input?, Error?) -> Void) {
+  func getCurrentClassifierInput(shouldCreateTrainingData: Bool = false, _ completion: @escaping (Predictor.Input?, Error?) -> Void) {
     guard !testing else {
       completion(nil, nil)
       return
@@ -621,10 +621,10 @@ extension HeadacheManager {
   /// - Parameters:
   ///   - newSeverityIdentifier: The new severity identifier.
   ///   - completion: The completion block to call after the training data has been created.
-  func createTrainingData(newSeverityIdentifier: UUID? = nil, completion: ((Error?) -> Void)? = nil) {
+  func createTrainingData(newSeverityIdentifier: UUID? = nil, completion: ((Predictor.Input?, Error?) -> Void)? = nil) {
     guard !testing else {
       logDebug("Testing and returning early.")
-      completion?(nil)
+      completion?(nil, nil)
       return
     }
 
@@ -634,30 +634,28 @@ extension HeadacheManager {
     }
 
     // Get the barometric pressure
-    logDebug("Create training data. Getting weather...")
-    weatherManager?.weather { [weak self] weather, error in
+    logDebug("Create training data. Getting input...")
+    getCurrentClassifierInput { [weak self] input, error in
       guard let self = self else {
         logWarning("Self was nil. Returning early.")
         self?.createTrainingDataBackgroundTask.end()
-        completion?(nil)
+        completion?(nil, nil)
         return
       }
-
+      
       if let error = error {
         logError("Error getting weather: \(error)")
       }
-      else if let weather = weather {
-        logDebug("Got weather: \(weather)")
+      else if let input = input {
+        logDebug("Got weather: \(input)")
       }
-
+      
       logDebug("Creating training data...")
       self.trainingQueue.async {
         let context = DataController.shared.newNestedBackgroundContext()
         
         // Create the training data
-        let now = Date()
-        let interval = DateInterval(start: now.addingTimeInterval(-86400.0), end: now)
-        let trainingData = TrainingData(context: context, healthKitData: self.healthKitManager?.readHealthKitData(in: interval) ?? [:], weather: weather)
+        let trainingData = TrainingData(context: context, input: input)
         
         logDebug("Created training data.")
         
@@ -681,7 +679,7 @@ extension HeadacheManager {
             logDebug("Finished saving training data.")
           }
           
-          completion?(error)
+          completion?(input, error)
           self.createTrainingDataBackgroundTask.end()
         }
       }
@@ -801,35 +799,23 @@ extension HeadacheManager {
       currentSeverityID = headache?.currentSeverity?.identifier
     }
     
-    if let currentSeverityID = currentSeverityID {
-      logDebug("Creating training data with severity identifier \(currentSeverityID).")
-      
-      // We have a current headache and severity, so get some training data
-      createTrainingData(newSeverityIdentifier: currentSeverityID) { error in
-        if let error = error {
-          logError("Error creating training data: \(error)")
-        }
-        
-        task.setTaskCompleted(success: error == nil)
-      }
-    }
-    else {
+    createTrainingData(newSeverityIdentifier: currentSeverityID) { input, error in
       // There's no current headache, so run a prediction
-      getCurrentClassifierInput { [weak self] input, error in
-        if let error = error {
-          // There was an error with getting the input
-          logError("Error getting classifier input: \(error)")
-          task.setTaskCompleted(success: false)
-        }
-        else if let input = input {
+      if let error = error {
+        // There was an error with getting the input
+        logError("Error getting classifier input: \(error)")
+        task.setTaskCompleted(success: false)
+      }
+      else if let input = input {
+        if currentSeverityID == nil {
           // We got the input, so present the prediction
           do {
-            let prediction = try self?.predictor?.predict(input)
+            let prediction = try self.predictor?.predict(input)
             
             SharedUserDefaults.standard.outlook = prediction?.outlookClassifierOutput.prediction ?? .noHeadache
             SharedUserDefaults.standard.onset = prediction?.onsetRegressorOutput.prediction
             
-            self?.presentPredictionAlert(with: prediction, completion: { error in
+            self.presentPredictionAlert(with: prediction, completion: { error in
               if let error = error {
                 logError("Error presenting alert: \(error)")
               }
@@ -843,9 +829,13 @@ extension HeadacheManager {
           }
         }
         else {
-          // Something else went wrong
-          task.setTaskCompleted(success: false)
+          // We don't need to present a prediction and there was no error
+          task.setTaskCompleted(success: true)
         }
+      }
+      else {
+        // Something else went wrong
+        task.setTaskCompleted(success: false)
       }
     }
   }

@@ -30,21 +30,21 @@ extension TrainingData {
   
   // MARK: Initializers
   
-  convenience init(context: NSManagedObjectContext, healthKitData: [HealthKitData: Double], weather: Weather?) {
+  convenience init(context: NSManagedObjectContext, input: Predictor.Input?) {
     self.init(context: context)
     
     logDebug("Creating training data.")
     
-    self.timestamp = Date()
-    self.currentPressure = weather?.currentPressure.converted(to: .kilopascals).value ?? 0.0
-    self.currentHumidity = weather?.currentHumidity ?? 0.0
-    self.currentTemperature = weather?.currentTemperature.converted(to: .celsius).value ?? 0.0
-    self.sigmaPressure = weather?.sigmaPressure ?? 0.0
-    self.sigmaHumidity = weather?.sigmaHumidity ?? 0.0
-    self.sigmaTemperature = weather?.sigmaTemperature ?? 0.0
-    self.barometricPressure = weather?.devicePressure.converted(to: .kilopascals).value ?? 0.0
+    self.timestamp = input?.date
+    self.currentPressure = input?.weather?.currentPressure.converted(to: .kilopascals).value ?? 0.0
+    self.currentHumidity = input?.weather?.currentHumidity ?? 0.0
+    self.currentTemperature = input?.weather?.currentTemperature.converted(to: .celsius).value ?? 0.0
+    self.sigmaPressure = input?.weather?.sigmaPressure ?? 0.0
+    self.sigmaHumidity = input?.weather?.sigmaHumidity ?? 0.0
+    self.sigmaTemperature = input?.weather?.sigmaTemperature ?? 0.0
+    self.barometricPressure = input?.weather?.devicePressure.converted(to: .kilopascals).value ?? 0.0
     
-    for (key, value) in healthKitData {
+    for (key, value) in input?.healthKitData ?? [:] {
       switch key {
       case .heartRate: heartRate = value
       case .mindfulSession: mindfulSeconds = value
