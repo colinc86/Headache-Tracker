@@ -72,6 +72,9 @@ struct CurrentHeadacheView: View {
   /// The application's first appearance.
   @State private var firstAppearance: Bool = true
   
+  /// The date of the last prediction.
+  @State private var lastPredictionDate: Date? = nil
+  
   /// The current (unresolved) headache.
   private var currentHeadache: Headache? {
     return headaches.first
@@ -145,7 +148,7 @@ struct CurrentHeadacheView: View {
         
         // Predictions
         if let prediction = prediction {
-          let dailyOutlook = OutlookView(outlook: prediction.outlookClassifierOutput.prediction, onset: prediction.onsetRegressorOutput.prediction)
+          let dailyOutlook = OutlookView(outlook: prediction.outlookClassifierOutput.prediction, onset: prediction.onsetRegressorOutput.prediction, duration: prediction.durationRegressorOutput.prediction)
             .cell(
               title: prediction.outlookClassifierOutput.probability == nil ? "Outlook" : "Outlook (\(String(format: "%0.f%%", prediction.outlookClassifierOutput.probability! * 100.0)))",
               systemImage: "sun.and.horizon", foregroundColor: .mint)
@@ -202,6 +205,9 @@ struct CurrentHeadacheView: View {
       }
       .background(Color(UIColor.systemGroupedBackground))
       .navigationTitle("Track")
+      .refreshable {
+        predict(forced: true)
+      }
     }
     .navigationViewStyle(StackNavigationViewStyle())
     .onReceive(didBecomeActiveNotificationPublisher, perform: didBecomeActive)
@@ -236,9 +242,7 @@ extension CurrentHeadacheView {
   }
   
   /// Updates the classifier input.
-  private func predict() {
-    logDebug("Predict.")
-    
+  private func predict(forced: Bool = false) {
     // Check if we should show the not-present training data cell
     headacheManager.needsNotPresentTrainingData { needsTrainingData in
       DispatchQueue.main.async {
@@ -248,7 +252,20 @@ extension CurrentHeadacheView {
       }
     }
     
-    // Update the classifier input
+    // Check if we should run a prediction
+    let now = Date()
+    if let lastPredictionDate = lastPredictionDate {
+      let timeSinceLastPrediction = now.timeIntervalSince(lastPredictionDate)
+      guard forced || timeSinceLastPrediction > Constants.predictionRefreshInterval else {
+        logDebug("Not updating prediction. Minimum interval, \(Constants.predictionRefreshInterval), not met with interval \(now.timeIntervalSince(lastPredictionDate)).")
+        return
+      }
+    }
+    lastPredictionDate = now
+    
+    logDebug("Predict.")
+    
+    // Run a prediction
     headacheManager.getCurrentClassifierInput { input, error in
       DispatchQueue.main.async {
         if let error = error {
@@ -262,6 +279,7 @@ extension CurrentHeadacheView {
               /// Save this prediction for the widget
               SharedUserDefaults.standard.outlook = prediction?.outlookClassifierOutput.prediction ?? .noHeadache
               SharedUserDefaults.standard.onset = prediction?.onsetRegressorOutput.prediction
+              SharedUserDefaults.standard.duration = prediction?.durationRegressorOutput.prediction
             }
           }
           catch {
@@ -334,7 +352,7 @@ extension CurrentHeadacheView {
     logDebug("No headache action.")
     
     handlingInput = true
-    headacheManager.createTrainingData { error in
+    headacheManager.createTrainingData { _, error in
       if let error = error {
         handlingInput = false
         showAlert("Error Saving Data", error)

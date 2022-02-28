@@ -208,27 +208,26 @@ extension Array where Element == TrainingData {
   ///
   /// Each element is set to the time interval until the _next_ headache.
   func onsetTableData() -> [String: MLDataValueConvertible] {
-    let filteredData = filter({ $0.timeIntervalUntilNextHeadacheStart != nil })
     var table = [String: MLDataValueConvertible]()
     
     // Environmental input
-    table[EnvironmentalInput.FeatureName.currentPressure] = filteredData.map({ $0.currentPressure })
-    table[EnvironmentalInput.FeatureName.currentHumidity] = filteredData.map({ $0.currentHumidity })
-    table[EnvironmentalInput.FeatureName.currentTemperature] = filteredData.map({ $0.currentTemperature })
-    table[EnvironmentalInput.FeatureName.sigmaPressure] = filteredData.map({ $0.sigmaPressure })
-    table[EnvironmentalInput.FeatureName.sigmaHumidity] = filteredData.map({ $0.sigmaHumidity })
-    table[EnvironmentalInput.FeatureName.sigmaTemperature] = filteredData.map({ $0.sigmaTemperature })
-    table[EnvironmentalInput.FeatureName.barometricPressure] = filteredData.map({ $0.barometricPressure })
-    table[EnvironmentalInput.FeatureName.environmentAudioExposure] = filteredData.map({ $0.environmentalAudioExposure })
+    table[EnvironmentalInput.FeatureName.currentPressure] = map({ $0.currentPressure })
+    table[EnvironmentalInput.FeatureName.currentHumidity] = map({ $0.currentHumidity })
+    table[EnvironmentalInput.FeatureName.currentTemperature] = map({ $0.currentTemperature })
+    table[EnvironmentalInput.FeatureName.sigmaPressure] = map({ $0.sigmaPressure })
+    table[EnvironmentalInput.FeatureName.sigmaHumidity] = map({ $0.sigmaHumidity })
+    table[EnvironmentalInput.FeatureName.sigmaTemperature] = map({ $0.sigmaTemperature })
+    table[EnvironmentalInput.FeatureName.barometricPressure] = map({ $0.barometricPressure })
+    table[EnvironmentalInput.FeatureName.environmentAudioExposure] = map({ $0.environmentalAudioExposure })
     
     // Time input
-    table[TimeInput.FeatureName.secondsSinceMidnight] = filteredData.map({ data -> Double in
+    table[TimeInput.FeatureName.secondsSinceMidnight] = map({ data -> Double in
       if let timestamp = data.timestamp {
         return Double(Calendar.current.timeIntervalSinceMidnight(timestamp))
       }
       return Double(0.0)
     })
-    table[TimeInput.FeatureName.weekday] = filteredData.map({ data -> Double in
+    table[TimeInput.FeatureName.weekday] = map({ data -> Double in
       if let timestamp = data.timestamp {
         return Double(Calendar.current.dayOfWeek(timestamp))
       }
@@ -236,21 +235,21 @@ extension Array where Element == TrainingData {
     })
     
     // Uncontrolled input
-    table[UncontrolledUserInput.FeatureName.heartRate] = filteredData.map({ $0.heartRate })
-    table[UncontrolledUserInput.FeatureName.respiratoryRate] = filteredData.map({ $0.respiratoryRate })
-    table[UncontrolledUserInput.FeatureName.oxygenSaturation] = filteredData.map({ $0.oxygenSaturation })
-    table[UncontrolledUserInput.FeatureName.heartRateVariability] = filteredData.map({ $0.heartRateVariability })
-    table[UncontrolledUserInput.FeatureName.walkingHeartRateAverage] = filteredData.map({ $0.walkingHeartRateAverage })
-    table[UncontrolledUserInput.FeatureName.restingHeartRate] = filteredData.map({ $0.restingHeartRate })
+    table[UncontrolledUserInput.FeatureName.heartRate] = map({ $0.heartRate })
+    table[UncontrolledUserInput.FeatureName.respiratoryRate] = map({ $0.respiratoryRate })
+    table[UncontrolledUserInput.FeatureName.oxygenSaturation] = map({ $0.oxygenSaturation })
+    table[UncontrolledUserInput.FeatureName.heartRateVariability] = map({ $0.heartRateVariability })
+    table[UncontrolledUserInput.FeatureName.walkingHeartRateAverage] = map({ $0.walkingHeartRateAverage })
+    table[UncontrolledUserInput.FeatureName.restingHeartRate] = map({ $0.restingHeartRate })
     
     // Controlled input
-    table[ControlledUserInput.FeatureName.mindfulSession] = filteredData.map({ $0.mindfulSeconds })
-    table[ControlledUserInput.FeatureName.sleepAnalysis] = filteredData.map({ $0.sleepSeconds })
-    table[ControlledUserInput.FeatureName.headphoneAudioExposure] = filteredData.map({ $0.headphoneAudioExposure })
-    table[ControlledUserInput.FeatureName.stepCount] = filteredData.map({ $0.stepCount })
+    table[ControlledUserInput.FeatureName.mindfulSession] = map({ $0.mindfulSeconds })
+    table[ControlledUserInput.FeatureName.sleepAnalysis] = map({ $0.sleepSeconds })
+    table[ControlledUserInput.FeatureName.headphoneAudioExposure] = map({ $0.headphoneAudioExposure })
+    table[ControlledUserInput.FeatureName.stepCount] = map({ $0.stepCount })
     
     // Output
-    table[OnsetRegressorOutput.FeatureName.onset] = filteredData.map({ $0.timeIntervalUntilNextHeadacheStart ?? 0.0 })
+    table[OnsetRegressorOutput.FeatureName.onset] = map({ $0.timeIntervalUntilNextHeadacheStart ?? 0.0 })
     return table
   }
   
@@ -258,27 +257,26 @@ extension Array where Element == TrainingData {
   ///
   /// Each element is set to the time interval until the headache's end time.
   func durationTableData() -> [String: MLDataValueConvertible] {
-    let filteredData = filter({ $0.timeIntervalUntilNextHeadacheEnd != nil })
     var table = [String: MLDataValueConvertible]()
     
     // Environmental input
-    table[EnvironmentalInput.FeatureName.currentPressure] = filteredData.map({ $0.currentPressure })
-    table[EnvironmentalInput.FeatureName.currentHumidity] = filteredData.map({ $0.currentHumidity })
-    table[EnvironmentalInput.FeatureName.currentTemperature] = filteredData.map({ $0.currentTemperature })
-    table[EnvironmentalInput.FeatureName.sigmaPressure] = filteredData.map({ $0.sigmaPressure })
-    table[EnvironmentalInput.FeatureName.sigmaHumidity] = filteredData.map({ $0.sigmaHumidity })
-    table[EnvironmentalInput.FeatureName.sigmaTemperature] = filteredData.map({ $0.sigmaTemperature })
-    table[EnvironmentalInput.FeatureName.barometricPressure] = filteredData.map({ $0.barometricPressure })
-    table[EnvironmentalInput.FeatureName.environmentAudioExposure] = filteredData.map({ $0.environmentalAudioExposure })
+    table[EnvironmentalInput.FeatureName.currentPressure] = map({ $0.currentPressure })
+    table[EnvironmentalInput.FeatureName.currentHumidity] = map({ $0.currentHumidity })
+    table[EnvironmentalInput.FeatureName.currentTemperature] = map({ $0.currentTemperature })
+    table[EnvironmentalInput.FeatureName.sigmaPressure] = map({ $0.sigmaPressure })
+    table[EnvironmentalInput.FeatureName.sigmaHumidity] = map({ $0.sigmaHumidity })
+    table[EnvironmentalInput.FeatureName.sigmaTemperature] = map({ $0.sigmaTemperature })
+    table[EnvironmentalInput.FeatureName.barometricPressure] = map({ $0.barometricPressure })
+    table[EnvironmentalInput.FeatureName.environmentAudioExposure] = map({ $0.environmentalAudioExposure })
     
     // Time input
-    table[TimeInput.FeatureName.secondsSinceMidnight] = filteredData.map({ data -> Double in
+    table[TimeInput.FeatureName.secondsSinceMidnight] = map({ data -> Double in
       if let timestamp = data.timestamp {
         return Double(Calendar.current.timeIntervalSinceMidnight(timestamp))
       }
       return Double(0.0)
     })
-    table[TimeInput.FeatureName.weekday] = filteredData.map({ data -> Double in
+    table[TimeInput.FeatureName.weekday] = map({ data -> Double in
       if let timestamp = data.timestamp {
         return Double(Calendar.current.dayOfWeek(timestamp))
       }
@@ -286,21 +284,21 @@ extension Array where Element == TrainingData {
     })
     
     // Uncontrolled input
-    table[UncontrolledUserInput.FeatureName.heartRate] = filteredData.map({ $0.heartRate })
-    table[UncontrolledUserInput.FeatureName.respiratoryRate] = filteredData.map({ $0.respiratoryRate })
-    table[UncontrolledUserInput.FeatureName.oxygenSaturation] = filteredData.map({ $0.oxygenSaturation })
-    table[UncontrolledUserInput.FeatureName.heartRateVariability] = filteredData.map({ $0.heartRateVariability })
-    table[UncontrolledUserInput.FeatureName.walkingHeartRateAverage] = filteredData.map({ $0.walkingHeartRateAverage })
-    table[UncontrolledUserInput.FeatureName.restingHeartRate] = filteredData.map({ $0.restingHeartRate })
+    table[UncontrolledUserInput.FeatureName.heartRate] = map({ $0.heartRate })
+    table[UncontrolledUserInput.FeatureName.respiratoryRate] = map({ $0.respiratoryRate })
+    table[UncontrolledUserInput.FeatureName.oxygenSaturation] = map({ $0.oxygenSaturation })
+    table[UncontrolledUserInput.FeatureName.heartRateVariability] = map({ $0.heartRateVariability })
+    table[UncontrolledUserInput.FeatureName.walkingHeartRateAverage] = map({ $0.walkingHeartRateAverage })
+    table[UncontrolledUserInput.FeatureName.restingHeartRate] = map({ $0.restingHeartRate })
     
     // Controlled input
-    table[ControlledUserInput.FeatureName.mindfulSession] = filteredData.map({ $0.mindfulSeconds })
-    table[ControlledUserInput.FeatureName.sleepAnalysis] = filteredData.map({ $0.sleepSeconds })
-    table[ControlledUserInput.FeatureName.headphoneAudioExposure] = filteredData.map({ $0.headphoneAudioExposure })
-    table[ControlledUserInput.FeatureName.stepCount] = filteredData.map({ $0.stepCount })
+    table[ControlledUserInput.FeatureName.mindfulSession] = map({ $0.mindfulSeconds })
+    table[ControlledUserInput.FeatureName.sleepAnalysis] = map({ $0.sleepSeconds })
+    table[ControlledUserInput.FeatureName.headphoneAudioExposure] = map({ $0.headphoneAudioExposure })
+    table[ControlledUserInput.FeatureName.stepCount] = map({ $0.stepCount })
     
     // Output
-    table[DurationRegressorOutput.FeatureName.duration] = filteredData.map({ $0.timeIntervalUntilNextHeadacheEnd ?? 0.0 })
+    table[DurationRegressorOutput.FeatureName.duration] = map({ $0.timeIntervalUntilNextHeadacheEnd ?? 0.0 })
     return table
   }
   

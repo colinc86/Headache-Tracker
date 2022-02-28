@@ -14,6 +14,7 @@ class SharedUserDefaults {
   struct Keys {
     static let outlookKey = "outlook"
     static let onset = "onset"
+    static let duration = "duration"
   }
   
   // MARK: Static properties
@@ -54,6 +55,18 @@ class SharedUserDefaults {
     
     set {
       defaults?.set(newValue, forKey: Keys.onset)
+      defaults?.synchronize()
+    }
+  }
+  
+  /// The current duration.
+  var duration: TimeInterval? {
+    get {
+      return defaults?.value(forKey: Keys.duration) as? TimeInterval
+    }
+    
+    set {
+      defaults?.set(newValue, forKey: Keys.duration)
       defaults?.synchronize()
     }
   }

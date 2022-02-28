@@ -30,7 +30,7 @@ struct Cell: ViewModifier {
           Text(title)
           Spacer()
         }
-        .foregroundColor(foregroundColor)
+        .gradientForeground(colors: [foregroundColor.darker(by: 0.05), foregroundColor.lighter(by: 0.05)])
         .padding(.bottom, 8)
         
         content

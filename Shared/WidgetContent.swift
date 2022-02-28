@@ -11,4 +11,5 @@ struct WidgetContent: TimelineEntry {
   var date = Date()
   let outlook: Outlook
   let onset: Date?
+  let duration: TimeInterval?
 }

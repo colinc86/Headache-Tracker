@@ -9,6 +9,7 @@ import Foundation
 
 class Weather: CustomStringConvertible {
   
+  /// A spread of weather data by +/- 6 hrs.
   struct WeatherSpread: Codable, CustomStringConvertible {
     
     struct WeatherData: Codable, CustomStringConvertible {

@@ -11,19 +11,26 @@ import CoreLocation
 
 class WeatherManager {
   
+  /// The manager's motion manager.
   private let motionManager = MotionManager()
+  
+  /// The manager's location manager.
   private let locationManager = LocationManager()
+  
+  /// The manager's weather spread URL task.
   private var weatherSpreadTask: URLSessionTask?
   
 }
 
 extension WeatherManager {
   
+  /// Sets up the weather manager for use.
   func setup() {
     logDebug("Setting up weather manager.")
     locationManager.setup()
   }
   
+  /// Cancels the weather task.
   func cancel() {
     logDebug("Cancel weather manager task.")
     motionManager.cancel()
@@ -31,6 +38,14 @@ extension WeatherManager {
     weatherSpreadTask?.cancel()
   }
   
+  /// Gets the current weather of the device.
+  ///
+  /// Requires:
+  /// 1) A barometer is available.
+  /// 2) Location services are available.
+  /// 3) The network is available.
+  ///
+  /// - Parameter completion: Called after the weather has been fetched.
   func weather(completion: @escaping (Weather?, Error?) -> Void) {
     logDebug("Get weather...")
     
@@ -77,10 +92,13 @@ extension WeatherManager {
 
 extension WeatherManager {
   
+  /// Gets the weather spread from the weather API.
+  ///
+  /// - Parameters:
+  ///   - location: The location to get the spread for.
+  ///   - completion: Called after the spread has been received.
   private func getWeatherSpread(location: CLLocation, completion: @escaping (Weather.WeatherSpread?, Error?) -> Void) {
-    let username = "f6fad9695be5449475ccfba804ec1018"
-    let password = "c4efa0b907f057cdb110d36651e442b3"
-    let loginString = String(format: "%@:%@", username, password)
+    let loginString = String(format: "%@:%@", Constants.WeatherAPI.username, Constants.WeatherAPI.password)
     let loginData = loginString.data(using: String.Encoding.utf8)!
     let base64LoginString = loginData.base64EncodedString()
     

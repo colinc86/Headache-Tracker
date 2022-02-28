@@ -13,6 +13,19 @@ struct Constants {
   /// The desired time between predictions.
   static let backgroundPredictionInterval: TimeInterval = 3600.0
   
+  /// The minimum refresh interval.
+  static let predictionRefreshInterval: TimeInterval = 600.0
+  
+  struct WeatherAPI {
+    
+    /// The weather API username.
+    static let username = "f6fad9695be5449475ccfba804ec1018"
+    
+    /// The weather API password.
+    static let password = "c4efa0b907f057cdb110d36651e442b3"
+    
+  }
+  
   struct Identifiers {
     
     /// The identifier to use with background training tasks.
