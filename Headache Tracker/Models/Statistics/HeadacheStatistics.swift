@@ -23,6 +23,10 @@ struct HeadacheStatistics {
   /// The duration of each headache.
   let durations: DurationStatistic
   
+  let headachesPerYear: Double
+  let headachesPerMonth: Double
+  let headachesPerWeek: Double
+  
   // MARK: Initializers
   
   /// Initializes a set of headache statistics.
@@ -52,6 +56,24 @@ struct HeadacheStatistics {
     self.averages = SeverityStatistic(earliestDate: earliestDate, signal: averages, dates: dates)
     self.onsets = OnsetStatistic(earliestDate: earliestDate, signal: onsets, dates: dates)
     self.durations = DurationStatistic(earliestDate: earliestDate, signal: durations, dates: dates)
+    
+    // Rates
+    if let firstHeadacheDate = headaches.first?.startTime, let lastHeadacheDate = headaches.last?.startTime {
+      let interval = lastHeadacheDate.timeIntervalSince(firstHeadacheDate)
+      let years = interval / 31536000.0
+      let months = interval / 2678400.0
+      let weeks = interval / 604800.0
+      let headacheCount = Double(headaches.count)
+      
+      self.headachesPerYear = headacheCount / years
+      self.headachesPerMonth = headacheCount / months
+      self.headachesPerWeek = headacheCount / weeks
+    }
+    else {
+      self.headachesPerYear = 0.0
+      self.headachesPerMonth = 0.0
+      self.headachesPerWeek = 0.0
+    }
   }
   
 }

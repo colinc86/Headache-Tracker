@@ -106,6 +106,13 @@ struct BarGraph: View {
             .stroke(style: StrokeStyle(lineWidth: 0.5, dash: [5]))
             .foregroundColor(Color(UIColor.secondaryLabel))
             
+            if let selectedDate = selectedDate {
+              Text(selectedDate.formatted(date: .abbreviated, time: .omitted))
+                .font(.caption)
+                .foregroundColor(.secondary)
+                .offset(x: touchLocation.x - geometry.size.width / 2.0, y: geometry.size.height / 2.0 + 8.0)
+            }
+            
             if let selectedValue = selectedValue, let displayString = displayString(for: selectedValue) {
               Text(displayString)
                 .font(.caption)
@@ -123,6 +130,12 @@ struct BarGraph: View {
 
 extension BarGraph {
   
+  /// Called when the bar shape view is touched.
+  ///
+  /// - Parameters:
+  ///   - size: The view's size.
+  ///   - location: The touche's location.
+  ///   - type: The touche's event type.
   private func touched(size: CGSize, location: CGPoint, type: TouchLocatingView.TouchType) {
     let updateLocation = {
       guard let earliestDate = earliestDate ?? statistic.signal.first?.1 else {
@@ -164,6 +177,10 @@ extension BarGraph {
     }
   }
   
+  /// The string to display when the user selects a value.
+  ///
+  /// - Parameter value: The selected value.
+  /// - Returns: The string to display.
   private func displayString(for value: Double) -> String? {
     switch graphUnit {
     case .severity:
@@ -173,21 +190,27 @@ extension BarGraph {
     case .duration:
       return Formatters.dateComponentsFormatter.string(from: value)
     }
-    return nil
   }
   
 }
 
 struct Bars: Shape {
+  
   struct Line {
     let endpointA: CGPoint
     let endpointB: CGPoint
   }
   
+  /// The series to plot.
   let series: [(Double, Date)]
+  
+  /// The earliest date in the series.
   let earliestDate: Date?
+  
+  /// The maximum value in the series.
   let staticMax: Double?
 
+  /// The maximum value to use when calculating values.
   private var max: Double {
     return staticMax ?? Surge.max(series.map({ $0.0 }))
   }

@@ -17,6 +17,7 @@ struct AnalyzeView: View {
     case month
     case year
     
+    /// The range to use with the filter count picker.
     var filterCountRange: Range<Int> {
       switch self {
       case .day: return 1 ..< 8
@@ -26,6 +27,8 @@ struct AnalyzeView: View {
       }
     }
     
+    /// The date before now with the number of `count` units of self
+    /// before the current date.
     func dateBeforeNow(withCount count: Int) -> Date {
       var interval: TimeInterval = 0.0
       switch self {
@@ -53,6 +56,7 @@ struct AnalyzeView: View {
   /// The main view context.
   @Environment(\.managedObjectContext) private var viewContext
   
+  /// The view's state identifier.
   @State private var viewIdentifier = UUID()
   
   // MARK: View body

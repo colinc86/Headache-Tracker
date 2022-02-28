@@ -22,17 +22,26 @@ struct GraphList: View {
   /// The headache statistics to display.
   @State private var statistics: HeadacheStatistics?
   
+  /// The earliest date to show in the view.
   private let earliestDate: Date
   
   var body: some View {
     List {
       if let statistics = statistics {
         Section {
+          SubtitleCell(title: "Per Year", subtitle: String(format: "%0.1f", statistics.headachesPerYear))
+          SubtitleCell(title: "Per Month", subtitle: String(format: "%0.1f", statistics.headachesPerMonth))
+          SubtitleCell(title: "Per Week", subtitle: String(format: "%0.1f", statistics.headachesPerWeek))
+        } header: {
+          SectionTitleView(title: "Headaches")
+        }
+        
+        Section {
           BarGraph(
             graphUnit: .severity,
             statistic: statistics.peaks,
             yAxis: ["Not Present", "Present", "Mild", "Moderate", "Severe"],
-            gradient: Gradient(colors: [.cyan.darker(by: 0.05), .cyan.lighter(by: 0.05)]),
+            gradient: Gradient(colors: [.cyan.darker(by: 0.1), .cyan.lighter(by: 0.1)]),
             earliestDate: earliestDate,
             staticMax: 4)
             .frame(height: 100)
@@ -47,7 +56,7 @@ struct GraphList: View {
             graphUnit: .severity,
             statistic: statistics.averages,
             yAxis: ["Not Present", "Present", "Mild", "Moderate", "Severe"],
-            gradient: Gradient(colors: [.cyan.darker(by: 0.05), .cyan.lighter(by: 0.05)]),
+            gradient: Gradient(colors: [.cyan.darker(by: 0.1), .cyan.lighter(by: 0.1)]),
             earliestDate: earliestDate,
             staticMax: 4)
             .frame(height: 100)
@@ -60,7 +69,7 @@ struct GraphList: View {
             graphUnit: .time,
             statistic: statistics.onsets,
             yAxis: ["12 AM", "6 AM", "12 PM", "6 PM", "12 AM"],
-            gradient: Gradient(colors: [.purple.darker(by: 0.05), .purple.lighter(by: 0.05)]),
+            gradient: Gradient(colors: [.purple.darker(by: 0.1), .purple.lighter(by: 0.1)]),
             earliestDate: earliestDate,
             staticMax: 86400)
             .frame(height: 100)
@@ -75,7 +84,7 @@ struct GraphList: View {
             graphUnit: .duration,
             statistic: statistics.durations,
             yAxis: ["0m", Formatters.dateComponentsFormatter.string(from: statistics.durations.max ) ?? "-"],
-            gradient: Gradient(colors: [.green.darker(by: 0.05), .green.lighter(by: 0.05)]),
+            gradient: Gradient(colors: [.green.darker(by: 0.1), .green.lighter(by: 0.1)]),
             earliestDate: earliestDate)
             .frame(height: 100)
             .cell(title: "Duration", systemImage: "timer", foregroundColor: .green)
@@ -88,6 +97,11 @@ struct GraphList: View {
     .onAppear(perform: appeared)
   }
   
+  // MARK: Initializers
+  
+  /// Intializes a graph list with an earliest date.
+  ///
+  /// - Parameter earliestDate: The earliest date to graph in the list.
   init(earliestDate: Date) {
     logDebug("Drawing graphs with earliest date \(earliestDate.formatted())")
     self.earliestDate = earliestDate
