@@ -25,10 +25,12 @@ struct HeadacheStatistics {
   
   // MARK: Initializers
   
-  /// Initializes a seet of headache statistics.
+  /// Initializes a set of headache statistics.
   ///
   /// - Parameter headaches: The headaches.
-  init(headaches: [Headache]) {
+  init(headaches: [Headache], earliestDate: Date?) {
+    let now = Date()
+    var dates = [Date](repeating: now, count: headaches.count)
     var peaks = [Double](repeating: 0.0, count: headaches.count)
     var averages = [Double](repeating: 0.0, count: headaches.count)
     var onsets = [Double](repeating: 0.0, count: headaches.count)
@@ -36,6 +38,7 @@ struct HeadacheStatistics {
     
     // Do one loop through the headaches and convert
     for i in 0 ..< headaches.count {
+      dates[i] = headaches[i].createdAt ?? dates[i]
       peaks[i] = Double(headaches[i].severityRange.upperBound.orderingValue)
       averages[i] = Double(headaches[i].severityRange.average)
       durations[i] = headaches[i].duration
@@ -45,10 +48,10 @@ struct HeadacheStatistics {
     }
     
     // Create statistics
-    self.peaks = SeverityStatistic(signal: peaks)
-    self.averages = SeverityStatistic(signal: averages)
-    self.onsets = OnsetStatistic(signal: onsets)
-    self.durations = DurationStatistic(signal: durations)
+    self.peaks = SeverityStatistic(earliestDate: earliestDate, signal: peaks, dates: dates)
+    self.averages = SeverityStatistic(earliestDate: earliestDate, signal: averages, dates: dates)
+    self.onsets = OnsetStatistic(earliestDate: earliestDate, signal: onsets, dates: dates)
+    self.durations = DurationStatistic(earliestDate: earliestDate, signal: durations, dates: dates)
   }
   
 }

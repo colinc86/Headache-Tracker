@@ -7,10 +7,20 @@
 
 import Surge
 import SwiftUI
+import HealthKit
 
 struct BarGraph: View {
   
+  enum GraphUnit {
+    case severity
+    case time
+    case duration
+  }
+  
   // MARK: Public properties
+  
+  /// The graph's unit.
+  let graphUnit: GraphUnit
   
   /// The graph's series to plot.
   let statistic: Statistic
@@ -21,21 +31,28 @@ struct BarGraph: View {
   /// The bar graph's gradient.
   let gradient: Gradient
   
-  /// The static number of elements that will be drawn.
-  var staticCount: Int? = nil
+  /// The earliest date of the bar graph.
+  var earliestDate: Date? = nil
   
   /// The static maximum that will be drawn.
   var staticMax: Double? = nil
   
   // MARK: Private properties
   
+  /// The graph's feedback generator.
+  @State var feedbackGenerator: UISelectionFeedbackGenerator?
+  
   /// The view's trim for animating its appearance.
   @State private var trim = 0.0
   
-  /// The count to use.
-  private var count: Int {
-    return staticCount ?? statistic.signal.count
-  }
+  /// The current touch location.
+  @State private var touchLocation: CGPoint?
+  
+  /// The selected date of the bar graph.
+  @State private var selectedDate: Date?
+  
+  /// The selected value of the bar graph.
+  @State private var selectedValue: Double?
   
   /// The max to use.
   private var max: Double {
@@ -47,7 +64,7 @@ struct BarGraph: View {
   var body: some View {
     HStack {
       VStack(alignment: .trailing) {
-        ForEach(0 ..< yAxis.count) { i in
+        ForEach(0 ..< yAxis.count, id: \.self) { i in
           Text(yAxis[yAxis.count - i - 1])
             .font(.caption)
             .foregroundColor(.secondary)
@@ -63,11 +80,14 @@ struct BarGraph: View {
       GeometryReader { geometry in
         ZStack {
           // Bars
-          Bars(series: statistic.signal, staticCount: staticCount, staticMax: staticMax)
+          Bars(series: statistic.signal, earliestDate: earliestDate, staticMax: staticMax)
             .trim(from: 0.0, to: trim)
-            .stroke(LinearGradient(gradient: gradient, startPoint: .bottom, endPoint: .top), lineWidth: 0.9 * geometry.size.width / CGFloat(count))
+            .stroke(LinearGradient(gradient: gradient, startPoint: .bottom, endPoint: .top), lineWidth: 0.9 * geometry.size.width / CGFloat(statistic.count))
             .animation(.easeInOut(duration: Double.random(in: 0.0 ... 0.3) + 0.3), value: trim)
             .onAppear(perform: { trim = 1.0 })
+            .onTouch(limitToBounds: true) { location, type in
+              touched(size: geometry.size, location: location, type: type)
+            }
           
           // Mean
           Path { path in
@@ -76,15 +96,84 @@ struct BarGraph: View {
           }
           .stroke(style: StrokeStyle(lineWidth: 0.5, dash: [5]))
           .foregroundColor(Color(UIColor.tertiaryLabel))
+          
+          // Touch
+          if let touchLocation = touchLocation {
+            Path { path in
+              path.move(to: CGPoint(x: touchLocation.x, y: 0.0))
+              path.addLine(to: CGPoint(x: touchLocation.x, y: geometry.size.height))
+            }
+            .stroke(style: StrokeStyle(lineWidth: 0.5, dash: [5]))
+            .foregroundColor(Color(UIColor.secondaryLabel))
+            
+            if let selectedValue = selectedValue, let displayString = displayString(for: selectedValue) {
+              Text(displayString)
+                .font(.caption)
+                .foregroundColor(.secondary)
+                .offset(x: touchLocation.x - geometry.size.width / 2.0, y: -geometry.size.height / 2.0 - 10.0)
+            }
+          }
         }
       }
       .padding(.leading, 4)
     }
   }
   
-  func lineWidth(for size: CGSize) -> CGFloat {
-    let xStep = size.width / CGFloat(statistic.signal.count)
-    return xStep * 0.8
+}
+
+extension BarGraph {
+  
+  private func touched(size: CGSize, location: CGPoint, type: TouchLocatingView.TouchType) {
+    let updateLocation = {
+      guard let earliestDate = earliestDate ?? statistic.signal.first?.1 else {
+        return
+      }
+      
+      let count = Calendar.current.numberOfDaysBetween(earliestDate, and: Date())
+      
+      guard count > 0 else {
+        return
+      }
+      
+      let xStep = size.width / CGFloat(count)
+      let currentIndex = floor(location.x / xStep)
+      let xLocation = currentIndex * xStep + xStep / 2.0
+      let currentXLocation = touchLocation?.x ?? -1.0
+      
+      if xLocation != currentXLocation {
+        feedbackGenerator?.selectionChanged()
+        feedbackGenerator?.prepare()
+      }
+      
+      let date = earliestDate.addingTimeInterval(TimeInterval(currentIndex) * 86400.0)
+      selectedDate = date
+      selectedValue = statistic.signal.filter({ Calendar.current.numberOfDaysBetween(date, and: $0.1) == 0 }).first?.0
+      touchLocation = CGPoint(x: xLocation, y: location.y)
+    }
+    
+    switch type {
+    case .started:
+      feedbackGenerator = UISelectionFeedbackGenerator()
+      feedbackGenerator?.prepare()
+      updateLocation()
+    case .moved:
+      updateLocation()
+    default:
+      touchLocation = nil
+      feedbackGenerator = nil
+    }
+  }
+  
+  private func displayString(for value: Double) -> String? {
+    switch graphUnit {
+    case .severity:
+      return HKCategoryValueSeverity(orderingValue: Int(value))?.title
+    case .time:
+      return Calendar.current.startOfDay(for: Date()).addingTimeInterval(value).formatted(date: .omitted, time: .shortened)
+    case .duration:
+      return Formatters.dateComponentsFormatter.string(from: value)
+    }
+    return nil
   }
   
 }
@@ -95,16 +184,12 @@ struct Bars: Shape {
     let endpointB: CGPoint
   }
   
-  let series: [Double]
-  let staticCount: Int?
+  let series: [(Double, Date)]
+  let earliestDate: Date?
   let staticMax: Double?
-  
-  private var count: Int {
-    return staticCount ?? series.count
-  }
 
   private var max: Double {
-    return staticMax ?? Surge.max(series)
+    return staticMax ?? Surge.max(series.map({ $0.0 }))
   }
   
   func path(in rect: CGRect) -> Path {
@@ -116,9 +201,9 @@ struct Bars: Shape {
     }
   }
   
-  init(series: [Double], staticCount: Int?, staticMax: Double?) {
+  init(series: [(Double, Date)], earliestDate: Date?, staticMax: Double?) {
     self.series = series
-    self.staticCount = staticCount
+    self.earliestDate = earliestDate
     self.staticMax = staticMax
   }
 }
@@ -131,6 +216,12 @@ extension Bars {
   ///
   /// - Returns: An array of unit points.
   func pathLines(for size: CGSize) -> [(CGFloat, CGFloat)] {
+    guard let earliestDate = earliestDate ?? series.first?.1 else {
+      return []
+    }
+    
+    let count = Calendar.current.numberOfDaysBetween(earliestDate, and: Date())
+    
     guard max > 0.0 && count > 0 else {
       return []
     }
@@ -138,11 +229,15 @@ extension Bars {
     let xStep = size.width / CGFloat(count)
     var pathLines = [(CGFloat, CGFloat)]()
     
-    let shift = CGFloat(count - series.count) * xStep
-    
-    for i in 0 ..< series.count {
-      let seriesValue = series[i]
-      let xCenter = xStep * CGFloat(i) + xStep / 2.0 + shift
+    for i in 0 ..< count {
+      let date = earliestDate.addingTimeInterval(TimeInterval(i) * 86400.0)
+      
+      // Get the series values on this date
+      let values = series.filter({ Calendar.current.numberOfDaysBetween(date, and: $0.1) == 0 })
+      
+      // Get the maximum series value
+      let seriesValue = values.max(by: { $0.0 < $1.0 })?.0 ?? 0.0
+      let xCenter = xStep * CGFloat(i) + xStep / 2.0
       let yValue = size.height * (1.0 - CGFloat(seriesValue) / max)
       pathLines.append((xCenter, yValue))
     }
@@ -155,10 +250,11 @@ extension Bars {
 struct BarGraph_Previews: PreviewProvider {
   static var previews: some View {
     BarGraph(
-      statistic: Statistic(signal: [1.0, 2.0, 4.0]),
+      graphUnit: .severity,
+      statistic: Statistic(earliestDate: Date(), signal: [1.0, 2.0, 4.0], dates: [Date(), Date(), Date()]),
       yAxis: ["Not Present", "Present", "Mild", "Moderate", "Severe"],
       gradient: Gradient(colors: [.cyan, .purple]),
-      staticCount: 10,
+      earliestDate: Date(),
       staticMax: 4)
       .previewLayout(.fixed(width: 428, height: 200))
   }

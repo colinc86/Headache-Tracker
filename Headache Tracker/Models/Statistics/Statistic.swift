@@ -13,13 +13,25 @@ import Surge
 class Statistic {
   
   /// The statistic's signal.
-  let signal: [Double]
+  let signal: [(Double, Date)]
   
   /// The signal's mean.
   let mean: Double
   
   /// The signal's max.
   let max: Double
+  
+  /// The earliest date plotted by the series.
+  let earliestDate: Date?
+  
+  /// The number of elements to graph.
+  var count: Int {
+    guard let earliestDate = earliestDate ?? signal.first?.1 else {
+      return 0
+    }
+    
+    return Calendar.current.numberOfDaysBetween(earliestDate, and: Date())
+  }
   
   /// The mean value's description.
   var meanDescription: String {
@@ -36,9 +48,13 @@ class Statistic {
   
   /// Initializes a statistic.
   ///
-  /// - Parameter signal: The signal.
-  init(signal: [Double]) {
-    self.signal = signal
+  /// - Parameters:
+  ///   - earliestDate: The earliest date to graph.
+  ///   - signal: The signal.
+  ///   - dates: The signal's dates.
+  init(earliestDate: Date?, signal: [Double], dates: [Date]) {
+    self.earliestDate = earliestDate
+    self.signal = [(Double, Date)](zip(signal, dates))
     
     if signal.isEmpty {
       self.mean = 0.0

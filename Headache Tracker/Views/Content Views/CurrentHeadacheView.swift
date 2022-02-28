@@ -174,6 +174,10 @@ struct CurrentHeadacheView: View {
             
             Section {
               durationPrediction
+            } footer: {
+              if let lastPredictionDate = lastPredictionDate {
+                Text("Updated at \(lastPredictionDate.formatted()).")
+              }
             }
           }
           else if currentHeadache == nil {
@@ -185,7 +189,13 @@ struct CurrentHeadacheView: View {
             }
             
             if prediction.outlookClassifierOutput.prediction == .headache {
-              severityPrediction
+              Section {
+                severityPrediction
+              } footer: {
+                if let lastPredictionDate = lastPredictionDate {
+                  Text("Updated at \(lastPredictionDate.formatted()).")
+                }
+              }
             }
           }
           else {
@@ -199,6 +209,10 @@ struct CurrentHeadacheView: View {
             // Duration Prediction
             Section {
               durationPrediction
+            } footer: {
+              if let lastPredictionDate = lastPredictionDate {
+                Text("Updated at \(lastPredictionDate.formatted()).")
+              }
             }
           }
         }
