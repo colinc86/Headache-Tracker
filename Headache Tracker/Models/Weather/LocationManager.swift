@@ -57,9 +57,8 @@ extension LocationManager {
   
   /// Sets up the location manager for use.
   func setup() {
-    logDebug("Called setup on location manager with status \(manager.authorizationStatus).")
     if manager.authorizationStatus == .notDetermined {
-      manager.requestWhenInUseAuthorization()
+      manager.requestAlwaysAuthorization()
     }
   }
   
@@ -151,6 +150,10 @@ extension LocationManager: CLLocationManagerDelegate {
   
   func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
     locationUpdate(location: locations.last, error: nil)
+  }
+  
+  func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+    
   }
   
 }

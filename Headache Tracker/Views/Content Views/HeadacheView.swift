@@ -55,14 +55,14 @@ struct HeadacheView: View {
         Text(headache.resolved ? "Resolved" : "Unresolved")
           .font(.title)
           .foregroundColor(.teal)
-          .cell(title: "Status", systemImage: headache.resolved ? "face.smiling.fill" : "person.badge.circle.crop.fill", foregroundColor: headache.resolved ? .teal : .pink)
+          .cell(title: "Status", systemImage: "face.smiling.fill", foregroundColor: .teal)
       } header: {
         SectionTitleView(title: "Headache")
       }
       
       if let onset = headache.startTime {
         Section {
-          OnsetView(onset: onset, relativeDate: false)
+          OnsetView(onset: onset, relativeDate: !headache.resolved)
         }
       }
       
@@ -73,8 +73,6 @@ struct HeadacheView: View {
       Section {
         HorizontalSeverityLevel(currentSeverity: nil, severityRange: headache.severityRange, collapsed: true, action: nil)
       }
-      
-      
       
       Section {
         if headache.severities?.count ?? 0 > 1 {

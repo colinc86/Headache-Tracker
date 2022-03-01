@@ -16,9 +16,13 @@
 		<string>location</string>
 		<string>processing</string>
 	</array>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Your location is used to get weather information to help predict headaches.</string>
 	<key>FirebaseCrashlyticsCollectionEnabled</key>
 	<string>false</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Your location is used to determine the current weather conditions.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Your location is used to determine the current weather conditions.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Your location is used to determine the current weather conditions in the background.</string>
 </dict>
 </plist>
