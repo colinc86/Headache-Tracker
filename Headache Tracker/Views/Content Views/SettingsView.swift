@@ -139,14 +139,24 @@ struct SettingsView: View {
           }
           .onChange(of: enableCrashReporting, perform: enableCrashReportingValueChanged)
           SubtitleCell(title: "Version", subtitle: Bundle.main.humanReadableVersionString)
+        } header: {
+          Text("General")
         }
         
         // Debug
         #if DEBUG
-        DebugSettingsView()
-          .environment(\.managedObjectContext, viewContext)
-          .environmentObject(headacheManager)
-          .environmentObject(predictor)
+        Section {
+          NavigationLink {
+            DebugSettingsView()
+              .environment(\.managedObjectContext, viewContext)
+              .environmentObject(headacheManager)
+              .environmentObject(predictor)
+          } label: {
+            Text("Debug Settings")
+          }
+        } header: {
+          Text("Debug")
+        }
         #endif
       }
       .navigationTitle("Settings")

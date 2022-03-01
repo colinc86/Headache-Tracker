@@ -564,7 +564,7 @@ extension HeadacheManager {
       
       var nextDateAllowed = false
       if let lastNotPresentDate = notPresentTrainigData.last?.timestamp {
-        nextDateAllowed = Date().timeIntervalSince(lastNotPresentDate) > 21600.0 // Every 6 hours
+        nextDateAllowed = Date().timeIntervalSince(lastNotPresentDate) > 3600.0 // Every 1 hour
       }
       
       completion(nextDateAllowed)

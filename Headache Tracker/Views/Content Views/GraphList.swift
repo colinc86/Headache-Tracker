@@ -131,6 +131,16 @@ struct GraphList: View {
             subtitle: statistics.durations.meanDescription,
             systemImage: statistics.durations.meanTrend.systemImage,
             imageForegroundColor: statistics.durations.meanTrend.foregroundColor)
+          SubtitleCell(
+            title: "Min",
+            subtitle: statistics.durations.minDescription,
+            systemImage: statistics.durations.minTrend.systemImage,
+            imageForegroundColor: statistics.durations.minTrend.foregroundColor)
+          SubtitleCell(
+            title: "Max",
+            subtitle: statistics.durations.maxDescription,
+            systemImage: statistics.durations.maxTrend.systemImage,
+            imageForegroundColor: statistics.durations.maxTrend.foregroundColor)
         } header: {
           SectionTitleView(title: "Duration")
         }

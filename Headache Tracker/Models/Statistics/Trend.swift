@@ -12,6 +12,8 @@ enum Trend {
   case rising(valueA: Double, valueB: Double)
   case falling(valueA: Double, valueB: Double)
   
+  static let empty = Trend.steady(valueA: 0.0, valueB: 0.0)
+  
   /// Creates a new trend with the given values.
   /// - Parameters:
   ///   - valueA: The first value.

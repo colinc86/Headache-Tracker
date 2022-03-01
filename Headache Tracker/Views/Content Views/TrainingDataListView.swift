@@ -51,7 +51,10 @@ extension TrainingDataListView {
   
   private func deleteTrainingData(offsets: IndexSet) {
     withAnimation {
-      offsets.map { trainingData[$0] }.forEach({ viewContext.delete($0) })
+      offsets.map { trainingData[$0] }.forEach({ element in
+        element.severity?.removeFromTrainingData(element)
+        viewContext.delete(element)
+      })
     }
   }
   

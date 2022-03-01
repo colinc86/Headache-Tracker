@@ -78,64 +78,65 @@ struct DebugSettingsView: View {
   private var severeTrainingData: FetchedResults<TrainingData>
   
   var body: some View {
-    Section {
-      Toggle("Show All Views", isOn: $debugShowAllViews)
-    } header: {
-      Text("Debug")
-    }
-    
-    Section {
-      NavigationLink {
-        TrainingDataListView()
-          .environment(\.managedObjectContext, viewContext)
-      } label: {
-        Text("Training Data")
+    Form {
+      Section {
+        Toggle("Show All Views", isOn: $debugShowAllViews)
       }
       
-      SubtitleCell(title: "Severe", subtitle: "\(severeTrainingData.count)")
-      SubtitleCell(title: "Moderate", subtitle: "\(moderateTrainingData.count)")
-      SubtitleCell(title: "Mild", subtitle: "\(mildTrainingData.count)")
-      SubtitleCell(title: "Present", subtitle: "\(presentTrainingData.count)")
-      SubtitleCell(title: "Not Present", subtitle: "\(notPresentTrainingData.count)")
-    }
-    
-    Section {
-      SubtitleCell(title: "Outlook Classifier", subtitle: "\(predictor.prediction?.outlookClassifierOutput.prediction.rawValue ?? "")")
-      SubtitleCell(title: "Outlook Probability", subtitle: "\(predictor.prediction?.outlookClassifierOutput.probability?.percentFormat() ?? "N/A")")
-      SubtitleCell(title: "Severity Classifier", subtitle: "\(predictor.prediction?.severityClassifierOutput.prediction.title ?? "")")
-      SubtitleCell(title: "Severity Probability", subtitle: "\(predictor.prediction?.severityClassifierOutput.probability?.percentFormat() ?? "N/A")")
-      SubtitleCell(title: "Onset Regressor", subtitle: "\(predictor.prediction?.onsetRegressorOutput.prediction.formattedNonRelative() ?? "N/A")")
-      SubtitleCell(title: "Duration Regressor", subtitle: "\(predictor.prediction?.durationRegressorOutput.prediction ?? 0.0)")
-    }
-    
-    Section {
-      Button("Train Models") {
-        headacheManager.trainClassifiers { error in
-          if let error = error {
-            logError("Error training classifiers: \(error)")
-          }
+      Section {
+        NavigationLink {
+          TrainingDataListView()
+            .environment(\.managedObjectContext, viewContext)
+        } label: {
+          Text("Training Data")
         }
+        
+        SubtitleCell(title: "Severe", subtitle: "\(severeTrainingData.count)")
+        SubtitleCell(title: "Moderate", subtitle: "\(moderateTrainingData.count)")
+        SubtitleCell(title: "Mild", subtitle: "\(mildTrainingData.count)")
+        SubtitleCell(title: "Present", subtitle: "\(presentTrainingData.count)")
+        SubtitleCell(title: "Not Present", subtitle: "\(notPresentTrainingData.count)")
       }
       
-      Button("Clean Data") {
-        headacheManager.cleanTrainingData { error in
-          if let error = error {
-            logError("Error cleaning data: \(error)")
+      Section {
+        SubtitleCell(title: "Outlook Classifier", subtitle: "\(predictor.prediction?.outlookClassifierOutput.prediction.rawValue ?? "")")
+        SubtitleCell(title: "Outlook Probability", subtitle: "\(predictor.prediction?.outlookClassifierOutput.probability?.percentFormat() ?? "N/A")")
+        SubtitleCell(title: "Severity Classifier", subtitle: "\(predictor.prediction?.severityClassifierOutput.prediction.title ?? "")")
+        SubtitleCell(title: "Severity Probability", subtitle: "\(predictor.prediction?.severityClassifierOutput.probability?.percentFormat() ?? "N/A")")
+        SubtitleCell(title: "Onset Regressor", subtitle: "\(predictor.prediction?.onsetRegressorOutput.prediction.formattedNonRelative() ?? "N/A")")
+        SubtitleCell(title: "Duration Regressor", subtitle: "\(predictor.prediction?.durationRegressorOutput.prediction ?? 0.0)")
+      }
+      
+      Section {
+        Button("Train Models") {
+          headacheManager.trainClassifiers { error in
+            if let error = error {
+              logError("Error training classifiers: \(error)")
+            }
           }
         }
+        
+        Button("Clean Data") {
+          headacheManager.cleanTrainingData { error in
+            if let error = error {
+              logError("Error cleaning data: \(error)")
+            }
+          }
+        }
+      } footer: {
+        Text("Models last updated \(predictor.modelUpdatedAt?.formattedNonRelative() ?? "N/A")")
       }
-    } footer: {
-      Text("Models last updated at \(predictor.modelUpdatedAt?.formattedNonRelative() ?? "N/A")")
+      
+      Section {
+        SubtitleCell(title: "Last Outlook", subtitle: "\(debugLastOutlookDate?.formattedNonRelative() ?? "N/A")")
+        SubtitleCell(title: "Next Outlook", subtitle: "\(debugNextOutlookDate?.formattedNonRelative() ?? "N/A")")
+        SubtitleCell(title: "Last Training", subtitle: "\(debugLastTrainingDate?.formattedNonRelative() ?? "N/A")")
+        SubtitleCell(title: "Next Training", subtitle: "\(debugNextTrainingDate?.formattedNonRelative() ?? "N/A")")
+        SubtitleCell(title: "Last Prediction", subtitle: "\(debugLastPredictionDate?.formattedNonRelative() ?? "N/A")")
+        SubtitleCell(title: "Next Prediction", subtitle: "\(debugNextPredictionDate?.formattedNonRelative() ?? "N/A")")
+      }
     }
-    
-    Section {
-      SubtitleCell(title: "Last Outlook", subtitle: "\(debugLastOutlookDate?.formattedNonRelative() ?? "N/A")")
-      SubtitleCell(title: "Next Outlook", subtitle: "\(debugNextOutlookDate?.formattedNonRelative() ?? "N/A")")
-      SubtitleCell(title: "Last Training", subtitle: "\(debugLastTrainingDate?.formattedNonRelative() ?? "N/A")")
-      SubtitleCell(title: "Next Training", subtitle: "\(debugNextTrainingDate?.formattedNonRelative() ?? "N/A")")
-      SubtitleCell(title: "Last Prediction", subtitle: "\(debugLastPredictionDate?.formattedNonRelative() ?? "N/A")")
-      SubtitleCell(title: "Next Prediction", subtitle: "\(debugNextPredictionDate?.formattedNonRelative() ?? "N/A")")
-    }
+    .navigationTitle("Debug Settings")
   }
 }
 

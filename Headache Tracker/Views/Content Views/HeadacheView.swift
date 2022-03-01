@@ -72,6 +72,10 @@ struct HeadacheView: View {
       
       Section {
         HorizontalSeverityLevel(currentSeverity: nil, severityRange: headache.severityRange, collapsed: true, action: nil)
+      } footer: {
+        if !headache.resolved, let startTime = headache.severitiesArray.last?.startTime {
+          Text("Last updated \(startTime.formattedNonRelative())")
+        }
       }
       
       Section {

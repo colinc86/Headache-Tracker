@@ -88,7 +88,11 @@ struct CurrentHeadacheView: View {
         } header: {
           SectionTitleView(title: currentHeadache == nil ? "New Headache" : "Current Headache")
         } footer: {
-          if currentHeadache == nil {
+          if let currentHeadache = currentHeadache {
+            if let startTime = currentHeadache.severitiesArray.last?.startTime {
+              Text("Last updated \(startTime.formattedNonRelative())")
+            }
+          } else {
             Text("Feel a headache coming on? Select a severity level to start tracking it.")
           }
         }
@@ -135,6 +139,8 @@ struct CurrentHeadacheView: View {
               .font(.title)
               .foregroundColor(.teal)
               .cell(title: "Resolve Headache", systemImage: "face.smiling.fill", foregroundColor: .teal)
+          } footer: {
+            Text("Is your headache gone? Tap Resolve to let the app know!")
           }
         }
         
@@ -165,7 +171,7 @@ struct CurrentHeadacheView: View {
               SectionTitleView(title: "Predictions")
             } footer: {
               if let lastPredictionDate = predictor.prediction?.date {
-                Text("Updated at \(lastPredictionDate.formattedNonRelative()).")
+                Text("Updated \(lastPredictionDate.formattedNonRelative()).")
               }
             }
           }
