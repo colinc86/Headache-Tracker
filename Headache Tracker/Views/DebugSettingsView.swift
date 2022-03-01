@@ -25,6 +25,24 @@ struct DebugSettingsView: View {
   /// A debug setting to show all views in the prediction section.
   @AppStorage(AppSettings.debugShowAllViews) private var debugShowAllViews = false
   
+  /// A debug last outlook date setting.
+  @AppStorage(AppSettings.debugLastOutlookDate) private var debugLastOutlookDate: Date?
+  
+  /// A debug next outlook date setting.
+  @AppStorage(AppSettings.debugNextOutlookDate) private var debugNextOutlookDate: Date?
+  
+  /// A debug last outlook date setting.
+  @AppStorage(AppSettings.debugLastTrainingDate) private var debugLastTrainingDate: Date?
+  
+  /// A debug next outlook date setting.
+  @AppStorage(AppSettings.debugNextTrainingDate) private var debugNextTrainingDate: Date?
+  
+  /// A debug last outlook date setting.
+  @AppStorage(AppSettings.debugLastPredictionDate) private var debugLastPredictionDate: Date?
+  
+  /// A debug next outlook date setting.
+  @AppStorage(AppSettings.debugNextPredictionDate) private var debugNextPredictionDate: Date?
+  
   /// The application's not present training data.
   @FetchRequest(
     sortDescriptors: [NSSortDescriptor(keyPath: \TrainingData.timestamp, ascending: false)],
@@ -85,7 +103,7 @@ struct DebugSettingsView: View {
     Section {
       SubtitleCell(title: "Outlook Classifier", subtitle: "\(predictor.prediction?.outlookClassifierOutput.prediction.rawValue ?? "")")
       SubtitleCell(title: "Severity Classifier", subtitle: "\(predictor.prediction?.severityClassifierOutput.prediction.title ?? "")")
-      SubtitleCell(title: "Onset Regressor", subtitle: "\(predictor.prediction?.onsetRegressorOutput.prediction ?? Date())")
+      SubtitleCell(title: "Onset Regressor", subtitle: "\(predictor.prediction?.onsetRegressorOutput.prediction.formatted() ?? "N/A")")
       SubtitleCell(title: "Duration Regressor", subtitle: "\(predictor.prediction?.durationRegressorOutput.prediction ?? 0.0)")
     }
     
@@ -109,7 +127,14 @@ struct DebugSettingsView: View {
       Text("Models last updated at \(predictor.modelUpdatedAt?.formatted() ?? "N/A")")
     }
     
-    
+    Section {
+      SubtitleCell(title: "Last Outlook", subtitle: "\(debugLastOutlookDate?.formatted() ?? "N/A")")
+      SubtitleCell(title: "Next Outlook", subtitle: "\(debugNextOutlookDate?.formatted() ?? "N/A")")
+      SubtitleCell(title: "Last Training", subtitle: "\(debugLastTrainingDate?.formatted() ?? "N/A")")
+      SubtitleCell(title: "Next Training", subtitle: "\(debugNextTrainingDate?.formatted() ?? "N/A")")
+      SubtitleCell(title: "Last Prediction", subtitle: "\(debugLastPredictionDate?.formatted() ?? "N/A")")
+      SubtitleCell(title: "Next Prediction", subtitle: "\(debugNextPredictionDate?.formatted() ?? "N/A")")
+    }
   }
 }
 

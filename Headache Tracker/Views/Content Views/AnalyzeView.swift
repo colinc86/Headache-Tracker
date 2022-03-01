@@ -63,7 +63,7 @@ struct AnalyzeView: View {
   
   var body: some View {
     NavigationView {
-      GraphList(earliestDate: filterUnit.dateBeforeNow(withCount: filterCount))
+      GraphList(filterUnit: filterUnit, earliestDate: filterUnit.dateBeforeNow(withCount: filterCount))
       .id(viewIdentifier)
       .navigationTitle("Analyze")
       .toolbar {
@@ -79,6 +79,7 @@ struct AnalyzeView: View {
             .padding([.leading, .trailing])
             .background(RoundedRectangle(cornerRadius: 8)
                           .fill(Color.secondary.opacity(0.25)))
+            .onChange(of: filterCount, perform: changedFilterCount)
             
             Picker("\(filterUnit.rawValue)\(filterCount == 1 ? "." : "s.")", selection: $filterUnit) {
               Text(FilterUnit.day.rawValue + (filterCount == 1 ? "." : "s.")).tag(FilterUnit.day)
@@ -101,6 +102,12 @@ struct AnalyzeView: View {
 
 extension AnalyzeView {
   
+  func changedFilterCount(_ newValue: Int) {
+    withAnimation {
+      viewIdentifier = UUID()
+    }
+  }
+  
   /// Called when the filter unit changes.
   func changedFilterUnit(_ newValue: FilterUnit) {
     withAnimation {
@@ -110,8 +117,9 @@ extension AnalyzeView {
       else if filterCount > newValue.filterCountRange.upperBound - 1 {
         filterCount = newValue.filterCountRange.upperBound - 1
       }
-      
-      viewIdentifier = UUID()
+      else {
+        viewIdentifier = UUID()
+      }
     }
   }
   

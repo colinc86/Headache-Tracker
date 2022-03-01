@@ -58,7 +58,6 @@
 		3B68BE0C27BF5899007AAAC6 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B68BE0B27BF5899007AAAC6 /* GoogleService-Info.plist */; };
 		3B68BE0D27BF58A7007AAAC6 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B68BE0B27BF5899007AAAC6 /* GoogleService-Info.plist */; };
 		3B68BE0E27BF58A8007AAAC6 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B68BE0B27BF5899007AAAC6 /* GoogleService-Info.plist */; };
-		3B68BE1127BF599F007AAAC6 /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */ = {isa = PBXBuildFile; productRef = 3B68BE1027BF599F007AAAC6 /* FirebaseAnalyticsWithoutAdIdSupport */; };
 		3B68BE1327BF599F007AAAC6 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 3B68BE1227BF599F007AAAC6 /* FirebaseCrashlytics */; };
 		3B68BE1F27BF99D2007AAAC6 /* OnsetRegressorOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BE1E27BF99D2007AAAC6 /* OnsetRegressorOutput.swift */; };
 		3B68BE2327C026BB007AAAC6 /* DurationRegressorOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BE2227C026BB007AAAC6 /* DurationRegressorOutput.swift */; };
@@ -76,6 +75,9 @@
 		3B68BE7327C36928007AAAC6 /* ApplicationKey in Frameworks */ = {isa = PBXBuildFile; productRef = 3B68BE7227C36928007AAAC6 /* ApplicationKey */; };
 		3B68BE7627C3699C007AAAC6 /* SharedUserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BE6F27C36834007AAAC6 /* SharedUserDefaults.swift */; };
 		3B68BE7827C41FDE007AAAC6 /* TrainingDataListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BE7727C41FDE007AAAC6 /* TrainingDataListView.swift */; };
+		3B9332BC27CDC1B300BACE93 /* FirebaseAnalyticsSwift-Beta in Frameworks */ = {isa = PBXBuildFile; productRef = 3B9332BB27CDC1B300BACE93 /* FirebaseAnalyticsSwift-Beta */; };
+		3B9332BE27CDD52200BACE93 /* Date+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9332BD27CDD52200BACE93 /* Date+Extensions.swift */; };
+		3B9332C227CDDBC400BACE93 /* Trend.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9332C127CDDBC400BACE93 /* Trend.swift */; };
 		3BAAA67F27CC245200C0DDC4 /* EnvironmentalInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BAAA67E27CC245200C0DDC4 /* EnvironmentalInput.swift */; };
 		3BAAA68127CC247900C0DDC4 /* ControlledUserInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BAAA68027CC247900C0DDC4 /* ControlledUserInput.swift */; };
 		3BAAA68427CC24CA00C0DDC4 /* InputUnion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BAAA68327CC24CA00C0DDC4 /* InputUnion.swift */; };
@@ -214,6 +216,8 @@
 		3B68BE6B27C35EB9007AAAC6 /* Headache Tracker WidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Headache Tracker WidgetExtension.entitlements"; sourceTree = "<group>"; };
 		3B68BE6F27C36834007AAAC6 /* SharedUserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedUserDefaults.swift; sourceTree = "<group>"; };
 		3B68BE7727C41FDE007AAAC6 /* TrainingDataListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingDataListView.swift; sourceTree = "<group>"; };
+		3B9332BD27CDD52200BACE93 /* Date+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+Extensions.swift"; sourceTree = "<group>"; };
+		3B9332C127CDDBC400BACE93 /* Trend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Trend.swift; sourceTree = "<group>"; };
 		3BAAA67D27C94B9B00C0DDC4 /* Headache_Tracker 1.5.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Headache_Tracker 1.5.xcdatamodel"; sourceTree = "<group>"; };
 		3BAAA67E27CC245200C0DDC4 /* EnvironmentalInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnvironmentalInput.swift; sourceTree = "<group>"; };
 		3BAAA68027CC247900C0DDC4 /* ControlledUserInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlledUserInput.swift; sourceTree = "<group>"; };
@@ -261,8 +265,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				3BF5317227ACEC7900056673 /* Logger in Frameworks */,
-				3B68BE1127BF599F007AAAC6 /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */,
 				3B68BE0127BEF949007AAAC6 /* Surge in Frameworks */,
+				3B9332BC27CDC1B300BACE93 /* FirebaseAnalyticsSwift-Beta in Frameworks */,
 				3B68BE7327C36928007AAAC6 /* ApplicationKey in Frameworks */,
 				3B68BE1327BF599F007AAAC6 /* FirebaseCrashlytics in Frameworks */,
 				3BF5316D27ACEAC600056673 /* DataController in Frameworks */,
@@ -376,6 +380,7 @@
 				3BDCF23D27BC213800334B8B /* Calendar+Extensions.swift */,
 				3B68BDF627BDF459007AAAC6 /* Color+Extensions.swift */,
 				3BF5316E27ACEAF600056673 /* DataController+Extensions.swift */,
+				3B9332BD27CDD52200BACE93 /* Date+Extensions.swift */,
 				3B39DADC27ACFD5A00D39BB5 /* HKCategoryValueSeverity+Extensions.swift */,
 				3B68BDFD27BE2B57007AAAC6 /* Numeric+Extensions.swift */,
 				3BAAA69027CC7F5500C0DDC4 /* UIColor+Extensions.swift */,
@@ -446,6 +451,7 @@
 			isa = PBXGroup;
 			children = (
 				3B68BE0227BF2548007AAAC6 /* HeadacheStatistics.swift */,
+				3B9332C127CDDBC400BACE93 /* Trend.swift */,
 				3B68BE0527BF2F98007AAAC6 /* Statistic.swift */,
 			);
 			path = Statistics;
@@ -621,9 +627,9 @@
 				3BF5317127ACEC7900056673 /* Logger */,
 				3B09191E27BD84FE00844F6C /* Shapes */,
 				3B68BE0027BEF949007AAAC6 /* Surge */,
-				3B68BE1027BF599F007AAAC6 /* FirebaseAnalyticsWithoutAdIdSupport */,
 				3B68BE1227BF599F007AAAC6 /* FirebaseCrashlytics */,
 				3B68BE7227C36928007AAAC6 /* ApplicationKey */,
+				3B9332BB27CDC1B300BACE93 /* FirebaseAnalyticsSwift-Beta */,
 			);
 			productName = "Headache Tracker";
 			productReference = 3BF5313327ACE18D00056673 /* Headache Tracker.app */;
@@ -844,6 +850,7 @@
 				3B051A9527B18E3C0017131D /* HeadacheAlertRequest.swift in Sources */,
 				3B68BE2B27C2FF85007AAAC6 /* TrainingData+CoreDataClass.swift in Sources */,
 				3B09192127BD851700844F6C /* LineGraph.swift in Sources */,
+				3B9332C227CDDBC400BACE93 /* Trend.swift in Sources */,
 				3B051AA527B379DA0017131D /* Bundle+Extensions.swift in Sources */,
 				3B68BE0327BF2548007AAAC6 /* HeadacheStatistics.swift in Sources */,
 				3BAAA68727CC34BD00C0DDC4 /* TimeInput.swift in Sources */,
@@ -854,6 +861,7 @@
 				3BAAA69E27CDAE9800C0DDC4 /* Outlook.swift in Sources */,
 				3BDCF23E27BC213800334B8B /* Calendar+Extensions.swift in Sources */,
 				3B68BE0627BF2F98007AAAC6 /* Statistic.swift in Sources */,
+				3B9332BE27CDD52200BACE93 /* Date+Extensions.swift in Sources */,
 				3B68BDF927BDFCD3007AAAC6 /* AnalyzeView.swift in Sources */,
 				3BC7221127C69A6200E0C05E /* LocationManager.swift in Sources */,
 				3B051A8D27B0F4490017131D /* DescribableError.swift in Sources */,
@@ -1512,11 +1520,6 @@
 			package = 3B68BDFF27BEF949007AAAC6 /* XCRemoteSwiftPackageReference "Surge" */;
 			productName = Surge;
 		};
-		3B68BE1027BF599F007AAAC6 /* FirebaseAnalyticsWithoutAdIdSupport */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 3B68BE0F27BF599F007AAAC6 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseAnalyticsWithoutAdIdSupport;
-		};
 		3B68BE1227BF599F007AAAC6 /* FirebaseCrashlytics */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 3B68BE0F27BF599F007AAAC6 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
@@ -1526,6 +1529,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 3B68BE7127C36928007AAAC6 /* XCRemoteSwiftPackageReference "ApplicationKey" */;
 			productName = ApplicationKey;
+		};
+		3B9332BB27CDC1B300BACE93 /* FirebaseAnalyticsSwift-Beta */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3B68BE0F27BF599F007AAAC6 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = "FirebaseAnalyticsSwift-Beta";
 		};
 		3BF5316C27ACEAC600056673 /* DataController */ = {
 			isa = XCSwiftPackageProductDependency;

@@ -20,4 +20,10 @@ class AppSettings {
   static let filterUnit = ApplicationKey(from: "filterUnit")
   
   static let debugShowAllViews = ApplicationKey(from: "debugShowAllViews")
+  static let debugLastOutlookDate = ApplicationKey(from: "debugLastOutlookDate")
+  static let debugNextOutlookDate = ApplicationKey(from: "debugNextOutlookDate")
+  static let debugLastTrainingDate = ApplicationKey(from: "debugLastTrainingDate")
+  static let debugNextTrainingDate = ApplicationKey(from: "debugNextTrainingDate")
+  static let debugLastPredictionDate = ApplicationKey(from: "debugLastPredictionDate")
+  static let debugNextPredictionDate = ApplicationKey(from: "debugNextPredictionDate")
 }

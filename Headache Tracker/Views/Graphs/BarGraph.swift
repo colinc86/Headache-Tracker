@@ -8,6 +8,7 @@
 import Surge
 import SwiftUI
 import HealthKit
+import Logger
 
 struct BarGraph: View {
   
@@ -89,12 +90,21 @@ struct BarGraph: View {
               touched(size: geometry.size, location: location, type: type)
             }
           
-          // Mean
+          // Mean/trend
           Path { path in
-            path.move(to: CGPoint(x: 0.0, y: (1.0 - statistic.mean / max) * geometry.size.height))
-            path.addLine(to: CGPoint(x: geometry.size.width, y: (1.0 - statistic.mean / max) * geometry.size.height))
+            if statistic.meanTrend.isSteady {
+              path.move(to: CGPoint(x: 0.0, y: (1.0 - statistic.meanTrend.valueA / max) * geometry.size.height))
+              path.addLine(to: CGPoint(x: geometry.size.width, y: (1.0 - statistic.meanTrend.valueA / max) * geometry.size.height))
+            }
+            else {
+              path.move(to: CGPoint(x: 0.0, y: (1.0 - statistic.meanTrend.valueA / max) * geometry.size.height))
+              path.addLine(to: CGPoint(x: geometry.size.width / 2.0, y: (1.0 - statistic.meanTrend.valueA / max) * geometry.size.height))
+              
+              path.move(to: CGPoint(x: geometry.size.width / 2.0, y: (1.0 - statistic.meanTrend.valueB / max) * geometry.size.height))
+              path.addLine(to: CGPoint(x: geometry.size.width, y: (1.0 - statistic.meanTrend.valueB / max) * geometry.size.height))
+            }
           }
-          .stroke(style: StrokeStyle(lineWidth: 0.5, dash: [5]))
+          .stroke(style: StrokeStyle(lineWidth: 1.0, dash: [5]))
           .foregroundColor(Color(UIColor.tertiaryLabel))
           
           // Touch

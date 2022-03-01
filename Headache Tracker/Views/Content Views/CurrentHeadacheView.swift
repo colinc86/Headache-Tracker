@@ -152,7 +152,7 @@ struct CurrentHeadacheView: View {
               title: prediction.severityClassifierOutput.probability == nil ? "Current Severity" : "Current Severity (\(String(format: "%0.f%%", prediction.severityClassifierOutput.probability! * 100.0)))",
               systemImage: "dial.max.fill", foregroundColor: .cyan)
           
-          if currentHeadache == nil {
+          if currentHeadache == nil || debugShowAllViews {
             Section {
               dailyOutlook
             } header: {
@@ -162,7 +162,7 @@ struct CurrentHeadacheView: View {
             Section {
               severityPrediction
             } footer: {
-              if let lastPredictionDate = lastPredictionDate {
+              if let lastPredictionDate = predictor.prediction?.date {
                 Text("Updated at \(lastPredictionDate.formatted()).")
               }
             }
@@ -173,7 +173,7 @@ struct CurrentHeadacheView: View {
             } header: {
               SectionTitleView(title: "Predictions")
             } footer: {
-              if let lastPredictionDate = lastPredictionDate {
+              if let lastPredictionDate = predictor.prediction?.date {
                 Text("Updated at \(lastPredictionDate.formatted()).")
               }
             }
@@ -248,7 +248,7 @@ extension CurrentHeadacheView {
             }
             else if let input = input {
               do {
-                withAnimation {
+                _ = try withAnimation {
                   try predictor.predict(input)
                 }
               }

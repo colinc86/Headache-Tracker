@@ -8,7 +8,7 @@
 import WidgetKit
 import SwiftUI
 
-let snapshotEntry = WidgetContent(outlook: nil, onset: nil, duration: nil, severity: nil)
+let snapshotEntry = WidgetContent(date: Date(), outlook: nil, onset: nil, duration: nil, severity: nil)
 
 struct Provider: TimelineProvider {
   func placeholder(in context: Context) -> WidgetContent {

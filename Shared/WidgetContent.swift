@@ -9,7 +9,7 @@ import WidgetKit
 import HealthKit
 
 struct WidgetContent: TimelineEntry {
-  var date = Date()
+  var date: Date
   let outlook: Outlook?
   let onset: Date?
   let duration: TimeInterval?

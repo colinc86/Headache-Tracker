@@ -22,32 +22,41 @@ struct GraphList: View {
   /// The headache statistics to display.
   @State private var statistics: HeadacheStatistics?
   
+  /// The analyze view's filter unit.
+  private let filterUnit: AnalyzeView.FilterUnit
+  
   /// The earliest date to show in the view.
   private let earliestDate: Date
   
   var body: some View {
     List {
       if let statistics = statistics {
-        Section {
-          SubtitleCell(
-            title: "Per Year",
-            subtitle: String(format: "%0.1f", statistics.headachesPerYear),
-            systemImage: statistics.headachesPerYearTrend.systemImage,
-            imageForegroundColor: statistics.headachesPerYearTrend.foregroundColor)
-          
-          SubtitleCell(
-            title: "Per Month",
-            subtitle: String(format: "%0.1f", statistics.headachesPerMonth),
-            systemImage: statistics.headachesPerMonthTrend.systemImage,
-            imageForegroundColor: statistics.headachesPerMonthTrend.foregroundColor)
-          
-          SubtitleCell(
-            title: "Per Week",
-            subtitle: String(format: "%0.1f", statistics.headachesPerWeek),
-            systemImage: statistics.headachesPerWeekTrend.systemImage,
-            imageForegroundColor: statistics.headachesPerWeekTrend.foregroundColor)
-        } header: {
-          SectionTitleView(title: "Headaches")
+        if filterUnit == .year || filterUnit == .month || filterUnit == .week {
+          Section {
+            if filterUnit == .year {
+              SubtitleCell(
+                title: "Heaches Per Year",
+                subtitle: String(format: "%0.1f", statistics.headachesPerYear),
+                systemImage: statistics.headachesPerYearTrend.systemImage,
+                imageForegroundColor: statistics.headachesPerYearTrend.foregroundColor)
+            }
+            else if filterUnit == .month {
+              SubtitleCell(
+                title: "Heaches Per Month",
+                subtitle: String(format: "%0.1f", statistics.headachesPerMonth),
+                systemImage: statistics.headachesPerMonthTrend.systemImage,
+                imageForegroundColor: statistics.headachesPerMonthTrend.foregroundColor)
+            }
+            else {
+              SubtitleCell(
+                title: "Heaches Per Week",
+                subtitle: String(format: "%0.1f", statistics.headachesPerWeek),
+                systemImage: statistics.headachesPerWeekTrend.systemImage,
+                imageForegroundColor: statistics.headachesPerWeekTrend.foregroundColor)
+            }
+          } header: {
+            SectionTitleView(title: "Headaches")
+          }
         }
         
         Section {
@@ -60,7 +69,12 @@ struct GraphList: View {
             staticMax: 4)
             .frame(height: 100)
             .cell(title: "Peak Severity", systemImage: "dial.max.fill", foregroundColor: .cyan)
-          SubtitleCell(title: "Average", subtitle: statistics.peaks.meanDescription)
+          
+          SubtitleCell(
+            title: "Mean",
+            subtitle: statistics.peaks.meanDescription,
+            systemImage: statistics.peaks.meanTrend.systemImage,
+            imageForegroundColor: statistics.peaks.meanTrend.foregroundColor)
         } header: {
           SectionTitleView(title: "Severity")
         }
@@ -75,7 +89,12 @@ struct GraphList: View {
             staticMax: 4)
             .frame(height: 100)
             .cell(title: "Average Severity", systemImage: "dial.max.fill", foregroundColor: .cyan)
-          SubtitleCell(title: "Average", subtitle: statistics.averages.meanDescription)
+          
+          SubtitleCell(
+            title: "Mean",
+            subtitle: statistics.averages.meanDescription,
+            systemImage: statistics.averages.meanTrend.systemImage,
+            imageForegroundColor: statistics.averages.meanTrend.foregroundColor)
         }
         
         Section {
@@ -88,7 +107,12 @@ struct GraphList: View {
             staticMax: 86400)
             .frame(height: 100)
             .cell(title: "Onset", systemImage: "clock.fill", foregroundColor: .purple)
-          SubtitleCell(title: "Average", subtitle: statistics.onsets.meanDescription)
+          
+          SubtitleCell(
+            title: "Mean",
+            subtitle: statistics.onsets.meanDescription,
+            systemImage: statistics.onsets.meanTrend.systemImage,
+            imageForegroundColor: statistics.onsets.meanTrend.foregroundColor)
         } header: {
           SectionTitleView(title: "Onset")
         }
@@ -102,7 +126,12 @@ struct GraphList: View {
             earliestDate: earliestDate)
             .frame(height: 100)
             .cell(title: "Duration", systemImage: "timer", foregroundColor: .green)
-          SubtitleCell(title: "Average", subtitle: statistics.durations.meanDescription)
+          
+          SubtitleCell(
+            title: "Mean",
+            subtitle: statistics.durations.meanDescription,
+            systemImage: statistics.durations.meanTrend.systemImage,
+            imageForegroundColor: statistics.durations.meanTrend.foregroundColor)
         } header: {
           SectionTitleView(title: "Duration")
         }
@@ -113,11 +142,14 @@ struct GraphList: View {
   
   // MARK: Initializers
   
-  /// Intializes a graph list with an earliest date.
+  /// Initilized a graph list with an earliest date.
   ///
-  /// - Parameter earliestDate: The earliest date to graph in the list.
-  init(earliestDate: Date) {
+  /// - Parameters:
+  ///   - filterUnit: The analyze view's filter unit.
+  ///   - earliestDate: The earilest date to garph in the list.
+  init(filterUnit: AnalyzeView.FilterUnit, earliestDate: Date) {
     logDebug("Drawing graphs with earliest date \(earliestDate.formatted())")
+    self.filterUnit = filterUnit
     self.earliestDate = earliestDate
     let createdAtPredicate = NSPredicate(format: "createdAt >= %@", earliestDate as NSDate)
     let resolvedPredicate = NSPredicate(format: "resolved == %@", NSNumber(booleanLiteral: true))
@@ -139,7 +171,7 @@ extension GraphList {
 struct GraphList_Previews: PreviewProvider {
   
   static var previews: some View {
-    GraphList(earliestDate: Date())
+    GraphList(filterUnit: .month, earliestDate: Date())
       .environment(\.managedObjectContext, Previewing.CoreData.controller.container.viewContext)
   }
   

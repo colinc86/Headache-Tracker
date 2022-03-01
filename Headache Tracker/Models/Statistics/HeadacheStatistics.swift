@@ -13,40 +13,6 @@ import Logger
 
 struct HeadacheStatistics {
   
-  enum Trend {
-    case steady
-    case rising
-    case falling
-    
-    init(_ valueA: Double, _ valueB: Double) {
-      if valueA < valueB {
-        self = .rising
-      }
-      else if valueA > valueB {
-        self = .falling
-      }
-      else {
-        self = .steady
-      }
-    }
-    
-    var systemImage: String {
-      switch self {
-      case .steady: return "arrow.forward"
-      case .rising: return "arrow.up.right"
-      case .falling: return "arrow.down.right"
-      }
-    }
-    
-    var foregroundColor: Color {
-      switch self {
-      case .steady: return .cyan
-      case .rising: return .orange
-      case .falling: return .mint
-      }
-    }
-  }
-  
   /// The highest severity of each headache.
   let peaks: SeverityStatistic
   
@@ -133,11 +99,11 @@ struct HeadacheStatistics {
     else {
       logWarning("Setting to none.")
       self.headachesPerYear = 0.0
-      self.headachesPerYearTrend = .steady
+      self.headachesPerYearTrend = .steady(valueA: 0.0, valueB: 0.0)
       self.headachesPerMonth = 0.0
-      self.headachesPerMonthTrend = .steady
+      self.headachesPerMonthTrend = .steady(valueA: 0.0, valueB: 0.0)
       self.headachesPerWeek = 0.0
-      self.headachesPerWeekTrend = .steady
+      self.headachesPerWeekTrend = .steady(valueA: 0.0, valueB: 0.0)
     }
   }
   

@@ -50,6 +50,27 @@ class HeadacheManager: ObservableObject {
   /// The check-in interval setting if `checkInAlerts` is true.
   @AppStorage(AppSettings.checkInInterval) private var checkInInterval = TimeInterval(3600.0)
   
+  /// A debug setting to show all views in the prediction section.
+  @AppStorage(AppSettings.debugShowAllViews) private var debugShowAllViews = false
+  
+  /// A debug last outlook date setting.
+  @AppStorage(AppSettings.debugLastOutlookDate) private var debugLastOutlookDate: Date?
+  
+  /// A debug next outlook date setting.
+  @AppStorage(AppSettings.debugNextOutlookDate) private var debugNextOutlookDate: Date?
+  
+  /// A debug last outlook date setting.
+  @AppStorage(AppSettings.debugLastTrainingDate) private var debugLastTrainingDate: Date?
+  
+  /// A debug next outlook date setting.
+  @AppStorage(AppSettings.debugNextTrainingDate) private var debugNextTrainingDate: Date?
+  
+  /// A debug last outlook date setting.
+  @AppStorage(AppSettings.debugLastPredictionDate) private var debugLastPredictionDate: Date?
+  
+  /// A debug next outlook date setting.
+  @AppStorage(AppSettings.debugNextPredictionDate) private var debugNextPredictionDate: Date?
+  
   /// The refresh task responsible for creating background samples.
   private let predictionRefreshTask = RefreshTask(identifier: Constants.Identifiers.backgroundPredictionTaskIdentifier, type: .appRefresh)
   
@@ -479,7 +500,7 @@ extension HeadacheManager {
   ///   - completion: Called after the alert has been added to notification center.
   private func presentPredictionAlert(with prediction: Predictor.Prediction?, completion: @escaping (Error?) -> Void) {
     // Only continue if we have a prediction and prediction alerts are turned on
-    guard realTimeAlerts, let prediction = prediction, prediction.severityClassifierOutput.prediction != .notPresent else {
+    guard realTimeAlerts, let prediction = prediction, prediction.severityClassifierOutput.prediction != .notPresent && prediction.outlookClassifierOutput.prediction == .headache else {
       completion(nil)
       return
     }
@@ -767,12 +788,15 @@ extension HeadacheManager {
     
     // Schedule the next task
     logDebug("Scheduling prediction refresh task with date \(Date(timeIntervalSinceNow: secondsUntilNextHour))")
-    predictionRefreshTask.schedule(interval: secondsUntilNextHour) { error in
+    predictionRefreshTask.schedule(interval: secondsUntilNextHour) { [weak self] error in
       if let error = error {
         logError("Unable to schedule prediction task: \(error)")
       }
       else {
         logDebug("Successfully scheduled prediction refresh task.")
+        DispatchQueue.main.async {
+          self?.debugNextPredictionDate = Date(timeIntervalSinceNow: secondsUntilNextHour)
+        }
       }
     }
   }
@@ -780,6 +804,7 @@ extension HeadacheManager {
   /// Handles the refresh task.
   private func handlePredictionRefreshTask(_ task: BGTask) {
     logDebug("Handle prediction refresh task.")
+    debugLastPredictionDate = Date()
     
     // Schedule the next task
     schedulePredictionRefreshTask()
@@ -878,12 +903,15 @@ extension HeadacheManager {
     
     // Schedule the outlook task
     logDebug("Scheduling outlook refresh task with date \(Date(timeIntervalSinceNow: secondsUntilOutlook)).")
-    outlookRefreshTask.schedule(interval: secondsUntilOutlook) { error in
+    outlookRefreshTask.schedule(interval: secondsUntilOutlook) { [weak self] error in
       if let error = error {
         logError("Unable to schedule outlook task: \(error)")
       }
       else {
         logDebug("Successfully scheduled outlook refresh task.")
+        DispatchQueue.main.async {
+          self?.debugNextOutlookDate = Date(timeIntervalSinceNow: secondsUntilOutlook)
+        }
       }
     }
   }
@@ -891,6 +919,7 @@ extension HeadacheManager {
   /// Handles the refresh task.
   private func handleOutlookRefreshTask(_ task: BGTask) {
     logDebug("Handle outlook refresh task.")
+    debugLastOutlookDate = Date()
     
     // Schedule the next task
     if dailyOutlookAlerts {
@@ -973,12 +1002,15 @@ extension HeadacheManager {
     }
     
     logDebug("Scheduling training processing task with date \(Date(timeIntervalSinceNow: secondsUntilTraining))")
-    trainingProcessingTask.schedule(interval: secondsUntilTraining) { error in
+    trainingProcessingTask.schedule(interval: secondsUntilTraining) { [weak self] error in
       if let error = error {
         logError("Error scheduling training processing task: \(error)")
       }
       else {
         logDebug("Successfully scheduled training procecssing task.")
+        DispatchQueue.main.async {
+          self?.debugNextTrainingDate = Date(timeIntervalSinceNow: secondsUntilTraining)
+        }
       }
     }
   }
@@ -986,6 +1018,7 @@ extension HeadacheManager {
   /// Handles the processing task.
   private func handleTrainingProcessingTask(_ task: BGTask) {
     logDebug("Handle training processing task.")
+    debugLastTrainingDate = Date()
     
     // Schedule the next task
     scheduleTrainingRefreshTask()

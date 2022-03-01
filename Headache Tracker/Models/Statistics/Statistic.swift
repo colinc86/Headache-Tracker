@@ -7,6 +7,7 @@
 
 import Foundation
 import HealthKit
+import Logger
 import Surge
 
 /// A headache statistic.
@@ -15,8 +16,8 @@ class Statistic {
   /// The statistic's signal.
   let signal: [(Double, Date)]
   
-  /// The signal's mean.
-  let mean: Double
+  /// The mean's trend.
+  let meanTrend: Trend
   
   /// The signal's max.
   let max: Double
@@ -36,9 +37,10 @@ class Statistic {
   /// The mean value's description.
   var meanDescription: String {
     guard !signal.isEmpty else { return "" }
-    return description(for: mean)
+    return description(for: meanTrend.valueB)
   }
   
+  /// The max value's description.
   var maxDescription: String {
     guard !signal.isEmpty else { return "" }
     return description(for: max)
@@ -57,12 +59,12 @@ class Statistic {
     self.signal = [(Double, Date)](zip(signal, dates))
     
     if signal.isEmpty {
-      self.mean = 0.0
       self.max = 0.0
+      self.meanTrend = .steady(valueA: 0.0, valueB: 0.0)
     }
     else {
-      self.mean = Surge.mean(signal)
       self.max = Surge.max(signal)
+      self.meanTrend = Statistic.meanTrend(for: self.signal, earliestDate: earliestDate)
     }
   }
   
@@ -71,6 +73,42 @@ class Statistic {
   func description(for value: Double) -> String {
     return "\(value)"
   }
+}
+
+extension Statistic {
+  
+  /// Calculates the mean trend for the given signal and earliest date.
+  /// - Parameters:
+  ///   - signal: The signal.
+  ///   - earliestDate: The earliest date of the signal.
+  /// - Returns: A trend.
+  private static func meanTrend(for signal: [(Double, Date)],  earliestDate: Date?) -> Trend {
+    if let earliestDate = earliestDate {
+      let interval = Date().timeIntervalSince(earliestDate)
+      let halfDate = earliestDate.addingTimeInterval(interval / 2.0)
+      let firstHalfSignal = signal.filter({ $0.1 < halfDate })
+      let secondHalfSignal = signal.filter({ $0.1 >= halfDate })
+      
+      var firstHalfMean = 0.0
+      if !firstHalfSignal.isEmpty {
+        firstHalfMean = Surge.mean(firstHalfSignal.map({ $0.0 }))
+      }
+      
+      var secondHalfMean = 0.0
+      if !secondHalfSignal.isEmpty {
+        secondHalfMean = Surge.mean(secondHalfSignal.map({ $0.0 }))
+      }
+      
+      var actualMean = 0.0
+      if !signal.isEmpty {
+        actualMean = Surge.mean(signal.map({ $0.0 }))
+      }
+      
+      return Trend(firstHalfMean, secondHalfMean, actualMean, 0.2)
+    }
+    return .steady(valueA: 0.0, valueB: 0.0)
+  }
+  
 }
 
 class SeverityStatistic: Statistic {
