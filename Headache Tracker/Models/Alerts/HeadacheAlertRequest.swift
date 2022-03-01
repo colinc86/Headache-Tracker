@@ -37,7 +37,7 @@ enum HeadacheAlertRequest: AlertRequest {
     case .outlook(let outlook, let onset):
       if outlook == .headache {
         if let onset = onset {
-          return "Your daily headache outlook contains a possible headache at \(onset.formatted(date: .omitted, time: .shortened))."
+          return "Your daily headache outlook contains a possible headache at \(onset.formattedTime())."
         }
         else {
           return "Your daily headache outlook contains a possible headache."

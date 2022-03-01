@@ -9,7 +9,10 @@ import SwiftUI
 
 struct DurationView: View {
   
+  /// The headache to display.
   @StateObject var headache: Headache
+  
+  // MARK: Private properties
   
   /// The id of the duration view.
   @State private var durationID = UUID()
@@ -18,11 +21,20 @@ struct DurationView: View {
   @State private var durationUpdateTimer: Timer?
   
   var body: some View {
-    Text(Formatters.dateComponentsFormatter.string(from: headache.duration) ?? "N/A")
-      .font(.title)
-      .id(durationID)
-      .onAppear(perform: appeared)
-      .onDisappear(perform: disappeared)
+    VStack(alignment: .leading) {
+      Text(Formatters.dateComponentsFormatter.string(from: headache.duration) ?? "N/A")
+        .font(.title)
+        .id(durationID)
+      
+      if headache.resolved, let endTime = headache.endTime {
+        Text("until " + endTime.formattedNonRelative())
+          .font(.subheadline)
+          .foregroundColor(.secondary)
+      }
+    }
+    .onAppear(perform: appeared)
+    .onDisappear(perform: disappeared)
+    .cell(title: "Duration", systemImage: "timer", foregroundColor: .green)
   }
   
 }
@@ -39,8 +51,10 @@ extension DurationView {
   /// Called when the view appears.
   func appeared() {
     // If the headache isn't resolved, then start an update timer
-    updateDurationID()
-    startDurationUpdateTimer()
+    if !headache.resolved {
+      updateDurationID()
+      startDurationUpdateTimer()
+    }
   }
   
   /// Called when the view disappears.

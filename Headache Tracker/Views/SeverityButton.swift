@@ -16,7 +16,10 @@ struct SeverityButton: View {
   let severity: HKCategoryValueSeverity
   
   /// The selected severity in the button's parent view.
-  let selectedSeverity: HKCategoryValueSeverity?
+  var selectedSeverity: HKCategoryValueSeverity? = nil
+  
+  /// The selected severity range in the button's parent view.
+  var selectedSeverityRange: SeverityRange? = nil
   
   /// Whether or not the button should be drawn collapsed.
   let collapsed: Bool
@@ -32,7 +35,7 @@ struct SeverityButton: View {
   
   /// Whether or not this button is the selected button.
   private var selected: Bool {
-    return severity == selectedSeverity
+    return (severity == selectedSeverity) || (selectedSeverityRange?.contains(severity) ?? false)
   }
   
   var body: some View {
@@ -71,7 +74,7 @@ struct SeverityButton: View {
       
       Text(severity.title)
         .font(.caption)
-        .foregroundColor(selectedSeverity == nil ? .primary : (selected ? .primary : .secondary))
+        .foregroundColor(selectedSeverity == nil && selectedSeverityRange == nil ? .primary : (selected ? .primary : .secondary))
     }
     
   }

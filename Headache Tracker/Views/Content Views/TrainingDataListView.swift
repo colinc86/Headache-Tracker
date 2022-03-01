@@ -30,7 +30,7 @@ struct TrainingDataListView: View {
           TrainingDataView(trainingData: data)
             .environment(\.managedObjectContext, viewContext)
         } label: {
-          SubtitleCell(title: data.timestamp?.formatted(date: .numeric, time: .shortened) ?? "N/A", subtitle: data.severity?.severity.title ?? "-")
+          SubtitleCell(title: data.timestamp?.formattedNonRelative() ?? "N/A", subtitle: data.severity?.severity.title ?? "-")
         }
       }
       .onDelete(perform: deleteTrainingData)

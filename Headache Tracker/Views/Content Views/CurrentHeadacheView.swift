@@ -85,8 +85,7 @@ struct CurrentHeadacheView: View {
         // New/Current Headache
         Section {
           // New/Current Severity
-          HorizontalSeverityLevel(currentSeverity: currentHeadache?.severity, collapsed: false, action: changeSeverity)
-            .cell(title: "Severity", systemImage: "dial.max.fill", foregroundColor: .cyan)
+          HorizontalSeverityLevel(currentSeverity: currentHeadache?.severity, severityRange: nil, collapsed: false, action: changeSeverity)
         } header: {
           SectionTitleView(title: currentHeadache == nil ? "New Headache" : "Current Headache")
         } footer: {
@@ -110,15 +109,15 @@ struct CurrentHeadacheView: View {
         // Current Headache Information
         else if let currentHeadache = currentHeadache {
           // Onset
-          Section {
-            OnsetView(onset: currentHeadache.startTime)
-              .cell(title: "Onset", systemImage: "clock.fill", foregroundColor: .purple)
+          if let onset = currentHeadache.startTime {
+            Section {
+              OnsetView(onset: onset)
+            }
           }
           
           // Duration
           Section {
             DurationView(headache: currentHeadache)
-              .cell(title: "Duration", systemImage: "timer", foregroundColor: .green)
           }
           
           // Progression
@@ -143,14 +142,7 @@ struct CurrentHeadacheView: View {
         // Predictions
         if let prediction = predictor.prediction {
           let dailyOutlook = OutlookView(outlook: prediction.holisticOutlook)
-            .cell(
-              title: prediction.outlookClassifierOutput.probability == nil ? "Outlook" : "Outlook (\(String(format: "%0.f%%", prediction.outlookClassifierOutput.probability! * 100.0)))",
-              systemImage: "sun.and.horizon", foregroundColor: .mint)
-          
-          let severityPrediction = HorizontalSeverityLevel(currentSeverity: prediction.severityClassifierOutput.prediction, collapsed: true, action: nil)
-            .cell(
-              title: prediction.severityClassifierOutput.probability == nil ? "Current Severity" : "Current Severity (\(String(format: "%0.f%%", prediction.severityClassifierOutput.probability! * 100.0)))",
-              systemImage: "dial.max.fill", foregroundColor: .cyan)
+          let severityPrediction = HorizontalSeverityLevel(currentSeverity: prediction.severityClassifierOutput.prediction, severityRange: nil, collapsed: true, action: nil)
           
           if currentHeadache == nil || debugShowAllViews {
             Section {
@@ -163,7 +155,7 @@ struct CurrentHeadacheView: View {
               severityPrediction
             } footer: {
               if let lastPredictionDate = predictor.prediction?.date {
-                Text("Updated at \(lastPredictionDate.formatted()).")
+                Text("Updated at \(lastPredictionDate.formattedNonRelative()).")
               }
             }
           }
@@ -174,7 +166,7 @@ struct CurrentHeadacheView: View {
               SectionTitleView(title: "Predictions")
             } footer: {
               if let lastPredictionDate = predictor.prediction?.date {
-                Text("Updated at \(lastPredictionDate.formatted()).")
+                Text("Updated at \(lastPredictionDate.formattedNonRelative()).")
               }
             }
           }

@@ -52,15 +52,29 @@ struct HeadacheView: View {
   var body: some View {
     List {
       Section {
-        SubtitleCell(title: "Onset", subtitle: headache.startTime?.formatted() ?? "N/A")
-        SubtitleCell(title: "Duration", subtitle: Formatters.dateComponentsFormatter.string(from: headache.duration) ?? "0 min")
-          .id(durationID)
-        
-        SubtitleCell(title: "Severity", subtitle: headache.severityRange.description)
-        SubtitleCell(title: "Status", subtitle: headache.resolved ? "Resolved" : "Unresolved")
+        Text(headache.resolved ? "Resolved" : "Unresolved")
+          .font(.title)
+          .foregroundColor(.teal)
+          .cell(title: "Status", systemImage: headache.resolved ? "face.smiling.fill" : "person.badge.circle.crop.fill", foregroundColor: headache.resolved ? .teal : .pink)
       } header: {
         SectionTitleView(title: "Headache")
       }
+      
+      if let onset = headache.startTime {
+        Section {
+          OnsetView(onset: onset, relativeDate: false)
+        }
+      }
+      
+      Section {
+        DurationView(headache: headache)
+      }
+      
+      Section {
+        HorizontalSeverityLevel(currentSeverity: nil, severityRange: headache.severityRange, collapsed: true, action: nil)
+      }
+      
+      
       
       Section {
         if headache.severities?.count ?? 0 > 1 {
@@ -74,7 +88,7 @@ struct HeadacheView: View {
                 .environment(\.managedObjectContext, viewContext)
                 .environmentObject(headacheManager)
             } label: {
-              SubtitleCell(title: severity.severity.title, subtitle: severity.startTime?.formatted() ?? "N/A")
+              SubtitleCell(title: severity.severity.title, subtitle: severity.startTime?.formattedNonRelative() ?? "N/A")
             }
           }
           .onDelete(perform: deleteSeverities)
@@ -85,7 +99,7 @@ struct HeadacheView: View {
               .environment(\.managedObjectContext, viewContext)
               .environmentObject(headacheManager)
           } label: {
-            SubtitleCell(title: severity.severity.title, subtitle: severity.startTime?.formatted() ?? "N/A")
+            SubtitleCell(title: severity.severity.title, subtitle: severity.startTime?.formattedNonRelative() ?? "N/A")
           }
         }
       } header: {

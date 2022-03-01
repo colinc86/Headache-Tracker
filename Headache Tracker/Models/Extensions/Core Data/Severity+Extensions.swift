@@ -20,11 +20,11 @@ extension Severity {
   }
   
   /// The severity's severity interval.
-  var severityInterval: HealthKitManager.SeverityInterval? {
+  var severityInterval: SeverityInterval? {
     guard let startTime = startTime, let endTime = endTime else {
       return nil
     }
-    return (severity, DateInterval(start: startTime, end: endTime))
+    return SeverityInterval(severity: severity, interval: DateInterval(start: startTime, end: endTime))
   }
   
   // MARK: Initializers

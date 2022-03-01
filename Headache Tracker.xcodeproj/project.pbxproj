@@ -78,6 +78,8 @@
 		3B9332BC27CDC1B300BACE93 /* FirebaseAnalyticsSwift-Beta in Frameworks */ = {isa = PBXBuildFile; productRef = 3B9332BB27CDC1B300BACE93 /* FirebaseAnalyticsSwift-Beta */; };
 		3B9332BE27CDD52200BACE93 /* Date+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9332BD27CDD52200BACE93 /* Date+Extensions.swift */; };
 		3B9332C227CDDBC400BACE93 /* Trend.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9332C127CDDBC400BACE93 /* Trend.swift */; };
+		3B9332C427CDF5BA00BACE93 /* SeverityRange.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9332C327CDF5BA00BACE93 /* SeverityRange.swift */; };
+		3B9332C627CDF5CA00BACE93 /* SeverityInterval.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9332C527CDF5CA00BACE93 /* SeverityInterval.swift */; };
 		3BAAA67F27CC245200C0DDC4 /* EnvironmentalInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BAAA67E27CC245200C0DDC4 /* EnvironmentalInput.swift */; };
 		3BAAA68127CC247900C0DDC4 /* ControlledUserInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BAAA68027CC247900C0DDC4 /* ControlledUserInput.swift */; };
 		3BAAA68427CC24CA00C0DDC4 /* InputUnion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BAAA68327CC24CA00C0DDC4 /* InputUnion.swift */; };
@@ -218,6 +220,8 @@
 		3B68BE7727C41FDE007AAAC6 /* TrainingDataListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingDataListView.swift; sourceTree = "<group>"; };
 		3B9332BD27CDD52200BACE93 /* Date+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+Extensions.swift"; sourceTree = "<group>"; };
 		3B9332C127CDDBC400BACE93 /* Trend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Trend.swift; sourceTree = "<group>"; };
+		3B9332C327CDF5BA00BACE93 /* SeverityRange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeverityRange.swift; sourceTree = "<group>"; };
+		3B9332C527CDF5CA00BACE93 /* SeverityInterval.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeverityInterval.swift; sourceTree = "<group>"; };
 		3BAAA67D27C94B9B00C0DDC4 /* Headache_Tracker 1.5.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Headache_Tracker 1.5.xcdatamodel"; sourceTree = "<group>"; };
 		3BAAA67E27CC245200C0DDC4 /* EnvironmentalInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnvironmentalInput.swift; sourceTree = "<group>"; };
 		3BAAA68027CC247900C0DDC4 /* ControlledUserInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlledUserInput.swift; sourceTree = "<group>"; };
@@ -368,6 +372,8 @@
 				3BF5316927ACE47700056673 /* HeadacheManager.swift */,
 				3B39DAD627ACF67600D39BB5 /* Previewing.swift */,
 				3B09190A27BC7E0C00844F6C /* RefreshTask.swift */,
+				3B9332C527CDF5CA00BACE93 /* SeverityInterval.swift */,
+				3B9332C327CDF5BA00BACE93 /* SeverityRange.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -809,11 +815,13 @@
 				3B68BE1F27BF99D2007AAAC6 /* OnsetRegressorOutput.swift in Sources */,
 				3BF5316F27ACEAF700056673 /* DataController+Extensions.swift in Sources */,
 				3B13154927C9366700F6B50D /* WeatherManager.swift in Sources */,
+				3B9332C427CDF5BA00BACE93 /* SeverityRange.swift in Sources */,
 				3B68BDFB27BE0F00007AAAC6 /* BarGraph.swift in Sources */,
 				3B68BE6027C34B89007AAAC6 /* WidgetContent.swift in Sources */,
 				3B09191227BCCE1C00844F6C /* OnsetView.swift in Sources */,
 				3B051A4C27B0B4CC0017131D /* Severity+Extensions.swift in Sources */,
 				3B09191427BCCF9500844F6C /* Cell.swift in Sources */,
+				3B9332C627CDF5CA00BACE93 /* SeverityInterval.swift in Sources */,
 				3B051A4E27B0E9060017131D /* HeadachesView.swift in Sources */,
 				3BAAA69127CC7F5500C0DDC4 /* UIColor+Extensions.swift in Sources */,
 				3B09192327BD91F400844F6C /* SectionTitleView.swift in Sources */,

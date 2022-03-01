@@ -9,6 +9,7 @@ import SwiftUI
 
 struct OutlookView: View {
   
+  /// The view's outlook.
   let outlook: HolisticOutlook
     
   var body: some View {
@@ -20,15 +21,16 @@ struct OutlookView: View {
       case .noHeadache:
         EmptyView()
       case .possibleHeadache(let onset):
-        Text("at " + onset.formatted(date: .omitted, time: .shortened))
+        Text("at " + onset.formattedTime())
           .font(.subheadline)
           .foregroundColor(.secondary)
       case .headache(_, let end):
-        Text("until " + end.formatted(date: .omitted, time: .shortened))
+        Text("until " + end.formattedTime())
           .font(.subheadline)
           .foregroundColor(.secondary)
       }
     }
+    .cell(title: "Outlook", systemImage: "sun.and.horizon", foregroundColor: .mint)
   }
   
 }

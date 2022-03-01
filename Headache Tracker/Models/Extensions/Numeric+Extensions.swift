@@ -19,4 +19,9 @@ extension Double {
     return numberToRound.rounded() / n
   }
   
+  func percentFormat(decimalPlaces: Int = 0) -> String {
+    let formatString = "%0.\(decimalPlaces)f%%"
+    return String(format: formatString, self * 100.0)
+  }
+  
 }

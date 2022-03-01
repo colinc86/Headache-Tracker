@@ -79,13 +79,13 @@ struct SeverityView: View {
             DatePicker("End Time", selection: $editEndTime, displayedComponents: [.date, .hourAndMinute])
           }
           else {
-            SubtitleCell(title: "End Time", subtitle: severity.endTime?.formatted() ?? "N/A")
+            SubtitleCell(title: "End Time", subtitle: severity.endTime?.formattedNonRelative() ?? "N/A")
           }
         }
         else {
           SubtitleCell(title: "Severity", subtitle: severity.severity.title)
-          SubtitleCell(title: "Start Time", subtitle: severity.startTime?.formatted() ?? "N/A")
-          SubtitleCell(title: "End Time", subtitle: severity.endTime?.formatted() ?? "N/A")
+          SubtitleCell(title: "Start Time", subtitle: severity.startTime?.formattedNonRelative() ?? "N/A")
+          SubtitleCell(title: "End Time", subtitle: severity.endTime?.formattedNonRelative() ?? "N/A")
         }
       }
       

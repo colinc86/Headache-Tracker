@@ -61,12 +61,12 @@ extension Headache {
   }
   
   /// The headache's severity range.
-  var severityRange: HealthKitManager.SeverityRange {
+  var severityRange: SeverityRange {
     guard let minSeverity = severitiesArray.map({ $0.severity }).min(by: { $0.orderingValue < $1.orderingValue }),
           let maxSeverity = severitiesArray.map({ $0.severity }).max(by: { $0.orderingValue < $1.orderingValue }) else {
-            return HealthKitManager.SeverityRange(lowerBound: .notPresent, upperBound: .notPresent)
+            return SeverityRange(lowerBound: .notPresent, upperBound: .notPresent)
           }
-    return HealthKitManager.SeverityRange(lowerBound: minSeverity, upperBound: maxSeverity)
+    return SeverityRange(lowerBound: minSeverity, upperBound: maxSeverity)
   }
   
   /// The range of colors to use with the headache's severity range.
@@ -144,7 +144,7 @@ extension Headache {
   /// - Returns: A date interval of a completed severity if one's `endTime` was set, and the identifier
   ///   of the newly added Severity.
   @discardableResult
-  func addSeverity(_ severity: HKCategoryValueSeverity, startTime: Date) -> (HealthKitManager.SeverityInterval?, UUID?) {
+  func addSeverity(_ severity: HKCategoryValueSeverity, startTime: Date) -> (SeverityInterval?, UUID?) {
     logDebug("Adding severity \(severity.title) to the headache.")
     
     // Get the context
@@ -182,7 +182,7 @@ extension Headache {
   ///   - severity: The severity.
   ///   - duration: The severity's duration.
   @discardableResult
-  func addSeverity(_ severity: HKCategoryValueSeverity, duration: TimeInterval) -> HealthKitManager.SeverityInterval? {
+  func addSeverity(_ severity: HKCategoryValueSeverity, duration: TimeInterval) -> SeverityInterval? {
     logDebug("Adding severity \(severity.title) with duration \(duration) seconds.")
     
     // Get the context
@@ -210,7 +210,7 @@ extension Headache {
   /// to true.
   ///
   /// - Parameter endTime: The headache's end time.
-  func resolve(endTime: Date) -> HealthKitManager.SeverityInterval? {
+  func resolve(endTime: Date) -> SeverityInterval? {
     logDebug("Adding severity \(severity.title) to the headache.")
     
     // Resolve the headache

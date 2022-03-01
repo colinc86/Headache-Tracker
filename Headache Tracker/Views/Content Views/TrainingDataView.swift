@@ -26,7 +26,7 @@ struct TrainingDataView: View {
     List {
       Section {
         SubtitleCell(title: "Severity", subtitle: trainingData.severity?.severity.title ?? "-")
-        SubtitleCell(title: "Timestamp", subtitle: trainingData.timestamp?.formatted() ?? "N/A")
+        SubtitleCell(title: "Timestamp", subtitle: trainingData.timestamp?.formattedNonRelative() ?? "N/A")
       }
       
       Section {

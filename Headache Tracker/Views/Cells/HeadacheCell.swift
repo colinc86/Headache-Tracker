@@ -27,7 +27,7 @@ struct HeadacheCell: View {
   @State private var durationUpdateTimer: Timer?
   
   /// The previous severity range.
-  @State private var previousSeverityRange: HealthKitManager.SeverityRange?
+  @State private var previousSeverityRange: SeverityRange?
   
   // MARK: View body
   
@@ -39,7 +39,7 @@ struct HeadacheCell: View {
         .id(severityID)
       
       VStack {
-        SubtitleCell(title: "Onset", subtitle: headache.startTime?.formatted() ?? "N/A")
+        SubtitleCell(title: "Onset", subtitle: headache.startTime?.formattedNonRelative() ?? "N/A")
         Spacer(minLength: 0.0)
         SubtitleCell(
           title: "Duration",

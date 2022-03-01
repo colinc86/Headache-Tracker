@@ -16,6 +16,9 @@ struct HorizontalSeverityLevel: View {
   /// The headache's level to display.
   let currentSeverity: HKCategoryValueSeverity?
   
+  /// The headache's severity range to display.
+  let severityRange: SeverityRange?
+  
   /// The collapsed state of the view.
   let collapsed: Bool
   
@@ -32,6 +35,7 @@ struct HorizontalSeverityLevel: View {
           SeverityButton(
             severity: severity(for: i),
             selectedSeverity: currentSeverity,
+            selectedSeverityRange: severityRange,
             collapsed: collapsed,
             action: action)
           
@@ -42,6 +46,7 @@ struct HorizontalSeverityLevel: View {
       }
       Spacer(minLength: 0.0)
     }
+    .cell(title: "Severity", systemImage: "dial.max.fill", foregroundColor: .cyan)
   }
 }
 

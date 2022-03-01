@@ -30,4 +30,24 @@ extension Date: RawRepresentable {
     }
   }
   
+  /// The relative date string to use.
+  func formattedRelative() -> String {
+    return Calendar.current.relativeDateDescription(self)
+  }
+  
+  /// The non-relative date string to use.
+  func formattedNonRelative() -> String {
+    return formattedDate() + " at " + formattedTime()
+  }
+  
+  /// The formatted time to use.
+  func formattedTime() -> String {
+    return formatted(date: .omitted, time: .shortened)
+  }
+  
+  /// The formatted date to use.
+  func formattedDate() -> String {
+    return formatted(date: .abbreviated, time: .omitted)
+  }
+  
 }

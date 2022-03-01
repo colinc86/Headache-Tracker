@@ -148,7 +148,6 @@ struct GraphList: View {
   ///   - filterUnit: The analyze view's filter unit.
   ///   - earliestDate: The earilest date to garph in the list.
   init(filterUnit: AnalyzeView.FilterUnit, earliestDate: Date) {
-    logDebug("Drawing graphs with earliest date \(earliestDate.formatted())")
     self.filterUnit = filterUnit
     self.earliestDate = earliestDate
     let createdAtPredicate = NSPredicate(format: "createdAt >= %@", earliestDate as NSDate)

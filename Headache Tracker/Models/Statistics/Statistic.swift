@@ -120,7 +120,7 @@ class SeverityStatistic: Statistic {
           let upperSeverity = HKCategoryValueSeverity(orderingValue: upperBound) else {
             return ""
           }
-    return HealthKitManager.SeverityRange(lowerBound: lowerSeverity, upperBound: upperSeverity).description
+    return SeverityRange(lowerBound: lowerSeverity, upperBound: upperSeverity).description
   }
 }
 

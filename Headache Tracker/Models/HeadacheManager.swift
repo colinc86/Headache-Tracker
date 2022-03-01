@@ -118,7 +118,7 @@ extension HeadacheManager {
     logDebug("Change severity to \(severity.title).")
     
     // The date interval of the severity to save to health kit
-    var severityInterval: HealthKitManager.SeverityInterval?
+    var severityInterval: SeverityInterval?
     
     // The headache's identifier to pass to the local notification
     var headacheIdentifier: UUID?
@@ -166,7 +166,7 @@ extension HeadacheManager {
     logDebug("Resolve headache.")
     
     // The date interval of the severity to save to health kit
-    var severityInterval: HealthKitManager.SeverityInterval?
+    var severityInterval: SeverityInterval?
     
     // Get the current headache
     currentHeadache { headache, context in
@@ -248,7 +248,7 @@ extension HeadacheManager {
     logDebug("Add severity.")
     
     // The date interval of the severity to save to health kit
-    var severityInterval: HealthKitManager.SeverityInterval?
+    var severityInterval: SeverityInterval?
     
     // Get the headache
     headacheWithIdentifier(identifier: identifier) { headache, context in
@@ -321,7 +321,7 @@ extension HeadacheManager {
     logDebug("Delete severity.")
     
     var originalHeadacheInterval: DateInterval?
-    var newSeveritySamples = [HealthKitManager.SeverityInterval]()
+    var newSeveritySamples = [SeverityInterval]()
     
     severityWithIdentifier(identifier: identifier) { severity, context in
       if let severity = severity {
@@ -368,7 +368,7 @@ extension HeadacheManager {
     logDebug("Update severity.")
     
     var originalHeadacheInterval: DateInterval?
-    var newSeveritySamples = [HealthKitManager.SeverityInterval]()
+    var newSeveritySamples = [SeverityInterval]()
     
     severityWithIdentifier(identifier: identifier) { severity, context in
       if let severity = severity {

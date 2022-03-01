@@ -117,7 +117,7 @@ struct BarGraph: View {
             .foregroundColor(Color(UIColor.secondaryLabel))
             
             if let selectedDate = selectedDate {
-              Text(selectedDate.formatted(date: .abbreviated, time: .omitted))
+              Text(selectedDate.formattedDate())
                 .font(.caption)
                 .foregroundColor(.secondary)
                 .offset(x: touchLocation.x - geometry.size.width / 2.0, y: geometry.size.height / 2.0 + 8.0)
@@ -196,7 +196,7 @@ extension BarGraph {
     case .severity:
       return HKCategoryValueSeverity(orderingValue: Int(value))?.title
     case .time:
-      return Calendar.current.startOfDay(for: Date()).addingTimeInterval(value).formatted(date: .omitted, time: .shortened)
+      return Calendar.current.startOfDay(for: Date()).addingTimeInterval(value).formattedTime()
     case .duration:
       return Formatters.dateComponentsFormatter.string(from: value)
     }

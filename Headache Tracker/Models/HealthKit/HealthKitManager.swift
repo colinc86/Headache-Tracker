@@ -15,36 +15,6 @@ class HealthKitManager: ObservableObject {
   
   // MARK: Types
   
-  /// Pairs a severity value with a date interval.
-  typealias SeverityInterval = (HKCategoryValueSeverity, DateInterval)
-  
-  /// Pairs two severity values together as a closed range.
-  struct SeverityRange: CustomStringConvertible, Equatable {
-    let lowerBound: HKCategoryValueSeverity
-    let upperBound: HKCategoryValueSeverity
-    
-    var description: String {
-      if lowerBound == upperBound {
-        return lowerBound.title
-      }
-      return "\(lowerBound.title) - \(upperBound.title)"
-    }
-    
-    var average: Double {
-      return Double(lowerBound.orderingValue + upperBound.orderingValue) / 2.0
-    }
-    
-    init(lowerBound: HKCategoryValueSeverity, upperBound: HKCategoryValueSeverity) {
-      self.lowerBound = lowerBound
-      self.upperBound = upperBound
-    }
-    
-    static func == (lhs: SeverityRange, rhs: SeverityRange) -> Bool {
-      return lhs.lowerBound.orderingValue == rhs.lowerBound.orderingValue &&
-        lhs.upperBound.orderingValue == rhs.upperBound.orderingValue
-    }
-  }
-  
   /// A health kit error.
   enum HealthKitError: DescribableError {
     case notAvailable
@@ -162,7 +132,7 @@ extension HealthKitManager {
     
     var samples = [HKObject]()
     for interval in intervals {
-      samples.append(HKCategorySample(type: headacheType, value: interval.0.rawValue, start: interval.1.start, end: interval.1.end))
+      samples.append(HKCategorySample(type: headacheType, value: interval.severity.rawValue, start: interval.interval.start, end: interval.interval.end))
     }
     
     store.save(samples) { (success, error) in

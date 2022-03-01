@@ -102,8 +102,10 @@ struct DebugSettingsView: View {
     
     Section {
       SubtitleCell(title: "Outlook Classifier", subtitle: "\(predictor.prediction?.outlookClassifierOutput.prediction.rawValue ?? "")")
+      SubtitleCell(title: "Outlook Probability", subtitle: "\(predictor.prediction?.outlookClassifierOutput.probability?.percentFormat() ?? "N/A")")
       SubtitleCell(title: "Severity Classifier", subtitle: "\(predictor.prediction?.severityClassifierOutput.prediction.title ?? "")")
-      SubtitleCell(title: "Onset Regressor", subtitle: "\(predictor.prediction?.onsetRegressorOutput.prediction.formatted() ?? "N/A")")
+      SubtitleCell(title: "Severity Probability", subtitle: "\(predictor.prediction?.severityClassifierOutput.probability?.percentFormat() ?? "N/A")")
+      SubtitleCell(title: "Onset Regressor", subtitle: "\(predictor.prediction?.onsetRegressorOutput.prediction.formattedNonRelative() ?? "N/A")")
       SubtitleCell(title: "Duration Regressor", subtitle: "\(predictor.prediction?.durationRegressorOutput.prediction ?? 0.0)")
     }
     
@@ -124,16 +126,16 @@ struct DebugSettingsView: View {
         }
       }
     } footer: {
-      Text("Models last updated at \(predictor.modelUpdatedAt?.formatted() ?? "N/A")")
+      Text("Models last updated at \(predictor.modelUpdatedAt?.formattedNonRelative() ?? "N/A")")
     }
     
     Section {
-      SubtitleCell(title: "Last Outlook", subtitle: "\(debugLastOutlookDate?.formatted() ?? "N/A")")
-      SubtitleCell(title: "Next Outlook", subtitle: "\(debugNextOutlookDate?.formatted() ?? "N/A")")
-      SubtitleCell(title: "Last Training", subtitle: "\(debugLastTrainingDate?.formatted() ?? "N/A")")
-      SubtitleCell(title: "Next Training", subtitle: "\(debugNextTrainingDate?.formatted() ?? "N/A")")
-      SubtitleCell(title: "Last Prediction", subtitle: "\(debugLastPredictionDate?.formatted() ?? "N/A")")
-      SubtitleCell(title: "Next Prediction", subtitle: "\(debugNextPredictionDate?.formatted() ?? "N/A")")
+      SubtitleCell(title: "Last Outlook", subtitle: "\(debugLastOutlookDate?.formattedNonRelative() ?? "N/A")")
+      SubtitleCell(title: "Next Outlook", subtitle: "\(debugNextOutlookDate?.formattedNonRelative() ?? "N/A")")
+      SubtitleCell(title: "Last Training", subtitle: "\(debugLastTrainingDate?.formattedNonRelative() ?? "N/A")")
+      SubtitleCell(title: "Next Training", subtitle: "\(debugNextTrainingDate?.formattedNonRelative() ?? "N/A")")
+      SubtitleCell(title: "Last Prediction", subtitle: "\(debugLastPredictionDate?.formattedNonRelative() ?? "N/A")")
+      SubtitleCell(title: "Next Prediction", subtitle: "\(debugNextPredictionDate?.formattedNonRelative() ?? "N/A")")
     }
   }
 }
