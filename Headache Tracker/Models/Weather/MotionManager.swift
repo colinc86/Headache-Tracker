@@ -9,7 +9,6 @@ import Accelerate
 import CoreMotion
 import Foundation
 import SwiftUI
-import Logger
 
 class MotionManager {
   

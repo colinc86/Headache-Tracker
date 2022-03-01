@@ -5,10 +5,13 @@
 //  Created by Colin Campbell on 2/3/22.
 //
 
+@_exported import BugfenderSDK
 import BackgroundTasks
+import CocoaLumberjackSwift
+import CocoaLumberjackSwiftLogBackend
 import DataController
 import Firebase
-import Logger
+import Logging
 import SwiftUI
 
 @main
@@ -82,6 +85,9 @@ class AppDelegate: NSObject, UIApplicationDelegate {
   
   /// The application's weather manager.
   var weatherManager = WeatherManager()
+  
+  /// Whether or not to enable crash reporting.
+  @AppStorage(AppSettings.enableCrashReporting) var enableCrashReporting = true
     
   /// The Apple Health app integration setting.
   @AppStorage(AppSettings.healthIntegration) var healthIntegration = false
@@ -100,6 +106,15 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     // Load firebase if we're not previewing
 #if NON_PREVIEW
     FirebaseApp.configure()
+    Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(true)
+    
+    Bugfender.activateLogger("EympFu86jcLlhHeq78zP5JouXlWE16Qu")
+    Bugfender.enableCrashReporting()
+    Bugfender.enableUIEventLogging()
+    DDLog.add(DDBugfenderLogger.shared)
+#else
+    DDLog.add(DDOSLogger.sharedInstance)
+    LoggingSystem.bootstrapWithCocoaLumberjack()
 #endif
     
     // Adjust the table view appearance

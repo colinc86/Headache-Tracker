@@ -80,6 +80,18 @@
 		3B9332C227CDDBC400BACE93 /* Trend.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9332C127CDDBC400BACE93 /* Trend.swift */; };
 		3B9332C427CDF5BA00BACE93 /* SeverityRange.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9332C327CDF5BA00BACE93 /* SeverityRange.swift */; };
 		3B9332C627CDF5CA00BACE93 /* SeverityInterval.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9332C527CDF5CA00BACE93 /* SeverityInterval.swift */; };
+		3B9332C927CDFFAD00BACE93 /* BugfenderLibrary in Frameworks */ = {isa = PBXBuildFile; productRef = 3B9332C827CDFFAD00BACE93 /* BugfenderLibrary */; };
+		3B9332CB27CE003300BACE93 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B9332CA27CE003200BACE93 /* SystemConfiguration.framework */; };
+		3B9332CD27CE003D00BACE93 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B9332CC27CE003C00BACE93 /* Security.framework */; };
+		3B9332CF27CE004400BACE93 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B9332CE27CE004400BACE93 /* CoreServices.framework */; };
+		3B9332D127CE005200BACE93 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B9332D027CE005200BACE93 /* CoreGraphics.framework */; };
+		3B9332D327CE006800BACE93 /* libc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B9332D227CE005B00BACE93 /* libc++.tbd */; };
+		3B9332D927CE03E700BACE93 /* CocoaLumberjack in Frameworks */ = {isa = PBXBuildFile; productRef = 3B9332D827CE03E700BACE93 /* CocoaLumberjack */; };
+		3B9332DB27CE03E700BACE93 /* CocoaLumberjackSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 3B9332DA27CE03E700BACE93 /* CocoaLumberjackSwift */; };
+		3B9332DD27CE048000BACE93 /* CocoaLumberjackSwiftLogBackend in Frameworks */ = {isa = PBXBuildFile; productRef = 3B9332DC27CE048000BACE93 /* CocoaLumberjackSwiftLogBackend */; };
+		3B9332DF27CE052500BACE93 /* DDBugfenderLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9332DE27CE052500BACE93 /* DDBugfenderLogger.swift */; };
+		3B9332E127CE09ED00BACE93 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9332E027CE09ED00BACE93 /* Logger.swift */; };
+		3B9332E427CE0C8700BACE93 /* String+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9332E327CE0C8700BACE93 /* String+Extensions.swift */; };
 		3BAAA67F27CC245200C0DDC4 /* EnvironmentalInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BAAA67E27CC245200C0DDC4 /* EnvironmentalInput.swift */; };
 		3BAAA68127CC247900C0DDC4 /* ControlledUserInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BAAA68027CC247900C0DDC4 /* ControlledUserInput.swift */; };
 		3BAAA68427CC24CA00C0DDC4 /* InputUnion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BAAA68327CC24CA00C0DDC4 /* InputUnion.swift */; };
@@ -108,7 +120,6 @@
 		3BF5316A27ACE47700056673 /* HeadacheManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF5316927ACE47700056673 /* HeadacheManager.swift */; };
 		3BF5316D27ACEAC600056673 /* DataController in Frameworks */ = {isa = PBXBuildFile; productRef = 3BF5316C27ACEAC600056673 /* DataController */; };
 		3BF5316F27ACEAF700056673 /* DataController+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF5316E27ACEAF600056673 /* DataController+Extensions.swift */; };
-		3BF5317227ACEC7900056673 /* Logger in Frameworks */ = {isa = PBXBuildFile; productRef = 3BF5317127ACEC7900056673 /* Logger */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -222,6 +233,14 @@
 		3B9332C127CDDBC400BACE93 /* Trend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Trend.swift; sourceTree = "<group>"; };
 		3B9332C327CDF5BA00BACE93 /* SeverityRange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeverityRange.swift; sourceTree = "<group>"; };
 		3B9332C527CDF5CA00BACE93 /* SeverityInterval.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeverityInterval.swift; sourceTree = "<group>"; };
+		3B9332CA27CE003200BACE93 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
+		3B9332CC27CE003C00BACE93 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		3B9332CE27CE004400BACE93 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
+		3B9332D027CE005200BACE93 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		3B9332D227CE005B00BACE93 /* libc++.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = "libc++.tbd"; path = "usr/lib/libc++.tbd"; sourceTree = SDKROOT; };
+		3B9332DE27CE052500BACE93 /* DDBugfenderLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DDBugfenderLogger.swift; sourceTree = "<group>"; };
+		3B9332E027CE09ED00BACE93 /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
+		3B9332E327CE0C8700BACE93 /* String+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Extensions.swift"; sourceTree = "<group>"; };
 		3BAAA67D27C94B9B00C0DDC4 /* Headache_Tracker 1.5.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Headache_Tracker 1.5.xcdatamodel"; sourceTree = "<group>"; };
 		3BAAA67E27CC245200C0DDC4 /* EnvironmentalInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnvironmentalInput.swift; sourceTree = "<group>"; };
 		3BAAA68027CC247900C0DDC4 /* ControlledUserInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlledUserInput.swift; sourceTree = "<group>"; };
@@ -268,14 +287,22 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3BF5317227ACEC7900056673 /* Logger in Frameworks */,
+				3B9332D127CE005200BACE93 /* CoreGraphics.framework in Frameworks */,
+				3B9332C927CDFFAD00BACE93 /* BugfenderLibrary in Frameworks */,
+				3B9332D927CE03E700BACE93 /* CocoaLumberjack in Frameworks */,
 				3B68BE0127BEF949007AAAC6 /* Surge in Frameworks */,
+				3B9332CD27CE003D00BACE93 /* Security.framework in Frameworks */,
 				3B9332BC27CDC1B300BACE93 /* FirebaseAnalyticsSwift-Beta in Frameworks */,
 				3B68BE7327C36928007AAAC6 /* ApplicationKey in Frameworks */,
 				3B68BE1327BF599F007AAAC6 /* FirebaseCrashlytics in Frameworks */,
+				3B9332D327CE006800BACE93 /* libc++.tbd in Frameworks */,
+				3B9332CF27CE004400BACE93 /* CoreServices.framework in Frameworks */,
+				3B9332DD27CE048000BACE93 /* CocoaLumberjackSwiftLogBackend in Frameworks */,
+				3B9332CB27CE003300BACE93 /* SystemConfiguration.framework in Frameworks */,
 				3BF5316D27ACEAC600056673 /* DataController in Frameworks */,
 				3B09191F27BD84FE00844F6C /* Shapes in Frameworks */,
 				3BF5316827ACE1DA00056673 /* HealthKit.framework in Frameworks */,
+				3B9332DB27CE03E700BACE93 /* CocoaLumberjackSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -360,6 +387,7 @@
 				3BAAA68527CC281F00C0DDC4 /* Core Data */,
 				3B39DADF27AD00A900D39BB5 /* Extensions */,
 				3B4BA70127B762D600F38851 /* HealthKit */,
+				3B9332E227CE0B2300BACE93 /* Logging */,
 				3B4BA70227B762EE00F38851 /* Prediction */,
 				3B68BE0427BF2F83007AAAC6 /* Statistics */,
 				3B13154A27C940C100F6B50D /* Weather */,
@@ -389,6 +417,7 @@
 				3B9332BD27CDD52200BACE93 /* Date+Extensions.swift */,
 				3B39DADC27ACFD5A00D39BB5 /* HKCategoryValueSeverity+Extensions.swift */,
 				3B68BDFD27BE2B57007AAAC6 /* Numeric+Extensions.swift */,
+				3B9332E327CE0C8700BACE93 /* String+Extensions.swift */,
 				3BAAA69027CC7F5500C0DDC4 /* UIColor+Extensions.swift */,
 				3BAAA68E27CC7E3F00C0DDC4 /* View+Extensions.swift */,
 			);
@@ -495,6 +524,15 @@
 			path = Shared;
 			sourceTree = "<group>";
 		};
+		3B9332E227CE0B2300BACE93 /* Logging */ = {
+			isa = PBXGroup;
+			children = (
+				3B9332DE27CE052500BACE93 /* DDBugfenderLogger.swift */,
+				3B9332E027CE09ED00BACE93 /* Logger.swift */,
+			);
+			path = Logging;
+			sourceTree = "<group>";
+		};
 		3BAAA68227CC248D00C0DDC4 /* Inputs */ = {
 			isa = PBXGroup;
 			children = (
@@ -583,6 +621,11 @@
 		3BF5316627ACE1DA00056673 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				3B9332D227CE005B00BACE93 /* libc++.tbd */,
+				3B9332D027CE005200BACE93 /* CoreGraphics.framework */,
+				3B9332CE27CE004400BACE93 /* CoreServices.framework */,
+				3B9332CC27CE003C00BACE93 /* Security.framework */,
+				3B9332CA27CE003200BACE93 /* SystemConfiguration.framework */,
 				3BF5316727ACE1DA00056673 /* HealthKit.framework */,
 				3B68BE4D27C349B9007AAAC6 /* WidgetKit.framework */,
 				3B68BE4F27C349B9007AAAC6 /* SwiftUI.framework */,
@@ -619,8 +662,9 @@
 				3BF5312F27ACE18D00056673 /* Sources */,
 				3BF5313027ACE18D00056673 /* Frameworks */,
 				3BF5313127ACE18D00056673 /* Resources */,
-				3B68BE1427BF5B12007AAAC6 /* Upload dSYM to Crashlytics */,
 				3B68BE5A27C349BA007AAAC6 /* Embed App Extensions */,
+				3B68BE1427BF5B12007AAAC6 /* Upload dSYM to Crashlytics */,
+				3B9332D427CE021E00BACE93 /* Upload dSYM to Bugfender */,
 			);
 			buildRules = (
 			);
@@ -630,12 +674,15 @@
 			name = "Headache Tracker";
 			packageProductDependencies = (
 				3BF5316C27ACEAC600056673 /* DataController */,
-				3BF5317127ACEC7900056673 /* Logger */,
 				3B09191E27BD84FE00844F6C /* Shapes */,
 				3B68BE0027BEF949007AAAC6 /* Surge */,
 				3B68BE1227BF599F007AAAC6 /* FirebaseCrashlytics */,
 				3B68BE7227C36928007AAAC6 /* ApplicationKey */,
 				3B9332BB27CDC1B300BACE93 /* FirebaseAnalyticsSwift-Beta */,
+				3B9332C827CDFFAD00BACE93 /* BugfenderLibrary */,
+				3B9332D827CE03E700BACE93 /* CocoaLumberjack */,
+				3B9332DA27CE03E700BACE93 /* CocoaLumberjackSwift */,
+				3B9332DC27CE048000BACE93 /* CocoaLumberjackSwiftLogBackend */,
 			);
 			productName = "Headache Tracker";
 			productReference = 3BF5313327ACE18D00056673 /* Headache Tracker.app */;
@@ -714,11 +761,12 @@
 			mainGroup = 3BF5312A27ACE18D00056673;
 			packageReferences = (
 				3BF5316B27ACEAC600056673 /* XCRemoteSwiftPackageReference "DataController" */,
-				3BF5317027ACEC7900056673 /* XCRemoteSwiftPackageReference "Logger" */,
 				3B09191D27BD84FD00844F6C /* XCRemoteSwiftPackageReference "swiftui-shapes" */,
 				3B68BDFF27BEF949007AAAC6 /* XCRemoteSwiftPackageReference "Surge" */,
 				3B68BE0F27BF599F007AAAC6 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				3B68BE7127C36928007AAAC6 /* XCRemoteSwiftPackageReference "ApplicationKey" */,
+				3B9332C727CDFFAD00BACE93 /* XCRemoteSwiftPackageReference "BugfenderSDK-iOS" */,
+				3B9332D727CE03E700BACE93 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */,
 			);
 			productRefGroup = 3BF5313427ACE18D00056673 /* Products */;
 			projectDirPath = "";
@@ -790,6 +838,24 @@
 			shellPath = /bin/sh;
 			shellScript = "\"${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run\"\n";
 		};
+		3B9332D427CE021E00BACE93 /* Upload dSYM to Bugfender */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Upload dSYM to Bugfender";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\nBUGFENDER_SYMBOLICATION_URL=https://dashboard.bugfender.com/ ${BUILD_DIR%Build/*}SourcePackages/checkouts/BugfenderSDK-iOS/xcode-upload-symbols/upload-symbols.sh reYtR71jc7-937cf6dd4b844ef48f200d8d2cabfcb7\n";
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -826,8 +892,10 @@
 				3BAAA69127CC7F5500C0DDC4 /* UIColor+Extensions.swift in Sources */,
 				3B09192327BD91F400844F6C /* SectionTitleView.swift in Sources */,
 				3B051A9127B0FACA0017131D /* HeadacheView.swift in Sources */,
+				3B9332DF27CE052500BACE93 /* DDBugfenderLogger.swift in Sources */,
 				3B13154C27C940E800F6B50D /* Weather.swift in Sources */,
 				3B39DADD27ACFD5A00D39BB5 /* HKCategoryValueSeverity+Extensions.swift in Sources */,
+				3B9332E427CE0C8700BACE93 /* String+Extensions.swift in Sources */,
 				3B4BA6F527B6313B00F38851 /* HealthKitData.swift in Sources */,
 				3B051AA027B3577B0017131D /* DestructiveConfirmationDialog.swift in Sources */,
 				3B051A9C27B351C70017131D /* Formatters.swift in Sources */,
@@ -843,6 +911,7 @@
 				3B68BE6A27C35778007AAAC6 /* OutlookView.swift in Sources */,
 				3BAAA68127CC247900C0DDC4 /* ControlledUserInput.swift in Sources */,
 				3B39DAD727ACF67600D39BB5 /* Previewing.swift in Sources */,
+				3B9332E127CE09ED00BACE93 /* Logger.swift in Sources */,
 				3B4BA70427B7640F00F38851 /* UncontrolledUserInput.swift in Sources */,
 				3B68BDF727BDF459007AAAC6 /* Color+Extensions.swift in Sources */,
 				3BAAA68F27CC7E3F00C0DDC4 /* View+Extensions.swift in Sources */,
@@ -1499,20 +1568,28 @@
 				minimumVersion = 0.1.1;
 			};
 		};
+		3B9332C727CDFFAD00BACE93 /* XCRemoteSwiftPackageReference "BugfenderSDK-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/bugfender/BugfenderSDK-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.10.5;
+			};
+		};
+		3B9332D727CE03E700BACE93 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "git@github.com:CocoaLumberjack/CocoaLumberjack.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.7.4;
+			};
+		};
 		3BF5316B27ACEAC600056673 /* XCRemoteSwiftPackageReference "DataController" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "git@github.com:colinc86/DataController.git";
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 0.2.5;
-			};
-		};
-		3BF5317027ACEC7900056673 /* XCRemoteSwiftPackageReference "Logger" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "git@github.com:colinc86/Logger.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.1.5;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
@@ -1543,15 +1620,30 @@
 			package = 3B68BE0F27BF599F007AAAC6 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = "FirebaseAnalyticsSwift-Beta";
 		};
+		3B9332C827CDFFAD00BACE93 /* BugfenderLibrary */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3B9332C727CDFFAD00BACE93 /* XCRemoteSwiftPackageReference "BugfenderSDK-iOS" */;
+			productName = BugfenderLibrary;
+		};
+		3B9332D827CE03E700BACE93 /* CocoaLumberjack */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3B9332D727CE03E700BACE93 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */;
+			productName = CocoaLumberjack;
+		};
+		3B9332DA27CE03E700BACE93 /* CocoaLumberjackSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3B9332D727CE03E700BACE93 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */;
+			productName = CocoaLumberjackSwift;
+		};
+		3B9332DC27CE048000BACE93 /* CocoaLumberjackSwiftLogBackend */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3B9332D727CE03E700BACE93 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */;
+			productName = CocoaLumberjackSwiftLogBackend;
+		};
 		3BF5316C27ACEAC600056673 /* DataController */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 3BF5316B27ACEAC600056673 /* XCRemoteSwiftPackageReference "DataController" */;
 			productName = DataController;
-		};
-		3BF5317127ACEC7900056673 /* Logger */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 3BF5317027ACEC7900056673 /* XCRemoteSwiftPackageReference "Logger" */;
-			productName = Logger;
 		};
 /* End XCSwiftPackageProductDependency section */
 

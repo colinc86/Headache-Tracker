@@ -5,8 +5,8 @@
 //  Created by Colin Campbell on 2/4/22.
 //
 
+import FirebaseCrashlytics
 import SwiftUI
-import Logger
 
 /// Displays the application's settings.
 struct SettingsView: View {
@@ -27,6 +27,9 @@ struct SettingsView: View {
   
   /// The app's alert manager.
   @EnvironmentObject private var alertManager: AlertManager
+  
+  /// Whether or not to enable crash reporting.
+  @AppStorage(AppSettings.enableCrashReporting) var enableCrashReporting = true
   
   /// The health integration setting.
   @AppStorage(AppSettings.healthIntegration) private var healthIntegration = false
@@ -131,6 +134,10 @@ struct SettingsView: View {
         
         // Information
         Section {
+          Toggle(isOn: $enableCrashReporting) {
+            Text("Submit Crash Data")
+          }
+          .onChange(of: enableCrashReporting, perform: enableCrashReportingValueChanged)
           SubtitleCell(title: "Version", subtitle: Bundle.main.humanReadableVersionString)
         }
         
@@ -161,6 +168,11 @@ extension SettingsView {
     else {
       headacheManager.cancelOutlookRefreshTask()
     }
+  }
+  
+  /// Turns crash reporting on or off.
+  private func enableCrashReportingValueChanged(_ newValue: Bool) {
+    Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(newValue)
   }
   
 }

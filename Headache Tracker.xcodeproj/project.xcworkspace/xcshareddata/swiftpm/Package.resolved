@@ -29,6 +29,24 @@
         }
       },
       {
+        "package": "BugfenderPackage",
+        "repositoryURL": "https://github.com/bugfender/BugfenderSDK-iOS",
+        "state": {
+          "branch": null,
+          "revision": "5f9fb3b5e9cf9a7149aaecd7c570ca8eee174379",
+          "version": "1.10.5"
+        }
+      },
+      {
+        "package": "CocoaLumberjack",
+        "repositoryURL": "git@github.com:CocoaLumberjack/CocoaLumberjack.git",
+        "state": {
+          "branch": null,
+          "revision": "80ada1f753b0d53d9b57c465936a7c4169375002",
+          "version": "3.7.4"
+        }
+      },
+      {
         "package": "DataController",
         "repositoryURL": "git@github.com:colinc86/DataController.git",
         "state": {
@@ -98,15 +116,6 @@
           "branch": null,
           "revision": "0706abcc6b0bd9cedfbb015ba840e4a780b5159b",
           "version": "1.22.2"
-        }
-      },
-      {
-        "package": "Logger",
-        "repositoryURL": "git@github.com:colinc86/Logger.git",
-        "state": {
-          "branch": null,
-          "revision": "dc44f70e8aa1c9cabe189e0775bfb12b03546376",
-          "version": "0.1.5"
         }
       },
       {

@@ -8,7 +8,6 @@
 import ApplicationKey
 import Foundation
 import HealthKit
-import Logger
 import SwiftUI
 
 class HealthKitManager: ObservableObject {

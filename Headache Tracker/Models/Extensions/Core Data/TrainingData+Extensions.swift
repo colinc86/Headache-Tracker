@@ -8,7 +8,6 @@
 import CoreData
 import CoreML
 import Foundation
-import Logger
 
 #if NON_PREVIEW
 import CreateML

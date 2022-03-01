@@ -9,7 +9,6 @@ import SwiftUI
 import CoreData
 import DataController
 import HealthKit
-import Logger
 
 /// The main content view that contains the tab view.
 struct ContentView: View {

@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Logger
 import CoreLocation
 
 class WeatherManager {

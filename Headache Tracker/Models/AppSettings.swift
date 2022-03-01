@@ -9,6 +9,8 @@ import Foundation
 import ApplicationKey
 
 class AppSettings {
+  static let enableCrashReporting = ApplicationKey(from: "enableCrashReporting")
+  
   static let healthIntegration = ApplicationKey(from: "healthIntegration")
   static let checkInAlerts = ApplicationKey(from: "checkInAlerts")
   static let checkInInterval = ApplicationKey(from: "checkInInterval")

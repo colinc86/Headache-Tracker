@@ -7,7 +7,6 @@
 
 import SwiftUI
 import HealthKit
-import Logger
 
 /// Draws a vertical severity level indicator.
 struct VerticalSeverityLevel: View {

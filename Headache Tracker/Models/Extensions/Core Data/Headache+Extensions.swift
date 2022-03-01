@@ -8,7 +8,6 @@
 import Foundation
 import HealthKit
 import CoreData
-import Logger
 import SwiftUI
 
 extension Headache {

@@ -5,7 +5,6 @@
 //  Created by Colin Campbell on 2/28/22.
 //
 
-import Logger
 import SwiftUI
 import HealthKit
 

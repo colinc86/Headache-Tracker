@@ -9,7 +9,6 @@ import SwiftUI
 import CoreData
 import DataController
 import HealthKit
-import Logger
 
 /// Shows and manages the current headache's UI.
 struct CurrentHeadacheView: View {

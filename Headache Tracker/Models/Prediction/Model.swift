@@ -6,6 +6,8 @@
 //
 
 import CoreML
+
+#if NON_PREVIEW
 import CreateML
 
 /// An object that can be initialized with a feature provider.
@@ -18,6 +20,7 @@ protocol CoreMLModel {
 }
 extension MLBoostedTreeClassifier: CoreMLModel {}
 extension MLBoostedTreeRegressor: CoreMLModel {}
+#endif
 
 /// Class for model loading and prediction
 class Model<Input: MLFeatureProvider, Output: MLFeatureInitializable> {

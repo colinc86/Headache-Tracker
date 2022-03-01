@@ -8,7 +8,6 @@
 import ApplicationKey
 import CoreML
 import Foundation
-import Logger
 import HealthKit
 
 #if NON_PREVIEW

@@ -12,7 +12,6 @@ import DataController
 import Foundation
 import HealthKit
 import SwiftUI
-import Logger
 
 class HeadacheManager: ObservableObject {
   

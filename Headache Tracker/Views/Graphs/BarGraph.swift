@@ -8,7 +8,6 @@
 import Surge
 import SwiftUI
 import HealthKit
-import Logger
 
 struct BarGraph: View {
   

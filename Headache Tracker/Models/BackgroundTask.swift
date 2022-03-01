@@ -8,7 +8,6 @@
 import ApplicationKey
 import Foundation
 import UIKit
-import Logger
 
 class BackgroundTask {
   

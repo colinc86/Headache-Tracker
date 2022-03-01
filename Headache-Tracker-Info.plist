@@ -18,5 +18,7 @@
 	</array>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Your location is used to get weather information to help predict headaches.</string>
+	<key>FirebaseCrashlyticsCollectionEnabled</key>
+	<string>false</string>
 </dict>
 </plist>

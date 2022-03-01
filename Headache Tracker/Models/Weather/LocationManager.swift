@@ -7,7 +7,6 @@
 
 import CoreLocation
 import Foundation
-import Logger
 import UIKit
 import SwiftUI
 

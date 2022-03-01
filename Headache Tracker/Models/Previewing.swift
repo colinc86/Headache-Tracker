@@ -9,7 +9,6 @@ import DataController
 import Foundation
 import SwiftUI
 import HealthKit
-import Logger
 
 struct Previewing {
   

@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import Logger
 
 struct GraphList: View {
   

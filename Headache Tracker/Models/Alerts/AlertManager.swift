@@ -7,7 +7,6 @@
 
 import Foundation
 import UserNotifications
-import Logger
 import SwiftUI
 import UIKit
 

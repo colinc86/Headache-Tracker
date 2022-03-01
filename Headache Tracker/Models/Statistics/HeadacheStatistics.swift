@@ -9,7 +9,6 @@ import Foundation
 import HealthKit
 import Surge
 import SwiftUI
-import Logger
 
 struct HeadacheStatistics {
   
