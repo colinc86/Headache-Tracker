@@ -8,7 +8,7 @@
 import WidgetKit
 import SwiftUI
 
-let snapshotEntry = WidgetContent(outlook: .noHeadache, onset: nil, duration: nil)
+let snapshotEntry = WidgetContent(outlook: nil, onset: nil, duration: nil, severity: nil)
 
 struct Provider: TimelineProvider {
   func placeholder(in context: Context) -> WidgetContent {
@@ -26,7 +26,8 @@ struct Provider: TimelineProvider {
         date: Date().addingTimeInterval(60.0),
         outlook: SharedUserDefaults.standard.outlook,
         onset: SharedUserDefaults.standard.onset,
-        duration: SharedUserDefaults.standard.duration
+        duration: SharedUserDefaults.standard.duration,
+        severity: SharedUserDefaults.standard.severity
       )
     ], policy: .atEnd)
     completion(timeline)
@@ -47,16 +48,18 @@ struct OutlookEntryView: View {
       .foregroundColor(.mint)
       .padding(.bottom, 8)
       
-      Text(entry.outlook.rawValue)
+      Text(entry.holisticOutlook.title)
         .font(.title)
       
-      if entry.outlook == .possibleHeadache, let onset = entry.onset, onset.timeIntervalSince(Date()) > 0.0 {
+      switch entry.holisticOutlook {
+      case .noHeadache:
+        EmptyView()
+      case .possibleHeadache(let onset):
         Text("at " + onset.formatted(date: .omitted, time: .shortened))
           .font(.subheadline)
           .foregroundColor(.secondary)
-      }
-      else if entry.outlook == .headache, let duration = entry.duration {
-        Text("until " + Date(timeIntervalSinceNow: duration).formatted(date: .omitted, time: .shortened))
+      case .headache(_, let end):
+        Text("until " + end.formatted(date: .omitted, time: .shortened))
           .font(.subheadline)
           .foregroundColor(.secondary)
       }

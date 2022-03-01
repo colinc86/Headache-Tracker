@@ -536,8 +536,11 @@ extension HeadacheManager {
     let context = DataController.shared.newNestedBackgroundContext()
     context.perform { [unowned context] in
       let request = TrainingData.fetchRequest()
+      request.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: true)]
+      
       let trainingData = (try? context.fetch(request)) ?? []
       let notPresentTrainigData = trainingData.filter({ $0.severity == nil })
+      logDebug("Not present training data count: \(notPresentTrainigData.count)")
       
       var nextDateAllowed = false
       if let lastNotPresentDate = notPresentTrainigData.last?.timestamp {
@@ -558,8 +561,8 @@ extension HeadacheManager {
     context.perform { [unowned context] in
       let request = TrainingData.fetchRequest()
       request.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: true)]
-      let trainingData = (try? context.fetch(request)) ?? []
       
+      let trainingData = (try? context.fetch(request)) ?? []
       if let date = trainingData.last?.timestamp, let lastTrainingDate = self.predictor?.modelUpdatedAt {
         needs = date.timeIntervalSince(lastTrainingDate) > 0.0
       }
@@ -645,44 +648,47 @@ extension HeadacheManager {
       
       if let error = error {
         logError("Error getting weather: \(error)")
+        self.createTrainingDataBackgroundTask.end()
+        completion?(nil, error)
       }
       else if let input = input {
         logDebug("Got weather: \(input)")
-      }
-      
-      logDebug("Creating training data...")
-      self.trainingQueue.async {
-        let context = DataController.shared.newNestedBackgroundContext()
-        
-        // Create the training data
-        let trainingData = TrainingData(context: context, input: input)
-        
-        logDebug("Created training data.")
-        
-        if let newSeverityIdentifier = newSeverityIdentifier {
-          logDebug("Setting training data on severity \(newSeverityIdentifier)")
-          let request = Severity.fetchRequest(withIdentifier: newSeverityIdentifier)
-          if let severity = ((try? context.fetch(request)) ?? []).first {
-            severity.addToTrainingData(trainingData)
-          }
-          else {
-            logWarning("Unable to add training data to severity with identifier: \(newSeverityIdentifier.uuidString)")
-          }
-        }
-        
-        logDebug("Saving context.")
-        DataController.shared.saveBackgroundAndViewContexts(context) { error in
-          if let error = error {
-            logError("Error saving training data: \(error)")
-          }
-          else {
-            logDebug("Finished saving training data.")
+
+        self.trainingQueue.async {
+          let context = DataController.shared.newNestedBackgroundContext()
+          
+          // Create the training data
+          let trainingData = TrainingData(context: context, input: input)
+          
+          logDebug("Created training data.")
+          
+          if let newSeverityIdentifier = newSeverityIdentifier {
+            logDebug("Setting training data on severity \(newSeverityIdentifier)")
+            let request = Severity.fetchRequest(withIdentifier: newSeverityIdentifier)
+            if let severity = ((try? context.fetch(request)) ?? []).first {
+              severity.addToTrainingData(trainingData)
+            }
+            else {
+              logWarning("Unable to add training data to severity with identifier: \(newSeverityIdentifier.uuidString)")
+            }
           }
           
-          completion?(input, error)
-          self.createTrainingDataBackgroundTask.end()
+          logDebug("Saving context.")
+          DataController.shared.saveBackgroundAndViewContexts(context) { error in
+            if let error = error {
+              logError("Error saving training data: \(error)")
+            }
+            else {
+              logDebug("Finished saving training data.")
+            }
+            
+            completion?(input, error)
+            self.createTrainingDataBackgroundTask.end()
+          }
         }
       }
+      
+      
     }
   }
   
@@ -719,23 +725,10 @@ extension HeadacheManager {
       let allTrainingData = (try? context.fetch(request)) ?? []
       
       logDebug("Cleaning training data...")
-      var currentDate: Date?
-      
       for data in allTrainingData {
-        guard data.severity?.headache == nil, let timestamp = data.timestamp else {
-          continue
-        }
-        
-        if let date = currentDate {
-          if timestamp.timeIntervalSince(date) > 120.0 {
-            currentDate = timestamp
-          }
-          else {
-            context.delete(data)
-          }
-        }
-        else {
-          currentDate = timestamp
+        if data.timestamp == nil {
+          data.severity?.removeFromTrainingData(data)
+          context.delete(data)
         }
       }
       
@@ -761,11 +754,20 @@ extension HeadacheManager {
     predictionRefreshTask.cancel()
   }
   
-  /// Schedules the refresh task.
+  /// Schedules the refresh task for the next hour.
   func schedulePredictionRefreshTask() {
-    logDebug("Scheduling prediction refresh task with interval \(Constants.backgroundPredictionInterval).")
+    // Get the current seconds past midnight.
+    let secondsPastMidnight = Calendar.current.timeIntervalSinceMidnight(Date())
     
-    predictionRefreshTask.schedule(interval: Constants.backgroundPredictionInterval) { error in
+    // Get the number of seconds past the hour
+    let secondsPastHour = secondsPastMidnight - TimeInterval(3600 * Int(floor(secondsPastMidnight / 3600.0)))
+    
+    // Get the number of seconds until the next hour
+    let secondsUntilNextHour = 3600.0 - secondsPastHour
+    
+    // Schedule the next task
+    logDebug("Scheduling prediction refresh task with date \(Date(timeIntervalSinceNow: secondsUntilNextHour))")
+    predictionRefreshTask.schedule(interval: secondsUntilNextHour) { error in
       if let error = error {
         logError("Unable to schedule prediction task: \(error)")
       }
@@ -811,11 +813,6 @@ extension HeadacheManager {
           // We got the input, so present the prediction
           do {
             let prediction = try self.predictor?.predict(input)
-            
-            SharedUserDefaults.standard.outlook = prediction?.outlookClassifierOutput.prediction ?? .noHeadache
-            SharedUserDefaults.standard.onset = prediction?.onsetRegressorOutput.prediction
-            SharedUserDefaults.standard.duration = prediction?.durationRegressorOutput.prediction
-            
             self.presentPredictionAlert(with: prediction, completion: { error in
               if let error = error {
                 logError("Error presenting alert: \(error)")
@@ -859,14 +856,29 @@ extension HeadacheManager {
     outlookRefreshTask.cancel()
   }
   
-  /// Schedules the refresh task.
+  /// Schedules the outlook task for the daily outlook time.
   func scheduleOutlookRefreshTask() {
-    logDebug("Scheduling outlook refresh task with interval \(Constants.backgroundPredictionInterval).")
-    
+    // Get the number of seconds past midnight.
     let now = Date()
-    let futureOutlookDate = Calendar.current.midnightAfter(now).addingTimeInterval(dailyOutlookTime)
-    let interval = futureOutlookDate.timeIntervalSince(now)
-    outlookRefreshTask.schedule(interval: interval) { error in
+    let secondsPastMidnight = Calendar.current.timeIntervalSinceMidnight(now)
+    
+    // Get the number of seconds until the next outlook time
+    var secondsUntilOutlook: TimeInterval = 0.0
+    
+    // Are we past the daily outlook time?
+    if secondsPastMidnight < dailyOutlookTime {
+      // We haven't passed the outlook time yet.
+      secondsUntilOutlook = dailyOutlookTime - secondsPastMidnight
+    }
+    else {
+      // We've already passed the outlook time.
+      let futureOutlookDate = Calendar.current.midnightAfter(now).addingTimeInterval(dailyOutlookTime)
+      secondsUntilOutlook = futureOutlookDate.timeIntervalSince(now)
+    }
+    
+    // Schedule the outlook task
+    logDebug("Scheduling outlook refresh task with date \(Date(timeIntervalSinceNow: secondsUntilOutlook)).")
+    outlookRefreshTask.schedule(interval: secondsUntilOutlook) { error in
       if let error = error {
         logError("Unable to schedule outlook task: \(error)")
       }
@@ -941,11 +953,27 @@ extension HeadacheManager {
   
   /// Schedulees the processing task.
   func scheduleTrainingRefreshTask() {
+    // Get the number of seconds past midnight.
     let now = Date()
-    let futureDate = Calendar.current.midnightAfter(now)
+    let secondsPastMidnight = Calendar.current.timeIntervalSinceMidnight(now)
+    let dailyTrainingTime: TimeInterval = 60.0 * 60.0 * 5.0
     
-    logDebug("Scheduling training processing task for date \(futureDate.description)")
-    trainingProcessingTask.schedule(date: futureDate) { error in
+    // Get the number of seconds until the next outlook time
+    var secondsUntilTraining: TimeInterval = 0.0
+    
+    // Are we past the daily training time? (5AM)
+    if secondsPastMidnight < dailyTrainingTime {
+      // We haven't passed the outlook time yet.
+      secondsUntilTraining = dailyTrainingTime - secondsPastMidnight
+    }
+    else {
+      // We've already passed the outlook time.
+      let futureOutlookDate = Calendar.current.midnightAfter(now).addingTimeInterval(dailyTrainingTime)
+      secondsUntilTraining = futureOutlookDate.timeIntervalSince(now)
+    }
+    
+    logDebug("Scheduling training processing task with date \(Date(timeIntervalSinceNow: secondsUntilTraining))")
+    trainingProcessingTask.schedule(interval: secondsUntilTraining) { error in
       if let error = error {
         logError("Error scheduling training processing task: \(error)")
       }

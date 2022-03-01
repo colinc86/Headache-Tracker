@@ -46,11 +46,6 @@ struct SettingsView: View {
   /// The daily outlook alert time.
   @AppStorage(AppSettings.dailyOutlookTime) private var dailyOutlookTime = TimeInterval(28800.0)
   
-  // MARK: Debug settings
-  
-  /// A debug setting to show all views in the prediction section.
-  @AppStorage(AppSettings.debugShowAllViews) private var debugShowAllViews = false
-  
   // MARK: Computed properties
     
   /// The health app integration binding.
@@ -140,36 +135,12 @@ struct SettingsView: View {
         }
         
         // Debug
-        Section {
-          Toggle("Show All Views", isOn: $debugShowAllViews)
-          
-          NavigationLink {
-            TrainingDataListView()
-              .environment(\.managedObjectContext, viewContext)
-          } label: {
-            Text("Training Data")
-          }
-
-          Button("Train Models") {
-            headacheManager.trainClassifiers { error in
-              if let error = error {
-                logError("Error training classifiers: \(error)")
-              }
-            }
-          }
-          
-          Button("Clean Data") {
-            headacheManager.cleanTrainingData { error in
-              if let error = error {
-                logError("Error cleaning data: \(error)")
-              }
-            }
-          }
-        } header: {
-          Text("Debug")
-        } footer: {
-          Text("Models last updated at \(predictor.modelUpdatedAt?.formatted() ?? "N/A")")
-        }
+        #if DEBUG
+        DebugSettingsView()
+          .environment(\.managedObjectContext, viewContext)
+          .environmentObject(headacheManager)
+          .environmentObject(predictor)
+        #endif
       }
       .navigationTitle("Settings")
     }
@@ -197,6 +168,7 @@ extension SettingsView {
 struct SettingsView_Previews: PreviewProvider {
   static var previews: some View {
     SettingsView()
+      .environment(\.managedObjectContext, Previewing.CoreData.controller.container.viewContext)
       .environmentObject(Previewing.headacheManager)
       .environmentObject(Previewing.predictor)
       .environmentObject(Previewing.healthKitManager)

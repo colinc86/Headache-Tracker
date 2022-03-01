@@ -29,9 +29,23 @@ struct GraphList: View {
     List {
       if let statistics = statistics {
         Section {
-          SubtitleCell(title: "Per Year", subtitle: String(format: "%0.1f", statistics.headachesPerYear))
-          SubtitleCell(title: "Per Month", subtitle: String(format: "%0.1f", statistics.headachesPerMonth))
-          SubtitleCell(title: "Per Week", subtitle: String(format: "%0.1f", statistics.headachesPerWeek))
+          SubtitleCell(
+            title: "Per Year",
+            subtitle: String(format: "%0.1f", statistics.headachesPerYear),
+            systemImage: statistics.headachesPerYearTrend.systemImage,
+            imageForegroundColor: statistics.headachesPerYearTrend.foregroundColor)
+          
+          SubtitleCell(
+            title: "Per Month",
+            subtitle: String(format: "%0.1f", statistics.headachesPerMonth),
+            systemImage: statistics.headachesPerMonthTrend.systemImage,
+            imageForegroundColor: statistics.headachesPerMonthTrend.foregroundColor)
+          
+          SubtitleCell(
+            title: "Per Week",
+            subtitle: String(format: "%0.1f", statistics.headachesPerWeek),
+            systemImage: statistics.headachesPerWeekTrend.systemImage,
+            imageForegroundColor: statistics.headachesPerWeekTrend.foregroundColor)
         } header: {
           SectionTitleView(title: "Headaches")
         }

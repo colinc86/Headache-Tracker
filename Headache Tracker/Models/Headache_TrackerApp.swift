@@ -43,6 +43,9 @@ extension Headache_TrackerApp {
   /// Called when the application becomes active.
   private func didBecomeActive(_ output: NotificationCenter.Publisher.Output) {
     logDebug("Application did become active.")
+    appDelegate.headacheManager.cancelTrainingProcessingTask()
+    appDelegate.headacheManager.cancelPredictionRefreshTask()
+    appDelegate.headacheManager.cancelOutlookRefreshTask()
   }
   
   /// Called when the application resigns active.

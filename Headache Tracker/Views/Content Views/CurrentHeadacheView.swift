@@ -57,9 +57,6 @@ struct CurrentHeadacheView: View {
   /// True iff the current headache is being updated.
   @State private var updatingHeadache = false
   
-  /// The classifier's current prediction.
-  @State private var prediction: Predictor.Prediction?
-  
   /// The last error produced by prediction.
   @State private var predictionError: Error? = nil
   
@@ -71,9 +68,6 @@ struct CurrentHeadacheView: View {
   
   /// The application's first appearance.
   @State private var firstAppearance: Bool = true
-  
-  /// The date of the last prediction.
-  @State private var lastPredictionDate: Date? = nil
   
   /// The current (unresolved) headache.
   private var currentHeadache: Headache? {
@@ -147,8 +141,8 @@ struct CurrentHeadacheView: View {
         }
         
         // Predictions
-        if let prediction = prediction {
-          let dailyOutlook = OutlookView(outlook: prediction.outlookClassifierOutput.prediction, onset: prediction.onsetRegressorOutput.prediction, duration: prediction.durationRegressorOutput.prediction)
+        if let prediction = predictor.prediction {
+          let dailyOutlook = OutlookView(outlook: prediction.holisticOutlook)
             .cell(
               title: prediction.outlookClassifierOutput.probability == nil ? "Outlook" : "Outlook (\(String(format: "%0.f%%", prediction.outlookClassifierOutput.probability! * 100.0)))",
               systemImage: "sun.and.horizon", foregroundColor: .mint)
@@ -158,10 +152,7 @@ struct CurrentHeadacheView: View {
               title: prediction.severityClassifierOutput.probability == nil ? "Current Severity" : "Current Severity (\(String(format: "%0.f%%", prediction.severityClassifierOutput.probability! * 100.0)))",
               systemImage: "dial.max.fill", foregroundColor: .cyan)
           
-          let durationPrediction = DurationPredictionView(duration: prediction.durationRegressorOutput.prediction)
-            .cell(title: "Estimated Time Remaining", systemImage: "timer", foregroundColor: .green)
-          
-          if debugShowAllViews {
+          if currentHeadache == nil {
             Section {
               dailyOutlook
             } header: {
@@ -170,45 +161,17 @@ struct CurrentHeadacheView: View {
             
             Section {
               severityPrediction
-            }
-            
-            Section {
-              durationPrediction
             } footer: {
               if let lastPredictionDate = lastPredictionDate {
                 Text("Updated at \(lastPredictionDate.formatted()).")
               }
             }
           }
-          else if currentHeadache == nil {
-            // Daily outlook
-            Section {
-              dailyOutlook
-            } header: {
-              SectionTitleView(title: "Predictions")
-            }
-            
-            if prediction.outlookClassifierOutput.prediction == .headache {
-              Section {
-                severityPrediction
-              } footer: {
-                if let lastPredictionDate = lastPredictionDate {
-                  Text("Updated at \(lastPredictionDate.formatted()).")
-                }
-              }
-            }
-          }
           else {
-            // Severity Prediction
             Section {
               severityPrediction
             } header: {
               SectionTitleView(title: "Predictions")
-            }
-            
-            // Duration Prediction
-            Section {
-              durationPrediction
             } footer: {
               if let lastPredictionDate = lastPredictionDate {
                 Text("Updated at \(lastPredictionDate.formatted()).")
@@ -259,47 +222,39 @@ extension CurrentHeadacheView {
   private func predict(forced: Bool = false) {
     // Check if we should show the not-present training data cell
     headacheManager.needsNotPresentTrainingData { needsTrainingData in
+      logDebug("Needs training data: \(needsTrainingData)")
       DispatchQueue.main.async {
         withAnimation {
           self.needsInput = needsTrainingData
         }
-      }
-    }
-    
-    // Check if we should run a prediction
-    let now = Date()
-    if let lastPredictionDate = lastPredictionDate {
-      let timeSinceLastPrediction = now.timeIntervalSince(lastPredictionDate)
-      guard forced || timeSinceLastPrediction > Constants.predictionRefreshInterval else {
-        logDebug("Not updating prediction. Minimum interval, \(Constants.predictionRefreshInterval), not met with interval \(now.timeIntervalSince(lastPredictionDate)).")
-        return
-      }
-    }
-    lastPredictionDate = now
-    
-    logDebug("Predict.")
-    
-    // Run a prediction
-    headacheManager.getCurrentClassifierInput { input, error in
-      DispatchQueue.main.async {
-        if let error = error {
-          logError("Error getting classifier input: \(error)")
-        }
-        else if let input = input {
-          do {
-            try withAnimation {
-              prediction = try predictor.predict(input)
-              
-              /// Save this prediction for the widget
-              SharedUserDefaults.standard.outlook = prediction?.outlookClassifierOutput.prediction ?? .noHeadache
-              SharedUserDefaults.standard.onset = prediction?.onsetRegressorOutput.prediction
-              SharedUserDefaults.standard.duration = prediction?.durationRegressorOutput.prediction
-            }
+        
+        // Check if we should run a prediction
+        let now = Date()
+        if let lastPredictionDate = predictor.prediction?.date {
+          let timeSinceLastPrediction = now.timeIntervalSince(lastPredictionDate)
+          guard forced || timeSinceLastPrediction > Constants.predictionRefreshInterval else {
+            logDebug("Not updating prediction. Minimum interval, \(Constants.predictionRefreshInterval), not met with interval \(now.timeIntervalSince(lastPredictionDate)).")
+            return
           }
-          catch {
-            logError("Error getting prediction: \(error)")
-            withAnimation {
-              prediction = nil
+        }
+        
+        logDebug("Predict.")
+        
+        // Run a prediction
+        headacheManager.getCurrentClassifierInput { input, error in
+          DispatchQueue.main.async {
+            if let error = error {
+              logError("Error getting classifier input: \(error)")
+            }
+            else if let input = input {
+              do {
+                withAnimation {
+                  try predictor.predict(input)
+                }
+              }
+              catch {
+                logError("Error getting prediction: \(error)")
+              }
             }
           }
         }

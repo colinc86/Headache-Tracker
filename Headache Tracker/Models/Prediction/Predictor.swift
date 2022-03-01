@@ -100,6 +100,18 @@ class Predictor: ObservableObject {
     /// The duration regressor's output.
     let durationRegressorOutput: PredictionStatistic<TimeInterval>
     
+    /// The date of this prediction.
+    let date = Date()
+    
+    /// The prediction's holistic outlook.
+    var holisticOutlook: HolisticOutlook {
+      return HolisticOutlook(
+        outlook: outlookClassifierOutput.prediction,
+        onset: onsetRegressorOutput.prediction,
+        duration: durationRegressorOutput.prediction,
+        severity: severityClassifierOutput.prediction)
+    }
+    
   }
   
   // MARK: Static properties
@@ -123,6 +135,9 @@ class Predictor: ObservableObject {
   
   /// Whether or not the predictor is ready to predict.
   @Published var ready: Bool = false
+  
+  /// The predictor's latest prediction.
+  @Published var prediction: Prediction?
   
   /// The model's last updated at date.
   @Published var modelUpdatedAt: Date?
@@ -367,7 +382,7 @@ extension Predictor {
     let onsetPrediction = try onsetRegressor.prediction(input: fullInput)
     let durationPrediction = try durationRegressor.prediction(input: fullInput)
         
-    return Prediction(
+    let prediction = Prediction(
       outlookClassifierOutput: Prediction.PredictionStatistic(
         prediction: Outlook(rawValue: outlookPrediction.Outlook) ?? .noHeadache,
         probability: outlookPrediction.OutlookProbability[outlookPrediction.Outlook]),
@@ -384,6 +399,19 @@ extension Predictor {
         prediction: durationPrediction.Duration,
         probability: nil)
     )
+    
+    /// Save this prediction for the widget
+    SharedUserDefaults.standard.outlook = prediction.outlookClassifierOutput.prediction
+    SharedUserDefaults.standard.severity = prediction.severityClassifierOutput.prediction
+    SharedUserDefaults.standard.onset = prediction.onsetRegressorOutput.prediction
+    SharedUserDefaults.standard.duration = prediction.durationRegressorOutput.prediction
+    
+    // Update the prediction value
+    DispatchQueue.main.async { [weak self] in
+      self?.prediction = prediction
+    }
+    
+    return prediction
   }
   
 }
