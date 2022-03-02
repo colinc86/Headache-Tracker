@@ -102,6 +102,8 @@
 		3B9332FC27CF401F00BACE93 /* SeverityWidgetContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9332FB27CF401F00BACE93 /* SeverityWidgetContent.swift */; };
 		3B9332FE27CF40A300BACE93 /* SeverityWidgetProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9332FD27CF40A300BACE93 /* SeverityWidgetProvider.swift */; };
 		3B93330027CF419C00BACE93 /* SeverityWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9332FF27CF419C00BACE93 /* SeverityWidgetView.swift */; };
+		3B93330227CF51C600BACE93 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B93330127CF51C600BACE93 /* AppDelegate.swift */; };
+		3B93330427CF51D500BACE93 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B93330327CF51D500BACE93 /* SceneDelegate.swift */; };
 		3BAAA67F27CC245200C0DDC4 /* EnvironmentalInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BAAA67E27CC245200C0DDC4 /* EnvironmentalInput.swift */; };
 		3BAAA68127CC247900C0DDC4 /* ControlledUserInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BAAA68027CC247900C0DDC4 /* ControlledUserInput.swift */; };
 		3BAAA68427CC24CA00C0DDC4 /* InputUnion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BAAA68327CC24CA00C0DDC4 /* InputUnion.swift */; };
@@ -261,6 +263,8 @@
 		3B9332FB27CF401F00BACE93 /* SeverityWidgetContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeverityWidgetContent.swift; sourceTree = "<group>"; };
 		3B9332FD27CF40A300BACE93 /* SeverityWidgetProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeverityWidgetProvider.swift; sourceTree = "<group>"; };
 		3B9332FF27CF419C00BACE93 /* SeverityWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeverityWidgetView.swift; sourceTree = "<group>"; };
+		3B93330127CF51C600BACE93 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		3B93330327CF51D500BACE93 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		3BAAA67D27C94B9B00C0DDC4 /* Headache_Tracker 1.5.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Headache_Tracker 1.5.xcdatamodel"; sourceTree = "<group>"; };
 		3BAAA67E27CC245200C0DDC4 /* EnvironmentalInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnvironmentalInput.swift; sourceTree = "<group>"; };
 		3BAAA68027CC247900C0DDC4 /* ControlledUserInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlledUserInput.swift; sourceTree = "<group>"; };
@@ -406,6 +410,7 @@
 		3B39DADE27AD009F00D39BB5 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				3B93330527CF51FD00BACE93 /* App */,
 				3B4BA70027B762B800F38851 /* Alerts */,
 				3BAAA68527CC281F00C0DDC4 /* Core Data */,
 				3B39DADF27AD00A900D39BB5 /* Extensions */,
@@ -419,7 +424,6 @@
 				3B09190827BC7D8000844F6C /* Constants.swift */,
 				3B051A8C27B0F4490017131D /* DescribableError.swift */,
 				3B051A9B27B351C70017131D /* Formatters.swift */,
-				3BF5313627ACE18D00056673 /* Headache_TrackerApp.swift */,
 				3BF5316927ACE47700056673 /* HeadacheManager.swift */,
 				3B39DAD627ACF67600D39BB5 /* Previewing.swift */,
 				3B09190A27BC7E0C00844F6C /* RefreshTask.swift */,
@@ -578,6 +582,16 @@
 				3B9332FF27CF419C00BACE93 /* SeverityWidgetView.swift */,
 			);
 			path = Severity;
+			sourceTree = "<group>";
+		};
+		3B93330527CF51FD00BACE93 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				3B93330127CF51C600BACE93 /* AppDelegate.swift */,
+				3BF5313627ACE18D00056673 /* Headache_TrackerApp.swift */,
+				3B93330327CF51D500BACE93 /* SceneDelegate.swift */,
+			);
+			path = App;
 			sourceTree = "<group>";
 		};
 		3BAAA68227CC248D00C0DDC4 /* Inputs */ = {
@@ -954,6 +968,7 @@
 				3B4BA6F927B6352300F38851 /* MotionManager.swift in Sources */,
 				3B68BE1F27BF99D2007AAAC6 /* OnsetRegressorOutput.swift in Sources */,
 				3BF5316F27ACEAF700056673 /* DataController+Extensions.swift in Sources */,
+				3B93330227CF51C600BACE93 /* AppDelegate.swift in Sources */,
 				3B13154927C9366700F6B50D /* WeatherManager.swift in Sources */,
 				3B9332C427CDF5BA00BACE93 /* SeverityRange.swift in Sources */,
 				3B68BDFB27BE0F00007AAAC6 /* BarGraph.swift in Sources */,
@@ -1019,6 +1034,7 @@
 				3BC7221127C69A6200E0C05E /* LocationManager.swift in Sources */,
 				3B051A8D27B0F4490017131D /* DescribableError.swift in Sources */,
 				3B09191627BCD38300844F6C /* DurationView.swift in Sources */,
+				3B93330427CF51D500BACE93 /* SceneDelegate.swift in Sources */,
 				3B09191C27BD5F6F00844F6C /* SeverityButton.swift in Sources */,
 				3B39DAE227AD068300D39BB5 /* AppSettings.swift in Sources */,
 				3B68BE7027C36834007AAAC6 /* SharedUserDefaults.swift in Sources */,

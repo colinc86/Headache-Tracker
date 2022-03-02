@@ -1,8 +1,8 @@
 //
-//  Headache_TrackerApp.swift
+//  AppDelegate.swift
 //  Headache Tracker
 //
-//  Created by Colin Campbell on 2/3/22.
+//  Created by Colin Campbell on 3/2/22.
 //
 
 @_exported import BugfenderSDK
@@ -14,102 +14,7 @@ import Firebase
 import Logging
 import SwiftUI
 
-@main
-struct Headache_TrackerApp: App {
-  
-  /// The application delegate.
-  @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
-  
-  // Notification publishers
-  private let didBecomeActiveNotificationPublisher = NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)
-  private let willResignActiveNotificationPublisher = NotificationCenter.default.publisher(for: UIApplication.willResignActiveNotification)
-  
-  // MARK: View body
-  
-  var body: some Scene {
-    WindowGroup {
-      ContentView()
-        .environment(\.managedObjectContext, DataController.shared.container.viewContext)
-        .environmentObject(appDelegate.headacheManager)
-        .environmentObject(appDelegate.predictor)
-        .environmentObject(appDelegate.healthKitManager)
-        .environmentObject(appDelegate.alertManager)
-        .onReceive(didBecomeActiveNotificationPublisher, perform: didBecomeActive)
-        .onReceive(willResignActiveNotificationPublisher, perform: willResignActive)
-    }
-  }
-  
-}
-
-extension Headache_TrackerApp {
-  
-  /// Called when the application becomes active.
-  private func didBecomeActive(_ output: NotificationCenter.Publisher.Output) {
-    logDebug("Application did become active.")
-    appDelegate.headacheManager.cancelTrainingProcessingTask()
-    appDelegate.headacheManager.cancelPredictionRefreshTask()
-    appDelegate.headacheManager.cancelOutlookRefreshTask()
-    appDelegate.checkForIncompleteTrainingData()
-  }
-  
-  /// Called when the application resigns active.
-  private func willResignActive(_ output: NotificationCenter.Publisher.Output) {
-    logDebug("Application will resign active.")
-    
-    // Schedule our training and prediction tasks
-    appDelegate.headacheManager.scheduleTrainingRefreshTask()
-    appDelegate.headacheManager.schedulePredictionRefreshTask()
-    
-    // Schedule our outlook task
-    if appDelegate.dailyOutlookAlerts {
-      appDelegate.headacheManager.scheduleOutlookRefreshTask()
-    }
-  }
-  
-}
-
-class SceneDelegate: NSObject, UIWindowSceneDelegate, ObservableObject {
-  
-  func sceneWillEnterForeground(_ scene: UIScene) {
-    // ...
-  }
-  
-  func sceneDidBecomeActive(_ scene: UIScene) {
-    // ...
-  }
-  
-  func sceneWillResignActive(_ scene: UIScene) {
-    // ...
-  }
-  
-  func scene(_ scene: UIScene, openURLContexts contexts: Set<UIOpenURLContext>) {
-    guard let url = contexts.first?.url else {
-      logDebug("No url.")
-      return
-    }
-    
-    guard let components = URLComponents(url: url, resolvingAgainstBaseURL: true) else {
-      logWarning("Unable to open URL \(url.absoluteString)")
-      return false
-    }
-    
-    // Check the scheme
-    guard components.scheme == "myheadache" else {
-      logWarning("Bad scheme \(components.scheme)")
-      return false
-    }
-    
-    // Check the host
-    guard components.host == "severity" else {
-      logWarning("Bad host \(components.host)")
-      return false
-    }
-    
-    logDebug("All good.")
-  }
-}
-
-class AppDelegate: NSObject, UIApplicationDelegate {
+class AppDelegate: NSObject, UIApplicationDelegate, ObservableObject {
   
   // MARK: Public properties
   
@@ -130,7 +35,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
   
   /// Whether or not to enable crash reporting.
   @AppStorage(AppSettings.enableCrashReporting) var enableCrashReporting = true
-    
+  
   /// The Apple Health app integration setting.
   @AppStorage(AppSettings.healthIntegration) var healthIntegration = false
   
@@ -150,7 +55,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     Bugfender.activateLogger(Constants.Bugfender.apiKey)
     Bugfender.enableCrashReporting()
     Bugfender.enableUIEventLogging()
-    DDLog.add(DDBugfenderLogger.shared)    
+    DDLog.add(DDBugfenderLogger.shared)
 #else
     DDLog.add(DDOSLogger.sharedInstance)
     LoggingSystem.bootstrapWithCocoaLumberjack()

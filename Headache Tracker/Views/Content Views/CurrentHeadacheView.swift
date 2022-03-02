@@ -18,6 +18,8 @@ struct CurrentHeadacheView: View {
   /// The main view context.
   @Environment(\.managedObjectContext) private var viewContext
   
+  @EnvironmentObject private var sceneDelegate: SceneDelegate
+  
   /// The app's headache manager.
   @EnvironmentObject private var headacheManager: HeadacheManager
   
@@ -50,8 +52,11 @@ struct CurrentHeadacheView: View {
   /// Whether or not the alert is visible.
   @State private var showingAlert = false
   
-  /// Whether or not the resolve confirmation alert is visible.
+  /// Whether the resolve confirmation alert is visible.
   @State private var showingResolveConfirmation = false
+  
+  /// Whether the change severity confirmation alert is visible.
+  @State private var showingSeverityConfirmation = false
   
   /// True iff the current headache is being updated.
   @State private var updatingHeadache = false
@@ -214,6 +219,9 @@ struct CurrentHeadacheView: View {
     .confirmationDialog("Resolve Headache? It will be available in the Headaches tab.", isPresented: $showingResolveConfirmation, titleVisibility: .visible) {
       Button("Resolve", role: .destructive, action: resolve)
     }
+    .confirmationDialog("Change headache severity to \((sceneDelegate.desiredSeverity ?? .notPresent).title.lowercased())?", isPresented: $showingSeverityConfirmation, titleVisibility: .visible) {
+      Button("Change", action: confirmChangeSeverity)
+    }
   }
   
 }
@@ -224,7 +232,14 @@ extension CurrentHeadacheView {
   
   /// Called when the app becomes active.
   private func didBecomeActive(_ notification: NotificationCenter.Publisher.Output) {
-    logDebug("Did become active.")
+    // Were we launched from the widget?
+    if sceneDelegate.desiredSeverity != nil {
+      withAnimation {
+        showingSeverityConfirmation = true
+      }
+    }
+    
+    // Run a prediction
     predict()
   }
   
@@ -235,7 +250,6 @@ extension CurrentHeadacheView {
       return
     }
     
-    logDebug("On appear.")
     predict()
   }
   
@@ -297,6 +311,19 @@ extension CurrentHeadacheView {
     alertTitle = title
     alertMessage = error.localizedDescription
     withAnimation { showingAlert = true }
+  }
+  
+  /// Changes the severity to the desired severity if available.
+  private func confirmChangeSeverity() {
+    guard let severity = sceneDelegate.desiredSeverity else {
+      return
+    }
+    
+    // Reset the desired severity
+    sceneDelegate.desiredSeverity = nil
+    
+    // Change the severity
+    changeSeverity(to: severity)
   }
   
   /// Changes the current headache's severity or creates a new headache if one

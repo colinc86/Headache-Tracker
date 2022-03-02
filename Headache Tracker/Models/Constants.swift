@@ -16,21 +16,21 @@ struct Constants {
   /// The minimum refresh interval.
   static let predictionRefreshInterval: TimeInterval = 600.0
   
+  struct AssetKeys {
+    
+    static let headacheSeverityNotPresent = "HeadacheSeverityNotPresent"
+    static let headacheSeverityPresent = "HeadacheSeverityPresent"
+    static let headacheSeverityMild = "HeadacheSeverityMild"
+    static let headacheSeverityModerate = "HeadacheSeverityModerate"
+    static let headacheSeveritySevere = "HeadacheSeveritySevere"
+    
+  }
+  
   struct Bugfender {
     
     /// The Bugfender API key.
     static let apiKey = "EympFu86jcLlhHeq78zP5JouXlWE16Qu"
 
-  }
-  
-  struct WeatherAPI {
-    
-    /// The weather API username.
-    static let username = "f6fad9695be5449475ccfba804ec1018"
-    
-    /// The weather API password.
-    static let password = "c4efa0b907f057cdb110d36651e442b3"
-    
   }
   
   struct Identifiers {
@@ -45,13 +45,22 @@ struct Constants {
     static let backgroundOutlookTaskIdentifier = ApplicationKey(from: "outlook")
   }
   
-  struct AssetKeys {
-  
-    static let headacheSeverityNotPresent = "HeadacheSeverityNotPresent"
-    static let headacheSeverityPresent = "HeadacheSeverityPresent"
-    static let headacheSeverityMild = "HeadacheSeverityMild"
-    static let headacheSeverityModerate = "HeadacheSeverityModerate"
-    static let headacheSeveritySevere = "HeadacheSeveritySevere"
+  struct URLSchemes {
+    
+    static let scheme = "myheadache"
+    static let severityHost = "severity"
+    static let rawValueQuery = "rawValue"
     
   }
+  
+  struct WeatherAPI {
+    
+    /// The weather API username.
+    static let username = "f6fad9695be5449475ccfba804ec1018"
+    
+    /// The weather API password.
+    static let password = "c4efa0b907f057cdb110d36651e442b3"
+    
+  }
+  
 }

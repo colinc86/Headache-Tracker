@@ -1,0 +1,71 @@
+//
+//  Headache_TrackerApp.swift
+//  Headache Tracker
+//
+//  Created by Colin Campbell on 2/3/22.
+//
+
+@_exported import BugfenderSDK
+import BackgroundTasks
+import CocoaLumberjackSwift
+import CocoaLumberjackSwiftLogBackend
+import DataController
+import Firebase
+import Logging
+import SwiftUI
+
+@main
+struct Headache_TrackerApp: App {
+  
+  /// The application delegate.
+  @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
+  
+  /// The application did become active publisher.
+  private let didBecomeActiveNotificationPublisher = NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)
+  
+  /// The application will resign active publisher.
+  private let willResignActiveNotificationPublisher = NotificationCenter.default.publisher(for: UIApplication.willResignActiveNotification)
+  
+  // MARK: View body
+  
+  var body: some Scene {
+    WindowGroup {
+      ContentView()
+        .environment(\.managedObjectContext, DataController.shared.container.viewContext)
+        .environmentObject(appDelegate.headacheManager)
+        .environmentObject(appDelegate.predictor)
+        .environmentObject(appDelegate.healthKitManager)
+        .environmentObject(appDelegate.alertManager)
+        .onReceive(didBecomeActiveNotificationPublisher, perform: didBecomeActive)
+        .onReceive(willResignActiveNotificationPublisher, perform: willResignActive)
+    }
+  }
+  
+}
+
+extension Headache_TrackerApp {
+  
+  /// Called when the application becomes active.
+  private func didBecomeActive(_ output: NotificationCenter.Publisher.Output) {
+    logDebug("Application did become active.")
+    appDelegate.headacheManager.cancelTrainingProcessingTask()
+    appDelegate.headacheManager.cancelPredictionRefreshTask()
+    appDelegate.headacheManager.cancelOutlookRefreshTask()
+    appDelegate.checkForIncompleteTrainingData()
+  }
+  
+  /// Called when the application resigns active.
+  private func willResignActive(_ output: NotificationCenter.Publisher.Output) {
+    logDebug("Application will resign active.")
+    
+    // Schedule our training and prediction tasks
+    appDelegate.headacheManager.scheduleTrainingRefreshTask()
+    appDelegate.headacheManager.schedulePredictionRefreshTask()
+    
+    // Schedule our outlook task
+    if appDelegate.dailyOutlookAlerts {
+      appDelegate.headacheManager.scheduleOutlookRefreshTask()
+    }
+  }
+  
+}
