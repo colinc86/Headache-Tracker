@@ -112,6 +112,17 @@ extension FeedbackView {
 struct FeedbackView_Previews: PreviewProvider {
   static var previews: some View {
     FeedbackView(type: .feedback)
+      .environment(\.managedObjectContext, Previewing.CoreData.controller.container.viewContext)
+      .environmentObject(Previewing.headacheManager)
+      .environmentObject(Previewing.alertManager)
+      .environmentObject(Previewing.predictor)
+      .environmentObject(Previewing.healthKitManager)
+    
     FeedbackView(type: .bug)
+      .environment(\.managedObjectContext, Previewing.CoreData.controller.container.viewContext)
+      .environmentObject(Previewing.headacheManager)
+      .environmentObject(Previewing.alertManager)
+      .environmentObject(Previewing.predictor)
+      .environmentObject(Previewing.healthKitManager)
   }
 }

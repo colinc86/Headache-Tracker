@@ -12,9 +12,6 @@ struct HeadachesView: View {
   
   // MARK: Private properties
   
-  /// The main view context.
-  @Environment(\.managedObjectContext) private var viewContext
-  
   /// The app's headache manager.
   @EnvironmentObject private var headacheManager: HeadacheManager
   
@@ -44,8 +41,6 @@ struct HeadachesView: View {
             ForEach(unresolvedHeadaches) { headache in
               NavigationLink {
                 HeadacheView(headache: headache)
-                  .environment(\.managedObjectContext, viewContext)
-                  .environmentObject(headacheManager)
               } label: {
                 HeadacheCell(headache: headache)
               }
@@ -60,8 +55,6 @@ struct HeadachesView: View {
           ForEach(resolvedHeadaches) { headache in
             NavigationLink {
               HeadacheView(headache: headache)
-                .environment(\.managedObjectContext, viewContext)
-                .environmentObject(headacheManager)
             } label: {
               HeadacheCell(headache: headache)
             }
@@ -112,5 +105,8 @@ struct HeadachesView_Previews: PreviewProvider {
     HeadachesView()
       .environment(\.managedObjectContext, Previewing.CoreData.controller.container.viewContext)
       .environmentObject(Previewing.headacheManager)
+      .environmentObject(Previewing.alertManager)
+      .environmentObject(Previewing.predictor)
+      .environmentObject(Previewing.healthKitManager)
   }
 }

@@ -28,7 +28,6 @@ struct TrainingDataListView: View {
       ForEach(trainingData) { data in
         NavigationLink {
           TrainingDataView(trainingData: data)
-            .environment(\.managedObjectContext, viewContext)
         } label: {
           SubtitleCell(title: data.timestamp?.formattedNonRelative() ?? "N/A", subtitle: data.severity?.severity.title ?? "-")
         }
@@ -64,6 +63,10 @@ struct TrainingDataListView_Previews: PreviewProvider {
   static var previews: some View {
     TrainingDataListView()
       .environment(\.managedObjectContext, Previewing.CoreData.controller.container.viewContext)
+      .environmentObject(Previewing.headacheManager)
+      .environmentObject(Previewing.alertManager)
+      .environmentObject(Previewing.predictor)
+      .environmentObject(Previewing.healthKitManager)
   }
 }
 

@@ -17,11 +17,8 @@ struct HeadacheView: View {
   
   // MARK: Private properties
   
-  /// The main view context.
-  @Environment(\.managedObjectContext) private var viewContext
-  
   /// The view's presentation mode.
-  @Environment(\.presentationMode) private var mode: Binding<PresentationMode>
+  @Environment(\.presentationMode) private var presentationMode
   
   /// The app's headache manager.
   @EnvironmentObject private var headacheManager: HeadacheManager
@@ -87,8 +84,6 @@ struct HeadacheView: View {
           ForEach(headache.severitiesArray, id: \.self) { severity in
             NavigationLink {
               SeverityView(severity: severity, canEditEndTime: severity == headache.severitiesArray.last, canDelete: true)
-                .environment(\.managedObjectContext, viewContext)
-                .environmentObject(headacheManager)
             } label: {
               SubtitleCell(title: severity.severity.title, subtitle: severity.startTime?.formattedNonRelative() ?? "N/A")
             }
@@ -98,8 +93,6 @@ struct HeadacheView: View {
         else if let severity = headache.severitiesArray.first {
           NavigationLink {
             SeverityView(severity: severity, canEditEndTime: severity == headache.severitiesArray.last, canDelete: false)
-              .environment(\.managedObjectContext, viewContext)
-              .environmentObject(headacheManager)
           } label: {
             SubtitleCell(title: severity.severity.title, subtitle: severity.startTime?.formattedNonRelative() ?? "N/A")
           }
@@ -196,7 +189,7 @@ extension HeadacheView {
             showAlert("Unable to Delete Headache", error.localizedDescription)
           }
           else {
-            mode.wrappedValue.dismiss()
+            presentationMode.wrappedValue.dismiss()
           }
         }
       }
@@ -258,5 +251,8 @@ struct HeadacheView_Previews: PreviewProvider {
     HeadacheView(headache: Previewing.CoreData.headache)
       .environment(\.managedObjectContext, Previewing.CoreData.controller.container.viewContext)
       .environmentObject(Previewing.headacheManager)
+      .environmentObject(Previewing.alertManager)
+      .environmentObject(Previewing.predictor)
+      .environmentObject(Previewing.healthKitManager)
   }
 }

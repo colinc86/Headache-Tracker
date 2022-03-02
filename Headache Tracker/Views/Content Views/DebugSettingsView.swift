@@ -12,9 +12,6 @@ struct DebugSettingsView: View {
   
   // MARK: Private properties
   
-  /// The main view context.
-  @Environment(\.managedObjectContext) private var viewContext
-  
   /// The app's headache manager.
   @EnvironmentObject private var headacheManager: HeadacheManager
   
@@ -87,7 +84,6 @@ struct DebugSettingsView: View {
       Section {
         NavigationLink {
           TrainingDataListView()
-            .environment(\.managedObjectContext, viewContext)
         } label: {
           Text("Training Data")
         }
@@ -145,5 +141,9 @@ struct DebugSettingsView_Previews: PreviewProvider {
   static var previews: some View {
     DebugSettingsView()
       .environment(\.managedObjectContext, Previewing.CoreData.controller.container.viewContext)
+      .environmentObject(Previewing.headacheManager)
+      .environmentObject(Previewing.alertManager)
+      .environmentObject(Previewing.predictor)
+      .environmentObject(Previewing.healthKitManager)
   }
 }

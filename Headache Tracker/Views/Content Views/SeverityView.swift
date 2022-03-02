@@ -23,11 +23,8 @@ struct SeverityView: View {
   
   // MARK: Private properties
   
-  /// The main view context.
-  @Environment(\.managedObjectContext) private var viewContext
-  
   /// The view's presentation mode.
-  @Environment(\.presentationMode) private var mode: Binding<PresentationMode>
+  @Environment(\.presentationMode) private var presentationMode
   
   /// The app's headache manager.
   @EnvironmentObject private var headacheManager: HeadacheManager
@@ -196,7 +193,7 @@ extension SeverityView {
             showAlert("Unable to Delete Severity", error)
           }
           else {
-            mode.wrappedValue.dismiss()
+            presentationMode.wrappedValue.dismiss()
           }
         }
       }
@@ -220,5 +217,8 @@ struct SeverityView_Previews: PreviewProvider {
     SeverityView(severity: Previewing.CoreData.severity, canEditEndTime: false, canDelete: false)
       .environment(\.managedObjectContext, Previewing.CoreData.controller.container.viewContext)
       .environmentObject(Previewing.headacheManager)
+      .environmentObject(Previewing.alertManager)
+      .environmentObject(Previewing.predictor)
+      .environmentObject(Previewing.healthKitManager)
   }
 }

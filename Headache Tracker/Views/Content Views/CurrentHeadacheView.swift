@@ -15,9 +15,7 @@ struct CurrentHeadacheView: View {
   
   // MARK: Private properties
   
-  /// The main view context.
-  @Environment(\.managedObjectContext) private var viewContext
-  
+  /// The app's scene delegate.
   @EnvironmentObject private var sceneDelegate: SceneDelegate
   
   /// The app's headache manager.
@@ -25,9 +23,6 @@ struct CurrentHeadacheView: View {
   
   /// The app's headache predictor.
   @EnvironmentObject private var predictor: Predictor
-  
-  /// The app's alert manager for displaying notifications.
-  @EnvironmentObject private var alertManager: AlertManager
   
   /// The Apple Health integration setting.
   @AppStorage(AppSettings.healthIntegration) private var healthIntegration = false
@@ -395,7 +390,8 @@ struct CurrentHeadacheView_Previews: PreviewProvider {
     CurrentHeadacheView()
       .environment(\.managedObjectContext, Previewing.CoreData.controller.container.viewContext)
       .environmentObject(Previewing.headacheManager)
-      .environmentObject(Previewing.predictor)
       .environmentObject(Previewing.alertManager)
+      .environmentObject(Previewing.predictor)
+      .environmentObject(Previewing.healthKitManager)
   }
 }

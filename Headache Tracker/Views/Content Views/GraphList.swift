@@ -11,9 +11,6 @@ struct GraphList: View {
   
   // MARK: Private properties
   
-  /// The main view context.
-  @Environment(\.managedObjectContext) private var viewContext
-  
   /// The resolved headaches fetch request.
   /// Returns a list of all resolved headaches.
   @FetchRequest private var resolvedHeadaches: FetchedResults<Headache>
@@ -181,6 +178,10 @@ struct GraphList_Previews: PreviewProvider {
   static var previews: some View {
     GraphList(filterUnit: .month, earliestDate: Date())
       .environment(\.managedObjectContext, Previewing.CoreData.controller.container.viewContext)
+      .environmentObject(Previewing.headacheManager)
+      .environmentObject(Previewing.alertManager)
+      .environmentObject(Previewing.predictor)
+      .environmentObject(Previewing.healthKitManager)
   }
   
 }

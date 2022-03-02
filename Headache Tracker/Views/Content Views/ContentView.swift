@@ -13,55 +13,26 @@ import HealthKit
 /// The main content view that contains the tab view.
 struct ContentView: View {
   
-  // MARK: Private properties
-  
-  /// The main view context.
-  @Environment(\.managedObjectContext) private var viewContext
-  
-  /// The headache manager.
-  @EnvironmentObject private var headacheManager: HeadacheManager
-  
-  /// The headache predictor.
-  @EnvironmentObject private var predictor: Predictor
-  
-  /// The health kit manager.
-  @EnvironmentObject private var healthKitManager: HealthKitManager
-  
-  /// The alert manager for displaying notifications.
-  @EnvironmentObject private var alertManager: AlertManager
-  
   // MARK: View body
   
   var body: some View {
     TabView {
       CurrentHeadacheView()
-        .environment(\.managedObjectContext, viewContext)
-        .environmentObject(headacheManager)
-        .environmentObject(predictor)
-        .environmentObject(alertManager)
         .tabItem {
           Label("Track", systemImage: "brain.head.profile")
         }
       
       AnalyzeView()
-        .environment(\.managedObjectContext, viewContext)
         .tabItem {
           Label("Analyze", systemImage: "chart.bar.xaxis")
         }
       
       HeadachesView()
-        .environment(\.managedObjectContext, viewContext)
-        .environmentObject(headacheManager)
         .tabItem {
           Label("Headaches", systemImage: "list.bullet")
         }
       
       SettingsView()
-        .environment(\.managedObjectContext, viewContext)
-        .environmentObject(headacheManager)
-        .environmentObject(predictor)
-        .environmentObject(healthKitManager)
-        .environmentObject(alertManager)
         .tabItem {
           Label("Settings", systemImage: "gear")
         }
@@ -78,9 +49,5 @@ struct ContentView_Previews: PreviewProvider {
       .environmentObject(Previewing.alertManager)
       .environmentObject(Previewing.predictor)
       .environmentObject(Previewing.healthKitManager)
-      .onAppear {
-        _ = Previewing.CoreData.headache
-        _ = Previewing.CoreData.unresolvedHeadache
-      }
   }
 }

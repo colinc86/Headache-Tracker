@@ -14,14 +14,8 @@ struct SettingsView: View {
   
   // MARK: Private properties
   
-  /// The main view context.
-  @Environment(\.managedObjectContext) private var viewContext
-  
   /// The app's headache manager.
   @EnvironmentObject private var headacheManager: HeadacheManager
-  
-  /// The app's headache predictor.
-  @EnvironmentObject private var predictor: Predictor
   
   /// The health kit manager.
   @EnvironmentObject private var healthKitManager: HealthKitManager
@@ -50,7 +44,10 @@ struct SettingsView: View {
   /// The daily outlook alert time.
   @AppStorage(AppSettings.dailyOutlookTime) private var dailyOutlookTime = TimeInterval(28800.0)
   
+  /// Whether we are showing the bug report content view.
   @State private var showingReportBug = false
+  
+  /// Whether we are showing the share feedback view.
   @State private var showingShareFeedback = false
   
   // MARK: Computed properties
@@ -162,9 +159,6 @@ struct SettingsView: View {
         Section {
           NavigationLink {
             DebugSettingsView()
-              .environment(\.managedObjectContext, viewContext)
-              .environmentObject(headacheManager)
-              .environmentObject(predictor)
           } label: {
             Text("Debug Settings")
           }
