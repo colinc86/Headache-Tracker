@@ -42,22 +42,38 @@ extension TrainingData {
     self.sigmaHumidity = input?.weather?.sigmaHumidity ?? 0.0
     self.sigmaTemperature = input?.weather?.sigmaTemperature ?? 0.0
     self.barometricPressure = input?.weather?.devicePressure.converted(to: .kilopascals).value ?? 0.0
-    
-    for (key, value) in input?.healthKitData ?? [:] {
-      switch key {
-      case .heartRate: heartRate = value
-      case .mindfulSession: mindfulSeconds = value
-      case .sleepAnalysis: sleepSeconds = value
-      case .respiratoryRate: respiratoryRate = value
-      case .oxygenSaturation: oxygenSaturation = value
-      case .heartRateVariabilitySDNN: heartRateVariability = value
-      case .walkingHeartRateAverage: walkingHeartRateAverage = value
-      case .restingHeartRate: restingHeartRate = value
-      case .headphoneAudioExposure: headphoneAudioExposure = value
-      case .environmentalAudioExposure: environmentalAudioExposure = value
-      case .stepCount: stepCount = value
-      default: continue
+    self.updateWithHealthKitData(input?.healthKitData)
+  }
+}
+  
+// MARK: Public methods
+  
+extension TrainingData {
+  
+  /// Updates the training data with the given health kit data.
+  ///
+  /// - Parameter healthKitData: The health kit data.
+  func updateWithHealthKitData(_ healthKitData: [HealthKitData: Double]?) {
+    if let healthKitData = healthKitData {
+      for (key, value) in healthKitData {
+        switch key {
+        case .heartRate: heartRate = value
+        case .mindfulSession: mindfulSeconds = value
+        case .sleepAnalysis: sleepSeconds = value
+        case .respiratoryRate: respiratoryRate = value
+        case .oxygenSaturation: oxygenSaturation = value
+        case .heartRateVariabilitySDNN: heartRateVariability = value
+        case .walkingHeartRateAverage: walkingHeartRateAverage = value
+        case .restingHeartRate: restingHeartRate = value
+        case .headphoneAudioExposure: headphoneAudioExposure = value
+        case .environmentalAudioExposure: environmentalAudioExposure = value
+        case .stepCount: stepCount = value
+        default: continue
+        }
       }
+    }
+    else {
+      needsHealthKitData = true
     }
   }
   

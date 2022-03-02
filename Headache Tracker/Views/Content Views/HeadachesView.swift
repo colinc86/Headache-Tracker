@@ -112,9 +112,5 @@ struct HeadachesView_Previews: PreviewProvider {
     HeadachesView()
       .environment(\.managedObjectContext, Previewing.CoreData.controller.container.viewContext)
       .environmentObject(Previewing.headacheManager)
-      .onAppear {
-        _ = Previewing.CoreData.headache
-        _ = Previewing.CoreData.unresolvedHeadache
-      }
   }
 }

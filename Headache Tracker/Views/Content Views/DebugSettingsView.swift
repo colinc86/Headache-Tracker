@@ -81,6 +81,7 @@ struct DebugSettingsView: View {
     Form {
       Section {
         Toggle("Show All Views", isOn: $debugShowAllViews)
+          .tint(.accentColor)
       }
       
       Section {

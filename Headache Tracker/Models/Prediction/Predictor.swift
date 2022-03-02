@@ -12,7 +12,6 @@ import HealthKit
 
 #if NON_PREVIEW
 import CreateML
-#endif
 
 class Predictor: ObservableObject {
   
@@ -32,7 +31,7 @@ class Predictor: ObservableObject {
     var weather: Weather?
     
     /// The input health kit data.
-    var healthKitData: [HealthKitData: Double]
+    var healthKitData: [HealthKitData: Double]?
     
     /// The input date.
     var date: Date
@@ -43,11 +42,11 @@ class Predictor: ObservableObject {
     }
     
     private func controlledUserInput() -> ControlledUserInput {
-      return ControlledUserInput(healthKitData: healthKitData)
+      return ControlledUserInput(healthKitData: healthKitData ?? [:])
     }
     
     private func environmentalInput() -> EnvironmentalInput {
-      return EnvironmentalInput(weather: weather, healthKitData: healthKitData)
+      return EnvironmentalInput(weather: weather, healthKitData: healthKitData ?? [:])
     }
     
     private func timeInput() -> TimeInput {
@@ -55,7 +54,7 @@ class Predictor: ObservableObject {
     }
     
     private func uncontrolledUserInput() -> UncontrolledUserInput {
-      return UncontrolledUserInput(healthKitData: healthKitData)
+      return UncontrolledUserInput(healthKitData: healthKitData ?? [:])
     }
     
   }
@@ -164,13 +163,11 @@ class Predictor: ObservableObject {
   /// Whether or not training was cancelled.
   private var cancelledTraining = false
   
-#if NON_PREVIEW
   /// The metadata to save with a model.
   private let metadata = MLModelMetadata(
     author: "Colin Campbell",
     shortDescription: "Predicts the onset, severity and progression of headaches.",
     version: Date().description)
-#endif
   
 }
 
@@ -250,7 +247,6 @@ extension Predictor {
       return
     }
     
-#if NON_PREVIEW
     // Set the training tags
     trainingData.setVolitileVariables()
     
@@ -332,9 +328,6 @@ extension Predictor {
         finished(error)
       }
     }
-#else
-    finished(nil)
-#endif
   }
   
   /// Cancels the current training session.
@@ -532,3 +525,148 @@ extension Predictor {
   }
   
 }
+#else
+class Predictor: ObservableObject {
+  
+  // MARK: Types
+  
+  enum ModelType {
+    case durationRegressor
+    case onsetRegressor
+    case outlookClassifier
+    case severityClassifier
+  }
+  
+  /// A prediction input.
+  struct Input {
+    
+    /// The input weather data.
+    var weather: Weather?
+    
+    /// The input health kit data.
+    var healthKitData: [HealthKitData: Double]?
+    
+    /// The input date.
+    var date: Date
+    
+    /// The full model input.
+    func fullInput() -> InputUnion {
+      return InputUnion(providers: [controlledUserInput(), environmentalInput(), timeInput(), uncontrolledUserInput()])
+    }
+    
+    private func controlledUserInput() -> ControlledUserInput {
+      return ControlledUserInput(healthKitData: healthKitData ?? [:])
+    }
+    
+    private func environmentalInput() -> EnvironmentalInput {
+      return EnvironmentalInput(weather: weather, healthKitData: healthKitData ?? [:])
+    }
+    
+    private func timeInput() -> TimeInput {
+      return TimeInput(date: date)
+    }
+    
+    private func uncontrolledUserInput() -> UncontrolledUserInput {
+      return UncontrolledUserInput(healthKitData: healthKitData ?? [:])
+    }
+    
+  }
+  
+  /// A headache prediction.
+  struct Prediction {
+    
+    /// An empty prediction.
+    static let empty = Prediction()
+    
+    /// A prediction statistic pairs a severity to a probability.
+    struct PredictionStatistic<T> {
+      
+      /// The statistic's severity.
+      let prediction: T
+      
+      /// The statistic's probability.
+      let probability: Double?
+      
+      // MARK: Initializers
+      
+      init(prediction: T, probability: Double?) {
+        self.prediction = prediction
+        self.probability = probability
+      }
+    }
+    
+    /// The outlook classifier's output
+    let outlookClassifierOutput: PredictionStatistic<Outlook> = PredictionStatistic<Outlook>(prediction: .noHeadache, probability: 0)
+    
+    /// The severity classifier's output.
+    let severityClassifierOutput: PredictionStatistic<HKCategoryValueSeverity> = PredictionStatistic<HKCategoryValueSeverity>(prediction: .notPresent, probability: 0)
+    
+    /// The onset regressor's output.
+    let onsetRegressorOutput: PredictionStatistic<Date> = PredictionStatistic<Date>(prediction: Date(timeIntervalSince1970: 0), probability: nil)
+    
+    /// The duration regressor's output.
+    let durationRegressorOutput: PredictionStatistic<TimeInterval> = PredictionStatistic<TimeInterval>(prediction: 0, probability: nil)
+    
+    /// The date of this prediction.
+    let date = Date()
+    
+    init() {
+      
+    }
+    
+    var holisticOutlook: HolisticOutlook {
+      return .noHeadache
+    }
+    
+  }
+
+  /// Whether or not the predictor is training.
+  @Published var training: Bool = false
+  
+  /// Whether or not the predictor is ready to predict.
+  @Published var ready: Bool = false
+  
+  /// The predictor's latest prediction.
+  @Published var prediction: Prediction?
+  
+  /// The model's last updated at date.
+  @Published var modelUpdatedAt: Date?
+
+}
+
+// MARK: Public methods
+
+extension Predictor {
+  
+  /// Loads the predictor's models.
+  ///
+  /// - Parameter completion: Called after the models have been loaded.
+  func load(_ completion: @escaping (Error?) -> Void) {
+    completion(nil)
+  }
+  
+  /// Trains the predictor's classifiers.
+  ///
+  /// - Parameters:
+  ///   - trainingData: The training data.
+  ///   - completion: Called after training has completed.
+  func train(with trainingData: [TrainingData], completion: @escaping (Error?) -> Void) {
+    completion(nil)
+  }
+  
+  /// Cancels the current training session.
+  func cancelTraining() {}
+  
+  /// Resets the predictor and its classifiers.
+  func reset() {}
+  
+  /// Makes a prediction.
+  ///
+  /// - Parameter input: The predictor's input.
+  /// - Returns: The predictor's output.
+  func predict(_ input: Input) throws -> Prediction {
+    return Prediction()
+  }
+  
+}
+#endif

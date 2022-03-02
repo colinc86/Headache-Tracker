@@ -630,7 +630,7 @@ extension HeadacheManager {
       logDebug("Creating input data...")
       let now = Date()
       let interval = DateInterval(start: now.addingTimeInterval(-86400.0), end: now)
-      let healthKitData = self.healthKitManager?.readHealthKitData(in: interval) ?? [:]
+      let healthKitData = self.healthKitManager?.readHealthKitData(in: interval)
       
       completion(Predictor.Input(weather: weather, healthKitData: healthKitData, date: now), nil)
       self.getCurrentClassifierInputBackgroundTask.end()
@@ -707,8 +707,6 @@ extension HeadacheManager {
           }
         }
       }
-      
-      
     }
   }
   
@@ -725,6 +723,8 @@ extension HeadacheManager {
       
       logDebug("Fetching all training data...")
       let request = TrainingData.fetchRequest()
+      request.predicate = NSPredicate(format: "needsHealthKitData == %@", NSNumber(booleanLiteral: false))
+      
       let allTrainingData = (try? context.fetch(request)) ?? []
       
       logDebug("Training classifiers...")
@@ -732,24 +732,32 @@ extension HeadacheManager {
     }
   }
   
+  /// Adds health kit data to incomplete training samples.
+  ///
+  /// - Parameter completion: Called after the training data has been cleaned.
   func cleanTrainingData(_ completion: @escaping (Error?) -> Void) {
     guard !testing else {
+      completion(nil)
       return
     }
     
-    trainingQueue.async {
+    logDebug("Cleaning training data.")
+    trainingQueue.async { [weak self] in
       let context = DataController.shared.newNestedBackgroundContext()
+
+      logDebug("Fetching incomplete training data...")
+      let incompleteRequest = TrainingData.fetchRequest()
+      incompleteRequest.predicate = NSPredicate(format: "heartRate == %@", NSNumber(value: 0.0))
       
-      logDebug("Fetching all training data...")
-      let request = TrainingData.fetchRequest()
-      let allTrainingData = (try? context.fetch(request)) ?? []
+      let incompleteTrainingData = (try? context.fetch(incompleteRequest)) ?? []
       
-      logDebug("Cleaning training data...")
-      for data in allTrainingData {
-        if data.timestamp == nil {
-          data.severity?.removeFromTrainingData(data)
-          context.delete(data)
+      logDebug("Updating \(incompleteTrainingData.count) traininig data...")
+      for data in incompleteTrainingData {
+        guard let timestamp = data.timestamp else {
+          continue
         }
+        let interval = DateInterval(start: timestamp.addingTimeInterval(-86400.0), end: timestamp)
+        data.updateWithHealthKitData(self?.healthKitManager?.readHealthKitData(in: interval))
       }
       
       DataController.shared.saveBackgroundAndViewContexts(context, completion)
@@ -783,7 +791,10 @@ extension HeadacheManager {
     let secondsPastHour = secondsPastMidnight - TimeInterval(3600 * Int(floor(secondsPastMidnight / 3600.0)))
     
     // Get the number of seconds until the next hour
-    let secondsUntilNextHour = 3600.0 - secondsPastHour
+    var secondsUntilNextHour = 3600.0 - secondsPastHour
+    if secondsPastHour > 3540.0 {
+      secondsUntilNextHour += 3600.0
+    }
     
     // Schedule the next task
     logDebug("Scheduling prediction refresh task with date \(Date(timeIntervalSinceNow: secondsUntilNextHour))")

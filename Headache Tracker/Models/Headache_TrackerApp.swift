@@ -49,6 +49,7 @@ extension Headache_TrackerApp {
     appDelegate.headacheManager.cancelTrainingProcessingTask()
     appDelegate.headacheManager.cancelPredictionRefreshTask()
     appDelegate.headacheManager.cancelOutlookRefreshTask()
+    appDelegate.checkForIncompleteTrainingData()
   }
   
   /// Called when the application resigns active.
@@ -101,21 +102,20 @@ class AppDelegate: NSObject, UIApplicationDelegate {
   // MARK: Override methods
   
   func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-    logDebug("Application did finish launching.")
-    
-    // Load firebase if we're not previewing
 #if NON_PREVIEW
     FirebaseApp.configure()
     Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(true)
     
-    Bugfender.activateLogger("EympFu86jcLlhHeq78zP5JouXlWE16Qu")
+    Bugfender.activateLogger(Constants.Bugfender.apiKey)
     Bugfender.enableCrashReporting()
     Bugfender.enableUIEventLogging()
-    DDLog.add(DDBugfenderLogger.shared)
+    DDLog.add(DDBugfenderLogger.shared)    
 #else
     DDLog.add(DDOSLogger.sharedInstance)
     LoggingSystem.bootstrapWithCocoaLumberjack()
 #endif
+    
+    logDebug("Application did finish launching.")
     
     // Adjust the table view appearance
     UITableView.appearance().sectionFooterHeight = 0
@@ -141,6 +141,21 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     loadClassifiers()
     
     return true
+  }
+  
+}
+
+// MARK: Public methods
+
+extension AppDelegate {
+  
+  /// Checks for incomplete training data.
+  func checkForIncompleteTrainingData() {
+    headacheManager.cleanTrainingData { error in
+      if let error = error {
+        logError("Error cleaning training data: \(error)")
+      }
+    }
   }
   
 }
@@ -179,6 +194,7 @@ extension AppDelegate {
     }
   }
   
+  /// Checks for locationi authorization status.
   private func checkLocationAuthorizationStatus() {
     weatherManager.setup()
   }

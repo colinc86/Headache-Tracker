@@ -5,6 +5,7 @@
 //  Created by Colin Campbell on 2/11/22.
 //
 
+#if NON_PREVIEW
 import CoreML
 
 /// Model Prediction Output Type
@@ -43,3 +44,4 @@ class SeverityClassifierOutput: MLFeatureInitializable {
     self.provider = features
   }
 }
+#endif

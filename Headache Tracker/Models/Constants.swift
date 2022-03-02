@@ -16,6 +16,13 @@ struct Constants {
   /// The minimum refresh interval.
   static let predictionRefreshInterval: TimeInterval = 600.0
   
+  struct Bugfender {
+    
+    /// The Bugfender API key.
+    static let apiKey = "EympFu86jcLlhHeq78zP5JouXlWE16Qu"
+
+  }
+  
   struct WeatherAPI {
     
     /// The weather API username.

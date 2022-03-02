@@ -5,6 +5,7 @@
 //  Created by Colin Campbell on 2/18/22.
 //
 
+#if NON_PREVIEW
 import CoreML
 
 /// Model Prediction Output Type
@@ -38,3 +39,4 @@ class OnsetRegressorOutput: MLFeatureInitializable {
     self.provider = features
   }
 }
+#endif

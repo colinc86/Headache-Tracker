@@ -37,6 +37,7 @@ struct Previewing {
       headache.addSeverity(.severe, startTime: now.addingTimeInterval(-2400.0))
       headache.addSeverity(.moderate, startTime: now.addingTimeInterval(-1200.0))
       headache.addSeverity(.notPresent, startTime: now.addingTimeInterval(-600.0))
+      headache.resolved = true
       
       do {
         try controller.container.viewContext.save()
@@ -54,6 +55,7 @@ struct Previewing {
       let headache = Headache(context: controller.container.viewContext, initialSeverity: .mild, startTime: now.addingTimeInterval(-3600.0))
       headache.addSeverity(.moderate, startTime: now.addingTimeInterval(-3000.0))
       headache.addSeverity(.severe, startTime: now.addingTimeInterval(-2400.0))
+      headache.resolved = false
       
       do {
         try controller.container.viewContext.save()
@@ -69,12 +71,6 @@ struct Previewing {
     static var severity: Severity = {
       return headache.severitiesArray.first!
     }()
-    
-    /// Sets up the preview objects.
-    static func setupObjects() {
-      logDebug("Setting up resolved headache with identifier \(headache.identifier?.uuidString ?? "N/A")")
-      logDebug("Setting up unresolved headache with identifier \(unresolvedHeadache.identifier?.uuidString ?? "N/A")")
-    }
     
   }
   

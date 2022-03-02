@@ -5,6 +5,7 @@
 //  Created by Colin Campbell on 2/4/22.
 //
 
+import BugfenderSDK
 import FirebaseCrashlytics
 import SwiftUI
 
@@ -49,6 +50,9 @@ struct SettingsView: View {
   /// The daily outlook alert time.
   @AppStorage(AppSettings.dailyOutlookTime) private var dailyOutlookTime = TimeInterval(28800.0)
   
+  @State private var showingReportBug = false
+  @State private var showingShareFeedback = false
+  
   // MARK: Computed properties
     
   /// The health app integration binding.
@@ -92,6 +96,7 @@ struct SettingsView: View {
           Toggle(isOn: healthAppIntegration) {
             Text("Health App Integration")
           }
+          .tint(.accentColor)
         }
         
         // Notifications
@@ -100,6 +105,7 @@ struct SettingsView: View {
             Text("Daily Outlook")
           }
           .onChange(of: dailyOutlookAlerts, perform: dailyOutlookAlertsChanged)
+          .tint(.accentColor)
           
           DatePicker("Daily Outlook Time", selection: dailyOutlookDate, displayedComponents: .hourAndMinute)
             .disabled(!dailyOutlookAlerts)
@@ -107,10 +113,12 @@ struct SettingsView: View {
           Toggle(isOn: $realTimeAlerts) {
             Text("Hourly Predictions")
           }
+          .tint(.accentColor)
           
           Toggle(isOn: $checkInAlerts) {
             Text("Headache Check-Ins")
           }
+          .tint(.accentColor)
           
           Picker(selection: $checkInInterval) {
             ForEach(1 ..< 25) { i in
@@ -134,10 +142,16 @@ struct SettingsView: View {
         
         // Information
         Section {
+          Button("Report Bug", action: reportBug)
+          
+          Button("Share Feedback", action: shareFeedback)
+          
           Toggle(isOn: $enableCrashReporting) {
             Text("Submit Crash Data")
           }
           .onChange(of: enableCrashReporting, perform: enableCrashReportingValueChanged)
+          .tint(.accentColor)
+          
           SubtitleCell(title: "Version", subtitle: Bundle.main.humanReadableVersionString)
         } header: {
           Text("General")
@@ -162,11 +176,29 @@ struct SettingsView: View {
       .navigationTitle("Settings")
     }
     .navigationViewStyle(StackNavigationViewStyle())
+    .sheet(isPresented: $showingReportBug, onDismiss: nil) {
+      FeedbackView(type: .bug)
+    }
+    .sheet(isPresented: $showingShareFeedback, onDismiss: nil) {
+      FeedbackView(type: .feedback)
+    }
   }
   
 }
 
 extension SettingsView {
+  
+  private func reportBug() {
+    withAnimation {
+      showingReportBug = true
+    }
+  }
+  
+  private func shareFeedback() {
+    withAnimation {
+      showingShareFeedback = true
+    }
+  }
   
   /// Called when the `dailyOutlookAlerts` setting changes.
   ///

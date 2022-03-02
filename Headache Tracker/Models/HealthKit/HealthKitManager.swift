@@ -190,16 +190,18 @@ extension HealthKitManager {
   ///
   /// - Parameter interval: The interval of the data to query.
   /// - Returns: A dictionary of training data.
-  func readHealthKitData(in interval: DateInterval) -> [HealthKitData: Double] {
+  func readHealthKitData(in interval: DateInterval) -> [HealthKitData: Double]? {
     logDebug("Read HealthKit data in \(interval).")
     
     // Only continue if we have health integration turned on
     guard healthIntegration else {
       logWarning("Health integration is \(healthIntegration). Not reading HealthKit data.")
-      return [:]
+      return nil
     }
     
     var healthKitData = [HealthKitData: Double]()
+    var didSet = false
+    let didSetSemaphore = DispatchSemaphore(value: 1)
     
     let group = DispatchGroup()
     for data in HealthKitData.allCases {
@@ -218,14 +220,23 @@ extension HealthKitManager {
                 asleepSeconds /= sources.count > 0 ? Double(sources.count) : 1.0
               }
               
+              didSetSemaphore.wait()
               healthKitData[.sleepAnalysis] = asleepSeconds
+              didSet = true
+              didSetSemaphore.signal()
             }
             else if data.type?.identifier == HKCategoryTypeIdentifier.mindfulSession.rawValue {
+              didSetSemaphore.wait()
               healthKitData[.mindfulSession] = samples.reduce(0.0, { $0 + $1.endDate.timeIntervalSince($1.startDate) })
+              didSet = true
+              didSetSemaphore.signal()
             }
           }
           else if let quantity = quantity, let unit = data.unit {
+            didSetSemaphore.wait()
             healthKitData[data] = quantity.doubleValue(for: unit)
+            didSet = true
+            didSetSemaphore.signal()
           }
           group.leave()
         }) else {
@@ -238,7 +249,12 @@ extension HealthKitManager {
     }
 
     group.wait()
-    return healthKitData
+    
+    if didSet {
+      return healthKitData
+    }
+    
+    return nil
   }
   
 }

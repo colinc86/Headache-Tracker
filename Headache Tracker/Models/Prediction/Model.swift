@@ -20,7 +20,6 @@ protocol CoreMLModel {
 }
 extension MLBoostedTreeClassifier: CoreMLModel {}
 extension MLBoostedTreeRegressor: CoreMLModel {}
-#endif
 
 /// Class for model loading and prediction
 class Model<Input: MLFeatureProvider, Output: MLFeatureInitializable> {
@@ -141,4 +140,5 @@ class Model<Input: MLFeatureProvider, Output: MLFeatureInitializable> {
     return results
   }
 }
+#endif
 

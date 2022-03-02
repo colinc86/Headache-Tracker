@@ -147,9 +147,29 @@ struct CurrentHeadacheView: View {
         // Predictions
         if let prediction = predictor.prediction {
           let dailyOutlook = OutlookView(outlook: prediction.holisticOutlook)
+          let durationPrediction = DurationPredictionView(duration: prediction.durationRegressorOutput.prediction)
           let severityPrediction = HorizontalSeverityLevel(currentSeverity: prediction.severityClassifierOutput.prediction, severityRange: nil, collapsed: true, action: nil)
           
-          if currentHeadache == nil || debugShowAllViews {
+          if debugShowAllViews {
+            Section {
+              dailyOutlook
+            } header: {
+              SectionTitleView(title: "Predictions")
+            }
+            
+            Section {
+              durationPrediction
+            }
+            
+            Section {
+              severityPrediction
+            } footer: {
+              if let lastPredictionDate = predictor.prediction?.date {
+                Text("Updated \(lastPredictionDate.formattedNonRelative()).")
+              }
+            }
+          }
+          else if currentHeadache == nil {
             Section {
               dailyOutlook
             } header: {
@@ -166,9 +186,13 @@ struct CurrentHeadacheView: View {
           }
           else {
             Section {
-              severityPrediction
+              durationPrediction
             } header: {
               SectionTitleView(title: "Predictions")
+            }
+            
+            Section {
+              severityPrediction
             } footer: {
               if let lastPredictionDate = predictor.prediction?.date {
                 Text("Updated \(lastPredictionDate.formattedNonRelative()).")

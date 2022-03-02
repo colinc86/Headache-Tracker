@@ -92,6 +92,9 @@
 		3B9332DF27CE052500BACE93 /* DDBugfenderLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9332DE27CE052500BACE93 /* DDBugfenderLogger.swift */; };
 		3B9332E127CE09ED00BACE93 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9332E027CE09ED00BACE93 /* Logger.swift */; };
 		3B9332E427CE0C8700BACE93 /* String+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9332E327CE0C8700BACE93 /* String+Extensions.swift */; };
+		3B9332E627CEF7AC00BACE93 /* DurationPredictionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9332E527CEF7AC00BACE93 /* DurationPredictionView.swift */; };
+		3B9332E827CF13B100BACE93 /* UUID+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9332E727CF13B100BACE93 /* UUID+Extensions.swift */; };
+		3B9332EA27CF1E8400BACE93 /* FeedbackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9332E927CF1E8400BACE93 /* FeedbackView.swift */; };
 		3BAAA67F27CC245200C0DDC4 /* EnvironmentalInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BAAA67E27CC245200C0DDC4 /* EnvironmentalInput.swift */; };
 		3BAAA68127CC247900C0DDC4 /* ControlledUserInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BAAA68027CC247900C0DDC4 /* ControlledUserInput.swift */; };
 		3BAAA68427CC24CA00C0DDC4 /* InputUnion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BAAA68327CC24CA00C0DDC4 /* InputUnion.swift */; };
@@ -241,6 +244,9 @@
 		3B9332DE27CE052500BACE93 /* DDBugfenderLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DDBugfenderLogger.swift; sourceTree = "<group>"; };
 		3B9332E027CE09ED00BACE93 /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 		3B9332E327CE0C8700BACE93 /* String+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Extensions.swift"; sourceTree = "<group>"; };
+		3B9332E527CEF7AC00BACE93 /* DurationPredictionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DurationPredictionView.swift; sourceTree = "<group>"; };
+		3B9332E727CF13B100BACE93 /* UUID+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UUID+Extensions.swift"; sourceTree = "<group>"; };
+		3B9332E927CF1E8400BACE93 /* FeedbackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackView.swift; sourceTree = "<group>"; };
 		3BAAA67D27C94B9B00C0DDC4 /* Headache_Tracker 1.5.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Headache_Tracker 1.5.xcdatamodel"; sourceTree = "<group>"; };
 		3BAAA67E27CC245200C0DDC4 /* EnvironmentalInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnvironmentalInput.swift; sourceTree = "<group>"; };
 		3BAAA68027CC247900C0DDC4 /* ControlledUserInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlledUserInput.swift; sourceTree = "<group>"; };
@@ -340,6 +346,7 @@
 				3BF5313827ACE18D00056673 /* ContentView.swift */,
 				3B051A4F27B0E9410017131D /* CurrentHeadacheView.swift */,
 				3BAAA69827CD5B0100C0DDC4 /* DebugSettingsView.swift */,
+				3B9332E927CF1E8400BACE93 /* FeedbackView.swift */,
 				3BAAA69227CC8A5800C0DDC4 /* GraphList.swift */,
 				3B051A4D27B0E9060017131D /* HeadachesView.swift */,
 				3B051A9027B0FACA0017131D /* HeadacheView.swift */,
@@ -420,6 +427,7 @@
 				3B68BDFD27BE2B57007AAAC6 /* Numeric+Extensions.swift */,
 				3B9332E327CE0C8700BACE93 /* String+Extensions.swift */,
 				3BAAA69027CC7F5500C0DDC4 /* UIColor+Extensions.swift */,
+				3B9332E727CF13B100BACE93 /* UUID+Extensions.swift */,
 				3BAAA68E27CC7E3F00C0DDC4 /* View+Extensions.swift */,
 			);
 			path = Extensions;
@@ -433,6 +441,7 @@
 				3B68BDFC27BE0FF0007AAAC6 /* Graphs */,
 				3B051AA127B357830017131D /* Modifiers */,
 				3B09191527BCD38300844F6C /* DurationView.swift */,
+				3B9332E527CEF7AC00BACE93 /* DurationPredictionView.swift */,
 				3B09191927BD58A100844F6C /* HorizontalSeverityLevel.swift */,
 				3B09191127BCCE1C00844F6C /* OnsetView.swift */,
 				3B68BE6627C35644007AAAC6 /* OutlookView.swift */,
@@ -664,7 +673,6 @@
 				3BF5313127ACE18D00056673 /* Resources */,
 				3B68BE5A27C349BA007AAAC6 /* Embed App Extensions */,
 				3B68BE1427BF5B12007AAAC6 /* Upload dSYM to Crashlytics */,
-				3B9332D427CE021E00BACE93 /* Upload dSYM to Bugfender */,
 			);
 			buildRules = (
 			);
@@ -838,24 +846,6 @@
 			shellPath = /bin/sh;
 			shellScript = "\"${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run\"\n";
 		};
-		3B9332D427CE021E00BACE93 /* Upload dSYM to Bugfender */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = "Upload dSYM to Bugfender";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\nBUGFENDER_SYMBOLICATION_URL=https://dashboard.bugfender.com/ ${BUILD_DIR%Build/*}SourcePackages/checkouts/BugfenderSDK-iOS/xcode-upload-symbols/upload-symbols.sh reYtR71jc7-937cf6dd4b844ef48f200d8d2cabfcb7\n";
-		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -884,6 +874,7 @@
 				3B9332C427CDF5BA00BACE93 /* SeverityRange.swift in Sources */,
 				3B68BDFB27BE0F00007AAAC6 /* BarGraph.swift in Sources */,
 				3B68BE6027C34B89007AAAC6 /* WidgetContent.swift in Sources */,
+				3B9332EA27CF1E8400BACE93 /* FeedbackView.swift in Sources */,
 				3B09191227BCCE1C00844F6C /* OnsetView.swift in Sources */,
 				3B051A4C27B0B4CC0017131D /* Severity+Extensions.swift in Sources */,
 				3B09191427BCCF9500844F6C /* Cell.swift in Sources */,
@@ -917,9 +908,11 @@
 				3BAAA68F27CC7E3F00C0DDC4 /* View+Extensions.swift in Sources */,
 				3BF5313927ACE18D00056673 /* ContentView.swift in Sources */,
 				3B09190B27BC7E0C00844F6C /* RefreshTask.swift in Sources */,
+				3B9332E827CF13B100BACE93 /* UUID+Extensions.swift in Sources */,
 				3B09190927BC7D8000844F6C /* Constants.swift in Sources */,
 				3BAAA69927CD5B0100C0DDC4 /* DebugSettingsView.swift in Sources */,
 				3B68BE2327C026BB007AAAC6 /* DurationRegressorOutput.swift in Sources */,
+				3B9332E627CEF7AC00BACE93 /* DurationPredictionView.swift in Sources */,
 				3BF5313727ACE18D00056673 /* Headache_TrackerApp.swift in Sources */,
 				3B09191A27BD58A100844F6C /* HorizontalSeverityLevel.swift in Sources */,
 				3B09190F27BCA52700844F6C /* BackgroundTask.swift in Sources */,
