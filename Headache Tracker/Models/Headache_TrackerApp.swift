@@ -68,6 +68,47 @@ extension Headache_TrackerApp {
   
 }
 
+class SceneDelegate: NSObject, UIWindowSceneDelegate, ObservableObject {
+  
+  func sceneWillEnterForeground(_ scene: UIScene) {
+    // ...
+  }
+  
+  func sceneDidBecomeActive(_ scene: UIScene) {
+    // ...
+  }
+  
+  func sceneWillResignActive(_ scene: UIScene) {
+    // ...
+  }
+  
+  func scene(_ scene: UIScene, openURLContexts contexts: Set<UIOpenURLContext>) {
+    guard let url = contexts.first?.url else {
+      logDebug("No url.")
+      return
+    }
+    
+    guard let components = URLComponents(url: url, resolvingAgainstBaseURL: true) else {
+      logWarning("Unable to open URL \(url.absoluteString)")
+      return false
+    }
+    
+    // Check the scheme
+    guard components.scheme == "myheadache" else {
+      logWarning("Bad scheme \(components.scheme)")
+      return false
+    }
+    
+    // Check the host
+    guard components.host == "severity" else {
+      logWarning("Bad host \(components.host)")
+      return false
+    }
+    
+    logDebug("All good.")
+  }
+}
+
 class AppDelegate: NSObject, UIApplicationDelegate {
   
   // MARK: Public properties
@@ -141,6 +182,12 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     loadClassifiers()
     
     return true
+  }
+  
+  func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
+    let sceneConfiguration = UISceneConfiguration(name: nil, sessionRole: connectingSceneSession.role)
+    sceneConfiguration.delegateClass = SceneDelegate.self
+    return sceneConfiguration
   }
   
 }

@@ -27,10 +27,7 @@ struct SeverityWidgetView: View {
         Spacer(minLength: 0.0)
         HStack(spacing: 0.0) {
           ForEach(0 ..< 5) { i in
-            SeverityButton(
-              severity: HKCategoryValueSeverity(orderingValue: i) ?? .notPresent,
-              selectedSeverity: entry.severity,
-              action: severityButtonAction)
+            SeverityButton(severity: HKCategoryValueSeverity(orderingValue: i) ?? .notPresent, selectedSeverity: entry.severity)
             
             if i < 4 {
               Spacer(minLength: 0.0)
@@ -42,14 +39,6 @@ struct SeverityWidgetView: View {
     }
     .padding()
   }
-}
-
-extension SeverityWidgetView {
-  
-  func severityButtonAction(_ severity: HKCategoryValueSeverity) {
-    
-  }
-  
 }
 
 struct SeverityWidgetView_Previews: PreviewProvider {
@@ -69,10 +58,6 @@ struct SeverityButton: View {
   /// The selected severity in the button's parent view.
   var selectedSeverity: HKCategoryValueSeverity? = nil
   
-  /// The button's action. If nil, then the button is drawn
-  /// as a rectantle instead.
-  let action: ((HKCategoryValueSeverity) -> Void)?
-  
   // MARK: Private properties
   
   /// The dimensions of the button's rectangle.
@@ -83,38 +68,26 @@ struct SeverityButton: View {
     return severity == selectedSeverity
   }
   
+  private var destinationURL: URL {
+    return URL(string: "myheadache://severity?rawValue=\(severity.rawValue)")!
+  }
+  
   var body: some View {
     VStack {
-      if let action = action {
-        Button {
-          action(severity)
-        } label: {
-          ZStack {
-            RoundedRectangle(cornerRadius: 12)
-              .frame(width: dimension, height: dimension)
-              .foregroundColor(selected ? severity.uiColor : Color.secondary.opacity(0.25))
-              .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                  .stroke(severity.uiColor.opacity(0.25), lineWidth: 4.0)
-              )
-            
-            //            if let image = severity.image {
-            //              image
-            //                .resizable()
-            //                .frame(width: dimension, height: dimension, alignment: .center)
-            //                .foregroundColor(selected ? .primary : Color(UIColor.secondarySystemGroupedBackground))
-            //            }
-          }
+      Link(destination: destinationURL) {
+        ZStack {
+          RoundedRectangle(cornerRadius: 12)
+            .frame(width: dimension, height: dimension)
+            .foregroundColor(selected ? severity.uiColor : Color.secondary.opacity(0.25))
+            .overlay(
+              RoundedRectangle(cornerRadius: 12)
+                .stroke(severity.uiColor.opacity(0.25), lineWidth: 4.0)
+            )
         }
-        .buttonStyle(BorderlessButtonStyle())
-        .foregroundColor(selected ? severity.uiColor : Color.secondary.opacity(0.25))
-        .cornerRadius(12)
       }
-      else {
-        RoundedRectangle(cornerRadius: 12)
-          .frame(width: dimension, height: dimension)
-          .foregroundColor(selected ? severity.uiColor : Color.secondary.opacity(0.25))
-      }
+      .buttonStyle(BorderlessButtonStyle())
+      .foregroundColor(selected ? severity.uiColor : Color.secondary.opacity(0.25))
+      .cornerRadius(12)
       
       Text(severity.title)
         .font(.caption)
@@ -125,15 +98,9 @@ struct SeverityButton: View {
   
 }
 
-extension SeverityButton {
-  
-}
-
 struct SeverityButton_Previews: PreviewProvider {
   static var previews: some View {
-    SeverityButton(severity: .notPresent, selectedSeverity: nil) { _ in
-      
-    }
+    SeverityButton(severity: .notPresent, selectedSeverity: nil)
   }
 }
 
