@@ -393,10 +393,10 @@ extension Predictor {
     )
     
     /// Save this prediction for the widget
-    SharedUserDefaults.standard.outlook = prediction.outlookClassifierOutput.prediction
-    SharedUserDefaults.standard.severity = prediction.severityClassifierOutput.prediction
-    SharedUserDefaults.standard.onset = prediction.onsetRegressorOutput.prediction
-    SharedUserDefaults.standard.duration = prediction.durationRegressorOutput.prediction
+    SharedUserDefaults.standard.predictedOutlook = prediction.outlookClassifierOutput.prediction
+    SharedUserDefaults.standard.predictedSeverity = prediction.severityClassifierOutput.prediction
+    SharedUserDefaults.standard.predictedOnset = prediction.onsetRegressorOutput.prediction
+    SharedUserDefaults.standard.predictedDuration = prediction.durationRegressorOutput.prediction
     
     // Update the prediction value
     DispatchQueue.main.async { [weak self] in

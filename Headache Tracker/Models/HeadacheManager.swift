@@ -146,6 +146,9 @@ extension HeadacheManager {
         return
       }
       
+      // If there wasn't an error, then update the widget data and continue
+      SharedUserDefaults.standard.currentSeverity = severity
+      
       // Write the data to health kit and set our check-in alert
       self.healthKitManager?.saveSeveritySamples(intervals: severityInterval == nil ? [] : [severityInterval!]) { saveError in
         self.presentCheckInAlert(with: headacheIdentifier) { checkInError in
@@ -182,6 +185,9 @@ extension HeadacheManager {
         completion(error)
         return
       }
+      
+      // If there wasn't an error, then update the widget data and continue
+      SharedUserDefaults.standard.currentSeverity = nil
       
       // Cancel any pending notifications
       self.alertManager?.removeRequests(pending: true, delivered: false)
@@ -220,6 +226,9 @@ extension HeadacheManager {
         completion(error)
         return
       }
+      
+      // If there wasn't an error, then update the widget data and continue
+      SharedUserDefaults.standard.currentSeverity = nil
       
       // If there wasn't an error, then we should check and delete it from health kit
       if let startTime = startTime, let endTime = endTime {

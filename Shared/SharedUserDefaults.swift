@@ -13,10 +13,11 @@ class SharedUserDefaults {
   // MARK: Types
   
   struct Keys {
-    static let outlookKey = "outlook"
-    static let onset = "onset"
-    static let duration = "duration"
-    static let severity = "severity"
+    static let predictedOutlook = "predicted.outlook"
+    static let predictedOnset = "predicted.onset"
+    static let predictedDuration = "predicted.duration"
+    static let predictedSeverity = "predicted.severity"
+    static let currentSeverity = "current.severity"
   }
   
   // MARK: Static properties
@@ -34,56 +35,71 @@ class SharedUserDefaults {
   
   // MARK: Public properties
   
-  /// The current outlook.
-  var outlook: Outlook? {
+  /// The predicted outlook.
+  var predictedOutlook: Outlook? {
     get {
-      if let outlook = defaults?.string(forKey: Keys.outlookKey) {
+      if let outlook = defaults?.string(forKey: Keys.predictedOutlook) {
         return Outlook(rawValue: outlook) ?? .noHeadache
       }
       return .noHeadache
     }
     
     set {
-      defaults?.set(newValue?.rawValue, forKey: Keys.outlookKey)
+      defaults?.set(newValue?.rawValue, forKey: Keys.predictedOutlook)
       defaults?.synchronize()
     }
   }
   
-  /// The current onset.
-  var onset: Date? {
+  /// The predicted onset.
+  var predictedOnset: Date? {
     get {
-      return defaults?.value(forKey: Keys.onset) as? Date
+      return defaults?.value(forKey: Keys.predictedOnset) as? Date
     }
     
     set {
-      defaults?.set(newValue, forKey: Keys.onset)
+      defaults?.set(newValue, forKey: Keys.predictedOnset)
       defaults?.synchronize()
     }
   }
   
-  /// The current duration.
-  var duration: TimeInterval? {
+  /// The predicted duration.
+  var predictedDuration: TimeInterval? {
     get {
-      return defaults?.value(forKey: Keys.duration) as? TimeInterval
+      return defaults?.value(forKey: Keys.predictedDuration) as? TimeInterval
     }
     
     set {
-      defaults?.set(newValue, forKey: Keys.duration)
+      defaults?.set(newValue, forKey: Keys.predictedDuration)
       defaults?.synchronize()
     }
   }
   
-  /// The current severity.
-  var severity: HKCategoryValueSeverity? {
+  /// The predicted severity.
+  var predictedSeverity: HKCategoryValueSeverity? {
     get {
-      if let rawValue = defaults?.integer(forKey: Keys.severity) {
+      if let rawValue = defaults?.integer(forKey: Keys.predictedSeverity) {
         return HKCategoryValueSeverity(rawValue: rawValue) ?? .notPresent
       }
       return .notPresent
     }
     
     set {
-      defaults?.set(newValue?.rawValue, forKey: Keys.severity)
+      defaults?.set(newValue?.rawValue, forKey: Keys.predictedSeverity)
+      defaults?.synchronize()
+    }
+  }
+  
+  /// The current severity.
+  var currentSeverity: HKCategoryValueSeverity? {
+    get {
+      if let rawValue = defaults?.integer(forKey: Keys.currentSeverity) {
+        return HKCategoryValueSeverity(rawValue: rawValue) ?? .notPresent
+      }
+      return .notPresent
+    }
+    
+    set {
+      defaults?.set(newValue?.rawValue, forKey: Keys.currentSeverity)
       defaults?.synchronize()
     }
   }

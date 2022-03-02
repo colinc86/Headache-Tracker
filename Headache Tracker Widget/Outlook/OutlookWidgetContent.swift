@@ -1,5 +1,5 @@
 //
-//  WidgetContent.swift
+//  OutlookWidgetContent.swift
 //  Headache Tracker
 //
 //  Created by Colin Campbell on 2/20/22.
@@ -8,7 +8,7 @@
 import WidgetKit
 import HealthKit
 
-struct WidgetContent: TimelineEntry {
+struct OutlookWidgetContent: TimelineEntry {
   var date: Date
   let outlook: Outlook?
   let onset: Date?

@@ -68,8 +68,7 @@
 		3B68BE5327C349B9007AAAC6 /* Headache_Tracker_Widget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BE5227C349B9007AAAC6 /* Headache_Tracker_Widget.swift */; };
 		3B68BE5527C349BA007AAAC6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3B68BE5427C349BA007AAAC6 /* Assets.xcassets */; };
 		3B68BE5927C349BA007AAAC6 /* Headache Tracker WidgetExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 3B68BE4C27C349B9007AAAC6 /* Headache Tracker WidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		3B68BE6027C34B89007AAAC6 /* WidgetContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BE5F27C34B89007AAAC6 /* WidgetContent.swift */; };
-		3B68BE6127C34B8E007AAAC6 /* WidgetContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BE5F27C34B89007AAAC6 /* WidgetContent.swift */; };
+		3B68BE6127C34B8E007AAAC6 /* OutlookWidgetContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BE5F27C34B89007AAAC6 /* OutlookWidgetContent.swift */; };
 		3B68BE6A27C35778007AAAC6 /* OutlookView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BE6627C35644007AAAC6 /* OutlookView.swift */; };
 		3B68BE7027C36834007AAAC6 /* SharedUserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BE6F27C36834007AAAC6 /* SharedUserDefaults.swift */; };
 		3B68BE7327C36928007AAAC6 /* ApplicationKey in Frameworks */ = {isa = PBXBuildFile; productRef = 3B68BE7227C36928007AAAC6 /* ApplicationKey */; };
@@ -95,6 +94,14 @@
 		3B9332E627CEF7AC00BACE93 /* DurationPredictionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9332E527CEF7AC00BACE93 /* DurationPredictionView.swift */; };
 		3B9332E827CF13B100BACE93 /* UUID+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9332E727CF13B100BACE93 /* UUID+Extensions.swift */; };
 		3B9332EA27CF1E8400BACE93 /* FeedbackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9332E927CF1E8400BACE93 /* FeedbackView.swift */; };
+		3B9332EE27CF38B300BACE93 /* ApplicationKey in Frameworks */ = {isa = PBXBuildFile; productRef = 3B9332ED27CF38B300BACE93 /* ApplicationKey */; };
+		3B9332F127CF3B5300BACE93 /* OutlookWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9332EF27CF3ADB00BACE93 /* OutlookWidget.swift */; };
+		3B9332F427CF3BB200BACE93 /* SeverityWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9332F227CF3BAF00BACE93 /* SeverityWidget.swift */; };
+		3B9332F627CF3C2E00BACE93 /* OutlookWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9332F527CF3C2E00BACE93 /* OutlookWidgetView.swift */; };
+		3B9332F827CF3CA600BACE93 /* OutlookWidgetProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9332F727CF3CA600BACE93 /* OutlookWidgetProvider.swift */; };
+		3B9332FC27CF401F00BACE93 /* SeverityWidgetContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9332FB27CF401F00BACE93 /* SeverityWidgetContent.swift */; };
+		3B9332FE27CF40A300BACE93 /* SeverityWidgetProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9332FD27CF40A300BACE93 /* SeverityWidgetProvider.swift */; };
+		3B93330027CF419C00BACE93 /* SeverityWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9332FF27CF419C00BACE93 /* SeverityWidgetView.swift */; };
 		3BAAA67F27CC245200C0DDC4 /* EnvironmentalInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BAAA67E27CC245200C0DDC4 /* EnvironmentalInput.swift */; };
 		3BAAA68127CC247900C0DDC4 /* ControlledUserInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BAAA68027CC247900C0DDC4 /* ControlledUserInput.swift */; };
 		3BAAA68427CC24CA00C0DDC4 /* InputUnion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BAAA68327CC24CA00C0DDC4 /* InputUnion.swift */; };
@@ -227,7 +234,7 @@
 		3B68BE5227C349B9007AAAC6 /* Headache_Tracker_Widget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Headache_Tracker_Widget.swift; sourceTree = "<group>"; };
 		3B68BE5427C349BA007AAAC6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		3B68BE5627C349BA007AAAC6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		3B68BE5F27C34B89007AAAC6 /* WidgetContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetContent.swift; sourceTree = "<group>"; };
+		3B68BE5F27C34B89007AAAC6 /* OutlookWidgetContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutlookWidgetContent.swift; sourceTree = "<group>"; };
 		3B68BE6627C35644007AAAC6 /* OutlookView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutlookView.swift; sourceTree = "<group>"; };
 		3B68BE6B27C35EB9007AAAC6 /* Headache Tracker WidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Headache Tracker WidgetExtension.entitlements"; sourceTree = "<group>"; };
 		3B68BE6F27C36834007AAAC6 /* SharedUserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedUserDefaults.swift; sourceTree = "<group>"; };
@@ -247,6 +254,13 @@
 		3B9332E527CEF7AC00BACE93 /* DurationPredictionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DurationPredictionView.swift; sourceTree = "<group>"; };
 		3B9332E727CF13B100BACE93 /* UUID+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UUID+Extensions.swift"; sourceTree = "<group>"; };
 		3B9332E927CF1E8400BACE93 /* FeedbackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackView.swift; sourceTree = "<group>"; };
+		3B9332EF27CF3ADB00BACE93 /* OutlookWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutlookWidget.swift; sourceTree = "<group>"; };
+		3B9332F227CF3BAF00BACE93 /* SeverityWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeverityWidget.swift; sourceTree = "<group>"; };
+		3B9332F527CF3C2E00BACE93 /* OutlookWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutlookWidgetView.swift; sourceTree = "<group>"; };
+		3B9332F727CF3CA600BACE93 /* OutlookWidgetProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutlookWidgetProvider.swift; sourceTree = "<group>"; };
+		3B9332FB27CF401F00BACE93 /* SeverityWidgetContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeverityWidgetContent.swift; sourceTree = "<group>"; };
+		3B9332FD27CF40A300BACE93 /* SeverityWidgetProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeverityWidgetProvider.swift; sourceTree = "<group>"; };
+		3B9332FF27CF419C00BACE93 /* SeverityWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeverityWidgetView.swift; sourceTree = "<group>"; };
 		3BAAA67D27C94B9B00C0DDC4 /* Headache_Tracker 1.5.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Headache_Tracker 1.5.xcdatamodel"; sourceTree = "<group>"; };
 		3BAAA67E27CC245200C0DDC4 /* EnvironmentalInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnvironmentalInput.swift; sourceTree = "<group>"; };
 		3BAAA68027CC247900C0DDC4 /* ControlledUserInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlledUserInput.swift; sourceTree = "<group>"; };
@@ -285,6 +299,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3B68BE5027C349B9007AAAC6 /* SwiftUI.framework in Frameworks */,
+				3B9332EE27CF38B300BACE93 /* ApplicationKey in Frameworks */,
 				3B68BE4E27C349B9007AAAC6 /* WidgetKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -515,6 +530,8 @@
 		3B68BE5127C349B9007AAAC6 /* Headache Tracker Widget */ = {
 			isa = PBXGroup;
 			children = (
+				3B9332F927CF3CC300BACE93 /* Outlook */,
+				3B9332FA27CF3CDE00BACE93 /* Severity */,
 				3B68BE5227C349B9007AAAC6 /* Headache_Tracker_Widget.swift */,
 				3B68BE5427C349BA007AAAC6 /* Assets.xcassets */,
 				3B68BE5627C349BA007AAAC6 /* Info.plist */,
@@ -528,7 +545,6 @@
 				3BAAA69A27CDA52C00C0DDC4 /* HolisticOutlook.swift */,
 				3BAAA69D27CDAE9800C0DDC4 /* Outlook.swift */,
 				3B68BE6F27C36834007AAAC6 /* SharedUserDefaults.swift */,
-				3B68BE5F27C34B89007AAAC6 /* WidgetContent.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -540,6 +556,28 @@
 				3B9332E027CE09ED00BACE93 /* Logger.swift */,
 			);
 			path = Logging;
+			sourceTree = "<group>";
+		};
+		3B9332F927CF3CC300BACE93 /* Outlook */ = {
+			isa = PBXGroup;
+			children = (
+				3B9332EF27CF3ADB00BACE93 /* OutlookWidget.swift */,
+				3B68BE5F27C34B89007AAAC6 /* OutlookWidgetContent.swift */,
+				3B9332F727CF3CA600BACE93 /* OutlookWidgetProvider.swift */,
+				3B9332F527CF3C2E00BACE93 /* OutlookWidgetView.swift */,
+			);
+			path = Outlook;
+			sourceTree = "<group>";
+		};
+		3B9332FA27CF3CDE00BACE93 /* Severity */ = {
+			isa = PBXGroup;
+			children = (
+				3B9332F227CF3BAF00BACE93 /* SeverityWidget.swift */,
+				3B9332FB27CF401F00BACE93 /* SeverityWidgetContent.swift */,
+				3B9332FD27CF40A300BACE93 /* SeverityWidgetProvider.swift */,
+				3B9332FF27CF419C00BACE93 /* SeverityWidgetView.swift */,
+			);
+			path = Severity;
 			sourceTree = "<group>";
 		};
 		3BAAA68227CC248D00C0DDC4 /* Inputs */ = {
@@ -660,6 +698,7 @@
 			);
 			name = "Headache Tracker WidgetExtension";
 			packageProductDependencies = (
+				3B9332ED27CF38B300BACE93 /* ApplicationKey */,
 			);
 			productName = "Headache Tracker WidgetExtension";
 			productReference = 3B68BE4C27C349B9007AAAC6 /* Headache Tracker WidgetExtension.appex */;
@@ -891,10 +930,17 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3B9332FC27CF401F00BACE93 /* SeverityWidgetContent.swift in Sources */,
+				3B9332F827CF3CA600BACE93 /* OutlookWidgetProvider.swift in Sources */,
 				3BAAA69C27CDA68800C0DDC4 /* HolisticOutlook.swift in Sources */,
+				3B9332F127CF3B5300BACE93 /* OutlookWidget.swift in Sources */,
 				3B68BE7627C3699C007AAAC6 /* SharedUserDefaults.swift in Sources */,
+				3B93330027CF419C00BACE93 /* SeverityWidgetView.swift in Sources */,
 				3B68BE5327C349B9007AAAC6 /* Headache_Tracker_Widget.swift in Sources */,
-				3B68BE6127C34B8E007AAAC6 /* WidgetContent.swift in Sources */,
+				3B68BE6127C34B8E007AAAC6 /* OutlookWidgetContent.swift in Sources */,
+				3B9332F627CF3C2E00BACE93 /* OutlookWidgetView.swift in Sources */,
+				3B9332FE27CF40A300BACE93 /* SeverityWidgetProvider.swift in Sources */,
+				3B9332F427CF3BB200BACE93 /* SeverityWidget.swift in Sources */,
 				3BAAA69F27CDAE9D00C0DDC4 /* Outlook.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -911,7 +957,6 @@
 				3B13154927C9366700F6B50D /* WeatherManager.swift in Sources */,
 				3B9332C427CDF5BA00BACE93 /* SeverityRange.swift in Sources */,
 				3B68BDFB27BE0F00007AAAC6 /* BarGraph.swift in Sources */,
-				3B68BE6027C34B89007AAAC6 /* WidgetContent.swift in Sources */,
 				3B9332EA27CF1E8400BACE93 /* FeedbackView.swift in Sources */,
 				3B09191227BCCE1C00844F6C /* OnsetView.swift in Sources */,
 				3B051A4C27B0B4CC0017131D /* Severity+Extensions.swift in Sources */,
@@ -1105,6 +1150,9 @@
 				INFOPLIST_FILE = "Headache-Tracker-Info.plist";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Headache data is shared to the Health app.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Headache data is read from the Health application to look for trends.";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Your location is used to determine the current weather conditions.";
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "Your location is used to determine the current weather conditions in the background.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Your location is used to determine the current weather conditions.";
 				INFOPLIST_KEY_NSMotionUsageDescription = "Barometric pressure is used to help predict headaches.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -1381,6 +1429,9 @@
 				INFOPLIST_FILE = "Headache-Tracker-Info.plist";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Headache data is shared to the Health app.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Headache data is read from the Health application to look for trends.";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Your location is used to determine the current weather conditions.";
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "Your location is used to determine the current weather conditions in the background.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Your location is used to determine the current weather conditions.";
 				INFOPLIST_KEY_NSMotionUsageDescription = "Barometric pressure is used to help predict headaches.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -1416,6 +1467,9 @@
 				INFOPLIST_FILE = "Headache-Tracker-Info.plist";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Headache data is shared to the Health app.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Headache data is read from the Health application to look for trends.";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Your location is used to determine the current weather conditions.";
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "Your location is used to determine the current weather conditions in the background.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Your location is used to determine the current weather conditions.";
 				INFOPLIST_KEY_NSMotionUsageDescription = "Barometric pressure is used to help predict headaches.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -1670,6 +1724,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 3B9332D727CE03E700BACE93 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */;
 			productName = CocoaLumberjackSwiftLogBackend;
+		};
+		3B9332ED27CF38B300BACE93 /* ApplicationKey */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3B68BE7127C36928007AAAC6 /* XCRemoteSwiftPackageReference "ApplicationKey" */;
+			productName = ApplicationKey;
 		};
 		3BF5316C27ACEAC600056673 /* DataController */ = {
 			isa = XCSwiftPackageProductDependency;
