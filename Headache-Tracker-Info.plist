@@ -8,21 +8,23 @@
 		<string>com.cnc.Headache-Tracker.train</string>
 		<string>com.cnc.Headache-Tracker.outlook</string>
 	</array>
+	<key>CFBundleVersion</key>
+	<string>196</string>
+	<key>FirebaseCrashlyticsCollectionEnabled</key>
+	<string>false</string>
 	<key>GOOGLE_ANALYTICS_REGISTRATION_WITH_AD_NETWORK_ENABLED</key>
 	<false/>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Your location is used to determine the current weather conditions.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Your location is used to determine the current weather conditions in the background.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Your location is used to determine the current weather conditions.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>
 		<string>location</string>
 		<string>processing</string>
 	</array>
-	<key>FirebaseCrashlyticsCollectionEnabled</key>
-	<string>false</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Your location is used to determine the current weather conditions.</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Your location is used to determine the current weather conditions.</string>
-	<key>NSLocationAlwaysUsageDescription</key>
-	<string>Your location is used to determine the current weather conditions in the background.</string>
 </dict>
 </plist>

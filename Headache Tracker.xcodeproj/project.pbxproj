@@ -652,6 +652,7 @@
 				3B68BE4827C349B9007AAAC6 /* Sources */,
 				3B68BE4927C349B9007AAAC6 /* Frameworks */,
 				3B68BE4A27C349B9007AAAC6 /* Resources */,
+				3B9332EC27CF338100BACE93 /* Auto-Increment Bundle Version */,
 			);
 			buildRules = (
 			);
@@ -672,6 +673,7 @@
 				3BF5313027ACE18D00056673 /* Frameworks */,
 				3BF5313127ACE18D00056673 /* Resources */,
 				3B68BE5A27C349BA007AAAC6 /* Embed App Extensions */,
+				3B9332EB27CF332800BACE93 /* Auto-Increment Bundle Version */,
 				3B68BE1427BF5B12007AAAC6 /* Upload dSYM to Crashlytics */,
 			);
 			buildRules = (
@@ -845,6 +847,42 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run\"\n";
+		};
+		3B9332EB27CF332800BACE93 /* Auto-Increment Bundle Version */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Auto-Increment Bundle Version";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/bash;
+			shellScript = "#!/bin/bash\nbuildNumber=$(/usr/libexec/PlistBuddy -c \"Print CFBundleVersion\" \"$INFOPLIST_FILE\")\nbuildNumber=$((0x$buildNumber))\nbuildNumber=$(($buildNumber + 1))\nbuildNumber=$(printf \"%X\" $buildNumber)\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $buildNumber\" \"$INFOPLIST_FILE\"\n";
+		};
+		3B9332EC27CF338100BACE93 /* Auto-Increment Bundle Version */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Auto-Increment Bundle Version";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/bash;
+			shellScript = "#!/bin/bash\nbuildNumber=$(/usr/libexec/PlistBuddy -c \"Print CFBundleVersion\" \"$INFOPLIST_FILE\")\nbuildNumber=$((0x$buildNumber))\nbuildNumber=$(($buildNumber + 1))\nbuildNumber=$(printf \"%X\" $buildNumber)\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $buildNumber\" \"$INFOPLIST_FILE\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
