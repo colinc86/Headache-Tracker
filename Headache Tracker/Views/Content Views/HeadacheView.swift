@@ -248,7 +248,14 @@ extension HeadacheView {
 
 struct HeadacheView_Previews: PreviewProvider {
   static var previews: some View {
-    HeadacheView(headache: Previewing.CoreData.headache)
+    HeadacheView(headache: Previewing.CoreData.resolvedHeadache)
+      .environment(\.managedObjectContext, Previewing.CoreData.controller.container.viewContext)
+      .environmentObject(Previewing.headacheManager)
+      .environmentObject(Previewing.alertManager)
+      .environmentObject(Previewing.predictor)
+      .environmentObject(Previewing.healthKitManager)
+    
+    HeadacheView(headache: Previewing.CoreData.unresolvedHeadache)
       .environment(\.managedObjectContext, Previewing.CoreData.controller.container.viewContext)
       .environmentObject(Previewing.headacheManager)
       .environmentObject(Previewing.alertManager)

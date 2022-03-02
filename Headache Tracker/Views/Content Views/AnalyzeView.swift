@@ -51,7 +51,7 @@ struct AnalyzeView: View {
   @AppStorage(AppSettings.filterCount) private var filterCount: Int = 1
   
   /// The health integration setting.
-  @AppStorage(AppSettings.filterUnit) private var filterUnit: FilterUnit = .day
+  @AppStorage(AppSettings.filterUnit) private var filterUnit: FilterUnit = .month
   
   /// The main view context.
   @Environment(\.managedObjectContext) private var viewContext

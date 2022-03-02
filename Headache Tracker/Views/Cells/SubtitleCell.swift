@@ -43,11 +43,6 @@ struct SubtitleCell: View {
 struct SubtitleCell_Previews: PreviewProvider {
   static var previews: some View {
     SubtitleCell(title: "Title", subtitle: "Subtitle")
-      .environment(\.managedObjectContext, Previewing.CoreData.controller.container.viewContext)
-      .environmentObject(Previewing.headacheManager)
-      .environmentObject(Previewing.alertManager)
-      .environmentObject(Previewing.predictor)
-      .environmentObject(Previewing.healthKitManager)
       .previewLayout(PreviewLayout.fixed(width: 428, height: 20))
   }
 }

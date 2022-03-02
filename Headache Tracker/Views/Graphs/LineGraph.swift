@@ -84,6 +84,6 @@ struct LineGraph_Previews: PreviewProvider {
     LineGraph(series: [
       .mild, .notPresent, .unspecified
     ], gradient: Gradient(colors: [.cyan, .purple]))
-    .previewLayout(.fixed(width: 428, height: 200))
+      .previewLayout(.fixed(width: 428, height: 200))
   }
 }

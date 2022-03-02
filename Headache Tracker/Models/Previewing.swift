@@ -5,6 +5,7 @@
 //  Created by Colin Campbell on 2/3/22.
 //
 
+import CoreData
 import DataController
 import Foundation
 import SwiftUI
@@ -27,12 +28,28 @@ struct Previewing {
   struct CoreData {
     
     /// The preview data controller.
-    static let controller = DataController(containerName: "Headache_Tracker", inMemory: true)
+    static let controller: DataController = {
+      let context = DataController(containerName: "Headache_Tracker", inMemory: true)
+      resolvedHeadache = addResolvedHeadache(to: context.container.viewContext)
+      unresolvedHeadache = addUnresolvedHeadache(to: context.container.viewContext)
+      return context
+    }()
+      
     
-    /// A headache.
-    static var headache: Headache = {
+    /// A resolved headache.
+    static var resolvedHeadache: Headache! = nil
+    
+    /// An unresolved headache.
+    static var unresolvedHeadache: Headache! = nil
+    
+    /// A severity.
+    static var severity: Severity = {
+      return resolvedHeadache.severitiesArray.first!
+    }()
+    
+    static func addResolvedHeadache(to context: NSManagedObjectContext) -> Headache {
       let now = Date()
-      let headache = Headache(context: controller.container.viewContext, initialSeverity: .mild, startTime: now.addingTimeInterval(-3600.0))
+      let headache = Headache(context: context, initialSeverity: .mild, startTime: now.addingTimeInterval(-3600.0))
       headache.addSeverity(.moderate, startTime: now.addingTimeInterval(-3000.0))
       headache.addSeverity(.severe, startTime: now.addingTimeInterval(-2400.0))
       headache.addSeverity(.moderate, startTime: now.addingTimeInterval(-1200.0))
@@ -40,37 +57,31 @@ struct Previewing {
       headache.resolved = true
       
       do {
-        try controller.container.viewContext.save()
+        try context.save()
       }
       catch {
         fatalError(error.localizedDescription)
       }
       
       return headache
-    }()
+    }
     
-    /// An unresolved headache.
-    static var unresolvedHeadache: Headache = {
+    static func addUnresolvedHeadache(to context: NSManagedObjectContext) -> Headache {
       let now = Date()
-      let headache = Headache(context: controller.container.viewContext, initialSeverity: .mild, startTime: now.addingTimeInterval(-3600.0))
+      let headache = Headache(context: context, initialSeverity: .mild, startTime: now.addingTimeInterval(-3600.0))
       headache.addSeverity(.moderate, startTime: now.addingTimeInterval(-3000.0))
       headache.addSeverity(.severe, startTime: now.addingTimeInterval(-2400.0))
       headache.resolved = false
       
       do {
-        try controller.container.viewContext.save()
+        try context.save()
       }
       catch {
         fatalError(error.localizedDescription)
       }
       
       return headache
-    }()
-    
-    /// A severity.
-    static var severity: Severity = {
-      return headache.severitiesArray.first!
-    }()
+    }
     
   }
   

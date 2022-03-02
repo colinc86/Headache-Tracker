@@ -84,6 +84,12 @@ extension DurationView {
 
 struct DurationView_Previews: PreviewProvider {
   static var previews: some View {
-    DurationView(headache: Previewing.CoreData.headache)
+    DurationView(headache: Previewing.CoreData.resolvedHeadache)
+      .environment(\.managedObjectContext, Previewing.CoreData.controller.container.viewContext)
+      .environmentObject(Previewing.headacheManager)
+      .environmentObject(Previewing.alertManager)
+      .environmentObject(Previewing.predictor)
+      .environmentObject(Previewing.healthKitManager)
+      .previewLayout(.fixed(width: 428, height: 70))
   }
 }

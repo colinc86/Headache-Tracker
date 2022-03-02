@@ -142,8 +142,6 @@ struct DebugSettingsView_Previews: PreviewProvider {
     DebugSettingsView()
       .environment(\.managedObjectContext, Previewing.CoreData.controller.container.viewContext)
       .environmentObject(Previewing.headacheManager)
-      .environmentObject(Previewing.alertManager)
       .environmentObject(Previewing.predictor)
-      .environmentObject(Previewing.healthKitManager)
   }
 }

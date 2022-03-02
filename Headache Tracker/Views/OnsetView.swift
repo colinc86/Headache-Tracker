@@ -24,6 +24,7 @@ struct OnsetView: View {
 
 struct OnsetCell_Previews: PreviewProvider {
   static var previews: some View {
-    OnsetView(onset: Previewing.CoreData.headache.startTime ?? Date())
+    OnsetView(onset: Date(timeIntervalSinceNow: -3600.0))
+      .previewLayout(.fixed(width: 428, height: 70))
   }
 }

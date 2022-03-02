@@ -176,7 +176,7 @@ extension GraphList {
 struct GraphList_Previews: PreviewProvider {
   
   static var previews: some View {
-    GraphList(filterUnit: .month, earliestDate: Date())
+    GraphList(filterUnit: .day, earliestDate: Date(timeIntervalSinceNow: -600))
       .environment(\.managedObjectContext, Previewing.CoreData.controller.container.viewContext)
       .environmentObject(Previewing.headacheManager)
       .environmentObject(Previewing.alertManager)

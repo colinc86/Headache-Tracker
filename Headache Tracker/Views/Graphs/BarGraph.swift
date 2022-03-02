@@ -283,10 +283,10 @@ struct BarGraph_Previews: PreviewProvider {
   static var previews: some View {
     BarGraph(
       graphUnit: .severity,
-      statistic: Statistic(earliestDate: Date(), signal: [1.0, 2.0, 4.0], dates: [Date(), Date(), Date()]),
+      statistic: Statistic(earliestDate: Date().addingTimeInterval(-605.0), signal: [1.0, 2.0, 4.0], dates: [Date().addingTimeInterval(-600.0), Date().addingTimeInterval(-300.0), Date()]),
       yAxis: ["Not Present", "Present", "Mild", "Moderate", "Severe"],
       gradient: Gradient(colors: [.cyan, .purple]),
-      earliestDate: Date(),
+      earliestDate: Date().addingTimeInterval(-605.0),
       staticMax: 4)
       .previewLayout(.fixed(width: 428, height: 200))
   }

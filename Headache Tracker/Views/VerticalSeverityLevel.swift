@@ -63,7 +63,12 @@ extension VerticalSeverityLevel {
 
 struct VerticalSeverityLevel_Previews: PreviewProvider {
   static var previews: some View {
-    VerticalSeverityLevel(headache: Previewing.CoreData.headache)
+    VerticalSeverityLevel(headache: Previewing.CoreData.resolvedHeadache)
+      .environment(\.managedObjectContext, Previewing.CoreData.controller.container.viewContext)
+      .environmentObject(Previewing.headacheManager)
+      .environmentObject(Previewing.alertManager)
+      .environmentObject(Previewing.predictor)
+      .environmentObject(Previewing.healthKitManager)
       .previewLayout(PreviewLayout.fixed(width: 20, height: 50))
   }
 }

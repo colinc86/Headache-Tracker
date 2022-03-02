@@ -108,12 +108,12 @@ extension HeadacheCell {
 
 struct HeadacheCell_Previews: PreviewProvider {
   static var previews: some View {
-    HeadacheCell(headache: Previewing.CoreData.headache)
-      .environment(\.managedObjectContext, Previewing.CoreData.controller.container.viewContext)
-      .environmentObject(Previewing.headacheManager)
-      .environmentObject(Previewing.alertManager)
-      .environmentObject(Previewing.predictor)
-      .environmentObject(Previewing.healthKitManager)
+    HeadacheCell(headache: Previewing.CoreData.resolvedHeadache)
       .previewLayout(.fixed(width: 350.0, height: 75.0))
+      .previewDisplayName("Resolved Headache")
+    
+    HeadacheCell(headache: Previewing.CoreData.unresolvedHeadache)
+      .previewLayout(.fixed(width: 350.0, height: 75.0))
+      .previewDisplayName("Unesolved Headache")
   }
 }

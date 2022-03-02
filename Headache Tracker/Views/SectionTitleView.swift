@@ -29,5 +29,6 @@ struct SectionTitleView: View {
 struct SectionTitleView_Previews: PreviewProvider {
   static var previews: some View {
     SectionTitleView(title: "Title")
+      .previewLayout(.fixed(width: 428, height: 30))
   }
 }

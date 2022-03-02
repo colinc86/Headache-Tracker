@@ -66,8 +66,37 @@ extension HorizontalSeverityLevel {
 
 struct HorizontalSeverityLevel_Previews: PreviewProvider {
   static var previews: some View {
-    VerticalSeverityLevel(headache: Previewing.CoreData.headache)
-      .previewLayout(PreviewLayout.fixed(width: 20, height: 50))
+    HorizontalSeverityLevel(currentSeverity: nil, severityRange: nil, collapsed: false, action: nil)
+      .environment(\.managedObjectContext, Previewing.CoreData.controller.container.viewContext)
+      .environmentObject(Previewing.headacheManager)
+      .environmentObject(Previewing.alertManager)
+      .environmentObject(Previewing.predictor)
+      .environmentObject(Previewing.healthKitManager)
+      .previewLayout(PreviewLayout.fixed(width: 428, height: 130))
+    
+    HorizontalSeverityLevel(currentSeverity: .mild, severityRange: nil, collapsed: false, action: nil)
+      .environment(\.managedObjectContext, Previewing.CoreData.controller.container.viewContext)
+      .environmentObject(Previewing.headacheManager)
+      .environmentObject(Previewing.alertManager)
+      .environmentObject(Previewing.predictor)
+      .environmentObject(Previewing.healthKitManager)
+      .previewLayout(PreviewLayout.fixed(width: 428, height: 130))
+    
+    HorizontalSeverityLevel(currentSeverity: nil, severityRange: SeverityRange(lowerBound: .notPresent, upperBound: .severe), collapsed: false, action: nil)
+      .environment(\.managedObjectContext, Previewing.CoreData.controller.container.viewContext)
+      .environmentObject(Previewing.headacheManager)
+      .environmentObject(Previewing.alertManager)
+      .environmentObject(Previewing.predictor)
+      .environmentObject(Previewing.healthKitManager)
+      .previewLayout(PreviewLayout.fixed(width: 428, height: 130))
+    
+    HorizontalSeverityLevel(currentSeverity: nil, severityRange: nil, collapsed: true, action: nil)
+      .environment(\.managedObjectContext, Previewing.CoreData.controller.container.viewContext)
+      .environmentObject(Previewing.headacheManager)
+      .environmentObject(Previewing.alertManager)
+      .environmentObject(Previewing.predictor)
+      .environmentObject(Previewing.healthKitManager)
+      .previewLayout(PreviewLayout.fixed(width: 428, height: 70))
   }
 }
 

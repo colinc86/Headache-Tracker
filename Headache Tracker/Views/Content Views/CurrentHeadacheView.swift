@@ -388,6 +388,7 @@ extension CurrentHeadacheView {
 struct CurrentHeadacheView_Previews: PreviewProvider {
   static var previews: some View {
     CurrentHeadacheView()
+      .environmentObject(SceneDelegate())
       .environment(\.managedObjectContext, Previewing.CoreData.controller.container.viewContext)
       .environmentObject(Previewing.headacheManager)
       .environmentObject(Previewing.alertManager)

@@ -83,8 +83,19 @@ struct SeverityButton: View {
 
 struct SeverityButton_Previews: PreviewProvider {
   static var previews: some View {
-    SeverityButton(severity: .notPresent, selectedSeverity: nil, collapsed: false) { _ in
-      
-    }
+    SeverityButton(severity: .notPresent, selectedSeverity: nil, collapsed: false, action: nil)
+      .previewLayout(.fixed(width: 100, height: 100))
+    
+    SeverityButton(severity: .unspecified, selectedSeverity: .unspecified, collapsed: false, action: nil)
+      .previewLayout(.fixed(width: 100, height: 100))
+    
+    SeverityButton(severity: .mild, selectedSeverity: nil, collapsed: true, action: nil)
+      .previewLayout(.fixed(width: 100, height: 100))
+    
+    SeverityButton(severity: .moderate, selectedSeverity: .moderate, collapsed: true, action: nil)
+      .previewLayout(.fixed(width: 100, height: 100))
+    
+    SeverityButton(severity: .severe, selectedSeverity: nil, collapsed: false, action: nil)
+      .previewLayout(.fixed(width: 100, height: 100))
   }
 }
