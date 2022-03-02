@@ -55,6 +55,8 @@ extension TrainingData {
   /// - Parameter healthKitData: The health kit data.
   func updateWithHealthKitData(_ healthKitData: [HealthKitData: Double]?) {
     if let healthKitData = healthKitData {
+      needsHealthKitData = false
+      
       for (key, value) in healthKitData {
         switch key {
         case .heartRate: heartRate = value

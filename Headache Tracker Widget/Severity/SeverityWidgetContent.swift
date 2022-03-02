@@ -9,6 +9,6 @@ import WidgetKit
 import HealthKit
 
 struct SeverityWidgetContent: TimelineEntry {
-  var date: Date
+  let date = Date()
   let severity: HKCategoryValueSeverity?
 }

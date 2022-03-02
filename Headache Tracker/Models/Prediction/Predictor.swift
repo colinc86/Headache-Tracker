@@ -9,6 +9,7 @@ import ApplicationKey
 import CoreML
 import Foundation
 import HealthKit
+import WidgetKit
 
 #if NON_PREVIEW
 import CreateML
@@ -230,6 +231,7 @@ extension Predictor {
   ///   - completion: Called after training has completed.
   func train(with trainingData: [TrainingData], completion: @escaping (Error?) -> Void) {
     guard !training && !trainingData.isEmpty else {
+      logDebug("Training data is empty.")
       completion(nil)
       return
     }
@@ -393,10 +395,11 @@ extension Predictor {
     )
     
     /// Save this prediction for the widget
-    SharedUserDefaults.standard.predictedOutlook = prediction.outlookClassifierOutput.prediction
-    SharedUserDefaults.standard.predictedSeverity = prediction.severityClassifierOutput.prediction
-    SharedUserDefaults.standard.predictedOnset = prediction.onsetRegressorOutput.prediction
-    SharedUserDefaults.standard.predictedDuration = prediction.durationRegressorOutput.prediction
+    SharedUserDefaults.standard.setPredictionResults(
+      prediction.outlookClassifierOutput.prediction,
+      prediction.onsetRegressorOutput.prediction,
+      prediction.durationRegressorOutput.prediction,
+      prediction.severityClassifierOutput.prediction)
     
     // Update the prediction value
     DispatchQueue.main.async { [weak self] in

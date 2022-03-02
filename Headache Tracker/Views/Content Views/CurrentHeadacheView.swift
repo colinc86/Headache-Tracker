@@ -216,6 +216,7 @@ struct CurrentHeadacheView: View {
     }
     .confirmationDialog("Change headache severity to \((sceneDelegate.desiredSeverity ?? .notPresent).title.lowercased())?", isPresented: $showingSeverityConfirmation, titleVisibility: .visible) {
       Button("Change", action: confirmChangeSeverity)
+      Button("Cancel", role: .cancel, action: cancelChangeSeverity)
     }
   }
   
@@ -319,6 +320,12 @@ extension CurrentHeadacheView {
     
     // Change the severity
     changeSeverity(to: severity)
+  }
+  
+  /// Cancels the severity change.
+  private func cancelChangeSeverity() {
+    // Reset the desired severity
+    sceneDelegate.desiredSeverity = nil
   }
   
   /// Changes the current headache's severity or creates a new headache if one

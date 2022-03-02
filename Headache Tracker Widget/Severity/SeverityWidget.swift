@@ -10,7 +10,7 @@ import WidgetKit
 import SwiftUI
 
 struct SeverityWidget: Widget {
-  let kind: String = ApplicationKey(from: "severity")
+  let kind: String = SharedConstants.Widgets.severityWidgetKind
   
   var body: some WidgetConfiguration {
     StaticConfiguration(kind: kind, provider: SeverityWidgetProvider()) { entry in

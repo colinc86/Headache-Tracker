@@ -10,7 +10,7 @@ import SwiftUI
 
 struct SeverityWidgetProvider: TimelineProvider {
   
-  static let placeholder = SeverityWidgetContent(date: Date().addingTimeInterval(60.0), severity: nil)
+  static let placeholder = SeverityWidgetContent(severity: nil)
   
   func placeholder(in context: Context) -> SeverityWidgetContent {
     SeverityWidgetProvider.placeholder
@@ -21,7 +21,7 @@ struct SeverityWidgetProvider: TimelineProvider {
   }
   
   func getTimeline(in context: Context, completion: @escaping (Timeline<SeverityWidgetContent>) -> ()) {
-    completion(Timeline(entries: [currentContent()], policy: .atEnd))
+    completion(Timeline(entries: [currentContent()], policy: .never))
   }
   
 }
@@ -30,10 +30,7 @@ extension SeverityWidgetProvider {
   
   /// The current outlook content.
   private func currentContent() -> SeverityWidgetContent {
-    return SeverityWidgetContent(
-      date: Date().addingTimeInterval(60.0),
-      severity: SharedUserDefaults.standard.currentSeverity
-    )
+    return SeverityWidgetContent(severity: SharedUserDefaults.standard.currentSeverity)
   }
   
 }

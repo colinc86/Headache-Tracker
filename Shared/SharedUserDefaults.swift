@@ -7,6 +7,7 @@
 
 import Foundation
 import HealthKit
+import WidgetKit
 
 class SharedUserDefaults {
   
@@ -92,16 +93,43 @@ class SharedUserDefaults {
   /// The current severity.
   var currentSeverity: HKCategoryValueSeverity? {
     get {
-      if let rawValue = defaults?.integer(forKey: Keys.currentSeverity) {
-        return HKCategoryValueSeverity(rawValue: rawValue) ?? .notPresent
+      if let rawValue = defaults?.value(forKey: Keys.currentSeverity) as? Int {
+        return HKCategoryValueSeverity(rawValue: rawValue)
       }
-      return .notPresent
+      return nil
     }
     
     set {
       defaults?.set(newValue?.rawValue, forKey: Keys.currentSeverity)
       defaults?.synchronize()
     }
+  }
+  
+}
+
+extension SharedUserDefaults {
+  
+  /// Sets the prediction results and requests a widget reload.
+  ///
+  /// - Parameters:
+  ///   - outlook: The predicted outlook.
+  ///   - onset: The predicted onset.
+  ///   - duration: The predicted duration.
+  ///   - severity: The predicted severity
+  func setPredictionResults(_ outlook: Outlook?, _ onset: Date?, _ duration: TimeInterval?, _ severity: HKCategoryValueSeverity?) {
+    predictedOutlook = outlook
+    predictedOnset = onset
+    predictedDuration = duration
+    predictedSeverity = severity
+    WidgetCenter.shared.reloadTimelines(ofKind: SharedConstants.Widgets.outlookWidgetKind)
+  }
+  
+  /// Sets the current severity and requests a widget reload.
+  /// 
+  /// - Parameter severity: The current severity.
+  func setCurrentSeverity(_ severity: HKCategoryValueSeverity?) {
+    currentSeverity = severity
+    WidgetCenter.shared.reloadTimelines(ofKind: SharedConstants.Widgets.severityWidgetKind)
   }
   
 }

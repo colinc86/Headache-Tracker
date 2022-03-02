@@ -10,7 +10,7 @@ import WidgetKit
 import SwiftUI
 
 struct OutlookWidget: Widget {
-  let kind: String = ApplicationKey(from: "outlook")
+  let kind: String = SharedConstants.Widgets.outlookWidgetKind
   
   var body: some WidgetConfiguration {
     StaticConfiguration(kind: kind, provider: OutlookWidgetProvider()) { entry in

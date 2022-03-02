@@ -34,6 +34,8 @@
 		3B09192327BD91F400844F6C /* SectionTitleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B09192227BD91F400844F6C /* SectionTitleView.swift */; };
 		3B13154927C9366700F6B50D /* WeatherManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B13154827C9366700F6B50D /* WeatherManager.swift */; };
 		3B13154C27C940E800F6B50D /* Weather.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B13154B27C940E800F6B50D /* Weather.swift */; };
+		3B1C7DAC27CFFB8E000B3A99 /* SharedConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1C7DAB27CFFB8E000B3A99 /* SharedConstants.swift */; };
+		3B1C7DAD27CFFB8E000B3A99 /* SharedConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1C7DAB27CFFB8E000B3A99 /* SharedConstants.swift */; };
 		3B39DAD727ACF67600D39BB5 /* Previewing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B39DAD627ACF67600D39BB5 /* Previewing.swift */; };
 		3B39DAD927ACF74600D39BB5 /* Headache+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B39DAD827ACF74600D39BB5 /* Headache+Extensions.swift */; };
 		3B39DADB27ACFC9C00D39BB5 /* SubtitleCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B39DADA27ACFC9C00D39BB5 /* SubtitleCell.swift */; };
@@ -202,6 +204,7 @@
 		3B09192227BD91F400844F6C /* SectionTitleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SectionTitleView.swift; sourceTree = "<group>"; };
 		3B13154827C9366700F6B50D /* WeatherManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherManager.swift; sourceTree = "<group>"; };
 		3B13154B27C940E800F6B50D /* Weather.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Weather.swift; sourceTree = "<group>"; };
+		3B1C7DAB27CFFB8E000B3A99 /* SharedConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedConstants.swift; sourceTree = "<group>"; };
 		3B39DAD627ACF67600D39BB5 /* Previewing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Previewing.swift; sourceTree = "<group>"; };
 		3B39DAD827ACF74600D39BB5 /* Headache+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Headache+Extensions.swift"; sourceTree = "<group>"; };
 		3B39DADA27ACFC9C00D39BB5 /* SubtitleCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubtitleCell.swift; sourceTree = "<group>"; };
@@ -548,6 +551,7 @@
 			children = (
 				3BAAA69A27CDA52C00C0DDC4 /* HolisticOutlook.swift */,
 				3BAAA69D27CDAE9800C0DDC4 /* Outlook.swift */,
+				3B1C7DAB27CFFB8E000B3A99 /* SharedConstants.swift */,
 				3B68BE6F27C36834007AAAC6 /* SharedUserDefaults.swift */,
 			);
 			path = Shared;
@@ -958,6 +962,7 @@
 				3B9332FE27CF40A300BACE93 /* SeverityWidgetProvider.swift in Sources */,
 				3B9332F427CF3BB200BACE93 /* SeverityWidget.swift in Sources */,
 				3BAAA69F27CDAE9D00C0DDC4 /* Outlook.swift in Sources */,
+				3B1C7DAD27CFFB8E000B3A99 /* SharedConstants.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1046,6 +1051,7 @@
 				3B051A9827B1B4EC0017131D /* VerticalSeverityLevel.swift in Sources */,
 				3BF5316A27ACE47700056673 /* HeadacheManager.swift in Sources */,
 				3B4BA6FB27B6449F00F38851 /* Predictor.swift in Sources */,
+				3B1C7DAC27CFFB8E000B3A99 /* SharedConstants.swift in Sources */,
 				3B39DAE427AD06EA00D39BB5 /* SettingsView.swift in Sources */,
 				3BAAA69B27CDA52C00C0DDC4 /* HolisticOutlook.swift in Sources */,
 				3B051AA727B37D060017131D /* SeverityView.swift in Sources */,

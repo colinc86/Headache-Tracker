@@ -12,6 +12,7 @@ import DataController
 import Foundation
 import HealthKit
 import SwiftUI
+import WidgetKit
 
 class HeadacheManager: ObservableObject {
   
@@ -147,7 +148,7 @@ extension HeadacheManager {
       }
       
       // If there wasn't an error, then update the widget data and continue
-      SharedUserDefaults.standard.currentSeverity = severity
+      SharedUserDefaults.standard.setCurrentSeverity(severity)
       
       // Write the data to health kit and set our check-in alert
       self.healthKitManager?.saveSeveritySamples(intervals: severityInterval == nil ? [] : [severityInterval!]) { saveError in
@@ -187,7 +188,7 @@ extension HeadacheManager {
       }
       
       // If there wasn't an error, then update the widget data and continue
-      SharedUserDefaults.standard.currentSeverity = nil
+      SharedUserDefaults.standard.setCurrentSeverity(nil)
       
       // Cancel any pending notifications
       self.alertManager?.removeRequests(pending: true, delivered: false)
@@ -228,7 +229,7 @@ extension HeadacheManager {
       }
       
       // If there wasn't an error, then update the widget data and continue
-      SharedUserDefaults.standard.currentSeverity = nil
+      SharedUserDefaults.standard.setCurrentSeverity(nil)
       
       // If there wasn't an error, then we should check and delete it from health kit
       if let startTime = startTime, let endTime = endTime {
@@ -298,8 +299,10 @@ extension HeadacheManager {
         context.delete(headache)
         
         // If this headache was the current headache, then cancel any pending check-in notifications
+        // and reset the current severity.
         if !headache.resolved {
           self?.alertManager?.removeRequests(pending: true, delivered: false)
+          SharedUserDefaults.standard.setCurrentSeverity(nil)
         }
       }
     } completion: { [weak self] error in
@@ -736,7 +739,7 @@ extension HeadacheManager {
       
       let allTrainingData = (try? context.fetch(request)) ?? []
       
-      logDebug("Training classifiers...")
+      logDebug("Training classifiers with \(allTrainingData.count) data...")
       self?.predictor?.train(with: allTrainingData, completion: completion)
     }
   }
@@ -756,11 +759,11 @@ extension HeadacheManager {
 
       logDebug("Fetching incomplete training data...")
       let incompleteRequest = TrainingData.fetchRequest()
-      incompleteRequest.predicate = NSPredicate(format: "heartRate == %@", NSNumber(value: 0.0))
+      incompleteRequest.predicate = NSPredicate(format: "(needsHealthKitData == %@) || (needsHealthKitData == %@)", NSNumber(booleanLiteral: true), NSNull())
       
       let incompleteTrainingData = (try? context.fetch(incompleteRequest)) ?? []
       
-      logDebug("Updating \(incompleteTrainingData.count) traininig data...")
+      logDebug("Cleaning \(incompleteTrainingData.count) traininig data...")
       for data in incompleteTrainingData {
         guard let timestamp = data.timestamp else {
           continue
