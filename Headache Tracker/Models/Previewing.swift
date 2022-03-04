@@ -29,10 +29,10 @@ struct Previewing {
     
     /// The preview data controller.
     static let controller: DataController = {
-      let context = DataController(containerName: "Headache_Tracker", inMemory: true)
-      resolvedHeadache = addResolvedHeadache(to: context.container.viewContext)
-      unresolvedHeadache = addUnresolvedHeadache(to: context.container.viewContext)
-      return context
+      let controller = DataController(containerName: "Headache_Tracker", inMemory: true)
+      resolvedHeadache = addResolvedHeadache(to: controller.container.viewContext)
+      unresolvedHeadache = addUnresolvedHeadache(to: controller.container.viewContext)
+      return controller
     }()
       
     

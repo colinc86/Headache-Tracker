@@ -85,7 +85,7 @@ extension RefreshTask {
   ///
   /// - Parameter interval: The interval to schedule the task for.
   func schedule(interval: TimeInterval) async throws {
-    try await schedule(date: Date(timeIntervalSinceNow: interval), completion: completion)
+    try await schedule(date: Date(timeIntervalSinceNow: interval))
   }
   
   /// Cancels the scheduled task.

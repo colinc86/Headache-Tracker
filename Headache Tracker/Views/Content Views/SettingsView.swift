@@ -60,8 +60,11 @@ struct SettingsView: View {
     } set: { newValue in
       healthIntegration = newValue
       if healthIntegration {
-        healthKitManager.authorize { error in
-          if let error = error {
+        Task {
+          do {
+            try await healthKitManager.authorize()
+          }
+          catch {
             logError("Error authorizing HealthKit: \(error)")
           }
         }
@@ -199,7 +202,14 @@ extension SettingsView {
   /// - Parameter newValue: The new `dailyOutlookAlerts` value.
   private func dailyOutlookAlertsChanged(_ newValue: Bool) {
     if newValue {
-      headacheManager.scheduleOutlookRefreshTask()
+      Task {
+        do {
+          try await headacheManager.scheduleOutlookRefreshTask()
+        }
+        catch {
+          logError("Error scheduling outlook refresh task: \(error)")
+        }
+      }
     }
     else {
       headacheManager.cancelOutlookRefreshTask()

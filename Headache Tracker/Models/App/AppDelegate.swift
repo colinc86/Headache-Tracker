@@ -74,6 +74,9 @@ class AppDelegate: NSObject, UIApplicationDelegate, ObservableObject {
     // Make sure the headache manager has a reference to the alert and health kit managers
     setHeadacheManagerReferences()
     
+    // Check our location authorization status
+    checkLocationAuthorizationStatus()
+    
     // Set up the async stuff
     Task {
       do {
@@ -82,9 +85,6 @@ class AppDelegate: NSObject, UIApplicationDelegate, ObservableObject {
         
         // Check our health kit authorization status
         try await checkHealthKitAuthorizationStatus()
-        
-        // Check our location authorization status
-        try await checkLocationAuthorizationStatus()
         
         // Load our ML classifiers
         try await loadClassifiers()

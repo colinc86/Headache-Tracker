@@ -106,17 +106,23 @@ struct DebugSettingsView: View {
       
       Section {
         Button("Train Models") {
-          headacheManager.trainClassifiers { error in
-            if let error = error {
+          Task {
+            do {
+              try await headacheManager.trainClassifiers()
+            }
+            catch {
               logError("Error training classifiers: \(error)")
             }
           }
         }
         
-        Button("Clean Data") {
-          headacheManager.cleanTrainingData { error in
-            if let error = error {
-              logError("Error cleaning data: \(error)")
+        Button("Train Models") {
+          Task {
+            do {
+              try await headacheManager.cleanTrainingData()
+            }
+            catch {
+              logError("Error training classifiers: \(error)")
             }
           }
         }

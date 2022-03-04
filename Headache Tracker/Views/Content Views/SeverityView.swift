@@ -174,11 +174,12 @@ extension SeverityView {
     }
     
     if let identifier = severity.identifier {
-      headacheManager.updateSeverity(identifier: identifier, value: editSeverity, startTime: editStartTime, endTime: editEndTime) { error in
-        DispatchQueue.main.async {
-          if let error = error {
-            showAlert("Error Saving Severity", error)
-          }
+      Task {
+        do {
+          try await headacheManager.updateSeverity(identifier: identifier, value: editSeverity, startTime: editStartTime, endTime: editEndTime)
+        }
+        catch {
+          showAlert("Error Saving Severity", error)
         }
       }
     }
@@ -187,14 +188,13 @@ extension SeverityView {
   /// Deletes the view's severity.
   private func delete() {
     if let identifier = severity.identifier {
-      headacheManager.deleteSeverity(identifier: identifier) { error in
-        DispatchQueue.main.async {
-          if let error = error {
-            showAlert("Unable to Delete Severity", error)
-          }
-          else {
-            presentationMode.wrappedValue.dismiss()
-          }
+      Task {
+        do {
+          try await headacheManager.deleteSeverity(identifier: identifier)
+          presentationMode.wrappedValue.dismiss()
+        }
+        catch {
+          showAlert("Unable to Delete Severity", error)
         }
       }
     }

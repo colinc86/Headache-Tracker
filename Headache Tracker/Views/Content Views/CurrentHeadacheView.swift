@@ -204,7 +204,12 @@ struct CurrentHeadacheView: View {
       .background(Color(UIColor.systemGroupedBackground))
       .navigationTitle("Track")
       .refreshable {
-        predict(forced: true)
+        do {
+          try await predict(forced: true)
+        }
+        catch {
+          logError("Error refreshing view: \(error)")
+        }
       }
     }
     .navigationViewStyle(StackNavigationViewStyle())
@@ -236,7 +241,14 @@ extension CurrentHeadacheView {
     }
     
     // Run a prediction
-    predict()
+    Task {
+      do {
+        try await predict()
+      }
+      catch {
+        logError("Error predicting: \(error)")
+      }
+    }
   }
   
   /// Called when the view appears and reloads the classifier input.
@@ -246,13 +258,21 @@ extension CurrentHeadacheView {
       return
     }
     
-    predict()
+    Task {
+      do {
+        try await predict()
+      }
+      catch {
+        logError("Error predicting: \(error)")
+      }
+    }
   }
   
   /// Updates the classifier input.
   private func predict(forced: Bool = false) async throws {
-    try await withAnimation {
-      needsInput = try await headacheManager.needsNotPresentTrainingData()
+    let needsData = try await headacheManager.needsNotPresentTrainingData()
+    withAnimation {
+      needsInput = needsData
     }
     
     // Check if we should run a prediction
@@ -313,20 +333,22 @@ extension CurrentHeadacheView {
   /// doesn't exist.
   ///
   /// - Parameter severity: The new severity.
-  private func changeSeverity(to severity: HKCategoryValueSeverity) async {
+  private func changeSeverity(to severity: HKCategoryValueSeverity) {
     guard !updatingHeadache else { return }
     logDebug("Change severity to \(severity.title).")
     
     withAnimation { updatingHeadache = true }
     
-    do {
-      try await headacheManager.changeSeverity(to: severity)
+    Task {
+      do {
+        try await headacheManager.changeSeverity(to: severity)
+      }
+      catch {
+        showAlert("Unable to Change Severity", error)
+      }
+      
+      withAnimation { updatingHeadache = false }
     }
-    catch {
-      showAlert("Unable to Update Severity", error)
-    }
-    
-    withAnimation { updatingHeadache = false }
   }
   
   /// Resolves the current headache.
@@ -336,14 +358,16 @@ extension CurrentHeadacheView {
     
     withAnimation { updatingHeadache = true }
     
-    do {
-      try await headacheManager.resolve()
+    Task {
+      do {
+        try await headacheManager.resolve()
+      }
+      catch {
+        showAlert("Unable to Update Severity", error)
+      }
+      
+      withAnimation { updatingHeadache = false }
     }
-    catch {
-      showAlert("Unable to Update Severity", error)
-    }
-    
-    withAnimation { updatingHeadache = false }
   }
   
   /// The action to perform if there is no headache.
@@ -353,20 +377,22 @@ extension CurrentHeadacheView {
     
     handlingInput = true
     
-    do {
-      try await headacheManager.createTrainingData()
-      
-      // Check if we should show the not-present training data cell
-      try await withAnimation {
-        handlingInput = false
-        needsInput = try await headacheManager.needsNotPresentTrainingData()
+    Task {
+      do {
+        try await headacheManager.createTrainingData()
+        
+        // Check if we should show the not-present training data cell
+        let needsData = try await headacheManager.needsNotPresentTrainingData()
+        withAnimation {
+          needsInput = needsData
+        }
       }
+      catch {
+        showAlert("Error Saving Data", error)
+      }
+      
+      handlingInput = false
     }
-    catch {
-      showAlert("Error Saving Data", error)
-    }
-    
-    handlingInput = false
   }
   
 }

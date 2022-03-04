@@ -85,7 +85,16 @@ extension HeadachesView {
   /// - Parameter offsets: The item offsets.
   private func deleteUnresolvedHeadaches(offsets: IndexSet) {
     withAnimation {
-      offsets.map { unresolvedHeadaches[$0] }.forEach({ headacheManager.deleteHeadache(identifier: $0.identifier ?? UUID()) })
+      offsets.map { unresolvedHeadaches[$0] }.forEach({ headache in
+        Task {
+          do {
+            try await headacheManager.deleteHeadache(identifier: headache.identifier)
+          }
+          catch {
+            logError("Error deleting headache: \(error)")
+          }
+        }
+      })
     }
   }
   
@@ -94,7 +103,16 @@ extension HeadachesView {
   /// - Parameter offsets: The item offsets.
   private func deleteResolvedHeadaches(offsets: IndexSet) {
     withAnimation {
-      offsets.map { resolvedHeadaches[$0] }.forEach({ headacheManager.deleteHeadache(identifier: $0.identifier ?? UUID()) })
+      offsets.map { unresolvedHeadaches[$0] }.forEach({ headache in
+        Task {
+          do {
+            try await headacheManager.deleteHeadache(identifier: headache.identifier)
+          }
+          catch {
+            logError("Error deleting headache: \(error)")
+          }
+        }
+      })
     }
   }
   

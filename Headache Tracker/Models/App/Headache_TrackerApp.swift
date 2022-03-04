@@ -51,7 +51,15 @@ extension Headache_TrackerApp {
     appDelegate.headacheManager.cancelTrainingProcessingTask()
     appDelegate.headacheManager.cancelPredictionRefreshTask()
     appDelegate.headacheManager.cancelOutlookRefreshTask()
-    appDelegate.checkForIncompleteTrainingData()
+    
+    Task {
+      do {
+        try await appDelegate.checkForIncompleteTrainingData()
+      }
+      catch {
+        logError("Error checking for incomplete training data: \(error)")
+      }
+    }
   }
   
   /// Called when the application resigns active.
@@ -59,12 +67,19 @@ extension Headache_TrackerApp {
     logDebug("Application will resign active.")
     
     // Schedule our training and prediction tasks
-    appDelegate.headacheManager.scheduleTrainingRefreshTask()
-    appDelegate.headacheManager.schedulePredictionRefreshTask()
-    
-    // Schedule our outlook task
-    if appDelegate.dailyOutlookAlerts {
-      appDelegate.headacheManager.scheduleOutlookRefreshTask()
+    Task {
+      do {
+        try await appDelegate.headacheManager.scheduleTrainingRefreshTask()
+        try await appDelegate.headacheManager.schedulePredictionRefreshTask()
+        
+        // Schedule our outlook task
+        if appDelegate.dailyOutlookAlerts {
+          try await appDelegate.headacheManager.scheduleOutlookRefreshTask()
+        }
+      }
+      catch {
+        logError("Error scheduling task: \(error)")
+      }
     }
   }
   

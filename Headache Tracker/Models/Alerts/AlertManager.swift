@@ -84,6 +84,7 @@ extension AlertManager {
   ///
   /// - Parameter options: The options to request authorization to.
   /// - Returns: The current authorization status.
+  @discardableResult
   @MainActor func setup(options: UNAuthorizationOptions) async throws -> UNAuthorizationStatus {
     let settings = await checkNotificationSettings()
     

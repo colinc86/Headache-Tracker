@@ -256,8 +256,11 @@ extension HeadacheManager {
   /// Deletes the headache with the given identifier and it's associated health kit data.
   ///
   /// - Parameter identifier: The headache's identifier.
-  func deleteHeadache(identifier: UUID) async throws {
+  func deleteHeadache(identifier: UUID?) async throws {
     logDebug("Delete headache.")
+    guard let identifier = identifier else {
+      return
+    }
     
     // The start and end times to delete from health kit
     var startTime: Date?
@@ -294,8 +297,11 @@ extension HeadacheManager {
   /// Deletes the severity with the given identifier.
   ///
   /// - Parameter identifier: The severity's identifier.
-  func deleteSeverity(identifier: UUID) async throws {
+  func deleteSeverity(identifier: UUID?) async throws {
     logDebug("Delete severity.")
+    guard let identifier = identifier else {
+      return
+    }
     
     var originalHeadacheInterval: DateInterval?
     var newSeveritySamples = [SeverityInterval]()

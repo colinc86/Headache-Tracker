@@ -161,11 +161,12 @@ extension HeadacheView {
   /// Adds a severity to the headache.
   private func addSeverity() {
     if let identifier = headache.identifier {
-      headacheManager.addSeverityToHeadache(identifier: identifier) { error in
-        DispatchQueue.main.async {
-          if let error = error {
-            showAlert("Unable to Add Severity", error.localizedDescription)
-          }
+      Task {
+        do {
+          try await headacheManager.addSeverityToHeadache(identifier: identifier)
+        }
+        catch {
+          showAlert("Unable to Add Severity", error.localizedDescription)
         }
       }
     }
@@ -176,21 +177,29 @@ extension HeadacheView {
   /// - Parameter offsets: The item offsets.
   private func deleteSeverities(offsets: IndexSet) {
     withAnimation {
-      offsets.map { headache.severitiesArray[$0] }.forEach({ headacheManager.deleteSeverity(identifier: $0.identifier ?? UUID()) })
+      offsets.map { headache.severitiesArray[$0] }.forEach({ headache in
+        Task {
+          do {
+            try await headacheManager.deleteSeverity(identifier: headache.identifier)
+          }
+          catch {
+            showAlert("Unable to Delete Severity", error.localizedDescription)
+          }
+        }
+      })
     }
   }
   
   /// Deletes the view's headache.
   private func delete() {
     if let identifier = headache.identifier {
-      headacheManager.deleteHeadache(identifier: identifier) { error in
-        DispatchQueue.main.async {
-          if let error = error {
-            showAlert("Unable to Delete Headache", error.localizedDescription)
-          }
-          else {
-            presentationMode.wrappedValue.dismiss()
-          }
+      Task {
+        do {
+          try await headacheManager.deleteHeadache(identifier: identifier)
+          presentationMode.wrappedValue.dismiss()
+        }
+        catch {
+          showAlert("Unable to Delete Headache", error.localizedDescription)
         }
       }
     }
