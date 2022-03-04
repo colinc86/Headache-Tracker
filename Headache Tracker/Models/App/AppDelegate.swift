@@ -75,7 +75,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, ObservableObject {
     setHeadacheManagerReferences()
     
     // Check our location authorization status
-    checkLocationAuthorizationStatus()
+    weatherManager.setup()
     
     // Set up the async stuff
     Task {
@@ -87,7 +87,9 @@ class AppDelegate: NSObject, UIApplicationDelegate, ObservableObject {
         try await checkHealthKitAuthorizationStatus()
         
         // Load our ML classifiers
-        try await loadClassifiers()
+        try await predictor.load()
+        
+        try await headacheManager.upgradeTrainingData()
       }
       catch {
         logError("Error handling async process: \(error)")
@@ -101,17 +103,6 @@ class AppDelegate: NSObject, UIApplicationDelegate, ObservableObject {
     let sceneConfiguration = UISceneConfiguration(name: nil, sessionRole: connectingSceneSession.role)
     sceneConfiguration.delegateClass = SceneDelegate.self
     return sceneConfiguration
-  }
-  
-}
-
-// MARK: Public methods
-
-extension AppDelegate {
-  
-  /// Checks for incomplete training data.
-  func checkForIncompleteTrainingData() async throws {
-    try await headacheManager.cleanTrainingData()
   }
   
 }
@@ -144,16 +135,6 @@ extension AppDelegate {
     if healthIntegration && healthKitManager.needsAuthorization() {
       try await healthKitManager.authorize()
     }
-  }
-  
-  /// Checks for locationi authorization status.
-  private func checkLocationAuthorizationStatus() {
-    weatherManager.setup()
-  }
-  
-  /// Loads the ML classifiers and get's them ready for use.
-  private func loadClassifiers() async throws {
-    try await predictor.load()
   }
   
 }

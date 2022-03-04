@@ -15,15 +15,19 @@ import CreateML
 
 extension TrainingData {
   
-  var barometicPressureMeasurement: Measurement<UnitPressure> {
+  var devicePressureMeasurement: Measurement<UnitPressure> {
     return Measurement(value: barometricPressure, unit: .kilopascals)
   }
   
-  var currentPressureMeasurement: Measurement<UnitPressure> {
+  var pressureMeasurement: Measurement<UnitPressure> {
     return Measurement(value: currentPressure, unit: .kilopascals)
   }
   
-  var currentTemperatureMeasurement: Measurement<UnitTemperature> {
+  var humidityMeasurement: Measurement<UnitRate> {
+    return Measurement(value: currentHumidity, unit: .decimal)
+  }
+  
+  var temperatureMeasurement: Measurement<UnitTemperature> {
     return Measurement(value: currentTemperature, unit: .celsius)
   }
   
@@ -35,13 +39,13 @@ extension TrainingData {
     logDebug("Creating training data.")
     
     self.timestamp = input?.date
+    self.barometricPressure = input?.weather?.devicePressure.converted(to: .kilopascals).value ?? 0.0
     self.currentPressure = input?.weather?.currentPressure.converted(to: .kilopascals).value ?? 0.0
-    self.currentHumidity = input?.weather?.currentHumidity ?? 0.0
+    self.currentHumidity = input?.weather?.currentHumidity.converted(to: .decimal).value ?? 0.0
     self.currentTemperature = input?.weather?.currentTemperature.converted(to: .celsius).value ?? 0.0
     self.sigmaPressure = input?.weather?.sigmaPressure ?? 0.0
     self.sigmaHumidity = input?.weather?.sigmaHumidity ?? 0.0
     self.sigmaTemperature = input?.weather?.sigmaTemperature ?? 0.0
-    self.barometricPressure = input?.weather?.devicePressure.converted(to: .kilopascals).value ?? 0.0
     self.updateWithHealthKitData(input?.healthKitData)
   }
 }
@@ -55,13 +59,12 @@ extension TrainingData {
   /// - Parameter healthKitData: The health kit data.
   func updateWithHealthKitData(_ healthKitData: [HealthKitData: Double]?) {
     if let healthKitData = healthKitData {
-      needsHealthKitData = false
-      
       for (key, value) in healthKitData {
         switch key {
         case .heartRate: heartRate = value
         case .mindfulSession: mindfulSeconds = value
-        case .sleepAnalysis: sleepSeconds = value
+        case .sleepSeconds: sleepSeconds = value
+        case .sleepOnset: sleepOnset = value
         case .respiratoryRate: respiratoryRate = value
         case .oxygenSaturation: oxygenSaturation = value
         case .heartRateVariabilitySDNN: heartRateVariability = value
@@ -73,9 +76,9 @@ extension TrainingData {
         default: continue
         }
       }
-    }
-    else {
-      needsHealthKitData = true
+      
+      // Update the data version
+      version = Constants.trainingDataVersion
     }
   }
   
@@ -128,13 +131,12 @@ extension Array where Element == TrainingData {
     var table = [String: MLDataValueConvertible]()
     
     // Environmental input
-    table[EnvironmentalInput.FeatureName.currentPressure] = map({ $0.currentPressure })
+    table[EnvironmentalInput.FeatureName.currentPressure] = map({ $0.barometricPressure > 0.0 ? $0.barometricPressure : $0.currentPressure })
     table[EnvironmentalInput.FeatureName.currentHumidity] = map({ $0.currentHumidity })
     table[EnvironmentalInput.FeatureName.currentTemperature] = map({ $0.currentTemperature })
     table[EnvironmentalInput.FeatureName.sigmaPressure] = map({ $0.sigmaPressure })
     table[EnvironmentalInput.FeatureName.sigmaHumidity] = map({ $0.sigmaHumidity })
     table[EnvironmentalInput.FeatureName.sigmaTemperature] = map({ $0.sigmaTemperature })
-    table[EnvironmentalInput.FeatureName.barometricPressure] = map({ $0.barometricPressure })
     table[EnvironmentalInput.FeatureName.environmentAudioExposure] = map({ $0.environmentalAudioExposure })
     
     // Time input
@@ -161,7 +163,8 @@ extension Array where Element == TrainingData {
     
     // Controlled input
     table[ControlledUserInput.FeatureName.mindfulSession] = map({ $0.mindfulSeconds })
-    table[ControlledUserInput.FeatureName.sleepAnalysis] = map({ $0.sleepSeconds })
+    table[ControlledUserInput.FeatureName.sleepSeconds] = map({ $0.sleepSeconds })
+    table[ControlledUserInput.FeatureName.sleepOnset] = map({ $0.sleepOnset })
     table[ControlledUserInput.FeatureName.headphoneAudioExposure] = map({ $0.headphoneAudioExposure })
     table[ControlledUserInput.FeatureName.stepCount] = map({ $0.stepCount })
     
@@ -178,13 +181,12 @@ extension Array where Element == TrainingData {
     var table = [String: MLDataValueConvertible]()
     
     // Environmental input
-    table[EnvironmentalInput.FeatureName.currentPressure] = map({ $0.currentPressure })
+    table[EnvironmentalInput.FeatureName.currentPressure] = map({ $0.barometricPressure > 0.0 ? $0.barometricPressure : $0.currentPressure })
     table[EnvironmentalInput.FeatureName.currentHumidity] = map({ $0.currentHumidity })
     table[EnvironmentalInput.FeatureName.currentTemperature] = map({ $0.currentTemperature })
     table[EnvironmentalInput.FeatureName.sigmaPressure] = map({ $0.sigmaPressure })
     table[EnvironmentalInput.FeatureName.sigmaHumidity] = map({ $0.sigmaHumidity })
     table[EnvironmentalInput.FeatureName.sigmaTemperature] = map({ $0.sigmaTemperature })
-    table[EnvironmentalInput.FeatureName.barometricPressure] = map({ $0.barometricPressure })
     table[EnvironmentalInput.FeatureName.environmentAudioExposure] = map({ $0.environmentalAudioExposure })
     
     // Time input
@@ -211,7 +213,8 @@ extension Array where Element == TrainingData {
     
     // Controlled input
     table[ControlledUserInput.FeatureName.mindfulSession] = map({ $0.mindfulSeconds })
-    table[ControlledUserInput.FeatureName.sleepAnalysis] = map({ $0.sleepSeconds })
+    table[ControlledUserInput.FeatureName.sleepSeconds] = map({ $0.sleepSeconds })
+    table[ControlledUserInput.FeatureName.sleepOnset] = map({ $0.sleepOnset })
     table[ControlledUserInput.FeatureName.headphoneAudioExposure] = map({ $0.headphoneAudioExposure })
     table[ControlledUserInput.FeatureName.stepCount] = map({ $0.stepCount })
     
@@ -228,13 +231,12 @@ extension Array where Element == TrainingData {
     var table = [String: MLDataValueConvertible]()
     
     // Environmental input
-    table[EnvironmentalInput.FeatureName.currentPressure] = map({ $0.currentPressure })
+    table[EnvironmentalInput.FeatureName.currentPressure] = map({ $0.barometricPressure > 0.0 ? $0.barometricPressure : $0.currentPressure })
     table[EnvironmentalInput.FeatureName.currentHumidity] = map({ $0.currentHumidity })
     table[EnvironmentalInput.FeatureName.currentTemperature] = map({ $0.currentTemperature })
     table[EnvironmentalInput.FeatureName.sigmaPressure] = map({ $0.sigmaPressure })
     table[EnvironmentalInput.FeatureName.sigmaHumidity] = map({ $0.sigmaHumidity })
     table[EnvironmentalInput.FeatureName.sigmaTemperature] = map({ $0.sigmaTemperature })
-    table[EnvironmentalInput.FeatureName.barometricPressure] = map({ $0.barometricPressure })
     table[EnvironmentalInput.FeatureName.environmentAudioExposure] = map({ $0.environmentalAudioExposure })
     
     // Time input
@@ -261,7 +263,8 @@ extension Array where Element == TrainingData {
     
     // Controlled input
     table[ControlledUserInput.FeatureName.mindfulSession] = map({ $0.mindfulSeconds })
-    table[ControlledUserInput.FeatureName.sleepAnalysis] = map({ $0.sleepSeconds })
+    table[ControlledUserInput.FeatureName.sleepSeconds] = map({ $0.sleepSeconds })
+    table[ControlledUserInput.FeatureName.sleepOnset] = map({ $0.sleepOnset })
     table[ControlledUserInput.FeatureName.headphoneAudioExposure] = map({ $0.headphoneAudioExposure })
     table[ControlledUserInput.FeatureName.stepCount] = map({ $0.stepCount })
     
@@ -277,13 +280,12 @@ extension Array where Element == TrainingData {
     var table = [String: MLDataValueConvertible]()
     
     // Environmental input
-    table[EnvironmentalInput.FeatureName.currentPressure] = map({ $0.currentPressure })
+    table[EnvironmentalInput.FeatureName.currentPressure] = map({ $0.barometricPressure > 0.0 ? $0.barometricPressure : $0.currentPressure })
     table[EnvironmentalInput.FeatureName.currentHumidity] = map({ $0.currentHumidity })
     table[EnvironmentalInput.FeatureName.currentTemperature] = map({ $0.currentTemperature })
     table[EnvironmentalInput.FeatureName.sigmaPressure] = map({ $0.sigmaPressure })
     table[EnvironmentalInput.FeatureName.sigmaHumidity] = map({ $0.sigmaHumidity })
     table[EnvironmentalInput.FeatureName.sigmaTemperature] = map({ $0.sigmaTemperature })
-    table[EnvironmentalInput.FeatureName.barometricPressure] = map({ $0.barometricPressure })
     table[EnvironmentalInput.FeatureName.environmentAudioExposure] = map({ $0.environmentalAudioExposure })
     
     // Time input
@@ -310,7 +312,8 @@ extension Array where Element == TrainingData {
     
     // Controlled input
     table[ControlledUserInput.FeatureName.mindfulSession] = map({ $0.mindfulSeconds })
-    table[ControlledUserInput.FeatureName.sleepAnalysis] = map({ $0.sleepSeconds })
+    table[ControlledUserInput.FeatureName.sleepSeconds] = map({ $0.sleepSeconds })
+    table[ControlledUserInput.FeatureName.sleepOnset] = map({ $0.sleepOnset })
     table[ControlledUserInput.FeatureName.headphoneAudioExposure] = map({ $0.headphoneAudioExposure })
     table[ControlledUserInput.FeatureName.stepCount] = map({ $0.stepCount })
     

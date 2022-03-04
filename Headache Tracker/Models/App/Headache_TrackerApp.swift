@@ -54,7 +54,7 @@ extension Headache_TrackerApp {
     
     Task {
       do {
-        try await appDelegate.checkForIncompleteTrainingData()
+        try await appDelegate.headacheManager.upgradeTrainingData()
       }
       catch {
         logError("Error checking for incomplete training data: \(error)")

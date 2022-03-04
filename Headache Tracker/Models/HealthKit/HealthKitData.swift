@@ -23,7 +23,8 @@ enum HealthKitDataQueryType {
 /// HealthKit data.
 enum HealthKitData: CaseIterable {
   case headache
-  case sleepAnalysis
+  case sleepSeconds
+  case sleepOnset
   case mindfulSession
   case stepCount
   case environmentalAudioExposure
@@ -46,7 +47,7 @@ enum HealthKitData: CaseIterable {
   /// The data's type.
   var dataType: HealthKitDataType {
     switch self {
-    case .headache, .sleepAnalysis, .mindfulSession:
+    case .headache, .sleepSeconds, .sleepOnset, .mindfulSession:
       return .category
     default:
       return .quantity
@@ -57,7 +58,7 @@ enum HealthKitData: CaseIterable {
   var categoryTypeIdentifier: HKCategoryTypeIdentifier? {
     switch self {
     case .headache: return .headache
-    case .sleepAnalysis: return .sleepAnalysis
+    case .sleepSeconds, .sleepOnset: return .sleepAnalysis
     case .mindfulSession: return .mindfulSession
     default: return nil
     }
@@ -111,20 +112,21 @@ enum HealthKitData: CaseIterable {
   var queryType: HealthKitDataQueryType {
     switch self {
     case .headache,
-        .sleepAnalysis,
+        .sleepSeconds,
+        .sleepOnset,
         .mindfulSession:
       return .sample
     case .stepCount:
       return .statistics(options: .cumulativeSum)
     case .environmentalAudioExposure,
-        .headphoneAudioExposure,
-        .heartRate,
-        .heartRateVariabilitySDNN,
-        .oxygenSaturation:
+        .headphoneAudioExposure:
       return .statistics(options: .discreteAverage)
     case .restingHeartRate,
         .walkingHeartRateAverage,
-        .respiratoryRate:
+        .respiratoryRate,
+        .oxygenSaturation,
+        .heartRate,
+        .heartRateVariabilitySDNN:
       return .statistics(options: .mostRecent)
     }
   }

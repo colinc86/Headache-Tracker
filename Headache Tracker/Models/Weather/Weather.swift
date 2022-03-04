@@ -49,8 +49,8 @@ class Weather: CustomStringConvertible {
   var weatherSpread: WeatherSpread
   var devicePressure: Measurement<UnitPressure>
   
-  var currentHumidity: Double {
-    return weatherSpread.current.humidity / 100.0
+  var currentHumidity: Measurement<UnitRate> {
+    return Measurement(value: weatherSpread.current.humidity, unit: .percent)
   }
   
   var currentPressure: Measurement<UnitPressure> {

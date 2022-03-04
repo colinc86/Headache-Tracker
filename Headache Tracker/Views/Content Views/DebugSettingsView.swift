@@ -88,6 +88,10 @@ struct DebugSettingsView: View {
           Text("Training Data")
         }
         
+        SubtitleCell(title: "Data Version", subtitle: Constants.trainingDataVersion)
+      }
+      
+      Section {
         SubtitleCell(title: "Severe", subtitle: "\(severeTrainingData.count)")
         SubtitleCell(title: "Moderate", subtitle: "\(moderateTrainingData.count)")
         SubtitleCell(title: "Mild", subtitle: "\(mildTrainingData.count)")
@@ -100,7 +104,7 @@ struct DebugSettingsView: View {
         SubtitleCell(title: "Outlook Probability", subtitle: "\(predictor.prediction?.outlookClassifierOutput.probability?.percentFormat() ?? "N/A")")
         SubtitleCell(title: "Severity Classifier", subtitle: "\(predictor.prediction?.severityClassifierOutput.prediction.title ?? "")")
         SubtitleCell(title: "Severity Probability", subtitle: "\(predictor.prediction?.severityClassifierOutput.probability?.percentFormat() ?? "N/A")")
-        SubtitleCell(title: "Onset Regressor", subtitle: "\(predictor.prediction?.onsetRegressorOutput.prediction.formattedNonRelative() ?? "N/A")")
+        SubtitleCell(title: "Onset Regressor", subtitle: "\(predictor.prediction?.onsetRegressorOutput.prediction.formattedNonRelative() ?? "0.0")")
         SubtitleCell(title: "Duration Regressor", subtitle: "\(predictor.prediction?.durationRegressorOutput.prediction ?? 0.0)")
       }
       
@@ -115,19 +119,8 @@ struct DebugSettingsView: View {
             }
           }
         }
-        
-        Button("Train Models") {
-          Task {
-            do {
-              try await headacheManager.cleanTrainingData()
-            }
-            catch {
-              logError("Error training classifiers: \(error)")
-            }
-          }
-        }
       } footer: {
-        Text("Models last updated \(predictor.modelUpdatedAt?.formattedNonRelative() ?? "N/A")")
+        Text("Models last trained \(predictor.modelUpdatedAt?.formattedNonRelative() ?? "N/A")")
       }
       
       Section {

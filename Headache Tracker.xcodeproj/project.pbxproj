@@ -36,6 +36,8 @@
 		3B13154C27C940E800F6B50D /* Weather.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B13154B27C940E800F6B50D /* Weather.swift */; };
 		3B1C7DAC27CFFB8E000B3A99 /* SharedConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1C7DAB27CFFB8E000B3A99 /* SharedConstants.swift */; };
 		3B1C7DAD27CFFB8E000B3A99 /* SharedConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1C7DAB27CFFB8E000B3A99 /* SharedConstants.swift */; };
+		3B1C7DB027D1F0DB000B3A99 /* UnitRate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1C7DAF27D1F0DB000B3A99 /* UnitRate.swift */; };
+		3B1C7DB127D1F0DB000B3A99 /* UnitRate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1C7DAF27D1F0DB000B3A99 /* UnitRate.swift */; };
 		3B39DAD727ACF67600D39BB5 /* Previewing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B39DAD627ACF67600D39BB5 /* Previewing.swift */; };
 		3B39DAD927ACF74600D39BB5 /* Headache+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B39DAD827ACF74600D39BB5 /* Headache+Extensions.swift */; };
 		3B39DADB27ACFC9C00D39BB5 /* SubtitleCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B39DADA27ACFC9C00D39BB5 /* SubtitleCell.swift */; };
@@ -205,6 +207,8 @@
 		3B13154827C9366700F6B50D /* WeatherManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherManager.swift; sourceTree = "<group>"; };
 		3B13154B27C940E800F6B50D /* Weather.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Weather.swift; sourceTree = "<group>"; };
 		3B1C7DAB27CFFB8E000B3A99 /* SharedConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedConstants.swift; sourceTree = "<group>"; };
+		3B1C7DAE27D1EE32000B3A99 /* Headache_Tracker 1.6.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Headache_Tracker 1.6.xcdatamodel"; sourceTree = "<group>"; };
+		3B1C7DAF27D1F0DB000B3A99 /* UnitRate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnitRate.swift; sourceTree = "<group>"; };
 		3B39DAD627ACF67600D39BB5 /* Previewing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Previewing.swift; sourceTree = "<group>"; };
 		3B39DAD827ACF74600D39BB5 /* Headache+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Headache+Extensions.swift"; sourceTree = "<group>"; };
 		3B39DADA27ACFC9C00D39BB5 /* SubtitleCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubtitleCell.swift; sourceTree = "<group>"; };
@@ -432,6 +436,7 @@
 				3B09190A27BC7E0C00844F6C /* RefreshTask.swift */,
 				3B9332C527CDF5CA00BACE93 /* SeverityInterval.swift */,
 				3B9332C327CDF5BA00BACE93 /* SeverityRange.swift */,
+				3B1C7DAF27D1F0DB000B3A99 /* UnitRate.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -961,6 +966,7 @@
 				3B9332F627CF3C2E00BACE93 /* OutlookWidgetView.swift in Sources */,
 				3B9332FE27CF40A300BACE93 /* SeverityWidgetProvider.swift in Sources */,
 				3B9332F427CF3BB200BACE93 /* SeverityWidget.swift in Sources */,
+				3B1C7DB127D1F0DB000B3A99 /* UnitRate.swift in Sources */,
 				3BAAA69F27CDAE9D00C0DDC4 /* Outlook.swift in Sources */,
 				3B1C7DAD27CFFB8E000B3A99 /* SharedConstants.swift in Sources */,
 			);
@@ -999,6 +1005,7 @@
 				3BAAA69327CC8A5800C0DDC4 /* GraphList.swift in Sources */,
 				3B39DADB27ACFC9C00D39BB5 /* SubtitleCell.swift in Sources */,
 				3B68BE7827C41FDE007AAAC6 /* TrainingDataListView.swift in Sources */,
+				3B1C7DB027D1F0DB000B3A99 /* UnitRate.swift in Sources */,
 				3B39DAD927ACF74600D39BB5 /* Headache+Extensions.swift in Sources */,
 				3BAAA68427CC24CA00C0DDC4 /* InputUnion.swift in Sources */,
 				3B68BDFE27BE2B57007AAAC6 /* Numeric+Extensions.swift in Sources */,
@@ -1766,6 +1773,7 @@
 		3BF5314127ACE18F00056673 /* Headache_Tracker.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				3B1C7DAE27D1EE32000B3A99 /* Headache_Tracker 1.6.xcdatamodel */,
 				3BAAA67D27C94B9B00C0DDC4 /* Headache_Tracker 1.5.xcdatamodel */,
 				3B68BE2D27C33481007AAAC6 /* Headache_Tracker 1.4.xcdatamodel */,
 				3B68BE2C27C30923007AAAC6 /* Headache_Tracker 1.3.xcdatamodel */,
@@ -1774,7 +1782,7 @@
 				3B051A4927B0B3590017131D /* Headache_Tracker 1.0.xcdatamodel */,
 				3BF5314227ACE18F00056673 /* Headache_Tracker.xcdatamodel */,
 			);
-			currentVersion = 3BAAA67D27C94B9B00C0DDC4 /* Headache_Tracker 1.5.xcdatamodel */;
+			currentVersion = 3B1C7DAE27D1EE32000B3A99 /* Headache_Tracker 1.6.xcdatamodel */;
 			path = Headache_Tracker.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;

@@ -168,18 +168,16 @@ extension HeadacheManager {
   func resolve() async throws {
     logDebug("Resolve headache.")
     
-    // The date interval of the severity to save to health kit
-    var severityInterval: SeverityInterval?
-    
     // Get the current headache
-    try await currentHeadache { headache, context in
+    let severityInterval: SeverityInterval? = try await currentHeadache { headache, context in
       // Resolve the headache
       if let headache = headache {
-        severityInterval = headache.resolve(endTime: Date())
+        return headache.resolve(endTime: Date())
       }
       else {
         logWarning("No current headache to resolve.")
       }
+      return nil
     }
     
     // If there wasn't an error, then update the widget data and continue
@@ -241,13 +239,14 @@ extension HeadacheManager {
     logDebug("Add severity.")
     
     // The date interval of the severity to save to health kit
-    var severityInterval: SeverityInterval?
+    
     
     // Get the headache
-    try await headacheWithIdentifier(identifier: identifier) { headache, context in
+    let severityInterval: SeverityInterval? = try await headacheWithIdentifier(identifier: identifier) { headache, context in
       if let headache = headache {
-        severityInterval = headache.addSeverity(.notPresent, duration: 3600.0)
+        return headache.addSeverity(.notPresent, duration: 3600.0)
       }
+      return nil
     }
     
     try await healthKitManager?.saveSeveritySamples(intervals: severityInterval == nil ? [] : [severityInterval!])
@@ -306,7 +305,7 @@ extension HeadacheManager {
     var originalHeadacheInterval: DateInterval?
     var newSeveritySamples = [SeverityInterval]()
     
-    try await severityWithIdentifier(identifier: identifier, update: { severity, context in
+    try await severityWithIdentifier(identifier: identifier) { severity, context in
       if let severity = severity {
         let headache = severity.headache
         originalHeadacheInterval = headache?.dateInterval
@@ -319,7 +318,7 @@ extension HeadacheManager {
           newSeveritySamples.append(interval)
         }
       }
-    })
+    }
     
     // Check to see if we need to delete and re-add samples
     if let originalHeadacheInterval = originalHeadacheInterval {
@@ -337,7 +336,7 @@ extension HeadacheManager {
     var originalHeadacheInterval: DateInterval?
     var newSeveritySamples = [SeverityInterval]()
     
-    try await severityWithIdentifier(identifier: identifier, update: { severity, context in
+    try await severityWithIdentifier(identifier: identifier) { severity, context in
       if let severity = severity {
         let headache = severity.headache
         originalHeadacheInterval = headache?.dateInterval
@@ -351,7 +350,7 @@ extension HeadacheManager {
           newSeveritySamples.append(interval)
         }
       }
-    })
+    }
     
     // Check to see if we need to delete and re-add samples
     if let originalHeadacheInterval = originalHeadacheInterval {
@@ -371,11 +370,11 @@ extension HeadacheManager {
   ///
   /// - Parameter update: Called with the current headache to update it.
   ///   Errors thrown in this block will be received in completion.
-  private func currentHeadache(update: @escaping (Headache?, NSManagedObjectContext) async throws -> Void) async throws {
+  private func currentHeadache<T>(update: @escaping (Headache?, NSManagedObjectContext) async throws -> T) async throws -> T {
     try await DataController.shared.performInBackground(saveOnComplete: true) { context in
       let request = Headache.fetchRequest()
       request.predicate = NSPredicate(format: "ANY severities.endTime = nil")
-      try await update(try context.fetch(request).first, context)
+      return try await update(try context.fetch(request).first, context)
     }
   }
   
@@ -384,10 +383,10 @@ extension HeadacheManager {
   ///
   /// - Parameter update: Called with the headache to update it. Errors
   ///   thrown in this block will be received in completion.
-  private func headacheWithIdentifier(identifier: UUID, update: @escaping (Headache?, NSManagedObjectContext) async throws -> Void) async throws {
+  private func headacheWithIdentifier<T>(identifier: UUID, update: @escaping (Headache?, NSManagedObjectContext) async throws -> T) async throws -> T {
     try await DataController.shared.performInBackground(saveOnComplete: true) { context in
       let request = Headache.fetchRequest(withIdentifier: identifier)
-      try await update((try context.fetch(request)).first, context)
+      return try await update((try context.fetch(request)).first, context)
     }
   }
   
@@ -396,10 +395,26 @@ extension HeadacheManager {
   ///
   /// - Parameter update: Called with the severity to update it. Errors
   ///   thrown in this block will be received in completion.
-  private func severityWithIdentifier(identifier: UUID, update: @escaping (Severity?, NSManagedObjectContext) async throws -> Void) async throws {
+  private func severityWithIdentifier<T>(identifier: UUID, update: @escaping (Severity?, NSManagedObjectContext) async throws -> T) async throws -> T {
     try await DataController.shared.performInBackground(saveOnComplete: true) { context in
       let request = Severity.fetchRequest(withIdentifier: identifier)
-      try await update((try context.fetch(request)).first, context)
+      return try await update((try context.fetch(request)).first, context)
+    }
+  }
+  
+  /// Gets the sorted training data and calls it with the update block before
+  /// saving the context and calling the completion block.
+  ///
+  /// - Parameters:
+  ///   - predicate: The (optional) predicate to apply.
+  ///   - update: Called with the training data to update it. Errors thrown in
+  ///     this block will be received in completion.
+  private func trainingData<T>(predicate: NSPredicate? = nil, update: @escaping ([TrainingData], NSManagedObjectContext) async throws -> T) async throws -> T {
+    return try await DataController.shared.performInBackground(saveOnComplete: true) { context in
+      let request = TrainingData.fetchRequest()
+      request.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: true)]
+      request.predicate = predicate
+      return try await update(try context.fetch(request), context)
     }
   }
   
@@ -444,7 +459,6 @@ extension HeadacheManager {
       return
     }
     
-    // Make sure we're on the main queue
     // Present the alert
     logDebug("Presenting alert for predicted severity: \(prediction.severityClassifierOutput.prediction.title).")
     try await alertManager?.presentAlert(
@@ -483,11 +497,7 @@ extension HeadacheManager {
   ///
   /// - Returns: A boolean indicating if the app should ask for more training data.
   func needsNotPresentTrainingData() async throws -> Bool {
-    return try await DataController.shared.performInBackground { context in
-      let request = TrainingData.fetchRequest()
-      request.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: true)]
-      
-      let trainingData = try context.fetch(request)
+    return try await trainingData { trainingData, _ in
       let notPresentTrainigData = trainingData.filter({ $0.severity == nil || $0.severity?.severity == .notPresent })
       
       var nextDateAllowed = false
@@ -504,12 +514,7 @@ extension HeadacheManager {
   ///
   /// - Returns: A boolean indicating if the app needs to train its models.
   func needsTraining() async throws -> Bool {
-    return try await DataController.shared.performInBackground { context in
-      let request = TrainingData.fetchRequest()
-      request.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: true)]
-      
-      let trainingData = try context.fetch(request)
-      
+    return try await trainingData { trainingData, _ in
       var needs = false
       if let date = trainingData.last?.timestamp, let lastTrainingDate = self.predictor?.modelUpdatedAt {
         needs = date.timeIntervalSince(lastTrainingDate) > 0.0
@@ -583,8 +588,23 @@ extension HeadacheManager {
     return input
   }
   
-  func upgradeTrainingData() {
-    // TODO: Add code
+  /// Upgrades the app's training data.
+  func upgradeTrainingData() async throws {
+    logInfo("Upgrading training data.")
+    try await trainingData(predicate: NSPredicate(format: "(version != %@) OR (version == %@)", Constants.trainingDataVersion as NSString, NSNull())) { [weak self] trainingData, _ in
+      logInfo("Performing upgrade on \(trainingData.count) data.")
+      // Perform the upgrade
+      for trainingDatum in trainingData {
+        guard let timestamp = trainingDatum.timestamp else {
+          continue
+        }
+
+        let interval = DateInterval(start: timestamp.addingTimeInterval(-86400.0), end: timestamp)
+        let data = self?.healthKitManager?.readHealthKitData(in: interval)
+        trainingDatum.updateWithHealthKitData(data)
+      }
+      logDebug("Finished upgrading data.")
+    }
   }
   
   /// Trains the classifiers.
@@ -592,41 +612,9 @@ extension HeadacheManager {
   /// - Parameter completion: Called when training is complete.
   func trainClassifiers() async throws {
     guard !testing else { throw HeadacheError.testing }
-    
-    try await DataController.shared.performInBackground { context in
-      logDebug("Fetching all training data...")
-      let request = TrainingData.fetchRequest()
-      request.predicate = NSPredicate(format: "needsHealthKitData == %@", NSNumber(booleanLiteral: false))
-      
-      let allTrainingData = try context.fetch(request)
-      
-      logDebug("Training classifiers with \(allTrainingData.count) data...")
-      try await self.predictor!.train(with: allTrainingData)
-    }
-  }
-  
-  /// Adds health kit data to incomplete training samples.
-  func cleanTrainingData() async throws {
-    logDebug("Cleaning training data.")
-    try await DataController.shared.performInBackground(saveOnComplete: true) { [weak self] context in
-      guard let self = self else {
-        return
-      }
-      
-      logDebug("Fetching incomplete training data...")
-      let incompleteRequest = TrainingData.fetchRequest()
-      incompleteRequest.predicate = NSPredicate(format: "(needsHealthKitData == %@) || (needsHealthKitData == %@)", NSNumber(booleanLiteral: true), NSNull())
-      
-      let incompleteTrainingData = (try? context.fetch(incompleteRequest)) ?? []
-      
-      logDebug("Cleaning \(incompleteTrainingData.count) traininig data...")
-      for data in incompleteTrainingData {
-        guard let timestamp = data.timestamp else {
-          continue
-        }
-        let interval = DateInterval(start: timestamp.addingTimeInterval(-86400.0), end: timestamp)
-        data.updateWithHealthKitData(self.healthKitManager?.readHealthKitData(in: interval))
-      }
+    try await trainingData(predicate: NSPredicate(format: "version == %@", Constants.trainingDataVersion as NSString)) { trainingData, _ in
+      logDebug("Training classifiers with \(trainingData.count) data...")
+      try await self.predictor?.train(with: trainingData)
     }
   }
   

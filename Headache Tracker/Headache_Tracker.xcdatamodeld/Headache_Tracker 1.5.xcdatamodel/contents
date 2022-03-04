@@ -24,7 +24,6 @@
         <attribute name="heartRate" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="heartRateVariability" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="mindfulSeconds" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
-        <attribute name="needsHealthKitData" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="oxygenSaturation" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="respiratoryRate" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="restingHeartRate" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
@@ -41,6 +40,6 @@
     <elements>
         <element name="Headache" positionX="-63" positionY="-18" width="128" height="14"/>
         <element name="Severity" positionX="-63" positionY="9" width="128" height="119"/>
-        <element name="TrainingData" positionX="-45" positionY="54" width="128" height="359"/>
+        <element name="TrainingData" positionX="-45" positionY="54" width="128" height="344"/>
     </elements>
 </model>

@@ -27,13 +27,13 @@ struct TrainingDataView: View {
       Section {
         SubtitleCell(title: "Severity", subtitle: trainingData.severity?.severity.title ?? "-")
         SubtitleCell(title: "Timestamp", subtitle: trainingData.timestamp?.formattedNonRelative() ?? "N/A")
-        SubtitleCell(title: "Needs HealthKit Data", subtitle: "\(trainingData.needsHealthKitData)")
+        SubtitleCell(title: "Data Version", subtitle: "\(trainingData.version ?? "")")
       }
       
       Section {
         SubtitleCell(title: "Sleep", subtitle: Measurement(value: trainingData.sleepSeconds, unit: UnitDuration.seconds).formatted())
         SubtitleCell(title: "Oxygen Saturation", subtitle: String(format: "%0.f%%", trainingData.oxygenSaturation * 100.0))
-        SubtitleCell(title: "Heart Rate", subtitle: String(format: "%0.f%%", trainingData.oxygenSaturation * 100.0))
+        SubtitleCell(title: "Heart Rate", subtitle: "\(trainingData.heartRate)")
       }
       
       Section {
@@ -47,10 +47,10 @@ struct TrainingDataView: View {
           TextField("𝚺 Temperature", value: $trainingData.sigmaTemperature, format: .number, prompt: Text("𝚺 Temperature"))
         }
         else {
-          SubtitleCell(title: "Barometric Pressure", subtitle: trainingData.barometicPressureMeasurement.formatted())
-          SubtitleCell(title: "Current Pressure", subtitle: trainingData.currentPressureMeasurement.formatted())
-          SubtitleCell(title: "Current Humidity", subtitle: String(format: "%0.f%%", trainingData.currentHumidity * 100.0))
-          SubtitleCell(title: "Current Temperature", subtitle: trainingData.currentTemperatureMeasurement.formatted())
+          SubtitleCell(title: "Barometric Pressure", subtitle: trainingData.pressureMeasurement.formatted())
+          SubtitleCell(title: "Current Pressure", subtitle: trainingData.devicePressureMeasurement.formatted())
+          SubtitleCell(title: "Current Humidity", subtitle: trainingData.humidityMeasurement.formatted())
+          SubtitleCell(title: "Current Temperature", subtitle: trainingData.temperatureMeasurement.formatted())
           SubtitleCell(title: "𝚺 Pressure", subtitle: "\(trainingData.sigmaPressure) kPa")
           SubtitleCell(title: "𝚺 Humidity", subtitle: String(format: "%0.f%%", trainingData.sigmaHumidity * 100.0))
           SubtitleCell(title: "𝚺 Temperature", subtitle: "\(trainingData.sigmaTemperature)℃")
