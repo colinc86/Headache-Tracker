@@ -60,45 +60,32 @@ extension RefreshTask {
   
   /// Schedules a task.
   ///
-  /// - Parameters:
-  ///   - date: The date to schedule the task for.
-  ///   - completion: Called after the task has been scheduled.
-  func schedule(date: Date, completion: @escaping (Error?) -> Void) {
-    BGTaskScheduler.shared.getPendingTaskRequests { [weak self] requests in
-      guard let self = self else { return }
-      
-      guard !requests.contains(where: { $0.identifier == self.identifier }) else {
-        completion(RefreshTaskError.alreadyExists(identifier: self.identifier))
-        return
-      }
-      
-      var request: BGTaskRequest!
-      if self.type == .appRefresh {
-        request = BGAppRefreshTaskRequest(identifier: self.identifier)
-        request.earliestBeginDate = date
-      }
-      else {
-        request = BGProcessingTaskRequest(identifier: self.identifier)
-        request.earliestBeginDate = date
-      }
-      
-      do {
-        try BGTaskScheduler.shared.submit(request)
-        completion(nil)
-      }
-      catch {
-        completion(error)
-      }
+  /// - Parameter date: The date to schedule the task for.
+  func schedule(date: Date) async throws {
+    let requests = await BGTaskScheduler.shared.pendingTaskRequests()
+    
+    guard !requests.contains(where: { $0.identifier == self.identifier }) else {
+      throw RefreshTaskError.alreadyExists(identifier: self.identifier)
     }
+    
+    var request: BGTaskRequest!
+    if self.type == .appRefresh {
+      request = BGAppRefreshTaskRequest(identifier: self.identifier)
+      request.earliestBeginDate = date
+    }
+    else {
+      request = BGProcessingTaskRequest(identifier: self.identifier)
+      request.earliestBeginDate = date
+    }
+    
+    try BGTaskScheduler.shared.submit(request)
   }
   
   /// Schedules a task.
   ///
-  /// - Parameters:
-  ///   - interval: The interval to schedule the task for.
-  ///   - completion: Called after the task has been scheduled.
-  func schedule(interval: TimeInterval, completion: @escaping (Error?) -> Void) {
-    schedule(date: Date(timeIntervalSinceNow: interval), completion: completion)
+  /// - Parameter interval: The interval to schedule the task for.
+  func schedule(interval: TimeInterval) async throws {
+    try await schedule(date: Date(timeIntervalSinceNow: interval), completion: completion)
   }
   
   /// Cancels the scheduled task.

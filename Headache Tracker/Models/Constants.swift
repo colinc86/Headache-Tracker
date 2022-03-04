@@ -10,6 +10,9 @@ import Foundation
 
 struct Constants {
   
+  /// The current training data version.
+  static let trainingDataVersion = "1.0"
+  
   /// The desired time between predictions.
   static let backgroundPredictionInterval: TimeInterval = 3600.0
   

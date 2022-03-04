@@ -82,39 +82,25 @@ extension AlertManager {
   
   /// Sets up the alert manager.
   ///
-  /// - Parameters:
-  ///   - options: The options to request authorization to.
-  ///   - completion: Called after the status is determined.
-  func setup(options: UNAuthorizationOptions, completion: ((UNAuthorizationStatus, Error?) -> Void)?) {
-    // Get the initial authorization status
-    checkNotificationSettings { [weak self] settings in
-      guard let self = self else { completion?(.notDetermined, nil); return }
-      
-      // Only continue if our authorization status is unknown or we have option changes
-      guard settings.authorizationStatus == .notDetermined else {
-        completion?(settings.authorizationStatus, nil)
-        return
-      }
-      
-      // Request authorization from the user
-      self.requestAuthorization(options: options) { granted, error in
-        if let error = error {
-          // If we have an error, return the current status
-          completion?(settings.authorizationStatus, error)
-          return
-        }
-        
-        // There was no error, so return the new authorization status
-        self.checkNotificationSettings(completion: { newSettings in
-          completion?(newSettings.authorizationStatus, nil)
-          return
-        })
-      }
+  /// - Parameter options: The options to request authorization to.
+  /// - Returns: The current authorization status.
+  @MainActor func setup(options: UNAuthorizationOptions) async throws -> UNAuthorizationStatus {
+    let settings = await checkNotificationSettings()
+    
+    // Only continue if our authorization status is unknown or we have option changes
+    guard settings.authorizationStatus == .notDetermined else {
+      return settings.authorizationStatus
     }
+    
+    // Request authorization from the user
+    try await requestAuthorization(options: options)
+    
+    // There was no error, so return the new authorization status
+    return (await checkNotificationSettings()).authorizationStatus
   }
   
   /// Removes all requests from the center.
-  func removeRequests(pending: Bool = true, delivered: Bool = true) {    
+  func removeRequests(pending: Bool = true, delivered: Bool = true) {
     if pending {
       logDebug("Removing pending requests.")
       center.removeAllPendingNotificationRequests()
@@ -131,35 +117,23 @@ extension AlertManager {
   ///   - request:  The alert to present to the user.
   ///   - badgeNumber: The application badge number.
   ///   - completion: The completion to call.
-  func presentAlert(with request: AlertRequest, trigger: UNNotificationTrigger? = nil, badgeNumber: Int = 0, completion: ((Error?) -> Void)? = nil) {
-    checkAuthorization { [weak self] authorized in
-      guard let self = self else { completion?(nil); return }
-      
-      guard authorized else {
-        completion?(AlertError.notAuthorized)
-        return
-      }
-      
-      DispatchQueue.main.async {
-        self.center.add(request.notificationRequest(trigger: trigger, badgeNumber: badgeNumber), withCompletionHandler: completion)
-      }
+  @MainActor func presentAlert(with request: AlertRequest, trigger: UNNotificationTrigger? = nil, badgeNumber: Int = 0) async throws {
+    guard await checkAuthorization() else {
+      throw AlertError.notAuthorized
     }
+    
+    try await self.center.add(request.notificationRequest(trigger: trigger, badgeNumber: badgeNumber))
   }
   
   /// Sets the application's badge number.
   ///
   /// - Parameter number: The badge number to display.
-  func setApplicationIconBadgeNumber(_ number: Int, completion: ((Error?) -> Void)? = nil) {
-    checkAuthorization { authorized in
-      guard authorized else {
-        completion?(AlertError.notAuthorized)
-        return
-      }
-      
-      DispatchQueue.main.async {
-        UIApplication.shared.applicationIconBadgeNumber = number
-      }
+  @MainActor func setApplicationIconBadgeNumber(_ number: Int) async throws {
+    guard await checkAuthorization() else {
+      throw AlertError.notAuthorized
     }
+    
+    UIApplication.shared.applicationIconBadgeNumber = number
   }
   
 }
@@ -170,34 +144,30 @@ extension AlertManager {
   
   /// Checks the manager's authorization status.
   ///
-  /// - Parameter completion: Called with a boolean to signify whether or not the
-  ///   manager is authorized.
-  private func checkAuthorization(completion: @escaping (Bool) -> Void) {
-    checkNotificationSettings { settings in
-      completion(settings.authorizationStatus != .notDetermined && settings.authorizationStatus != .denied)
-    }
+  /// - Returns: A boolean indicating if the app is authorized to present alerts.
+  @MainActor private func checkAuthorization() async -> Bool {
+    let settings = await checkNotificationSettings()
+    return settings.authorizationStatus != .notDetermined && settings.authorizationStatus != .denied
   }
   
   /// Checks the current notification settings.
   ///
-  /// - Parameter completion: Completion handler containing the settings.
-  private func checkNotificationSettings(completion: @escaping (UNNotificationSettings) -> Void) {
-    center.getNotificationSettings { [weak self] notificationSettings in
-      // Publish the authorization status
-      DispatchQueue.main.async {
-        self?.authorizationStatus = notificationSettings.authorizationStatus
-      }
-      
-      // Call the completion block
-      completion(notificationSettings)
+  /// - Returns: The user notification settings.
+  @MainActor private func checkNotificationSettings() async -> UNNotificationSettings {
+    let notificationSettings = await center.notificationSettings()
+    
+    // Publish the authorization status
+    DispatchQueue.main.async { [weak self] in
+      self?.authorizationStatus = notificationSettings.authorizationStatus
     }
+    
+    return notificationSettings
   }
   
   /// Requests authorization from the user to display alerts.
-  private func requestAuthorization(options: UNAuthorizationOptions, completion: @escaping (Bool, Error?) -> Void) {
-    center.requestAuthorization(options: options) { granted, error in
-      completion(granted, error)
-    }
+  @discardableResult
+  @MainActor private func requestAuthorization(options: UNAuthorizationOptions) async throws -> Bool {
+    return try await center.requestAuthorization(options: options)
   }
   
 }

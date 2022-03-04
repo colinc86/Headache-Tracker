@@ -76,57 +76,40 @@ extension HealthKitManager {
   }
   
   /// Authorizes the manager with health kit.
-  ///
-  /// - Parameter completion: Called after authorization.
-  func authorize(completion: @escaping (Error?) -> Void) {
+  func authorize() async throws {
     if needsAuthorization() {
       logInfo("Authorization status is not determind. Requesting authorization...")
-      store.requestAuthorization(toShare: shareTypes, read: readTypes, completion: { success, error in
-        if let error = error {
-          completion(error)
-        }
-        else {
-          completion(success ? nil : HealthKitError.authorize)
-        }
-      })
+      try await store.requestAuthorization(toShare: shareTypes, read: readTypes)
     }
     else if readTypes.contains(where: { type in
       let status = store.authorizationStatus(for: type)
       return status != .sharingAuthorized && status != .sharingDenied
     }) {
-      completion(HealthKitError
+      throw HealthKitError
                   .unknownAuthorizationStatus(
                     status: readTypes
                       .map({ store.authorizationStatus(for: $0) })
-                      .first(where: { $0 != .notDetermined && $0 != .sharingDenied && $0 != .sharingAuthorized }) ?? .notDetermined))
-    }
-    else {
-      completion(nil)
+                      .first(where: { $0 != .notDetermined && $0 != .sharingDenied && $0 != .sharingAuthorized }) ?? .notDetermined)
     }
   }
   
   /// Saves an array of severity sample.
   ///
-  /// - Parameters:
-  ///   - intervals: The severity intervals to save.
-  ///   - completion: The completion block called after the severity has been added.
-  func saveSeveritySamples(intervals: [SeverityInterval], completion: ((Error?) -> Void)? = nil) {
+  /// - Parameter intervals: The severity intervals to save.
+  func saveSeveritySamples(intervals: [SeverityInterval]) async throws {
     // Only continue if we have health integration turned on
     guard healthIntegration && !intervals.isEmpty else {
-      completion?(nil)
       return
     }
     
     // Get the headache type
     guard let headacheType = HKObjectType.categoryType(forIdentifier: .headache) else {
-      completion?(HealthKitError.notAvailable)
-      return
+      throw HealthKitError.notAvailable
     }
     
     // Check our authorization status
     guard store.authorizationStatus(for: headacheType) == .sharingAuthorized else {
-      completion?(HealthKitError.typeNotAvailable)
-      return
+      throw HealthKitError.typeNotAvailable
     }
     
     var samples = [HKObject]()
@@ -134,56 +117,33 @@ extension HealthKitManager {
       samples.append(HKCategorySample(type: headacheType, value: interval.severity.rawValue, start: interval.interval.start, end: interval.interval.end))
     }
     
-    store.save(samples) { (success, error) in
-      if let error = error {
-        completion?(error)
-      } else {
-        completion?(success ? nil : HealthKitError.save)
-      }
-    }
+    try await store.save(samples)
   }
   
   /// Deletes the severity samples in the given date interval.
   ///
-  /// - Parameters:
-  ///   - interval: The interval.
-  ///   - completion: Called after samples have been deleted.
-  func deleteSeveritySamples(in interval: DateInterval, completion: ((Error?) -> Void)?) {
+  /// - Parameter interval: The interval.
+  func deleteSeveritySamples(in interval: DateInterval) async throws {
     logDebug("Delete severity samples in \(interval).")
     
     // Only continue if we have health integration turned on
     guard healthIntegration else {
       logWarning("Health integration is \(healthIntegration). Not deleting severity samples.")
-      completion?(nil)
       return
     }
     
     // Get the headache type
     guard let headacheType = HKObjectType.categoryType(forIdentifier: .headache) else {
       logWarning("Unable to get headache category type.")
-      completion?(HealthKitError.notAvailable)
-      return
+      throw HealthKitError.notAvailable
     }
     
     // Create our predicate
     let predicate = HKQuery.predicateForSamples(withStart: interval.start, end: interval.end, options: [])
     
     // Delete the objects
-    store.deleteObjects(of: headacheType, predicate: predicate) { success, count, error in
-      if let error = error {
-        logError("Error deleting severity samples: \(error)")
-        completion?(error)
-      }
-      else {
-        if success {
-          logDebug("Deleted \(count) severity samples.")
-        }
-        else {
-          logWarning("Unable to delete severity samples.")
-        }
-        completion?(success ? nil : HealthKitError.delete)
-      }
-    }
+    let count = try await store.deleteObjects(of: headacheType, predicate: predicate)
+    logDebug("Deleted \(count) severity samples.")
   }
   
   /// Reads health kit training data.

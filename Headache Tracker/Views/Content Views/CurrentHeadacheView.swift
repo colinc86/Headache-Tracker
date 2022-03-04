@@ -250,46 +250,27 @@ extension CurrentHeadacheView {
   }
   
   /// Updates the classifier input.
-  private func predict(forced: Bool = false) {
-    // Check if we should show the not-present training data cell
-    headacheManager.needsNotPresentTrainingData { needsTrainingData in
-      logDebug("Needs training data: \(needsTrainingData)")
-      DispatchQueue.main.async {
-        withAnimation {
-          self.needsInput = needsTrainingData
-        }
-        
-        // Check if we should run a prediction
-        let now = Date()
-        if let lastPredictionDate = predictor.prediction?.date {
-          let timeSinceLastPrediction = now.timeIntervalSince(lastPredictionDate)
-          guard forced || timeSinceLastPrediction > Constants.predictionRefreshInterval else {
-            logDebug("Not updating prediction. Minimum interval, \(Constants.predictionRefreshInterval), not met with interval \(now.timeIntervalSince(lastPredictionDate)).")
-            return
-          }
-        }
-        
-        logDebug("Predict.")
-        
-        // Run a prediction
-        headacheManager.getCurrentClassifierInput { input, error in
-          DispatchQueue.main.async {
-            if let error = error {
-              logError("Error getting classifier input: \(error)")
-            }
-            else if let input = input {
-              do {
-                _ = try withAnimation {
-                  try predictor.predict(input)
-                }
-              }
-              catch {
-                logError("Error getting prediction: \(error)")
-              }
-            }
-          }
-        }
+  private func predict(forced: Bool = false) async throws {
+    try await withAnimation {
+      needsInput = try await headacheManager.needsNotPresentTrainingData()
+    }
+    
+    // Check if we should run a prediction
+    let now = Date()
+    if let lastPredictionDate = predictor.prediction?.date {
+      let timeSinceLastPrediction = now.timeIntervalSince(lastPredictionDate)
+      guard forced || timeSinceLastPrediction > Constants.predictionRefreshInterval else {
+        logDebug("Not updating prediction. Minimum interval, \(Constants.predictionRefreshInterval), not met with interval \(now.timeIntervalSince(lastPredictionDate)).")
+        return
       }
+    }
+    
+    logDebug("Updating current headache view prediction.")
+    
+    // Run a prediction
+    let input = try await headacheManager.getCurrentClassifierInput()
+    _ = try withAnimation {
+      try predictor.predict(input)
     }
   }
   
@@ -332,20 +313,20 @@ extension CurrentHeadacheView {
   /// doesn't exist.
   ///
   /// - Parameter severity: The new severity.
-  private func changeSeverity(to severity: HKCategoryValueSeverity) {
+  private func changeSeverity(to severity: HKCategoryValueSeverity) async {
     guard !updatingHeadache else { return }
     logDebug("Change severity to \(severity.title).")
     
-    updatingHeadache = true
-    headacheManager.changeSeverity(to: severity) { error in
-      DispatchQueue.main.async {
-        if let error = error {
-          showAlert("Unable to Update Severity", error)
-        }
-        
-        updatingHeadache = false
-      }
+    withAnimation { updatingHeadache = true }
+    
+    do {
+      try await headacheManager.changeSeverity(to: severity)
     }
+    catch {
+      showAlert("Unable to Update Severity", error)
+    }
+    
+    withAnimation { updatingHeadache = false }
   }
   
   /// Resolves the current headache.
@@ -353,16 +334,16 @@ extension CurrentHeadacheView {
     guard !updatingHeadache else { return }
     logDebug("Resolve current headache.")
     
-    updatingHeadache = true
-    headacheManager.resolve { error in
-      DispatchQueue.main.async {
-        if let error = error {
-          showAlert("Unable to Resolve Headache", error)
-        }
-        
-        updatingHeadache = false
-      }
+    withAnimation { updatingHeadache = true }
+    
+    do {
+      try await headacheManager.resolve()
     }
+    catch {
+      showAlert("Unable to Update Severity", error)
+    }
+    
+    withAnimation { updatingHeadache = false }
   }
   
   /// The action to perform if there is no headache.
@@ -371,23 +352,21 @@ extension CurrentHeadacheView {
     logDebug("No headache action.")
     
     handlingInput = true
-    headacheManager.createTrainingData { _, error in
-      if let error = error {
+    
+    do {
+      try await headacheManager.createTrainingData()
+      
+      // Check if we should show the not-present training data cell
+      try await withAnimation {
         handlingInput = false
-        showAlert("Error Saving Data", error)
-      }
-      else {
-        // Check if we should show the not-present training data cell
-        headacheManager.needsNotPresentTrainingData { needsTrainingData in
-          DispatchQueue.main.async {
-            withAnimation {
-              handlingInput = false
-              needsInput = needsTrainingData
-            }
-          }
-        }
+        needsInput = try await headacheManager.needsNotPresentTrainingData()
       }
     }
+    catch {
+      showAlert("Error Saving Data", error)
+    }
+    
+    handlingInput = false
   }
   
 }

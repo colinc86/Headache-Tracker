@@ -177,9 +177,130 @@ class Predictor: ObservableObject {
 extension Predictor {
   
   /// Loads the predictor's models.
+  func load() async throws {
+    return try await withCheckedThrowingContinuation({ [weak self] (continuation: CheckedContinuation<Void, Error>) in
+      guard let self = self else {
+        continuation.resume()
+        return
+      }
+      
+      self.load({ error in
+        if let error = error {
+          continuation.resume(throwing: error)
+        }
+        else {
+          continuation.resume()
+        }
+      })
+    })
+  }
+  
+  /// Trains the predictor's classifiers.
+  ///
+  /// - Parameter trainingData: The training data.
+  func train(with trainingData: [TrainingData]) async throws {
+    return try await withCheckedThrowingContinuation({ [weak self] (continuation: CheckedContinuation<Void, Error>) in
+      guard let self = self else {
+        continuation.resume()
+        return
+      }
+      
+      self.train(with: trainingData) { error in
+        if let error = error {
+          continuation.resume(throwing: error)
+        }
+        else {
+          continuation.resume()
+        }
+      }
+    })
+  }
+  
+  /// Cancels the current training session.
+  func cancelTraining() {
+    logDebug("Cancel training.")
+    cancelledTraining = true
+  }
+  
+  /// Resets the predictor and its classifiers.
+  func reset() {
+    do {
+      // Delete the compiled models
+      try FileManager.default.removeItem(at: self.compiledModelURL(with: Predictor.outlookClassifierFileName))
+      try FileManager.default.removeItem(at: self.compiledModelURL(with: Predictor.severityClassifierFileName))
+      try FileManager.default.removeItem(at: self.compiledModelURL(with: Predictor.onsetRegressorFileName))
+      try FileManager.default.removeItem(at: self.compiledModelURL(with: Predictor.durationRegressorFileName))
+      severityClassifier = nil
+      
+      // Reset the rest of our variables
+      modelUpdatedAt = nil
+    }
+    catch {
+      logError("Error resetting predictor: \(error)")
+    }
+    
+    DispatchQueue.main.async { self.ready = false }
+  }
+  
+  /// Makes a prediction.
+  ///
+  /// - Parameter input: The predictor's input.
+  /// - Returns: The predictor's output.
+  func predict(_ input: Input) throws -> Prediction {
+    guard let outlookClassifier = outlookClassifier,
+          let severityClassifier = severityClassifier,
+          let onsetRegressor = onsetRegressor,
+          let durationRegressor = durationRegressor else {
+      return .empty
+    }
+    
+    let fullInput = input.fullInput()
+    let outlookPrediction = try outlookClassifier.prediction(input: fullInput)
+    let severityPrediction = try severityClassifier.prediction(input: fullInput)
+    let onsetPrediction = try onsetRegressor.prediction(input: fullInput)
+    let durationPrediction = try durationRegressor.prediction(input: fullInput)
+        
+    let prediction = Prediction(
+      outlookClassifierOutput: Prediction.PredictionStatistic(
+        prediction: Outlook(rawValue: outlookPrediction.Outlook) ?? .noHeadache,
+        probability: outlookPrediction.OutlookProbability[outlookPrediction.Outlook]),
+      
+      severityClassifierOutput: Prediction.PredictionStatistic(
+        prediction: HKCategoryValueSeverity(title: severityPrediction.Severity)!,
+        probability: severityPrediction.SeverityProbability[severityPrediction.Severity]),
+      
+      onsetRegressorOutput: Prediction.PredictionStatistic<Date>(
+        prediction: Date().addingTimeInterval(onsetPrediction.Onset),
+        probability: nil),
+      
+      durationRegressorOutput: Prediction.PredictionStatistic<TimeInterval>(
+        prediction: durationPrediction.Duration,
+        probability: nil)
+    )
+    
+    /// Save this prediction for the widget
+    SharedUserDefaults.standard.setPredictionResults(
+      prediction.outlookClassifierOutput.prediction,
+      prediction.onsetRegressorOutput.prediction,
+      prediction.durationRegressorOutput.prediction,
+      prediction.severityClassifierOutput.prediction)
+    
+    // Update the prediction value
+    DispatchQueue.main.async { [weak self] in
+      self?.prediction = prediction
+    }
+    
+    return prediction
+  }
+  
+}
+
+extension Predictor {
+  
+  /// Loads the predictor's models.
   ///
   /// - Parameter completion: Called after the models have been loaded.
-  func load(_ completion: @escaping (Error?) -> Void) {
+  private func load(_ completion: @escaping (Error?) -> Void) {
     logDebug("Load models.")
     
     modelQueue.async { [weak self] in
@@ -229,7 +350,7 @@ extension Predictor {
   /// - Parameters:
   ///   - trainingData: The training data.
   ///   - completion: Called after training has completed.
-  func train(with trainingData: [TrainingData], completion: @escaping (Error?) -> Void) {
+  private func train(with trainingData: [TrainingData], completion: @escaping (Error?) -> Void) {
     guard !training && !trainingData.isEmpty else {
       logDebug("Training data is empty.")
       completion(nil)
@@ -331,87 +452,6 @@ extension Predictor {
       }
     }
   }
-  
-  /// Cancels the current training session.
-  func cancelTraining() {
-    logDebug("Cancel training.")
-    cancelledTraining = true
-  }
-  
-  /// Resets the predictor and its classifiers.
-  func reset() {
-    do {
-      // Delete the compiled models
-      try FileManager.default.removeItem(at: self.compiledModelURL(with: Predictor.outlookClassifierFileName))
-      try FileManager.default.removeItem(at: self.compiledModelURL(with: Predictor.severityClassifierFileName))
-      try FileManager.default.removeItem(at: self.compiledModelURL(with: Predictor.onsetRegressorFileName))
-      try FileManager.default.removeItem(at: self.compiledModelURL(with: Predictor.durationRegressorFileName))
-      severityClassifier = nil
-      
-      // Reset the rest of our variables
-      modelUpdatedAt = nil
-    }
-    catch {
-      logError("Error resetting predictor: \(error)")
-    }
-    
-    DispatchQueue.main.async { self.ready = false }
-  }
-  
-  /// Makes a prediction.
-  ///
-  /// - Parameter input: The predictor's input.
-  /// - Returns: The predictor's output.
-  func predict(_ input: Input) throws -> Prediction {
-    guard let outlookClassifier = outlookClassifier,
-          let severityClassifier = severityClassifier,
-          let onsetRegressor = onsetRegressor,
-          let durationRegressor = durationRegressor else {
-      return .empty
-    }
-    
-    let fullInput = input.fullInput()
-    let outlookPrediction = try outlookClassifier.prediction(input: fullInput)
-    let severityPrediction = try severityClassifier.prediction(input: fullInput)
-    let onsetPrediction = try onsetRegressor.prediction(input: fullInput)
-    let durationPrediction = try durationRegressor.prediction(input: fullInput)
-        
-    let prediction = Prediction(
-      outlookClassifierOutput: Prediction.PredictionStatistic(
-        prediction: Outlook(rawValue: outlookPrediction.Outlook) ?? .noHeadache,
-        probability: outlookPrediction.OutlookProbability[outlookPrediction.Outlook]),
-      
-      severityClassifierOutput: Prediction.PredictionStatistic(
-        prediction: HKCategoryValueSeverity(title: severityPrediction.Severity)!,
-        probability: severityPrediction.SeverityProbability[severityPrediction.Severity]),
-      
-      onsetRegressorOutput: Prediction.PredictionStatistic<Date>(
-        prediction: Date().addingTimeInterval(onsetPrediction.Onset),
-        probability: nil),
-      
-      durationRegressorOutput: Prediction.PredictionStatistic<TimeInterval>(
-        prediction: durationPrediction.Duration,
-        probability: nil)
-    )
-    
-    /// Save this prediction for the widget
-    SharedUserDefaults.standard.setPredictionResults(
-      prediction.outlookClassifierOutput.prediction,
-      prediction.onsetRegressorOutput.prediction,
-      prediction.durationRegressorOutput.prediction,
-      prediction.severityClassifierOutput.prediction)
-    
-    // Update the prediction value
-    DispatchQueue.main.async { [weak self] in
-      self?.prediction = prediction
-    }
-    
-    return prediction
-  }
-  
-}
-
-extension Predictor {
   
   /// Balances the training data for the given model type.
   ///
@@ -642,20 +682,12 @@ class Predictor: ObservableObject {
 extension Predictor {
   
   /// Loads the predictor's models.
-  ///
-  /// - Parameter completion: Called after the models have been loaded.
-  func load(_ completion: @escaping (Error?) -> Void) {
-    completion(nil)
-  }
+  func load() async throws {}
   
   /// Trains the predictor's classifiers.
   ///
-  /// - Parameters:
-  ///   - trainingData: The training data.
-  ///   - completion: Called after training has completed.
-  func train(with trainingData: [TrainingData], completion: @escaping (Error?) -> Void) {
-    completion(nil)
-  }
+  /// - Parameter trainingData: The training data.
+  func train(with trainingData: [TrainingData]) async throws {}
   
   /// Cancels the current training session.
   func cancelTraining() {}

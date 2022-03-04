@@ -74,17 +74,25 @@ class AppDelegate: NSObject, UIApplicationDelegate, ObservableObject {
     // Make sure the headache manager has a reference to the alert and health kit managers
     setHeadacheManagerReferences()
     
-    // Check our alert authorization status
-    checkAlertAuthorizationStatus()
-    
-    // Check our health kit authorization status
-    checkHealthKitAuthorizationStatus()
-    
-    // Check our location authorization status
-    checkLocationAuthorizationStatus()
-    
-    // Load our ML classifiers
-    loadClassifiers()
+    // Set up the async stuff
+    Task {
+      do {
+        // Check our alert authorization status
+        try await checkAlertAuthorizationStatus()
+        
+        // Check our health kit authorization status
+        try await checkHealthKitAuthorizationStatus()
+        
+        // Check our location authorization status
+        try await checkLocationAuthorizationStatus()
+        
+        // Load our ML classifiers
+        try await loadClassifiers()
+      }
+      catch {
+        logError("Error handling async process: \(error)")
+      }
+    }
     
     return true
   }
@@ -102,12 +110,8 @@ class AppDelegate: NSObject, UIApplicationDelegate, ObservableObject {
 extension AppDelegate {
   
   /// Checks for incomplete training data.
-  func checkForIncompleteTrainingData() {
-    headacheManager.cleanTrainingData { error in
-      if let error = error {
-        logError("Error cleaning training data: \(error)")
-      }
-    }
+  func checkForIncompleteTrainingData() async throws {
+    try await headacheManager.cleanTrainingData()
   }
   
 }
@@ -125,9 +129,9 @@ extension AppDelegate {
   }
   
   /// Setup alerts.
-  private func checkAlertAuthorizationStatus() {
+  private func checkAlertAuthorizationStatus() async throws {
     if alertManager.authorizationStatus == .notDetermined {
-      alertManager.setup(options: [.alert, .badge, .sound], completion: nil)
+      try await alertManager.setup(options: [.alert, .badge, .sound])
     }
     else {
       alertManager.removeRequests(pending: false, delivered: true)
@@ -136,13 +140,9 @@ extension AppDelegate {
   
   /// Setup health kit (only if it hasn't been done before) and the setting
   /// is on.
-  private func checkHealthKitAuthorizationStatus() {
+  private func checkHealthKitAuthorizationStatus() async throws {
     if healthIntegration && healthKitManager.needsAuthorization() {
-      healthKitManager.authorize { error in
-        if let error = error {
-          logError("Error authorizing HealthKit: \(error)")
-        }
-      }
+      try await healthKitManager.authorize()
     }
   }
   
@@ -152,15 +152,8 @@ extension AppDelegate {
   }
   
   /// Loads the ML classifiers and get's them ready for use.
-  private func loadClassifiers() {
-    predictor.load { error in
-      if let error = error {
-        logError("Error loading classifiers: \(error)")
-      }
-      else {
-        logDebug("Successfully loaded classifiers.")
-      }
-    }
+  private func loadClassifiers() async throws {
+    try await predictor.load()
   }
   
 }

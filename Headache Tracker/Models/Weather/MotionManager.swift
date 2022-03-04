@@ -16,9 +16,25 @@ class MotionManager {
   
   typealias BarometricPressureCompletion = (Measurement<UnitPressure>?, Error?) -> Void
   
-  enum MotionError: Error {
+  /// A barometric pressure error.
+  enum MotionError: Error, CustomStringConvertible {
     case notAvailable
     case cancelled
+    case missing
+    case deallocated
+    
+    var description: String {
+      switch self {
+      case .notAvailable:
+        return "Barometric pressure is not available on this device."
+      case .cancelled:
+        return "The reading was cancelled."
+      case .missing:
+        return "The reading was missing."
+      case .deallocated:
+        return "The motion manager was deallocated."
+      }
+    }
   }
   
   // MARK: Private properties
@@ -68,10 +84,38 @@ extension MotionManager {
     isUpdatingPressure = false
   }
   
+  /// Gets the barometric pressure read by the device.
+  ///
+  /// - Returns: The current barometric pressure.
+  func barometricPressure() async throws -> Measurement<UnitPressure> {
+    return try await withCheckedThrowingContinuation { [weak self] continuation in
+      guard let self = self else {
+        continuation.resume(throwing: MotionError.deallocated)
+        return
+      }
+      
+      self.barometricPressure { measurement, error in
+        if let measurement = measurement {
+          continuation.resume(returning: measurement)
+        }
+        else if let error = error {
+          continuation.resume(throwing: error)
+        }
+        else {
+          continuation.resume(throwing: MotionError.missing)
+        }
+      }
+    }
+  }
+  
+}
+
+extension MotionManager {
+  
   /// Gets the current barometric pressure at the device.
   ///
   /// - Parameter completion: Called when the pressure has been fetched.
-  func barometricPressure(completion: @escaping (Measurement<UnitPressure>?, Error?) -> Void) {
+  private func barometricPressure(completion: @escaping (Measurement<UnitPressure>?, Error?) -> Void) {
     logDebug("Get barometric pressure.")
     
     guard CMAltimeter.isRelativeAltitudeAvailable() else {
@@ -91,10 +135,7 @@ extension MotionManager {
     }
   }
   
-}
-
-extension MotionManager {
-  
+  /// Called when the relative altitude is updated.
   private func relativeAltitudeUpdate(data: CMAltitudeData?, error: Error?) {
     pendingCompletionBlocksSemaphore.wait()
     defer { pendingCompletionBlocksSemaphore.signal() }

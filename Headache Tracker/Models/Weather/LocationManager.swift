@@ -21,6 +21,8 @@ class LocationManager: NSObject {
     case notAvailable
     case notAuthorized
     case cancelled
+    case missing
+    case deallocated
     
     var description: String {
       switch self {
@@ -30,6 +32,10 @@ class LocationManager: NSObject {
         return "Location services are not authorized."
       case .cancelled:
         return "The reading was cancelled."
+      case .missing:
+        return "The reading was missing."
+      case .deallocated:
+        return "The location manager was deallocated."
       }
     }
   }
@@ -69,10 +75,10 @@ extension LocationManager {
   
   /// Cancels the current location reading.
   func cancel() {
+    logDebug("Cancel location reading.")
+    
     pendingCompletionBlocksSemaphore.wait()
     defer { pendingCompletionBlocksSemaphore.signal() }
-    
-    logDebug("Cancel location reading.")
     
     for block in pendingCompletionBlocks {
       block(nil, LocationError.cancelled)
@@ -83,10 +89,38 @@ extension LocationManager {
     isUpdatingLocation = false
   }
   
+  /// Gets the device's location from location services.
+  ///
+  /// - Returns: The device's current location.
+  func location() async throws -> CLLocation {
+    return try await withCheckedThrowingContinuation { [weak self] continuation in
+      guard let self = self else {
+        continuation.resume(throwing: LocationError.deallocated)
+        return
+      }
+      
+      self.location(completion: { location, error in
+        if let location = location {
+          continuation.resume(returning: location)
+        }
+        else if let error = error {
+          continuation.resume(throwing: error)
+        }
+        else {
+          continuation.resume(throwing: LocationError.missing)
+        }
+      })
+    }
+  }
+  
+}
+
+extension LocationManager {
+  
   /// Gets the current location of the device.
   ///
   /// - Parameter completion: Called when the location has been fetched.
-  func location(completion: @escaping (CLLocation?, Error?) -> Void) {
+  private func location(completion: @escaping (CLLocation?, Error?) -> Void) {
     logDebug("Get location.")
     
     guard CLLocationManager.locationServicesEnabled() else {
@@ -112,10 +146,11 @@ extension LocationManager {
     }
   }
   
-}
-
-extension LocationManager {
-  
+  /// Called when the manager receives a location or an error.
+  ///
+  /// - Parameters:
+  ///   - location: The location.
+  ///   - error: The error.
   private func locationUpdate(location: CLLocation?, error: Error?) {
     pendingCompletionBlocksSemaphore.wait()
     defer { pendingCompletionBlocksSemaphore.signal() }

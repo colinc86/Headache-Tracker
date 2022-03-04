@@ -16,6 +16,20 @@ import WidgetKit
 
 class HeadacheManager: ObservableObject {
   
+  enum HeadacheError: Error, CustomStringConvertible {
+    case testing
+    case missing
+    
+    var description: String {
+      switch self {
+      case .testing:
+        return "This operation is not allowed in test mode."
+      case .missing:
+        return "The required data was missing."
+      }
+    }
+  }
+  
   // MARK: Weak properties
   
   /// The alert manager to use when adding local notifications.
@@ -111,10 +125,8 @@ extension HeadacheManager {
   /// Changes the manager's severity and either creates a new headache, or adds the new
   /// severity to the current headache.
   ///
-  /// - Parameters:
-  ///   - severity: The headache's current severity.
-  ///   - completion: Called after the severity has been added.
-  func changeSeverity(to severity: HKCategoryValueSeverity, completion: @escaping (Error?) -> Void) {
+  /// - Parameter severity: The headache's current severity.
+  func changeSeverity(to severity: HKCategoryValueSeverity) async throws {
     logDebug("Change severity to \(severity.title).")
     
     // The date interval of the severity to save to health kit
@@ -126,8 +138,7 @@ extension HeadacheManager {
     // The identifier of the severity that was added
     var severityIdentifier: UUID?
     
-    // Get the current headache
-    currentHeadache { headache, context in
+    try await currentHeadache { headache, context in
       // Add to the current headache or create a new one
       if let headache = headache {
         logDebug("Adding severity to current headache.")
@@ -140,39 +151,28 @@ extension HeadacheManager {
         headacheIdentifier = newHeadache.identifier
         severityIdentifier = newHeadache.severitiesArray.first?.identifier
       }
-    } completion: { [weak self] error in
-      // If there if an error, then we're done
-      guard let self = self, !self.testing && error == nil else {
-        completion(error)
-        return
-      }
-      
-      // If there wasn't an error, then update the widget data and continue
-      SharedUserDefaults.standard.setCurrentSeverity(severity)
-      
-      // Write the data to health kit and set our check-in alert
-      self.healthKitManager?.saveSeveritySamples(intervals: severityInterval == nil ? [] : [severityInterval!]) { saveError in
-        self.presentCheckInAlert(with: headacheIdentifier) { checkInError in
-          completion(saveError ?? checkInError)
-        }
-      }
-      
-      // Update the CoreML models
-      self.createTrainingData(newSeverityIdentifier: severityIdentifier)
     }
+    
+    // If there wasn't an error, then update the widget data and continue
+    SharedUserDefaults.standard.setCurrentSeverity(severity)
+    
+    // Write the data to health kit and set our check-in alert
+    try await self.healthKitManager?.saveSeveritySamples(intervals: severityInterval == nil ? [] : [severityInterval!])
+    try await presentCheckInAlert(with: headacheIdentifier)
+    
+    // Update the CoreML models
+    try await createTrainingData(newSeverityIdentifier: severityIdentifier)
   }
   
   /// Resolves the headache.
-  ///
-  /// - Parameter completion: Called after the headache has resolved.
-  func resolve(completion: @escaping (Error?) -> Void) {
+  func resolve() async throws {
     logDebug("Resolve headache.")
     
     // The date interval of the severity to save to health kit
     var severityInterval: SeverityInterval?
     
     // Get the current headache
-    currentHeadache { headache, context in
+    try await currentHeadache { headache, context in
       // Resolve the headache
       if let headache = headache {
         severityInterval = headache.resolve(endTime: Date())
@@ -180,31 +180,23 @@ extension HeadacheManager {
       else {
         logWarning("No current headache to resolve.")
       }
-    } completion: { [weak self] error in
-      // If there is an error, then we're done
-      guard let self = self, !self.testing && error == nil else {
-        completion(error)
-        return
-      }
-      
-      // If there wasn't an error, then update the widget data and continue
-      SharedUserDefaults.standard.setCurrentSeverity(nil)
-      
-      // Cancel any pending notifications
-      self.alertManager?.removeRequests(pending: true, delivered: false)
-      
-      // Write the data to health kit
-      self.healthKitManager?.saveSeveritySamples(intervals: severityInterval == nil ? [] : [severityInterval!], completion: completion)
-      
-      // Update the CoreML models
-      self.createTrainingData()
     }
+    
+    // If there wasn't an error, then update the widget data and continue
+    SharedUserDefaults.standard.setCurrentSeverity(nil)
+    
+    // Cancel any pending notifications
+    alertManager?.removeRequests(pending: true, delivered: false)
+    
+    // Write the data to health kit
+    try await healthKitManager?.saveSeveritySamples(intervals: severityInterval == nil ? [] : [severityInterval!])
+    
+    // Update the CoreML models
+    try await createTrainingData()
   }
   
   /// Deletes the current headache.
-  ///
-  /// - Parameter completion: Called after the headache has been deleted.
-  func reset(completion: @escaping (Error?) -> Void) {
+  func reset() async throws {
     logDebug("Reset headache.")
     
     // The start and end times to delete from health kit
@@ -212,7 +204,7 @@ extension HeadacheManager {
     var endTime: Date?
     
     // Get the current headache
-    currentHeadache { headache, context in
+    try await currentHeadache { headache, context in
       logDebug("Resetting headache.")
       
       // If we have a current headache, then delete it
@@ -221,24 +213,18 @@ extension HeadacheManager {
         endTime = headache.endTime ?? headache.pendingEndTime
         context.delete(headache)
       }
-    } completion: { [weak self] error in
-      // If there is an error, then we're done
-      guard let self = self, !self.testing && error == nil else {
-        completion(error)
-        return
-      }
-      
-      // If there wasn't an error, then update the widget data and continue
-      SharedUserDefaults.standard.setCurrentSeverity(nil)
-      
-      // If there wasn't an error, then we should check and delete it from health kit
-      if let startTime = startTime, let endTime = endTime {
-        logDebug("Successfully reset headache. Deleting severity samples.")
-        self.healthKitManager?.deleteSeveritySamples(in: DateInterval(start: startTime, end: endTime), completion: completion)
-      }
-      else {
-        logDebug("Successfully reset headache, but not deleting severity samples.")
-      }
+    }
+    
+    // If there wasn't an error, then update the widget data and continue
+    SharedUserDefaults.standard.setCurrentSeverity(nil)
+    
+    // If there wasn't an error, then we should check and delete it from health kit
+    if let startTime = startTime, let endTime = endTime {
+      logDebug("Successfully reset headache. Deleting severity samples.")
+      try await healthKitManager?.deleteSeveritySamples(in: DateInterval(start: startTime, end: endTime))
+    }
+    else {
+      logDebug("Successfully reset headache, but not deleting severity samples.")
     }
   }
   
@@ -250,50 +236,38 @@ extension HeadacheManager {
   
   /// Adds a new severity to the headache with the given identifier.
   ///
-  /// - Parameters:
-  ///   - identifier: The headache's identifier.
-  ///   - completion: The completion block to call after the severity has been added.
-  func addSeverityToHeadache(identifier: UUID, completion: @escaping (Error?) -> Void) {
+  /// - Parameter identifier: The headache's identifier.
+  func addSeverityToHeadache(identifier: UUID) async throws {
     logDebug("Add severity.")
     
     // The date interval of the severity to save to health kit
     var severityInterval: SeverityInterval?
     
     // Get the headache
-    headacheWithIdentifier(identifier: identifier) { headache, context in
+    try await headacheWithIdentifier(identifier: identifier) { headache, context in
       if let headache = headache {
         severityInterval = headache.addSeverity(.notPresent, duration: 3600.0)
       }
-    } completion: { [weak self] error in
-      // If there is an error, then we're done
-      guard let self = self, !self.testing && error == nil else {
-        completion(error)
-        return
-      }
-      
-      self.healthKitManager?.saveSeveritySamples(intervals: severityInterval == nil ? [] : [severityInterval!], completion: completion)
     }
+    
+    try await healthKitManager?.saveSeveritySamples(intervals: severityInterval == nil ? [] : [severityInterval!])
   }
   
   /// Deletes the headache with the given identifier and it's associated health kit data.
   ///
-  /// - Parameters:
-  ///   - identifier: The headache's identifier.
-  ///   - completion: Called after the headache has been deleted.
-  func deleteHeadache(identifier: UUID, completion: ((Error?) -> Void)? = nil) {
+  /// - Parameter identifier: The headache's identifier.
+  func deleteHeadache(identifier: UUID) async throws {
     logDebug("Delete headache.")
     
     // The start and end times to delete from health kit
     var startTime: Date?
     var endTime: Date?
     
-    DataController.shared.performInBackground { [weak self] context in
+    try await headacheWithIdentifier(identifier: identifier) { [weak self] headache, context in
       logDebug("Deleting headache.")
       
       // Get the headache
-      let request = Headache.fetchRequest(withIdentifier: identifier)
-      let headaches = try context.fetch(request)
-      if let headache = headaches.first {
+      if let headache = headache {
         startTime = headache.startTime
         endTime = headache.endTime ?? headache.pendingEndTime
         context.delete(headache)
@@ -305,36 +279,28 @@ extension HeadacheManager {
           SharedUserDefaults.standard.setCurrentSeverity(nil)
         }
       }
-    } completion: { [weak self] error in
-      // If there is an error, then we're done
-      guard let self = self, !self.testing && error == nil else {
-        completion?(error)
-        return
-      }
-      
-      // If there wasn't an error, then we should check and delete it from health kit
-      if let startTime = startTime, let endTime = endTime {
-        logDebug("Successfully reset headache. Deleting severity samples.")
-        self.healthKitManager?.deleteSeveritySamples(in: DateInterval(start: startTime, end: endTime), completion: completion)
-      }
-      else {
-        logDebug("Successfully reset headache, but not deleting severity samples.")
-      }
+    }
+    
+    // If there wasn't an error, then we should check and delete it from health kit
+    if let startTime = startTime, let endTime = endTime {
+      logDebug("Successfully reset headache. Deleting severity samples.")
+      try await healthKitManager?.deleteSeveritySamples(in: DateInterval(start: startTime, end: endTime))
+    }
+    else {
+      logDebug("Successfully reset headache, but not deleting severity samples.")
     }
   }
   
   /// Deletes the severity with the given identifier.
   ///
-  /// - Parameters:
-  ///   - identifier: The severity's identifier.
-  ///   - completion: The completion block to call.
-  func deleteSeverity(identifier: UUID, completion: ((Error?) -> Void)? = nil) {
+  /// - Parameter identifier: The severity's identifier.
+  func deleteSeverity(identifier: UUID) async throws {
     logDebug("Delete severity.")
     
     var originalHeadacheInterval: DateInterval?
     var newSeveritySamples = [SeverityInterval]()
     
-    severityWithIdentifier(identifier: identifier) { severity, context in
+    try await severityWithIdentifier(identifier: identifier, update: { severity, context in
       if let severity = severity {
         let headache = severity.headache
         originalHeadacheInterval = headache?.dateInterval
@@ -347,41 +313,25 @@ extension HeadacheManager {
           newSeveritySamples.append(interval)
         }
       }
-    } completion: { [weak self] error in
-      // If there is an error, then we're done
-      guard let self = self, !self.testing && error == nil else {
-        completion?(error)
-        return
-      }
-      
-      // Check to see if we need to delete and re-add samples
-      if let originalHeadacheInterval = originalHeadacheInterval {
-        self.healthKitManager?.deleteSeveritySamples(in: originalHeadacheInterval) { error in
-          // If there is an error, then we're done
-          guard error == nil else {
-            completion?(error)
-            return
-          }
-          
-          // Otherwise re-add the samples
-          self.healthKitManager?.saveSeveritySamples(intervals: newSeveritySamples, completion: completion)
-        }
-      }
+    })
+    
+    // Check to see if we need to delete and re-add samples
+    if let originalHeadacheInterval = originalHeadacheInterval {
+      try await healthKitManager?.deleteSeveritySamples(in: originalHeadacheInterval)
+      try await healthKitManager?.saveSeveritySamples(intervals: newSeveritySamples)
     }
   }
   
   /// Updates the severity with the given identifier.
   ///
-  /// - Parameters:
-  ///   - identifier: The severity's identifier.
-  ///   - completion: The completion block to call.
-  func updateSeverity(identifier: UUID, value: HKCategoryValueSeverity, startTime: Date, endTime: Date, completion: ((Error?) -> Void)? = nil) {
+  /// - Parameter identifier: The severity's identifier.
+  func updateSeverity(identifier: UUID, value: HKCategoryValueSeverity, startTime: Date, endTime: Date) async throws {
     logDebug("Update severity.")
     
     var originalHeadacheInterval: DateInterval?
     var newSeveritySamples = [SeverityInterval]()
     
-    severityWithIdentifier(identifier: identifier) { severity, context in
+    try await severityWithIdentifier(identifier: identifier, update: { severity, context in
       if let severity = severity {
         let headache = severity.headache
         originalHeadacheInterval = headache?.dateInterval
@@ -395,26 +345,12 @@ extension HeadacheManager {
           newSeveritySamples.append(interval)
         }
       }
-    } completion: { [weak self] error in
-      // If there is an error, then we're done
-      guard let self = self, !self.testing && error == nil else {
-        completion?(error)
-        return
-      }
-      
-      // Check to see if we need to delete and re-add samples
-      if let originalHeadacheInterval = originalHeadacheInterval {
-        self.healthKitManager?.deleteSeveritySamples(in: originalHeadacheInterval) { error in
-          // If there is an error, then we're done
-          guard error == nil else {
-            completion?(error)
-            return
-          }
-          
-          // Otherwise re-add the samples
-          self.healthKitManager?.saveSeveritySamples(intervals: newSeveritySamples, completion: completion)
-        }
-      }
+    })
+    
+    // Check to see if we need to delete and re-add samples
+    if let originalHeadacheInterval = originalHeadacheInterval {
+      try await self.healthKitManager?.deleteSeveritySamples(in: originalHeadacheInterval)
+      try await self.healthKitManager?.saveSeveritySamples(intervals: newSeveritySamples)
     }
   }
   
@@ -427,44 +363,38 @@ extension HeadacheManager {
   /// Gets the current headache and calls it with the update block before
   /// saving the context and calling the completion block.
   ///
-  /// - Parameters:
-  ///   - update: Called with the current headache to update it. Errors thrown
-  ///     in this block will be received in completion.
-  ///   - completion: Called after the context has been saved.
-  private func currentHeadache(update: @escaping (Headache?, NSManagedObjectContext) throws -> Void, completion: @escaping (Error?) -> Void) {
-    DataController.shared.performInBackground(block: { context in
+  /// - Parameter update: Called with the current headache to update it.
+  ///   Errors thrown in this block will be received in completion.
+  private func currentHeadache(update: @escaping (Headache?, NSManagedObjectContext) async throws -> Void) async throws {
+    try await DataController.shared.performInBackground(saveOnComplete: true) { context in
       let request = Headache.fetchRequest()
       request.predicate = NSPredicate(format: "ANY severities.endTime = nil")
-      try update(try context.fetch(request).first, context)
-    }, completion: completion)
+      try await update(try context.fetch(request).first, context)
+    }
   }
   
   /// Gets the headache and calls it with the update block before
   /// saving the context and calling the completion block.
   ///
-  /// - Parameters:
-  ///   - update: Called with the headache to update it. Errors thrown
-  ///     in this block will be received in completion.
-  ///   - completion: Called after the context has been saved.
-  private func headacheWithIdentifier(identifier: UUID, update: @escaping (Headache?, NSManagedObjectContext) throws -> Void, completion: @escaping (Error?) -> Void) {
-    DataController.shared.performInBackground(block: { context in
+  /// - Parameter update: Called with the headache to update it. Errors
+  ///   thrown in this block will be received in completion.
+  private func headacheWithIdentifier(identifier: UUID, update: @escaping (Headache?, NSManagedObjectContext) async throws -> Void) async throws {
+    try await DataController.shared.performInBackground(saveOnComplete: true) { context in
       let request = Headache.fetchRequest(withIdentifier: identifier)
-      try update((try context.fetch(request)).first, context)
-    }, completion: completion)
+      try await update((try context.fetch(request)).first, context)
+    }
   }
   
   /// Gets the severity and calls it with the update block before
   /// saving the context and calling the completion block.
   ///
-  /// - Parameters:
-  ///   - update: Called with the severity to update it. Errors thrown
-  ///     in this block will be received in completion.
-  ///   - completion: Called after the context has been saved.
-  private func severityWithIdentifier(identifier: UUID, update: @escaping (Severity?, NSManagedObjectContext) throws -> Void, completion: @escaping (Error?) -> Void) {
-    DataController.shared.performInBackground(block: { context in
+  /// - Parameter update: Called with the severity to update it. Errors
+  ///   thrown in this block will be received in completion.
+  private func severityWithIdentifier(identifier: UUID, update: @escaping (Severity?, NSManagedObjectContext) async throws -> Void) async throws {
+    try await DataController.shared.performInBackground(saveOnComplete: true) { context in
       let request = Severity.fetchRequest(withIdentifier: identifier)
-      try update((try context.fetch(request)).first, context)
-    }, completion: completion)
+      try await update((try context.fetch(request)).first, context)
+    }
   }
   
 }
@@ -475,79 +405,61 @@ extension HeadacheManager {
   
   /// Presents a check-in alert in the future.
   ///
-  /// - Parameters:
-  ///   - headacheIdentifier: The headache identifier.
-  ///   - completion: Called after the alert has been added to notification center.
-  private func presentCheckInAlert(with headacheIdentifier: UUID?, completion: @escaping (Error?) -> Void) {
+  /// - Parameter headacheIdentifier: The headache identifier.
+  private func presentCheckInAlert(with headacheIdentifier: UUID?) async throws {
     // Only continue if we have an identifier and check-in alerts are turned on
     guard checkInAlerts, let headacheIdentifier = headacheIdentifier else {
-      completion(nil)
       return
     }
     
-    // Make sure we're on the main queue
-    DispatchQueue.main.async {
-      // Cancel any pending notifications
-      self.alertManager?.removeRequests(pending: true, delivered: false)
-      
-      // Get our date components
-      let futureDate = Date(timeIntervalSinceNow: self.checkInInterval)
-      let components = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: futureDate)
-      
-      // Present the alert
-      logDebug("Presenting alert with components at date \(futureDate).")
-      self.alertManager?.presentAlert(
-        with: HeadacheAlertRequest.checkIn(headacheIdentifier: headacheIdentifier),
-        trigger: UNCalendarNotificationTrigger(dateMatching: components, repeats: false),
-        badgeNumber: 0,
-        completion: completion)
-    }
+    // Cancel any pending notifications
+    alertManager?.removeRequests(pending: true, delivered: false)
+    
+    // Get our date components
+    let futureDate = Date(timeIntervalSinceNow: self.checkInInterval)
+    let components = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: futureDate)
+    
+    // Present the alert
+    logDebug("Presenting alert with components at date \(futureDate).")
+    try await alertManager?.presentAlert(
+      with: HeadacheAlertRequest.checkIn(headacheIdentifier: headacheIdentifier),
+      trigger: UNCalendarNotificationTrigger(dateMatching: components, repeats: false),
+      badgeNumber: 0)
   }
   
   /// Presents a prediction alert now.
   ///
-  /// - Parameters:
-  ///   - prediction: The prediction.
-  ///   - completion: Called after the alert has been added to notification center.
-  private func presentPredictionAlert(with prediction: Predictor.Prediction?, completion: @escaping (Error?) -> Void) {
+  /// - Parameter prediction: The prediction.
+  private func presentPredictionAlert(with prediction: Predictor.Prediction?) async throws {
     // Only continue if we have a prediction and prediction alerts are turned on
-    guard realTimeAlerts, let prediction = prediction, prediction.severityClassifierOutput.prediction != .notPresent && prediction.outlookClassifierOutput.prediction == .headache else {
-      completion(nil)
+    guard realTimeAlerts, let prediction = prediction,
+            prediction.severityClassifierOutput.prediction != .notPresent &&
+            prediction.outlookClassifierOutput.prediction == .headache else {
       return
     }
     
     // Make sure we're on the main queue
-    DispatchQueue.main.async {
-      // Present the alert
-      logDebug("Presenting alert for predicted severity: \(prediction.severityClassifierOutput.prediction.title).")
-      self.alertManager?.presentAlert(
-        with: HeadacheAlertRequest.prediction(severity: prediction.severityClassifierOutput.prediction),
-        badgeNumber: 0,
-        completion: completion)
-    }
+    // Present the alert
+    logDebug("Presenting alert for predicted severity: \(prediction.severityClassifierOutput.prediction.title).")
+    try await alertManager?.presentAlert(
+      with: HeadacheAlertRequest.prediction(severity: prediction.severityClassifierOutput.prediction),
+      badgeNumber: 0)
   }
   
   /// Presents an outlook alert now.
   ///
-  /// - Parameters:
-  ///   - prediction: The prediction.
-  ///   - completion: Called after the alert has been added to notification center.
-  private func presentOutlookAlert(with prediction: Predictor.Prediction?, completion: @escaping (Error?) -> Void) {
+  /// - Parameter prediction: The prediction.
+  private func presentOutlookAlert(with prediction: Predictor.Prediction?) async throws {
     // Only continue if we have a prediction and prediction alerts are turned on
     guard dailyOutlookAlerts, let prediction = prediction else {
-      completion(nil)
       return
     }
     
-    // Make sure we're on the main queue
-    DispatchQueue.main.async {
-      // Present the alert
-      logDebug("Presenting alert for outlook: \(prediction.outlookClassifierOutput.prediction).")
-      self.alertManager?.presentAlert(
-        with: HeadacheAlertRequest.outlook(outlook: prediction.outlookClassifierOutput.prediction, onset: prediction.onsetRegressorOutput.prediction),
-        badgeNumber: 0,
-        completion: completion)
-    }
+    // Present the alert
+    logDebug("Presenting alert for outlook: \(prediction.outlookClassifierOutput.prediction).")
+    try await self.alertManager?.presentAlert(
+      with: HeadacheAlertRequest.outlook(outlook: prediction.outlookClassifierOutput.prediction, onset: prediction.onsetRegressorOutput.prediction),
+      badgeNumber: 0)
   }
   
 }
@@ -564,42 +476,40 @@ extension HeadacheManager {
   /// Whether or not the application needs more not present training data.
   ///
   /// - Returns: A boolean indicating if the app should ask for more training data.
-  func needsNotPresentTrainingData(completion: @escaping (Bool) -> Void) {
-    let context = DataController.shared.newNestedBackgroundContext()
-    context.perform { [unowned context] in
+  func needsNotPresentTrainingData() async throws -> Bool {
+    return try await DataController.shared.performInBackground { context in
       let request = TrainingData.fetchRequest()
       request.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: true)]
       
-      let trainingData = (try? context.fetch(request)) ?? []
-      let notPresentTrainigData = trainingData.filter({ $0.severity == nil })
-      logDebug("Not present training data count: \(notPresentTrainigData.count)")
+      let trainingData = try context.fetch(request)
+      let notPresentTrainigData = trainingData.filter({ $0.severity == nil || $0.severity?.severity == .notPresent })
       
       var nextDateAllowed = false
       if let lastNotPresentDate = notPresentTrainigData.last?.timestamp {
         nextDateAllowed = Date().timeIntervalSince(lastNotPresentDate) > 3600.0 // Every 1 hour
       }
       
-      completion(nextDateAllowed)
+      return nextDateAllowed
     }
   }
   
   /// Whether or not the device contains training data that's newer than
   /// the latest compiled models.
   ///
-  /// - Parameter completion: Called after the training data has been fetched.
-  func needsTraining(completion: @escaping (Bool) -> Void) {
-    var needs = false
-    let context = DataController.shared.newNestedBackgroundContext()
-    context.perform { [unowned context] in
+  /// - Returns: A boolean indicating if the app needs to train its models.
+  func needsTraining() async throws -> Bool {
+    return try await DataController.shared.performInBackground { context in
       let request = TrainingData.fetchRequest()
       request.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: true)]
       
-      let trainingData = (try? context.fetch(request)) ?? []
+      let trainingData = try context.fetch(request)
+      
+      var needs = false
       if let date = trainingData.last?.timestamp, let lastTrainingDate = self.predictor?.modelUpdatedAt {
         needs = date.timeIntervalSince(lastTrainingDate) > 0.0
       }
       
-      completion(needs)
+      return needs
     }
   }
   
@@ -610,153 +520,93 @@ extension HeadacheManager {
   
   /// Gets classifier input appropriate for prediction.
   ///
-  /// - Parameter completion: Called when the input struture is ready.
-  func getCurrentClassifierInput(shouldCreateTrainingData: Bool = false, _ completion: @escaping (Predictor.Input?, Error?) -> Void) {
-    guard !testing else {
-      completion(nil, nil)
-      return
-    }
+  /// - Parameter shouldCreateTrainingData: Set to true if the headache manager should
+  ///   create training data as a reesult of getting the classifier input.
+  func getCurrentClassifierInput(shouldCreateTrainingData: Bool = false) async throws -> Predictor.Input {
+    guard !testing else { throw HeadacheError.testing }
     
+    defer { getCurrentClassifierInputBackgroundTask.end() }
     getCurrentClassifierInputBackgroundTask.begin { [weak self] in
       self?.weatherManager?.cancel()
     }
     
-    weatherManager?.weather { [weak self] weather, error in
-      guard let self = self else {
-        logWarning("Self was nil. Returning early.")
-        completion(nil, error)
-        self?.getCurrentClassifierInputBackgroundTask.end()
-        return
-      }
-      
-      if let error = error {
-        logError("Error getting weather: \(error)")
-        completion(nil, error)
-        self.getCurrentClassifierInputBackgroundTask.end()
-        return
-      }
-      else if let weather = weather {
-        logDebug("Got weather: \(weather)")
-      }
-      
-      logDebug("Creating input data...")
-      let now = Date()
-      let interval = DateInterval(start: now.addingTimeInterval(-86400.0), end: now)
-      let healthKitData = self.healthKitManager?.readHealthKitData(in: interval)
-      
-      completion(Predictor.Input(weather: weather, healthKitData: healthKitData, date: now), nil)
-      self.getCurrentClassifierInputBackgroundTask.end()
-    }
+    let weather = try await weatherManager?.weather()
+    let now = Date()
+    let interval = DateInterval(start: now.addingTimeInterval(-86400.0), end: now)
+    let healthKitData = self.healthKitManager?.readHealthKitData(in: interval)
+    return Predictor.Input(weather: weather, healthKitData: healthKitData, date: now)
   }
   
   /// Create new training data and sets its `severity` relationship to the severity
   /// with the given identifier. If no identifier is present, then the training data is
   /// still created but orphaned (a not-present severity).
   ///
-  /// - Parameters:
-  ///   - newSeverityIdentifier: The new severity identifier.
-  ///   - completion: The completion block to call after the training data has been created.
-  func createTrainingData(newSeverityIdentifier: UUID? = nil, completion: ((Predictor.Input?, Error?) -> Void)? = nil) {
-    guard !testing else {
-      logDebug("Testing and returning early.")
-      completion?(nil, nil)
-      return
-    }
+  /// - Parameter newSeverityIdentifier: The new severity identifier.
+  @discardableResult
+  func createTrainingData(newSeverityIdentifier: UUID? = nil) async throws -> Predictor.Input {
+    guard !testing else { throw HeadacheError.testing }
 
     logDebug("Create training data background task begin.")
+    defer { createTrainingDataBackgroundTask.end() }
     createTrainingDataBackgroundTask.begin { [weak self] in
       self?.weatherManager?.cancel()
     }
 
     // Get the barometric pressure
-    logDebug("Create training data. Getting input...")
-    getCurrentClassifierInput { [weak self] input, error in
-      guard let self = self else {
-        logWarning("Self was nil. Returning early.")
-        self?.createTrainingDataBackgroundTask.end()
-        completion?(nil, nil)
-        return
-      }
+    logDebug("Getting input...")
+    let input = try await getCurrentClassifierInput()
+    
+    logInfo("Creating training data...")
+    try await DataController.shared.performInBackground(saveOnComplete: true) { context in
+      // Create the training data
+      let trainingData = TrainingData(context: context, input: input)
+      logDebug("Created training data.")
       
-      if let error = error {
-        logError("Error getting weather: \(error)")
-        self.createTrainingDataBackgroundTask.end()
-        completion?(nil, error)
-      }
-      else if let input = input {
-        logDebug("Got weather: \(input)")
-
-        self.trainingQueue.async {
-          let context = DataController.shared.newNestedBackgroundContext()
-          
-          // Create the training data
-          let trainingData = TrainingData(context: context, input: input)
-          
-          logDebug("Created training data.")
-          
-          if let newSeverityIdentifier = newSeverityIdentifier {
-            logDebug("Setting training data on severity \(newSeverityIdentifier)")
-            let request = Severity.fetchRequest(withIdentifier: newSeverityIdentifier)
-            if let severity = ((try? context.fetch(request)) ?? []).first {
-              severity.addToTrainingData(trainingData)
-            }
-            else {
-              logWarning("Unable to add training data to severity with identifier: \(newSeverityIdentifier.uuidString)")
-            }
-          }
-          
-          logDebug("Saving context.")
-          DataController.shared.saveBackgroundAndViewContexts(context) { error in
-            if let error = error {
-              logError("Error saving training data: \(error)")
-            }
-            else {
-              logDebug("Finished saving training data.")
-            }
-            
-            completion?(input, error)
-            self.createTrainingDataBackgroundTask.end()
-          }
+      if let newSeverityIdentifier = newSeverityIdentifier {
+        logDebug("Setting training data on severity \(newSeverityIdentifier)")
+        let request = Severity.fetchRequest(withIdentifier: newSeverityIdentifier)
+        if let severity = ((try? context.fetch(request)) ?? []).first {
+          severity.addToTrainingData(trainingData)
+        }
+        else {
+          logWarning("Unable to add training data to severity with identifier: \(newSeverityIdentifier.uuidString)")
         }
       }
     }
+    
+    return input
+  }
+  
+  func upgradeTrainingData() {
+    // TODO: Add code
   }
   
   /// Trains the classifiers.
   ///
   /// - Parameter completion: Called when training is complete.
-  func trainClassifiers(_ completion: @escaping (Error?) -> Void) {
-    guard !testing else {
-      return
-    }
+  func trainClassifiers() async throws {
+    guard !testing else { throw HeadacheError.testing }
     
-    trainingQueue.async { [weak self] in
-      let context = DataController.shared.newNestedBackgroundContext()
-      
+    try await DataController.shared.performInBackground { context in
       logDebug("Fetching all training data...")
       let request = TrainingData.fetchRequest()
       request.predicate = NSPredicate(format: "needsHealthKitData == %@", NSNumber(booleanLiteral: false))
       
-      let allTrainingData = (try? context.fetch(request)) ?? []
+      let allTrainingData = try context.fetch(request)
       
       logDebug("Training classifiers with \(allTrainingData.count) data...")
-      self?.predictor?.train(with: allTrainingData, completion: completion)
+      try await self.predictor!.train(with: allTrainingData)
     }
   }
   
   /// Adds health kit data to incomplete training samples.
-  ///
-  /// - Parameter completion: Called after the training data has been cleaned.
-  func cleanTrainingData(_ completion: @escaping (Error?) -> Void) {
-    guard !testing else {
-      completion(nil)
-      return
-    }
-    
+  func cleanTrainingData() async throws {
     logDebug("Cleaning training data.")
-    trainingQueue.async { [weak self] in
-      let context = DataController.shared.newNestedBackgroundContext()
-
+    try await DataController.shared.performInBackground(saveOnComplete: true) { [weak self] context in
+      guard let self = self else {
+        return
+      }
+      
       logDebug("Fetching incomplete training data...")
       let incompleteRequest = TrainingData.fetchRequest()
       incompleteRequest.predicate = NSPredicate(format: "(needsHealthKitData == %@) || (needsHealthKitData == %@)", NSNumber(booleanLiteral: true), NSNull())
@@ -769,10 +619,8 @@ extension HeadacheManager {
           continue
         }
         let interval = DateInterval(start: timestamp.addingTimeInterval(-86400.0), end: timestamp)
-        data.updateWithHealthKitData(self?.healthKitManager?.readHealthKitData(in: interval))
+        data.updateWithHealthKitData(self.healthKitManager?.readHealthKitData(in: interval))
       }
-      
-      DataController.shared.saveBackgroundAndViewContexts(context, completion)
     }
   }
   
@@ -795,7 +643,7 @@ extension HeadacheManager {
   }
   
   /// Schedules the refresh task for the next hour.
-  func schedulePredictionRefreshTask() {
+  @MainActor func schedulePredictionRefreshTask() async throws {
     // Get the current seconds past midnight.
     let secondsPastMidnight = Calendar.current.timeIntervalSinceMidnight(Date())
     
@@ -810,17 +658,10 @@ extension HeadacheManager {
     
     // Schedule the next task
     logDebug("Scheduling prediction refresh task with date \(Date(timeIntervalSinceNow: secondsUntilNextHour))")
-    predictionRefreshTask.schedule(interval: secondsUntilNextHour) { [weak self] error in
-      if let error = error {
-        logError("Unable to schedule prediction task: \(error)")
-      }
-      else {
-        logDebug("Successfully scheduled prediction refresh task.")
-        DispatchQueue.main.async {
-          self?.debugNextPredictionDate = Date(timeIntervalSinceNow: secondsUntilNextHour)
-        }
-      }
-    }
+    try await predictionRefreshTask.schedule(interval: secondsUntilNextHour)
+    
+    logDebug("Successfully scheduled prediction refresh task.")
+    debugNextPredictionDate = Date(timeIntervalSinceNow: secondsUntilNextHour)
   }
   
   /// Handles the refresh task.
@@ -829,7 +670,14 @@ extension HeadacheManager {
     debugLastPredictionDate = Date()
     
     // Schedule the next task
-    schedulePredictionRefreshTask()
+    Task {
+      do {
+        try await schedulePredictionRefreshTask()
+      }
+      catch {
+        logError("Error scheduling prediction refresh task: \(error)")
+      }
+    }
     
     // Set the task's expiration handler
     task.expirationHandler = { [weak self] in
@@ -837,49 +685,30 @@ extension HeadacheManager {
       self?.cancelClassificationInput()
     }
     
-    // Get the current headache
-    var currentSeverityID: UUID?
-    
+    // Get the current severity identifier
     let context = DataController.shared.newNestedBackgroundContext()
-    context.performAndWait { [weak context] in
+    let currentSeverityID: UUID? = context.performAndWait { [weak context] in
       let request = Headache.fetchRequest()
       request.predicate = NSPredicate(format: "resolved = %@", NSNumber(booleanLiteral: false))
       let headache = (try? context?.fetch(request))?.last
-      currentSeverityID = headache?.currentSeverity?.identifier
+      return headache?.currentSeverity?.identifier
     }
     
-    createTrainingData(newSeverityIdentifier: currentSeverityID) { input, error in
-      // There's no current headache, so run a prediction
-      if let error = error {
-        // There was an error with getting the input
-        logError("Error getting classifier input: \(error)")
-        task.setTaskCompleted(success: false)
-      }
-      else if let input = input {
+    // Get the input and either alert or finish
+    Task {
+      do {
+        let input = try await createTrainingData(newSeverityIdentifier: currentSeverityID)
+        
         if currentSeverityID == nil {
           // We got the input, so present the prediction
-          do {
-            let prediction = try self.predictor?.predict(input)
-            self.presentPredictionAlert(with: prediction, completion: { error in
-              if let error = error {
-                logError("Error presenting alert: \(error)")
-              }
-              task.setTaskCompleted(success: error == nil)
-            })
-          }
-          catch {
-            // There was an error predicting
-            logError("Error getting prediction: \(error)")
-            task.setTaskCompleted(success: false)
-          }
+          let prediction = try self.predictor?.predict(input)
+          try await self.presentPredictionAlert(with: prediction)
         }
-        else {
-          // We don't need to present a prediction and there was no error
-          task.setTaskCompleted(success: true)
-        }
+        
+        task.setTaskCompleted(success: true)
       }
-      else {
-        // Something else went wrong
+      catch {
+        logError("Error creating training data: \(error)")
         task.setTaskCompleted(success: false)
       }
     }
@@ -904,7 +733,7 @@ extension HeadacheManager {
   }
   
   /// Schedules the outlook task for the daily outlook time.
-  func scheduleOutlookRefreshTask() {
+  @MainActor func scheduleOutlookRefreshTask() async throws {
     // Get the number of seconds past midnight.
     let now = Date()
     let secondsPastMidnight = Calendar.current.timeIntervalSinceMidnight(now)
@@ -925,17 +754,10 @@ extension HeadacheManager {
     
     // Schedule the outlook task
     logDebug("Scheduling outlook refresh task with date \(Date(timeIntervalSinceNow: secondsUntilOutlook)).")
-    outlookRefreshTask.schedule(interval: secondsUntilOutlook) { [weak self] error in
-      if let error = error {
-        logError("Unable to schedule outlook task: \(error)")
-      }
-      else {
-        logDebug("Successfully scheduled outlook refresh task.")
-        DispatchQueue.main.async {
-          self?.debugNextOutlookDate = Date(timeIntervalSinceNow: secondsUntilOutlook)
-        }
-      }
-    }
+    try await outlookRefreshTask.schedule(interval: secondsUntilOutlook)
+    
+    logDebug("Successfully scheduled outlook refresh task.")
+    debugNextOutlookDate = Date(timeIntervalSinceNow: secondsUntilOutlook)
   }
   
   /// Handles the refresh task.
@@ -945,7 +767,14 @@ extension HeadacheManager {
     
     // Schedule the next task
     if dailyOutlookAlerts {
-      scheduleOutlookRefreshTask()
+      Task {
+        do {
+          try await scheduleOutlookRefreshTask()
+        }
+        catch {
+          logError("Error scheduling outlook refresh task: \(error)")
+        }
+      }
     }
     
     // Set the task's expiration handler
@@ -955,30 +784,14 @@ extension HeadacheManager {
     }
     
     // Run a prediction
-    getCurrentClassifierInput { [weak self] input, error in
-      if let error = error {
-        // There was an error with getting the input
-        logError("Error getting classifier input: \(error)")
-        task.setTaskCompleted(success: false)
+    Task { [weak self] in
+      do {
+        let input = try await getCurrentClassifierInput()
+        try await presentOutlookAlert(with: try self?.predictor?.predict(input))
+        task.setTaskCompleted(success: true)
       }
-      else if let input = input {
-        // We got the input, so present the outlook
-        do {
-          self?.presentOutlookAlert(with: try self?.predictor?.predict(input), completion: { error in
-            if let error = error {
-              logError("Error presenting alert: \(error)")
-            }
-            task.setTaskCompleted(success: error == nil)
-          })
-        }
-        catch {
-          // There was an error predicting
-          logError("Error getting prediction: \(error)")
-          task.setTaskCompleted(success: false)
-        }
-      }
-      else {
-        // Something else went wrong
+      catch {
+        logError("Error getting current classifier input: \(error)")
         task.setTaskCompleted(success: false)
       }
     }
@@ -1003,7 +816,7 @@ extension HeadacheManager {
   }
   
   /// Schedulees the processing task.
-  func scheduleTrainingRefreshTask() {
+  @MainActor func scheduleTrainingRefreshTask() async throws {
     // Get the number of seconds past midnight.
     let now = Date()
     let secondsPastMidnight = Calendar.current.timeIntervalSinceMidnight(now)
@@ -1024,17 +837,10 @@ extension HeadacheManager {
     }
     
     logDebug("Scheduling training processing task with date \(Date(timeIntervalSinceNow: secondsUntilTraining))")
-    trainingProcessingTask.schedule(interval: secondsUntilTraining) { [weak self] error in
-      if let error = error {
-        logError("Error scheduling training processing task: \(error)")
-      }
-      else {
-        logDebug("Successfully scheduled training procecssing task.")
-        DispatchQueue.main.async {
-          self?.debugNextTrainingDate = Date(timeIntervalSinceNow: secondsUntilTraining)
-        }
-      }
-    }
+    try await trainingProcessingTask.schedule(interval: secondsUntilTraining)
+    
+    logDebug("Successfully scheduled training procecssing task.")
+    debugNextTrainingDate = Date(timeIntervalSinceNow: secondsUntilTraining)
   }
   
   /// Handles the processing task.
@@ -1043,7 +849,14 @@ extension HeadacheManager {
     debugLastTrainingDate = Date()
     
     // Schedule the next task
-    scheduleTrainingRefreshTask()
+    Task {
+      do {
+        try await scheduleTrainingRefreshTask()
+      }
+      catch {
+        logError("Error scheduling training processing task: \(error)")
+      }
+    }
     
     // Set the task's expiration handler
     task.expirationHandler = { [weak task, weak self] in
@@ -1053,26 +866,21 @@ extension HeadacheManager {
     }
     
     // Train
-    needsTraining { [weak self] needs in
+    Task { [weak self] in
       guard let self = self else {
         task.setTaskCompleted(success: false)
         return
       }
       
-      if needs {
-        self.trainClassifiers { error in
-          if let error = error {
-            logError("Error training classifiers: \(error)")
-          }
-          else {
-            logDebug("Successfully trained classifiers.")
-          }
-          
-          task.setTaskCompleted(success: error == nil)
+      do {
+        if try await self.needsTraining() {
+          try await self.trainClassifiers()
         }
-      }
-      else {
         task.setTaskCompleted(success: true)
+      }
+      catch {
+        logError("Error training classifiers: \(error)")
+        task.setTaskCompleted(success: false)
       }
     }
   }

@@ -11,6 +11,19 @@ import DataController
 extension DataController {
   
   /// The shared data controller.
-  static let shared = DataController(containerName: "Headache_Tracker")
+  static let shared: DataController = {
+    let controller = DataController(containerName: "Headache_Tracker")
+    
+    Task {
+      do {
+        try await controller.loadPersistentStores()
+      }
+      catch {
+        logError("Error loading persistent stores: \(error)")
+      }
+    }
+    
+    return controller
+  }()
   
 }

@@ -1675,7 +1675,7 @@
 			repositoryURL = "https://github.com/colinc86/ApplicationKey";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 0.1.1;
+				minimumVersion = 1.0.0;
 			};
 		};
 		3B9332C727CDFFAD00BACE93 /* XCRemoteSwiftPackageReference "BugfenderSDK-iOS" */ = {
@@ -1699,7 +1699,7 @@
 			repositoryURL = "git@github.com:colinc86/DataController.git";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 0.2.5;
+				minimumVersion = 1.0.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
