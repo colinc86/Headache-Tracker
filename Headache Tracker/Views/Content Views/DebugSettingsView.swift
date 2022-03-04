@@ -139,7 +139,7 @@ struct DebugSettingsView: View {
 struct DebugSettingsView_Previews: PreviewProvider {
   static var previews: some View {
     DebugSettingsView()
-      .environment(\.managedObjectContext, Previewing.CoreData.controller.container.viewContext)
+      .environment(\.managedObjectContext, Previewing.CoreData.viewContext)
       .environmentObject(Previewing.headacheManager)
       .environmentObject(Previewing.predictor)
   }

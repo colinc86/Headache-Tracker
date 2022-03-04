@@ -226,7 +226,7 @@ extension SettingsView {
 struct SettingsView_Previews: PreviewProvider {
   static var previews: some View {
     SettingsView()
-      .environment(\.managedObjectContext, Previewing.CoreData.controller.container.viewContext)
+      .environment(\.managedObjectContext, Previewing.CoreData.viewContext)
       .environmentObject(Previewing.headacheManager)
       .environmentObject(Previewing.predictor)
       .environmentObject(Previewing.healthKitManager)

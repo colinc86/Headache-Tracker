@@ -121,7 +121,7 @@ extension HeadachesView {
 struct HeadachesView_Previews: PreviewProvider {
   static var previews: some View {
     HeadachesView()
-      .environment(\.managedObjectContext, Previewing.CoreData.controller.container.viewContext)
+      .environment(\.managedObjectContext, Previewing.CoreData.viewContext)
       .environmentObject(Previewing.headacheManager)
       .environmentObject(Previewing.alertManager)
       .environmentObject(Previewing.predictor)

@@ -84,7 +84,7 @@ struct CurrentHeadacheView: View {
         // New/Current Headache
         Section {
           // New/Current Severity
-          HorizontalSeverityLevel(currentSeverity: currentHeadache?.severity, severityRange: nil, collapsed: false, action: changeSeverity)
+          HorizontalSeverityLevelView(currentSeverity: currentHeadache?.severity, severityRange: nil, collapsed: false, action: changeSeverity)
         } header: {
           SectionTitleView(title: currentHeadache == nil ? "New Headache" : "Current Headache")
         } footer: {
@@ -100,11 +100,7 @@ struct CurrentHeadacheView: View {
         // No Headache
         if currentHeadache == nil && needsInput {
           Section {
-            Button("No Headache", action: noHeadacheAction)
-              .buttonStyle(BorderlessButtonStyle())
-              .font(.title)
-              .foregroundColor(.teal)
-              .cell(title: "No Headache?", systemImage: "checkmark.circle.fill", foregroundColor: .teal)
+            ActionView(title: "No Headache?", buttonTitle: "No Headache", systemImage: "checkmark.circle.fill", foregroundColor: .teal, action: noHeadacheAction)
           } footer: {
             Text("No Headache? Tap above to let the app know.")
           }
@@ -126,19 +122,16 @@ struct CurrentHeadacheView: View {
           // Progression
           if currentHeadache.severitiesArray.count > 1 {
             Section {
-              LineGraph(series: currentHeadache.severitySignal, gradient: Gradient(colors: currentHeadache.severityColorRange))
-                .frame(height: 100)
-                .cell(title: "Progression", systemImage: "chart.xyaxis.line", foregroundColor: .orange)
+              TitleCaptionView(title: "Progression", systemImage: "chart.xyaxis.line", foregroundColor: .orange) {
+                LineGraph(series: currentHeadache.severitySignal, gradient: Gradient(colors: currentHeadache.severityColorRange))
+                  .frame(height: 100)
+              }
             }
           }
           
           // Resolve the Headache
           Section {
-            Button("Resolve", action: resolveConfirmation)
-              .buttonStyle(BorderlessButtonStyle())
-              .font(.title)
-              .foregroundColor(.teal)
-              .cell(title: "Resolve Headache", systemImage: "face.smiling.fill", foregroundColor: .teal)
+            ActionView(title: "Resolve Headache", buttonTitle: "Resolve", systemImage: "face.smiling.fill", foregroundColor: .teal, action: resolveConfirmation)
           } footer: {
             Text("Is your headache gone? Tap Resolve to let the app know!")
           }
@@ -148,7 +141,7 @@ struct CurrentHeadacheView: View {
         if let prediction = predictor.prediction {
           let dailyOutlook = OutlookView(outlook: prediction.holisticOutlook)
           let durationPrediction = DurationPredictionView(duration: prediction.durationRegressorOutput.prediction)
-          let severityPrediction = HorizontalSeverityLevel(currentSeverity: prediction.severityClassifierOutput.prediction, severityRange: nil, collapsed: true, action: nil)
+          let severityPrediction = HorizontalSeverityLevelView(currentSeverity: prediction.severityClassifierOutput.prediction, severityRange: nil, collapsed: true, action: nil)
           
           if debugShowAllViews {
             Section {
@@ -401,7 +394,7 @@ struct CurrentHeadacheView_Previews: PreviewProvider {
   static var previews: some View {
     CurrentHeadacheView()
       .environmentObject(SceneDelegate())
-      .environment(\.managedObjectContext, Previewing.CoreData.controller.container.viewContext)
+      .environment(\.managedObjectContext, Previewing.CoreData.viewContext)
       .environmentObject(Previewing.headacheManager)
       .environmentObject(Previewing.alertManager)
       .environmentObject(Previewing.predictor)

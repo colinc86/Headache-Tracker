@@ -45,7 +45,7 @@ struct ContentView_Previews: PreviewProvider {
   static var previews: some View {
     ContentView()
       .environmentObject(SceneDelegate())
-      .environment(\.managedObjectContext, Previewing.CoreData.controller.container.viewContext)
+      .environment(\.managedObjectContext, Previewing.CoreData.viewContext)
       .environmentObject(Previewing.headacheManager)
       .environmentObject(Previewing.alertManager)
       .environmentObject(Previewing.predictor)

@@ -16,15 +16,19 @@ struct OnsetView: View {
   var relativeDate: Bool = true
   
   var body: some View {
-    Text(relativeDate ? onset.formattedRelative() : onset.formattedNonRelative())
-      .font(.title)
-      .cell(title: "Onset", systemImage: "clock.fill", foregroundColor: .purple)
+    TitleCaptionView(title: "Onset", systemImage: "clock.fill", foregroundColor: .purple) {
+      Text(relativeDate ? onset.formattedRelative() : onset.formattedNonRelative())
+        .font(.title)
+    }
   }
 }
 
 struct OnsetCell_Previews: PreviewProvider {
   static var previews: some View {
-    OnsetView(onset: Date(timeIntervalSinceNow: -3600.0))
+    OnsetView(onset: Date(timeIntervalSinceNow: -3600.0), relativeDate: true)
+      .previewLayout(.fixed(width: 428, height: 70))
+    
+    OnsetView(onset: Date(timeIntervalSinceNow: -3600.0), relativeDate: false)
       .previewLayout(.fixed(width: 428, height: 70))
   }
 }

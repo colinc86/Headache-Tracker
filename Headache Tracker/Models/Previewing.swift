@@ -27,27 +27,43 @@ struct Previewing {
   
   struct CoreData {
     
-    /// The preview data controller.
-    static let controller: DataController = {
-      let controller = DataController(containerName: "Headache_Tracker", inMemory: true)
-      resolvedHeadache = addResolvedHeadache(to: controller.container.viewContext)
-      unresolvedHeadache = addUnresolvedHeadache(to: controller.container.viewContext)
-      return controller
-    }()
-      
+    /// The view context to preview with.
+    static var viewContext: NSManagedObjectContext {
+      if _resolvedHeadache == nil {
+        _resolvedHeadache = addResolvedHeadache(to: controller.container.viewContext)
+      }
+      if _unresolvedHeadache == nil {
+        _unresolvedHeadache = addUnresolvedHeadache(to: controller.container.viewContext)
+      }
+      return controller.container.viewContext
+    }
     
     /// A resolved headache.
-    static var resolvedHeadache: Headache! = nil
-    
+    static var resolvedHeadache: Headache {
+      if _resolvedHeadache == nil {
+        _resolvedHeadache = addResolvedHeadache(to: controller.container.viewContext)
+      }
+      return _resolvedHeadache!
+    }
+  
     /// An unresolved headache.
-    static var unresolvedHeadache: Headache! = nil
+    static var unresolvedHeadache: Headache {
+      if _unresolvedHeadache == nil {
+        _unresolvedHeadache = addUnresolvedHeadache(to: controller.container.viewContext)
+      }
+      return _unresolvedHeadache!
+    }
     
     /// A severity.
     static var severity: Severity = {
       return resolvedHeadache.severitiesArray.first!
     }()
     
-    static func addResolvedHeadache(to context: NSManagedObjectContext) -> Headache {
+    /// The preview data controller.
+    private static let controller: DataController = DataController(containerName: "Headache_Tracker", inMemory: true)
+    private static var _resolvedHeadache: Headache? = nil
+    private static var _unresolvedHeadache: Headache? = nil
+    private static func addResolvedHeadache(to context: NSManagedObjectContext) -> Headache {
       let now = Date()
       let headache = Headache(context: context, initialSeverity: .mild, startTime: now.addingTimeInterval(-3600.0))
       headache.addSeverity(.moderate, startTime: now.addingTimeInterval(-3000.0))
@@ -66,7 +82,7 @@ struct Previewing {
       return headache
     }
     
-    static func addUnresolvedHeadache(to context: NSManagedObjectContext) -> Headache {
+    private static func addUnresolvedHeadache(to context: NSManagedObjectContext) -> Headache {
       let now = Date()
       let headache = Headache(context: context, initialSeverity: .mild, startTime: now.addingTimeInterval(-3600.0))
       headache.addSeverity(.moderate, startTime: now.addingTimeInterval(-3000.0))

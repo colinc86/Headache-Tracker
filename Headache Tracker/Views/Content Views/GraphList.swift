@@ -56,15 +56,16 @@ struct GraphList: View {
         }
         
         Section {
-          BarGraph(
-            graphUnit: .severity,
-            statistic: statistics.peaks,
-            yAxis: ["Not Present", "Present", "Mild", "Moderate", "Severe"],
-            gradient: Gradient(colors: [.cyan.darker(by: 0.1), .cyan.lighter(by: 0.1)]),
-            earliestDate: earliestDate,
-            staticMax: 4)
-            .frame(height: 100)
-            .cell(title: "Peak Severity", systemImage: "dial.max.fill", foregroundColor: .cyan)
+          TitleCaptionView(title: "Peak Severity", systemImage: "dial.max.fill", foregroundColor: .cyan) {
+            BarGraph(
+              graphUnit: .severity,
+              statistic: statistics.peaks,
+              yAxis: ["Not Present", "Present", "Mild", "Moderate", "Severe"],
+              gradient: Gradient(colors: [.cyan.darker(by: 0.1), .cyan.lighter(by: 0.1)]),
+              earliestDate: earliestDate,
+              staticMax: 4)
+              .frame(height: 100)
+          }
           
           SubtitleCell(
             title: "Mean",
@@ -76,15 +77,16 @@ struct GraphList: View {
         }
         
         Section {
-          BarGraph(
-            graphUnit: .severity,
-            statistic: statistics.averages,
-            yAxis: ["Not Present", "Present", "Mild", "Moderate", "Severe"],
-            gradient: Gradient(colors: [.cyan.darker(by: 0.1), .cyan.lighter(by: 0.1)]),
-            earliestDate: earliestDate,
-            staticMax: 4)
-            .frame(height: 100)
-            .cell(title: "Average Severity", systemImage: "dial.max.fill", foregroundColor: .cyan)
+          TitleCaptionView(title: "Average Severity", systemImage: "dial.max.fill", foregroundColor: .cyan) {
+            BarGraph(
+              graphUnit: .severity,
+              statistic: statistics.averages,
+              yAxis: ["Not Present", "Present", "Mild", "Moderate", "Severe"],
+              gradient: Gradient(colors: [.cyan.darker(by: 0.1), .cyan.lighter(by: 0.1)]),
+              earliestDate: earliestDate,
+              staticMax: 4)
+              .frame(height: 100)
+          }
           
           SubtitleCell(
             title: "Mean",
@@ -94,15 +96,16 @@ struct GraphList: View {
         }
         
         Section {
-          BarGraph(
-            graphUnit: .time,
-            statistic: statistics.onsets,
-            yAxis: ["12 AM", "6 AM", "12 PM", "6 PM", "12 AM"],
-            gradient: Gradient(colors: [.purple.darker(by: 0.1), .purple.lighter(by: 0.1)]),
-            earliestDate: earliestDate,
-            staticMax: 86400)
-            .frame(height: 100)
-            .cell(title: "Onset", systemImage: "clock.fill", foregroundColor: .purple)
+          TitleCaptionView(title: "Onset", systemImage: "clock.fill", foregroundColor: .purple) {
+            BarGraph(
+              graphUnit: .time,
+              statistic: statistics.onsets,
+              yAxis: ["12 AM", "6 AM", "12 PM", "6 PM", "12 AM"],
+              gradient: Gradient(colors: [.purple.darker(by: 0.1), .purple.lighter(by: 0.1)]),
+              earliestDate: earliestDate,
+              staticMax: 86400)
+              .frame(height: 100)
+          }
           
           SubtitleCell(
             title: "Mean",
@@ -114,14 +117,15 @@ struct GraphList: View {
         }
         
         Section {
-          BarGraph(
-            graphUnit: .duration,
-            statistic: statistics.durations,
-            yAxis: ["0m", Formatters.dateComponentsFormatter.string(from: statistics.durations.max ) ?? "-"],
-            gradient: Gradient(colors: [.green.darker(by: 0.1), .green.lighter(by: 0.1)]),
-            earliestDate: earliestDate)
-            .frame(height: 100)
-            .cell(title: "Duration", systemImage: "timer", foregroundColor: .green)
+          TitleCaptionView(title: "Duration", systemImage: "timer", foregroundColor: .green) {
+            BarGraph(
+              graphUnit: .duration,
+              statistic: statistics.durations,
+              yAxis: ["0m", Formatters.dateComponentsFormatter.string(from: statistics.durations.max ) ?? "-"],
+              gradient: Gradient(colors: [.green.darker(by: 0.1), .green.lighter(by: 0.1)]),
+              earliestDate: earliestDate)
+              .frame(height: 100)
+          }
           
           SubtitleCell(
             title: "Mean",
@@ -177,7 +181,7 @@ struct GraphList_Previews: PreviewProvider {
   
   static var previews: some View {
     GraphList(filterUnit: .day, earliestDate: Date(timeIntervalSinceNow: -600))
-      .environment(\.managedObjectContext, Previewing.CoreData.controller.container.viewContext)
+      .environment(\.managedObjectContext, Previewing.CoreData.viewContext)
       .environmentObject(Previewing.headacheManager)
       .environmentObject(Previewing.alertManager)
       .environmentObject(Previewing.predictor)

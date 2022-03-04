@@ -1,16 +1,17 @@
 //
-//  DurationiView.swift
+//  DurationPredictionView.swift
 //  Headache Tracker
 //
-//  Created by Colin Campbell on 2/16/22.
+//  Created by Colin Campbell on 2/18/22.
 //
 
+import UIKit
 import SwiftUI
 
-struct DurationView: View {
+struct DurationPredictionView: View {
   
-  /// The headache to display.
-  @StateObject var headache: Headache
+  /// The view's predicted duration.
+  let duration: TimeInterval
   
   // MARK: Private properties
   
@@ -20,26 +21,24 @@ struct DurationView: View {
   /// A timer to update the duration view for unresolved headaches.
   @State private var durationUpdateTimer: Timer?
   
+  /// The date the view appeared.
+  @State private var startDate: Date = Date()
+  
+  /// The amount of time to remove from the duration
+  @State private var decrement: TimeInterval = 0.0
+  
   var body: some View {
-    VStack(alignment: .leading) {
-      Text(Formatters.dateComponentsFormatter.string(from: headache.duration) ?? "N/A")
+    TitleCaptionView(title: "Duration", systemImage: "timer", foregroundColor: .green, caption: "Until " + Date().addingTimeInterval(duration).formattedRelative()) {
+      Text(Formatters.dateComponentsFormatter.string(from: duration - decrement) ?? "N/A")
         .font(.title)
         .id(durationID)
-      
-      if headache.resolved, let endTime = headache.endTime {
-        Text("until " + endTime.formattedNonRelative())
-          .font(.subheadline)
-          .foregroundColor(.secondary)
-      }
     }
     .onAppear(perform: appeared)
     .onDisappear(perform: disappeared)
-    .cell(title: "Duration", systemImage: "timer", foregroundColor: .green)
   }
-  
 }
 
-extension DurationView {
+extension DurationPredictionView {
   
   /// Updates the duration view's identifier.
   func updateDurationID() {
@@ -50,11 +49,9 @@ extension DurationView {
   
   /// Called when the view appears.
   func appeared() {
-    // If the headache isn't resolved, then start an update timer
-    if !headache.resolved {
-      updateDurationID()
-      startDurationUpdateTimer()
-    }
+    startDate = Date()
+    updateDurationID()
+    startDurationUpdateTimer()
   }
   
   /// Called when the view disappears.
@@ -77,19 +74,20 @@ extension DurationView {
   
   /// Called when the duration update timer fires.
   func durationUpdateTimerFired(_ timer: Timer) {
+    decrement = Date().timeIntervalSince(startDate)
     updateDurationID()
   }
   
 }
 
-struct DurationView_Previews: PreviewProvider {
+struct DurationPredictionView_Previews: PreviewProvider {
   static var previews: some View {
-    DurationView(headache: Previewing.CoreData.resolvedHeadache)
-      .environment(\.managedObjectContext, Previewing.CoreData.controller.container.viewContext)
+    DurationPredictionView(duration: 0.0)
+      .environment(\.managedObjectContext, Previewing.CoreData.viewContext)
       .environmentObject(Previewing.headacheManager)
       .environmentObject(Previewing.alertManager)
       .environmentObject(Previewing.predictor)
       .environmentObject(Previewing.healthKitManager)
-      .previewLayout(.fixed(width: 428, height: 70))
+      .previewLayout(.fixed(width: 428, height: 100))
   }
 }

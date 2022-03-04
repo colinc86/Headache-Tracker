@@ -1,5 +1,5 @@
 //
-//  Cell.swift
+//  TitleCaptionView.swift
 //  Headache Tracker
 //
 //  Created by Colin Campbell on 2/16/22.
@@ -7,22 +7,28 @@
 
 import SwiftUI
 
-struct Cell: ViewModifier {
+struct TitleCaptionView<Content: View>: View {
   
   // MARK: Public properties
-  
-  /// The cell's system image name.
-  let systemImage: String
   
   /// The cell's title.
   let title: String
   
+  /// The cell's system image name.
+  let systemImage: String
+  
   /// The cell's foreground color.
-  let foregroundColor: Color
+  var foregroundColor: Color = .accentColor
+  
+  /// The cell's optional caption.
+  var caption: String? = nil
+  
+  /// the cell's content.
+  var content: () -> Content
   
   // MARK: Body content
   
-  func body(content: Content) -> some View {
+  var body: some View {
     VStack(alignment: .leading) {
       VStack(alignment: .leading) {
         HStack {
@@ -33,18 +39,16 @@ struct Cell: ViewModifier {
         .gradientForeground(colors: [foregroundColor.darker(by: 0.05), foregroundColor.lighter(by: 0.05)])
         .padding(.bottom, 8)
         
-        content
+        content()
+        
+        if let caption = caption {
+          Text(caption)
+            .font(.subheadline)
+            .foregroundColor(.secondary)
+        }
       }
     }
     .frame(minWidth: 0, minHeight: 70)
     .padding([.top, .bottom], 10)
-  }
-}
-
-extension View {
-  func cell(title: String, systemImage: String, foregroundColor: Color = .accentColor) -> some View {
-    modifier(
-      Cell(systemImage: systemImage, title: title, foregroundColor: foregroundColor)
-    )
   }
 }

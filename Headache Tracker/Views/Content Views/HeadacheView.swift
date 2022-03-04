@@ -49,10 +49,7 @@ struct HeadacheView: View {
   var body: some View {
     List {
       Section {
-        Text(headache.resolved ? "Resolved" : "Unresolved")
-          .font(.title)
-          .foregroundColor(.teal)
-          .cell(title: "Status", systemImage: "face.smiling.fill", foregroundColor: .teal)
+        StatusView(resolved: headache.resolved)
       } header: {
         SectionTitleView(title: "Headache")
       }
@@ -68,7 +65,7 @@ struct HeadacheView: View {
       }
       
       Section {
-        HorizontalSeverityLevel(currentSeverity: nil, severityRange: headache.severityRange, collapsed: true, action: nil)
+        HorizontalSeverityLevelView(currentSeverity: nil, severityRange: headache.severityRange, collapsed: true, action: nil)
       } footer: {
         if !headache.resolved, let startTime = headache.severitiesArray.last?.startTime {
           Text("Last updated \(startTime.formattedNonRelative())")
@@ -258,14 +255,14 @@ extension HeadacheView {
 struct HeadacheView_Previews: PreviewProvider {
   static var previews: some View {
     HeadacheView(headache: Previewing.CoreData.resolvedHeadache)
-      .environment(\.managedObjectContext, Previewing.CoreData.controller.container.viewContext)
+      .environment(\.managedObjectContext, Previewing.CoreData.viewContext)
       .environmentObject(Previewing.headacheManager)
       .environmentObject(Previewing.alertManager)
       .environmentObject(Previewing.predictor)
       .environmentObject(Previewing.healthKitManager)
     
     HeadacheView(headache: Previewing.CoreData.unresolvedHeadache)
-      .environment(\.managedObjectContext, Previewing.CoreData.controller.container.viewContext)
+      .environment(\.managedObjectContext, Previewing.CoreData.viewContext)
       .environmentObject(Previewing.headacheManager)
       .environmentObject(Previewing.alertManager)
       .environmentObject(Previewing.predictor)

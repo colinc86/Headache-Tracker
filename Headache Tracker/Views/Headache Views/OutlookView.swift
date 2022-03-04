@@ -11,26 +11,20 @@ struct OutlookView: View {
   
   /// The view's outlook.
   let outlook: HolisticOutlook
+  
+  private var caption: String? {
+    switch outlook {
+    case .noHeadache: return nil
+    case .possibleHeadache(let onset): return "at " + onset.formattedTime()
+    case .headache(_, let end): return "until " + end.formattedTime()
+    }
+  }
     
   var body: some View {
-    VStack(alignment: .leading) {
+    TitleCaptionView(title: "Outlook", systemImage: "sun.and.horizon", foregroundColor: .mint, caption: caption) {
       Text(outlook.title)
         .font(.title)
-      
-      switch outlook {
-      case .noHeadache:
-        EmptyView()
-      case .possibleHeadache(let onset):
-        Text("at " + onset.formattedTime())
-          .font(.subheadline)
-          .foregroundColor(.secondary)
-      case .headache(_, let end):
-        Text("until " + end.formattedTime())
-          .font(.subheadline)
-          .foregroundColor(.secondary)
-      }
     }
-    .cell(title: "Outlook", systemImage: "sun.and.horizon", foregroundColor: .mint)
   }
   
 }
