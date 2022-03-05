@@ -51,8 +51,8 @@
         "repositoryURL": "git@github.com:colinc86/DataController.git",
         "state": {
           "branch": null,
-          "revision": "fcb01722bded704186211da6648881bb371bb72f",
-          "version": "1.0.4"
+          "revision": "dd206f7d819249a27dd1e876b6a5e00d47c31e39",
+          "version": "1.0.6"
         }
       },
       {
@@ -159,8 +159,8 @@
         "repositoryURL": "https://github.com/apple/swift-protobuf.git",
         "state": {
           "branch": null,
-          "revision": "7e2c5f3cbbeea68e004915e3a8961e20bd11d824",
-          "version": "1.18.0"
+          "revision": "e1499bc69b9040b29184f7f2996f7bab467c1639",
+          "version": "1.19.0"
         }
       },
       {

@@ -33,12 +33,6 @@ struct DurationView: View {
         Text(Formatters.dateComponentsFormatter.string(from: headache.duration) ?? "N/A")
           .font(.title)
           .id(durationID)
-        
-        if headache.resolved, let endTime = headache.endTime {
-          Text("until " + endTime.formattedNonRelative())
-            .font(.subheadline)
-            .foregroundColor(.secondary)
-        }
       }
     }
     .onAppear(perform: appeared)

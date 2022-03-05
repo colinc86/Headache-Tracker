@@ -370,11 +370,11 @@ extension HeadacheManager {
   ///
   /// - Parameter update: Called with the current headache to update it.
   ///   Errors thrown in this block will be received in completion.
-  private func currentHeadache<T>(update: @escaping (Headache?, NSManagedObjectContext) async throws -> T) async throws -> T {
+  private func currentHeadache<T>(update: @escaping (Headache?, NSManagedObjectContext) throws -> T) async throws -> T {
     try await DataController.shared.performInBackground(saveOnComplete: true) { context in
       let request = Headache.fetchRequest()
       request.predicate = NSPredicate(format: "ANY severities.endTime = nil")
-      return try await update(try context.fetch(request).first, context)
+      return try update(try context.fetch(request).first, context)
     }
   }
   
@@ -383,10 +383,10 @@ extension HeadacheManager {
   ///
   /// - Parameter update: Called with the headache to update it. Errors
   ///   thrown in this block will be received in completion.
-  private func headacheWithIdentifier<T>(identifier: UUID, update: @escaping (Headache?, NSManagedObjectContext) async throws -> T) async throws -> T {
+  private func headacheWithIdentifier<T>(identifier: UUID, update: @escaping (Headache?, NSManagedObjectContext) throws -> T) async throws -> T {
     try await DataController.shared.performInBackground(saveOnComplete: true) { context in
       let request = Headache.fetchRequest(withIdentifier: identifier)
-      return try await update((try context.fetch(request)).first, context)
+      return try update((try context.fetch(request)).first, context)
     }
   }
   
@@ -395,10 +395,10 @@ extension HeadacheManager {
   ///
   /// - Parameter update: Called with the severity to update it. Errors
   ///   thrown in this block will be received in completion.
-  private func severityWithIdentifier<T>(identifier: UUID, update: @escaping (Severity?, NSManagedObjectContext) async throws -> T) async throws -> T {
+  private func severityWithIdentifier<T>(identifier: UUID, update: @escaping (Severity?, NSManagedObjectContext) throws -> T) async throws -> T {
     try await DataController.shared.performInBackground(saveOnComplete: true) { context in
       let request = Severity.fetchRequest(withIdentifier: identifier)
-      return try await update((try context.fetch(request)).first, context)
+      return try update((try context.fetch(request)).first, context)
     }
   }
   
@@ -409,12 +409,12 @@ extension HeadacheManager {
   ///   - predicate: The (optional) predicate to apply.
   ///   - update: Called with the training data to update it. Errors thrown in
   ///     this block will be received in completion.
-  private func trainingData<T>(predicate: NSPredicate? = nil, update: @escaping ([TrainingData], NSManagedObjectContext) async throws -> T) async throws -> T {
+  private func trainingData<T>(predicate: NSPredicate? = nil, update: @escaping ([TrainingData], NSManagedObjectContext) throws -> T) async throws -> T {
     return try await DataController.shared.performInBackground(saveOnComplete: true) { context in
       let request = TrainingData.fetchRequest()
       request.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: true)]
       request.predicate = predicate
-      return try await update(try context.fetch(request), context)
+      return try update(try context.fetch(request), context)
     }
   }
   
@@ -612,9 +612,20 @@ extension HeadacheManager {
   /// - Parameter completion: Called when training is complete.
   func trainClassifiers() async throws {
     guard !testing else { throw HeadacheError.testing }
-    try await trainingData(predicate: NSPredicate(format: "version == %@", Constants.trainingDataVersion as NSString)) { trainingData, _ in
+    try await trainingData(predicate: NSPredicate(format: "version == %@", Constants.trainingDataVersion as NSString)) { [weak self] trainingData, _ in
+      guard let self = self else {
+        return
+      }
+      
       logDebug("Training classifiers with \(trainingData.count) data...")
-      try await self.predictor?.train(with: trainingData)
+      Task {
+        do {
+          try await self.predictor?.train(with: trainingData)
+        }
+        catch {
+          logError("Error training classifiers: \(error)")
+        }
+      }
     }
   }
   
