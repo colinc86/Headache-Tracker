@@ -14,7 +14,7 @@ struct VerticalSeverityLevel: View {
   // MARK: Public properties
   
   /// The headache's level to display.
-  @StateObject var headache: Headache
+  var range: SeverityRange
   
   // MARK: View body
   
@@ -24,8 +24,7 @@ struct VerticalSeverityLevel: View {
         Spacer(minLength: 0.0)
         VStack(spacing: 0.0) {
           ForEach(0 ..< 5) { i in
-            if 4 - i < headache.severityRange.lowerBound.orderingValue ||
-                4 - i > headache.severityRange.upperBound.orderingValue {
+            if range == .empty || 4 - i < range.lowerBound.orderingValue || 4 - i > range.upperBound.orderingValue {
               Rectangle()
                 .fill(Color.secondary.opacity(0.25))
                 .frame(width: 10.0, height: 10.0)
@@ -63,7 +62,7 @@ extension VerticalSeverityLevel {
 
 struct VerticalSeverityLevel_Previews: PreviewProvider {
   static var previews: some View {
-    VerticalSeverityLevel(headache: Previewing.CoreData.resolvedHeadache)
+    VerticalSeverityLevel(range: Previewing.CoreData.resolvedHeadache.severityRange)
       .environment(\.managedObjectContext, Previewing.CoreData.viewContext)
       .environmentObject(Previewing.headacheManager)
       .environmentObject(Previewing.alertManager)

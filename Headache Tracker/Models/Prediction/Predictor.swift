@@ -61,7 +61,7 @@ class Predictor: ObservableObject {
   }
   
   /// A headache prediction.
-  struct Prediction {
+  struct Prediction: Equatable {
     
     /// An empty prediction.
     static let empty = Prediction(
@@ -71,7 +71,7 @@ class Predictor: ObservableObject {
       durationRegressorOutput: PredictionStatistic<TimeInterval>(prediction: 0, probability: nil))
     
     /// A prediction statistic pairs a severity to a probability.
-    struct PredictionStatistic<T> {
+    struct PredictionStatistic<T: Equatable>: Equatable {
       
       /// The statistic's severity.
       let prediction: T
@@ -84,6 +84,10 @@ class Predictor: ObservableObject {
       init(prediction: T, probability: Double?) {
         self.prediction = prediction
         self.probability = probability
+      }
+      
+      static func == (lhs: Self, rhs: Self) -> Bool {
+        return lhs.prediction == rhs.prediction && lhs.probability == rhs.probability
       }
     }
     
@@ -109,6 +113,13 @@ class Predictor: ObservableObject {
         onset: onsetRegressorOutput.prediction,
         duration: durationRegressorOutput.prediction,
         severity: severityClassifierOutput.prediction)
+    }
+    
+    static func == (lhs: Self, rhs: Self) -> Bool {
+      return lhs.outlookClassifierOutput == rhs.outlookClassifierOutput &&
+        lhs.severityClassifierOutput == rhs.severityClassifierOutput &&
+        lhs.onsetRegressorOutput == rhs.onsetRegressorOutput &&
+        lhs.durationRegressorOutput == rhs.durationRegressorOutput
     }
     
   }
@@ -246,51 +257,68 @@ extension Predictor {
   ///
   /// - Parameter input: The predictor's input.
   /// - Returns: The predictor's output.
-  func predict(_ input: Input) throws -> Prediction {
-    guard let outlookClassifier = outlookClassifier,
-          let severityClassifier = severityClassifier,
-          let onsetRegressor = onsetRegressor,
-          let durationRegressor = durationRegressor else {
-      return .empty
-    }
-    
-    let fullInput = input.fullInput()
-    let outlookPrediction = try outlookClassifier.prediction(input: fullInput)
-    let severityPrediction = try severityClassifier.prediction(input: fullInput)
-    let onsetPrediction = try onsetRegressor.prediction(input: fullInput)
-    let durationPrediction = try durationRegressor.prediction(input: fullInput)
+  @discardableResult
+  func predict(_ input: Input) async throws -> Prediction {
+    return try await withCheckedThrowingContinuation { [weak self] continuation in
+      guard let self = self else {
+        continuation.resume(returning: .empty)
+        return
+      }
+      
+      self.modelQueue.async {
+        guard let outlookClassifier = self.outlookClassifier,
+              let severityClassifier = self.severityClassifier,
+              let onsetRegressor = self.onsetRegressor,
+              let durationRegressor = self.durationRegressor else {
+                continuation.resume(returning: .empty)
+                return
+              }
         
-    let prediction = Prediction(
-      outlookClassifierOutput: Prediction.PredictionStatistic(
-        prediction: Outlook(rawValue: outlookPrediction.Outlook) ?? .noHeadache,
-        probability: outlookPrediction.OutlookProbability[outlookPrediction.Outlook]),
-      
-      severityClassifierOutput: Prediction.PredictionStatistic(
-        prediction: HKCategoryValueSeverity(title: severityPrediction.Severity)!,
-        probability: severityPrediction.SeverityProbability[severityPrediction.Severity]),
-      
-      onsetRegressorOutput: Prediction.PredictionStatistic<Date>(
-        prediction: Date().addingTimeInterval(onsetPrediction.Onset),
-        probability: nil),
-      
-      durationRegressorOutput: Prediction.PredictionStatistic<TimeInterval>(
-        prediction: durationPrediction.Duration,
-        probability: nil)
-    )
-    
-    /// Save this prediction for the widget
-    SharedUserDefaults.standard.setPredictionResults(
-      prediction.outlookClassifierOutput.prediction,
-      prediction.onsetRegressorOutput.prediction,
-      prediction.durationRegressorOutput.prediction,
-      prediction.severityClassifierOutput.prediction)
-    
-    // Update the prediction value
-    DispatchQueue.main.async { [weak self] in
-      self?.prediction = prediction
+        do {
+          let fullInput = input.fullInput()
+          let outlookPrediction = try outlookClassifier.prediction(input: fullInput)
+          let severityPrediction = try severityClassifier.prediction(input: fullInput)
+          let onsetPrediction = try onsetRegressor.prediction(input: fullInput)
+          let durationPrediction = try durationRegressor.prediction(input: fullInput)
+          
+          let prediction = Prediction(
+            outlookClassifierOutput: Prediction.PredictionStatistic(
+              prediction: Outlook(rawValue: outlookPrediction.Outlook) ?? .noHeadache,
+              probability: outlookPrediction.OutlookProbability[outlookPrediction.Outlook]),
+            
+            severityClassifierOutput: Prediction.PredictionStatistic(
+              prediction: HKCategoryValueSeverity(title: severityPrediction.Severity)!,
+              probability: severityPrediction.SeverityProbability[severityPrediction.Severity]),
+            
+            onsetRegressorOutput: Prediction.PredictionStatistic<Date>(
+              prediction: Date().addingTimeInterval(onsetPrediction.Onset),
+              probability: nil),
+            
+            durationRegressorOutput: Prediction.PredictionStatistic<TimeInterval>(
+              prediction: durationPrediction.Duration,
+              probability: nil)
+          )
+          
+          /// Save this prediction for the widget
+          SharedUserDefaults.standard.setPredictionResults(
+            prediction.outlookClassifierOutput.prediction,
+            prediction.onsetRegressorOutput.prediction,
+            prediction.durationRegressorOutput.prediction,
+            prediction.severityClassifierOutput.prediction)
+          
+          // Update the prediction value
+          DispatchQueue.main.async {
+            self.prediction = prediction
+          }
+          
+          continuation.resume(returning: prediction)
+        }
+        catch {
+          continuation.resume(throwing: error)
+        }
+      }
     }
     
-    return prediction
   }
   
 }

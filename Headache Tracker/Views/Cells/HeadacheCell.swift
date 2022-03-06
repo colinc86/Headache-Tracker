@@ -33,7 +33,7 @@ struct HeadacheCell: View {
   
   var body: some View {
     HStack(alignment: .top) {
-      VerticalSeverityLevel(headache: headache)
+      VerticalSeverityLevel(range: headache.severityRange)
         .padding(EdgeInsets(top: 4.0, leading: 0.0, bottom: 4.0, trailing: 0.0))
         .frame(width: 20.0)
         .id(severityID)

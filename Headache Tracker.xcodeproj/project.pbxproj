@@ -109,6 +109,7 @@
 		3B93330027CF419C00BACE93 /* SeverityWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9332FF27CF419C00BACE93 /* SeverityWidgetView.swift */; };
 		3B93330227CF51C600BACE93 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B93330127CF51C600BACE93 /* AppDelegate.swift */; };
 		3B93330427CF51D500BACE93 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B93330327CF51D500BACE93 /* SceneDelegate.swift */; };
+		3B93A6E027D5591F00BCBDE1 /* BlockGraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B93A6DF27D5591F00BCBDE1 /* BlockGraph.swift */; };
 		3BAAA67F27CC245200C0DDC4 /* EnvironmentalInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BAAA67E27CC245200C0DDC4 /* EnvironmentalInput.swift */; };
 		3BAAA68127CC247900C0DDC4 /* ControlledUserInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BAAA68027CC247900C0DDC4 /* ControlledUserInput.swift */; };
 		3BAAA68427CC24CA00C0DDC4 /* InputUnion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BAAA68327CC24CA00C0DDC4 /* InputUnion.swift */; };
@@ -274,6 +275,7 @@
 		3B9332FF27CF419C00BACE93 /* SeverityWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeverityWidgetView.swift; sourceTree = "<group>"; };
 		3B93330127CF51C600BACE93 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		3B93330327CF51D500BACE93 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		3B93A6DF27D5591F00BCBDE1 /* BlockGraph.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockGraph.swift; sourceTree = "<group>"; };
 		3BAAA67D27C94B9B00C0DDC4 /* Headache_Tracker 1.5.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Headache_Tracker 1.5.xcdatamodel"; sourceTree = "<group>"; };
 		3BAAA67E27CC245200C0DDC4 /* EnvironmentalInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnvironmentalInput.swift; sourceTree = "<group>"; };
 		3BAAA68027CC247900C0DDC4 /* ControlledUserInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlledUserInput.swift; sourceTree = "<group>"; };
@@ -524,6 +526,7 @@
 			isa = PBXGroup;
 			children = (
 				3B68BDFA27BE0F00007AAAC6 /* BarGraph.swift */,
+				3B93A6DF27D5591F00BCBDE1 /* BlockGraph.swift */,
 				3B09192027BD851700844F6C /* LineGraph.swift */,
 			);
 			path = Graphs;
@@ -1011,6 +1014,7 @@
 				3B39DADD27ACFD5A00D39BB5 /* HKCategoryValueSeverity+Extensions.swift in Sources */,
 				3B9332E427CE0C8700BACE93 /* String+Extensions.swift in Sources */,
 				3B4BA6F527B6313B00F38851 /* HealthKitData.swift in Sources */,
+				3B93A6E027D5591F00BCBDE1 /* BlockGraph.swift in Sources */,
 				3B051AA027B3577B0017131D /* DestructiveConfirmationDialog.swift in Sources */,
 				3B1C7DB627D205EE000B3A99 /* ActionView.swift in Sources */,
 				3B051A9C27B351C70017131D /* Formatters.swift in Sources */,

@@ -56,6 +56,14 @@ struct GraphList: View {
         }
         
         Section {
+          TitleCaptionView(title: "Severity", systemImage: "dial.max.fill", foregroundColor: .cyan) {
+            BlockGraph(series: statistics.severityRanges, earliestDate: earliestDate)
+          }
+        } header: {
+          SectionTitleView(title: "Severity")
+        }
+        
+        Section {
           TitleCaptionView(title: "Peak Severity", systemImage: "dial.max.fill", foregroundColor: .cyan) {
             BarGraph(
               graphUnit: .severity,
@@ -72,8 +80,6 @@ struct GraphList: View {
             subtitle: statistics.peaks.meanDescription,
             systemImage: statistics.peaks.meanTrend.systemImage,
             imageForegroundColor: statistics.peaks.meanTrend.foregroundColor)
-        } header: {
-          SectionTitleView(title: "Severity")
         }
         
         Section {

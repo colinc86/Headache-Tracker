@@ -68,6 +68,8 @@ struct CurrentHeadacheView: View {
   /// The application's first appearance.
   @State private var firstAppearance: Bool = true
   
+  @State private var predictionID = UUID()
+  
   /// The current (unresolved) headache.
   private var currentHeadache: Headache? {
     return headaches.first
@@ -196,6 +198,7 @@ struct CurrentHeadacheView: View {
       }
       .background(Color(UIColor.systemGroupedBackground))
       .navigationTitle("Track")
+      .animation(.default, value: predictor.prediction)
       .refreshable {
         do {
           try await predict(forced: true)
@@ -251,6 +254,7 @@ extension CurrentHeadacheView {
       return
     }
     
+    // Run a prediction
     Task {
       do {
         try await predict()
@@ -263,7 +267,7 @@ extension CurrentHeadacheView {
   
   /// Updates the classifier input.
   private func predict(forced: Bool = false) async throws {
-    let needsData = try await headacheManager.needsNotPresentTrainingData()
+    let needsData = try await headacheManager.needsTrainingData()
     withAnimation {
       needsInput = needsData
     }
@@ -281,9 +285,14 @@ extension CurrentHeadacheView {
     logDebug("Updating current headache view prediction.")
     
     // Run a prediction
-    let input = try await headacheManager.getCurrentClassifierInput()
-    _ = try withAnimation {
-      try predictor.predict(input)
+    Task {
+      do {
+        let input = try await headacheManager.getCurrentClassifierInput()
+        try await predictor.predict(input)
+      }
+      catch {
+        logError("Error getting prediction: \(error)")
+      }
     }
   }
   
@@ -372,10 +381,11 @@ extension CurrentHeadacheView {
     
     Task {
       do {
-        try await headacheManager.createTrainingData()
+        let input = try await headacheManager.getCurrentClassifierInput()
+        try await headacheManager.createTrainingData(from: input)
         
         // Check if we should show the not-present training data cell
-        let needsData = try await headacheManager.needsNotPresentTrainingData()
+        let needsData = try await headacheManager.needsTrainingData()
         withAnimation {
           needsInput = needsData
         }

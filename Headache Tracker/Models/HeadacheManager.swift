@@ -161,7 +161,8 @@ extension HeadacheManager {
     try await presentCheckInAlert(with: headacheIdentifier)
     
     // Update the CoreML models
-    try await createTrainingData(newSeverityIdentifier: severityIdentifier)
+    let input = try await getCurrentClassifierInput()
+    try await createTrainingData(from: input, severityIdentifier: severityIdentifier)
   }
   
   /// Resolves the headache.
@@ -190,7 +191,8 @@ extension HeadacheManager {
     try await healthKitManager?.saveSeveritySamples(intervals: severityInterval == nil ? [] : [severityInterval!])
     
     // Update the CoreML models
-    try await createTrainingData()
+    let input = try await getCurrentClassifierInput()
+    try await createTrainingData(from: input)
   }
   
   /// Deletes the current headache.
@@ -407,14 +409,26 @@ extension HeadacheManager {
   ///
   /// - Parameters:
   ///   - predicate: The (optional) predicate to apply.
+  ///   - fetchLimit: The limit of fetch results to return.
+  ///   - ascending: Whether the returned list is ascending date order.
   ///   - update: Called with the training data to update it. Errors thrown in
   ///     this block will be received in completion.
-  private func trainingData<T>(predicate: NSPredicate? = nil, update: @escaping ([TrainingData], NSManagedObjectContext) throws -> T) async throws -> T {
+  private func trainingData<T>(predicate: NSPredicate? = nil, fetchLimit: Int = 0, ascending: Bool = true, update: @escaping ([TrainingData], NSManagedObjectContext) throws -> T) async throws -> T {
     return try await DataController.shared.performInBackground(saveOnComplete: true) { context in
       let request = TrainingData.fetchRequest()
-      request.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: true)]
+      request.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: ascending)]
       request.predicate = predicate
+      request.fetchLimit = fetchLimit
       return try update(try context.fetch(request), context)
+    }
+  }
+  
+  /// Gets the date of the last training data sample.
+  ///
+  /// - Returns: A date.
+  private func lastTrainingDataDate() async throws -> Date? {
+    return try await trainingData(fetchLimit: 1, ascending: false) { trainingData, _ in
+      return trainingData.first?.timestamp
     }
   }
   
@@ -493,20 +507,15 @@ extension HeadacheManager {
     predictor?.reset()
   }
   
-  /// Whether or not the application needs more not present training data.
+  /// Whether or not the application needs more training data.
   ///
   /// - Returns: A boolean indicating if the app should ask for more training data.
-  func needsNotPresentTrainingData() async throws -> Bool {
-    return try await trainingData { trainingData, _ in
-      let notPresentTrainigData = trainingData.filter({ $0.severity == nil || $0.severity?.severity == .notPresent })
-      
-      var nextDateAllowed = false
-      if let lastNotPresentDate = notPresentTrainigData.last?.timestamp {
-        nextDateAllowed = Date().timeIntervalSince(lastNotPresentDate) > 3600.0 // Every 1 hour
-      }
-      
-      return nextDateAllowed
+  func needsTrainingData() async throws -> Bool {
+    guard let timestamp = try await lastTrainingDataDate() else {
+      return true
     }
+    
+    return Date().timeIntervalSince(timestamp) > 3600.0 // Every 1 hour
   }
   
   /// Whether or not the device contains training data that's newer than
@@ -514,14 +523,11 @@ extension HeadacheManager {
   ///
   /// - Returns: A boolean indicating if the app needs to train its models.
   func needsTraining() async throws -> Bool {
-    return try await trainingData { trainingData, _ in
-      var needs = false
-      if let date = trainingData.last?.timestamp, let lastTrainingDate = self.predictor?.modelUpdatedAt {
-        needs = date.timeIntervalSince(lastTrainingDate) > 0.0
-      }
-      
-      return needs
+    guard let lastTrainingDate = self.predictor?.modelUpdatedAt, let timestamp = try await lastTrainingDataDate() else {
+      return false
     }
+    
+    return timestamp.timeIntervalSince(lastTrainingDate) > 0.0
   }
   
   /// Cancels the current classification input reading.
@@ -552,9 +558,10 @@ extension HeadacheManager {
   /// with the given identifier. If no identifier is present, then the training data is
   /// still created but orphaned (a not-present severity).
   ///
-  /// - Parameter newSeverityIdentifier: The new severity identifier.
-  @discardableResult
-  func createTrainingData(newSeverityIdentifier: UUID? = nil) async throws -> Predictor.Input {
+  /// - Parameters:
+  ///   - input: The input data to create the training data from.
+  ///   - severityIdentifier: The identifier of the training data's parent severity, if any.
+  func createTrainingData(from input: Predictor.Input, severityIdentifier: UUID? = nil) async throws {
     guard !testing else { throw HeadacheError.testing }
 
     logDebug("Create training data background task begin.")
@@ -562,10 +569,6 @@ extension HeadacheManager {
     createTrainingDataBackgroundTask.begin { [weak self] in
       self?.weatherManager?.cancel()
     }
-
-    // Get the barometric pressure
-    logDebug("Getting input...")
-    let input = try await getCurrentClassifierInput()
     
     logInfo("Creating training data...")
     try await DataController.shared.performInBackground(saveOnComplete: true) { context in
@@ -573,19 +576,16 @@ extension HeadacheManager {
       let trainingData = TrainingData(context: context, input: input)
       logDebug("Created training data.")
       
-      if let newSeverityIdentifier = newSeverityIdentifier {
-        logDebug("Setting training data on severity \(newSeverityIdentifier)")
-        let request = Severity.fetchRequest(withIdentifier: newSeverityIdentifier)
+      if let severityIdentifier = severityIdentifier {
+        let request = Severity.fetchRequest(withIdentifier: severityIdentifier)
         if let severity = ((try? context.fetch(request)) ?? []).first {
           severity.addToTrainingData(trainingData)
         }
         else {
-          logWarning("Unable to add training data to severity with identifier: \(newSeverityIdentifier.uuidString)")
+          logWarning("Unable to add training data to severity with identifier: \(severityIdentifier.uuidString)")
         }
       }
     }
-    
-    return input
   }
   
   /// Upgrades the app's training data.
@@ -653,7 +653,7 @@ extension HeadacheManager {
     let secondsPastMidnight = Calendar.current.timeIntervalSinceMidnight(Date())
     
     // Get the number of seconds past the hour
-    let secondsPastHour = secondsPastMidnight - TimeInterval(3600 * Int(floor(secondsPastMidnight / 3600.0)))
+    let secondsPastHour = secondsPastMidnight - TimeInterval(3600 * Int(round(secondsPastMidnight / 3600.0)))
     
     // Get the number of seconds until the next hour
     var secondsUntilNextHour = 3600.0 - secondsPastHour
@@ -675,9 +675,11 @@ extension HeadacheManager {
     debugLastPredictionDate = Date()
     
     // Schedule the next task
-    Task {
+    Task { [weak self] in
+      guard let self = self else { return }
+      
       do {
-        try await schedulePredictionRefreshTask()
+        try await self.schedulePredictionRefreshTask()
       }
       catch {
         logError("Error scheduling prediction refresh task: \(error)")
@@ -700,13 +702,22 @@ extension HeadacheManager {
     }
     
     // Get the input and either alert or finish
-    Task {
+    Task { [weak self] in
+      guard let self = self else { return }
+      
       do {
-        let input = try await createTrainingData(newSeverityIdentifier: currentSeverityID)
+        let input = try await self.getCurrentClassifierInput()
         
+        // Should we create new training data?
+        // If it's been more than half an hour then yes.
+        if let timestamp = try await self.lastTrainingDataDate(), Date().timeIntervalSince(timestamp) > 1800.0 {
+          try await self.createTrainingData(from: input, severityIdentifier: currentSeverityID)
+        }
+        
+        // If there is no current headache, then present a prediction
         if currentSeverityID == nil {
           // We got the input, so present the prediction
-          let prediction = try self.predictor?.predict(input)
+          let prediction = try await self.predictor?.predict(input)
           try await self.presentPredictionAlert(with: prediction)
         }
         

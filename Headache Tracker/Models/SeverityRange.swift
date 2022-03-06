@@ -9,7 +9,10 @@ import Foundation
 import HealthKit
 
 /// Pairs two severity values together as a closed range.
-struct SeverityRange: CustomStringConvertible, Equatable {
+struct SeverityRange: CustomStringConvertible, Equatable, Hashable {
+  
+  /// An empty range.
+  static let empty = SeverityRange(lowerBound: .notPresent, upperBound: .notPresent)
   
   /// The range's lower bound.
   let lowerBound: HKCategoryValueSeverity
