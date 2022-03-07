@@ -9,6 +9,9 @@ import Foundation
 
 struct SharedConstants {
   
+  /// The application's app group identifier.
+  static let appGroupIdentifier = "group.com.cnc.Headache-Tracker.contents"
+  
   struct Widgets {
     
     /// The outlook widget's kind.

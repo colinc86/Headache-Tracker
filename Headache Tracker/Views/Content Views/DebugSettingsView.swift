@@ -5,8 +5,9 @@
 //  Created by Colin Campbell on 2/28/22.
 //
 
-import SwiftUI
+import DataController
 import HealthKit
+import SwiftUI
 
 struct DebugSettingsView: View {
   
@@ -130,6 +131,30 @@ struct DebugSettingsView: View {
         SubtitleCell(title: "Next Training", subtitle: "\(debugNextTrainingDate?.formattedNonRelative() ?? "N/A")")
         SubtitleCell(title: "Last Prediction", subtitle: "\(debugLastPredictionDate?.formattedNonRelative() ?? "N/A")")
         SubtitleCell(title: "Next Prediction", subtitle: "\(debugNextPredictionDate?.formattedNonRelative() ?? "N/A")")
+      }
+      
+      Section {
+        Button("Backup Database") {
+          Task {
+            do {
+              try await DataController.shared.backupDatabase()
+            }
+            catch {
+              logError("Error backing up database: \(error)")
+            }
+          }
+        }
+        
+        Button("Restore Database") {
+          Task {
+            do {
+              try await DataController.shared.restoreDatabase()
+            }
+            catch {
+              logError("Error restoring database: \(error)")
+            }
+          }
+        }
       }
     }
     .navigationTitle("Debug Settings")

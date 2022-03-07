@@ -36,6 +36,16 @@ struct Constants {
 
   }
   
+  struct CoreData {
+    
+    /// The application's coredata store name.
+    static let sqliteContainerName = "Headache_Tracker"
+    
+    /// The application's backup coredata store name.
+    static let sqliteBackupContainerName = "Headache_Tracker_Backup"
+    
+  }
+  
   struct Identifiers {
     
     /// The identifier to use with background training tasks.

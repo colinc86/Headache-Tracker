@@ -21,10 +21,7 @@ class SharedUserDefaults {
     static let currentSeverity = "current.severity"
   }
   
-  // MARK: Static properties
-  
-  /// The application's app group identifier.
-  static let appGroupIdentifier = "group.com.cnc.Headache-Tracker.contents"
+  // MARK: Static properties  
   
   /// The shared standard user defaults.
   static let standard = SharedUserDefaults()
@@ -32,7 +29,7 @@ class SharedUserDefaults {
   // MARK: Private properties
   
   /// The shared defaults.
-  private let defaults = UserDefaults(suiteName: SharedUserDefaults.appGroupIdentifier)
+  private let defaults = UserDefaults(suiteName: SharedConstants.appGroupIdentifier)
   
   // MARK: Public properties
   
