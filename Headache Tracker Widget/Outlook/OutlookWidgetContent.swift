@@ -14,6 +14,7 @@ struct OutlookWidgetContent: TimelineEntry {
   let onset: Date?
   let duration: TimeInterval?
   let severity: HKCategoryValueSeverity?
+  let hasCurrentHeadache: Bool
   
   var holisticOutlook: HolisticOutlook {
     return HolisticOutlook(

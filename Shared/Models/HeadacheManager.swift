@@ -370,6 +370,12 @@ extension HeadacheManager {
     }
   }
   
+  func hasCurrentHeadache() async throws -> Bool {
+    return try await currentHeadache { headache, _ in
+      return headache != nil
+    }
+  }
+  
 }
 
 // MARK: Prediction

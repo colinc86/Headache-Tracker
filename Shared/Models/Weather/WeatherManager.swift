@@ -27,11 +27,20 @@ class WeatherManager {
     }
   }
   
+  // MARK: Public properties
+  
   /// The manager's motion manager.
-  private let motionManager = MotionManager()
+  let motionManager = MotionManager()
   
   /// The manager's location manager.
-  private let locationManager = LocationManager()
+  let locationManager = LocationManager()
+  
+  /// Whether a widget is authorized for location updates.
+  var authorizedForWidgetUpdates: Bool {
+    return locationManager.authorizedForWidgetUpdates
+  }
+  
+  // MARK: Private properties
   
   /// The manager's weather spread URL task.
   private var weatherSpreadTask: URLSessionTask?

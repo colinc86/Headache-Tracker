@@ -85,7 +85,6 @@ struct DurationPredictionView_Previews: PreviewProvider {
     DurationPredictionView(duration: 0.0)
       .environment(\.managedObjectContext, Previewing.CoreData.viewContext)
       .environmentObject(Previewing.headacheManager)
-      .environmentObject(Previewing.alertManager)
       .environmentObject(Previewing.predictor)
       .environmentObject(Previewing.healthKitManager)
       .previewLayout(.fixed(width: 428, height: 100))

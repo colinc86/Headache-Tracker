@@ -138,6 +138,8 @@
 		3B3FFF0427D5A1F200DFACC1 /* DataController in Frameworks */ = {isa = PBXBuildFile; productRef = 3B3FFF0327D5A1F200DFACC1 /* DataController */; };
 		3B3FFF0627D5A1F200DFACC1 /* Surge in Frameworks */ = {isa = PBXBuildFile; productRef = 3B3FFF0527D5A1F200DFACC1 /* Surge */; };
 		3B3FFF0827D5A22200DFACC1 /* Previewing+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFF0727D5A22200DFACC1 /* Previewing+Extensions.swift */; };
+		3B3FFF0B27D5CF5600DFACC1 /* DurationPredictionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9332E527CEF7AC00BACE93 /* DurationPredictionView.swift */; };
+		3B3FFF0D27D5CFC500DFACC1 /* OutlookWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFF0C27D5CFC500DFACC1 /* OutlookWidgetView.swift */; };
 		3B68BDF927BDFCD3007AAAC6 /* AnalyzeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BDF827BDFCD3007AAAC6 /* AnalyzeView.swift */; };
 		3B68BDFB27BE0F00007AAAC6 /* BarGraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BDFA27BE0F00007AAAC6 /* BarGraph.swift */; };
 		3B68BE0127BEF949007AAAC6 /* Surge in Frameworks */ = {isa = PBXBuildFile; productRef = 3B68BE0027BEF949007AAAC6 /* Surge */; };
@@ -307,6 +309,7 @@
 		3B3FFE8C27D592A000DFACC1 /* Logger.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 		3B3FFEFD27D5994700DFACC1 /* Refresher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Refresher.swift; sourceTree = "<group>"; };
 		3B3FFF0727D5A22200DFACC1 /* Previewing+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Previewing+Extensions.swift"; sourceTree = "<group>"; };
+		3B3FFF0C27D5CFC500DFACC1 /* OutlookWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutlookWidgetView.swift; sourceTree = "<group>"; };
 		3B4BA6F327B6289C00F38851 /* Headache_Tracker 1.2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Headache_Tracker 1.2.xcdatamodel"; sourceTree = "<group>"; };
 		3B68BDF827BDFCD3007AAAC6 /* AnalyzeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyzeView.swift; sourceTree = "<group>"; };
 		3B68BDFA27BE0F00007AAAC6 /* BarGraph.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarGraph.swift; sourceTree = "<group>"; };
@@ -455,7 +458,6 @@
 			isa = PBXGroup;
 			children = (
 				3B1C7DB527D205EE000B3A99 /* ActionView.swift */,
-				3B9332E527CEF7AC00BACE93 /* DurationPredictionView.swift */,
 				3B09191527BCD38300844F6C /* DurationView.swift */,
 				3B09191127BCCE1C00844F6C /* OnsetView.swift */,
 				3B1C7DB327D2005E000B3A99 /* StatusView.swift */,
@@ -481,8 +483,9 @@
 		3B3FFDD027D5909B00DFACC1 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				3B09191927BD58A100844F6C /* SeveritySelectionView.swift */,
+				3B9332E527CEF7AC00BACE93 /* DurationPredictionView.swift */,
 				3B68BE6627C35644007AAAC6 /* OutlookView.swift */,
+				3B09191927BD58A100844F6C /* SeveritySelectionView.swift */,
 				3B09191327BCCF9500844F6C /* TitleCaptionView.swift */,
 			);
 			path = Views;
@@ -718,6 +721,7 @@
 				3B9332EF27CF3ADB00BACE93 /* OutlookWidget.swift */,
 				3B68BE5F27C34B89007AAAC6 /* OutlookWidgetContent.swift */,
 				3B9332F727CF3CA600BACE93 /* OutlookWidgetProvider.swift */,
+				3B3FFF0C27D5CFC500DFACC1 /* OutlookWidgetView.swift */,
 			);
 			path = Outlook;
 			sourceTree = "<group>";
@@ -1071,6 +1075,7 @@
 				3B3FFEEA27D592A000DFACC1 /* MotionManager.swift in Sources */,
 				3B3FFE9C27D592A000DFACC1 /* SharedUserDefaults.swift in Sources */,
 				3B3FFEE627D592A000DFACC1 /* WeatherManager.swift in Sources */,
+				3B3FFF0D27D5CFC500DFACC1 /* OutlookWidgetView.swift in Sources */,
 				3B3FFED827D592A000DFACC1 /* Bundle+Extensions.swift in Sources */,
 				3B3FFECE27D592A000DFACC1 /* UIColor+Extensions.swift in Sources */,
 				3B3FFEBC27D592A000DFACC1 /* InputUnion.swift in Sources */,
@@ -1125,6 +1130,7 @@
 				3B3FFEB227D592A000DFACC1 /* OutlookClassifierOutput.swift in Sources */,
 				3B3FFEAE27D592A000DFACC1 /* SeverityClassifierOutput.swift in Sources */,
 				3B3FFEE227D592A000DFACC1 /* UnitRate.swift in Sources */,
+				3B3FFF0B27D5CF5600DFACC1 /* DurationPredictionView.swift in Sources */,
 				3B3FFEC427D592A000DFACC1 /* TrainingData+Extensions.swift in Sources */,
 				3B3FFEA427D592A000DFACC1 /* HeadacheManager.swift in Sources */,
 			);

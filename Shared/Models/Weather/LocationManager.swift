@@ -40,6 +40,13 @@ class LocationManager: NSObject {
     }
   }
   
+  // MARK: Public properties
+  
+  /// Whether a widget is authorized for location updates.
+  var authorizedForWidgetUpdates: Bool {
+    return manager.isAuthorizedForWidgetUpdates
+  }
+  
   // MARK: Private properties
   
   /// The location manager.
