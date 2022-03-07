@@ -12,18 +12,17 @@ struct OutlookWidgetProvider: TimelineProvider {
   
   static let placeholder = OutlookWidgetContent(date: Date(), outlook: .noHeadache, onset: nil, duration: nil, severity: nil)
   
-  let headacheManager = HeadacheManager()
-  let predictor: Predictor = {
-    let predictor = Predictor()
+  let headacheManager: HeadacheManager = {
+    let manager = HeadacheManager()
     Task {
       do {
-        try await predictor.load()
+        try await manager.predictor.load()
       }
       catch {
         logError("Error loading predictor models: \(error)")
       }
     }
-    return predictor
+    return manager
   }()
   
   func placeholder(in context: Context) -> OutlookWidgetContent {
@@ -43,12 +42,12 @@ struct OutlookWidgetProvider: TimelineProvider {
     let now = Date()
     let currentContent = currentContent()
     
-    if now.timeIntervalSince(currentContent.date) >= 600.0 && predictor.ready {
+    if now.timeIntervalSince(currentContent.date) >= 600.0 && headacheManager.predictor.ready {
       // Get a new prediction
       Task {
         do {
           let input = try await headacheManager.getCurrentClassifierInput()
-          let prediction = try await predictor.predict(input, reloadWidget: false)
+          let prediction = try await headacheManager.predictor.predict(input, reloadWidget: false)
           
           let now = Date()
           let newContent = OutlookWidgetContent(

@@ -29,19 +29,16 @@ class HeadacheManager: ObservableObject {
     }
   }
   
-  // MARK: Weak properties
-  
-  /// The alert manager to use when adding local notifications.
-//  weak var alertManager: AlertManager?
-  
-  /// The health kit manager to use when authorizing health kit and sharing/reading data.
-  weak var healthKitManager: HealthKitManager?
+  // MARK: Public properties
   
   /// The manager's weather manager.
-  weak var weatherManager: WeatherManager?
+  let weatherManager = WeatherManager()
+  
+  /// The health kit manager to use when authorizing health kit and sharing/reading data.
+  let healthKitManager = HealthKitManager()
   
   /// The headache predictor.
-  weak var predictor: Predictor?
+  let predictor = Predictor()
   
   // MARK: Private properties
   
@@ -103,7 +100,7 @@ extension HeadacheManager {
     SharedUserDefaults.standard.setCurrentSeverity(severity)
     
     // Write the data to health kit and set our check-in alert
-    try await self.healthKitManager?.saveSeveritySamples(intervals: severityInterval == nil ? [] : [severityInterval!])
+    try await healthKitManager.saveSeveritySamples(intervals: severityInterval == nil ? [] : [severityInterval!])
     
     // Update the CoreML models
     let input = try await getCurrentClassifierInput()
@@ -130,7 +127,7 @@ extension HeadacheManager {
     SharedUserDefaults.standard.setCurrentSeverity(nil)
     
     // Write the data to health kit
-    try await healthKitManager?.saveSeveritySamples(intervals: severityInterval == nil ? [] : [severityInterval!])
+    try await healthKitManager.saveSeveritySamples(intervals: severityInterval == nil ? [] : [severityInterval!])
     
     // Update the CoreML models
     let input = try await getCurrentClassifierInput()
@@ -163,7 +160,7 @@ extension HeadacheManager {
     // If there wasn't an error, then we should check and delete it from health kit
     if let startTime = startTime, let endTime = endTime {
       logDebug("Successfully reset headache. Deleting severity samples.")
-      try await healthKitManager?.deleteSeveritySamples(in: DateInterval(start: startTime, end: endTime))
+      try await healthKitManager.deleteSeveritySamples(in: DateInterval(start: startTime, end: endTime))
     }
     else {
       logDebug("Successfully reset headache, but not deleting severity samples.")
@@ -193,7 +190,7 @@ extension HeadacheManager {
       return nil
     }
     
-    try await healthKitManager?.saveSeveritySamples(intervals: severityInterval == nil ? [] : [severityInterval!])
+    try await healthKitManager.saveSeveritySamples(intervals: severityInterval == nil ? [] : [severityInterval!])
   }
   
   /// Deletes the headache with the given identifier and it's associated health kit data.
@@ -229,7 +226,7 @@ extension HeadacheManager {
     // If there wasn't an error, then we should check and delete it from health kit
     if let startTime = startTime, let endTime = endTime {
       logDebug("Successfully reset headache. Deleting severity samples.")
-      try await healthKitManager?.deleteSeveritySamples(in: DateInterval(start: startTime, end: endTime))
+      try await healthKitManager.deleteSeveritySamples(in: DateInterval(start: startTime, end: endTime))
     }
     else {
       logDebug("Successfully reset headache, but not deleting severity samples.")
@@ -265,8 +262,8 @@ extension HeadacheManager {
     
     // Check to see if we need to delete and re-add samples
     if let originalHeadacheInterval = originalHeadacheInterval {
-      try await healthKitManager?.deleteSeveritySamples(in: originalHeadacheInterval)
-      try await healthKitManager?.saveSeveritySamples(intervals: newSeveritySamples)
+      try await healthKitManager.deleteSeveritySamples(in: originalHeadacheInterval)
+      try await healthKitManager.saveSeveritySamples(intervals: newSeveritySamples)
     }
   }
   
@@ -297,8 +294,8 @@ extension HeadacheManager {
     
     // Check to see if we need to delete and re-add samples
     if let originalHeadacheInterval = originalHeadacheInterval {
-      try await self.healthKitManager?.deleteSeveritySamples(in: originalHeadacheInterval)
-      try await self.healthKitManager?.saveSeveritySamples(intervals: newSeveritySamples)
+      try await healthKitManager.deleteSeveritySamples(in: originalHeadacheInterval)
+      try await healthKitManager.saveSeveritySamples(intervals: newSeveritySamples)
     }
   }
   
@@ -381,7 +378,7 @@ extension HeadacheManager {
   
   /// Resets all prediction and learning data.
   func resetPrediction() {
-    predictor?.reset()
+    predictor.reset()
   }
   
   /// Whether or not the application needs more training data.
@@ -400,7 +397,7 @@ extension HeadacheManager {
   ///
   /// - Returns: A boolean indicating if the app needs to train its models.
   func needsTraining() async throws -> Bool {
-    guard let lastTrainingDate = self.predictor?.modelUpdatedAt, let timestamp = try await lastTrainingDataDate() else {
+    guard let lastTrainingDate = predictor.modelUpdatedAt, let timestamp = try await lastTrainingDataDate() else {
       return false
     }
     
@@ -409,7 +406,7 @@ extension HeadacheManager {
   
   /// Cancels the current classification input reading.
   func cancelClassificationInput() {
-    weatherManager?.cancel()
+    weatherManager.cancel()
   }
   
   /// Gets classifier input appropriate for prediction.
@@ -419,10 +416,10 @@ extension HeadacheManager {
   func getCurrentClassifierInput(shouldCreateTrainingData: Bool = false) async throws -> Predictor.Input {
     guard !testing else { throw HeadacheError.testing }
     
-    let weather = try await weatherManager?.weather()
+    let weather = try await weatherManager.weather()
     let now = Date()
     let interval = DateInterval(start: now.addingTimeInterval(-86400.0), end: now)
-    let healthKitData = self.healthKitManager?.readHealthKitData(in: interval)
+    let healthKitData = healthKitManager.readHealthKitData(in: interval)
     return Predictor.Input(weather: weather, healthKitData: healthKitData, date: now)
   }
   
@@ -466,7 +463,7 @@ extension HeadacheManager {
         }
 
         let interval = DateInterval(start: timestamp.addingTimeInterval(-86400.0), end: timestamp)
-        let data = self?.healthKitManager?.readHealthKitData(in: interval)
+        let data = self?.healthKitManager.readHealthKitData(in: interval)
         trainingDatum.updateWithHealthKitData(data)
       }
       logDebug("Finished upgrading data.")
@@ -489,7 +486,7 @@ extension HeadacheManager {
       logDebug("Training classifiers with \(trainingData.count) data...")
       Task {
         do {
-          try await self.predictor?.train(input)
+          try await self.predictor.train(input)
         }
         catch {
           logError("Error training classifiers: \(error)")

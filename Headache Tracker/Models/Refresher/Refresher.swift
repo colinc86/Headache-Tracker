@@ -14,14 +14,11 @@ class Refresher: ObservableObject {
   
   // MARK: Public properties
   
+  /// The app's alert manager.
+  let alertManager = AlertManager()
+  
   /// The app's headache manager.
   weak var headacheManager: HeadacheManager!
-  
-  /// The app's alert manager.
-  weak var alertManager: AlertManager!
-  
-  /// The headache predictor.
-  weak var predictor: Predictor!
   
   // MARK: Private properties
   
@@ -89,7 +86,7 @@ extension Refresher {
     }
     
     // Cancel any pending notifications
-    alertManager?.removeRequests(pending: true, delivered: false)
+    alertManager.removeRequests(pending: true, delivered: false)
     
     // Get our date components
     let futureDate = Date(timeIntervalSinceNow: checkInInterval)
@@ -97,7 +94,7 @@ extension Refresher {
     
     // Present the alert
     logDebug("Presenting alert with components at date \(futureDate).")
-    try await alertManager?.presentAlert(
+    try await alertManager.presentAlert(
       with: HeadacheAlertRequest.checkIn(headacheIdentifier: headacheIdentifier),
       trigger: UNCalendarNotificationTrigger(dateMatching: components, repeats: false),
       badgeNumber: 0)
@@ -116,7 +113,7 @@ extension Refresher {
     
     // Present the alert
     logDebug("Presenting alert for predicted severity: \(prediction.severityClassifierOutput.prediction.title).")
-    try await alertManager?.presentAlert(
+    try await alertManager.presentAlert(
       with: HeadacheAlertRequest.prediction(severity: prediction.severityClassifierOutput.prediction),
       badgeNumber: 0)
   }
@@ -132,7 +129,7 @@ extension Refresher {
     
     // Present the alert
     logDebug("Presenting alert for outlook: \(prediction.outlookClassifierOutput.prediction).")
-    try await self.alertManager?.presentAlert(
+    try await alertManager.presentAlert(
       with: HeadacheAlertRequest.outlook(outlook: prediction.outlookClassifierOutput.prediction, onset: prediction.onsetRegressorOutput.prediction),
       badgeNumber: 0)
   }
@@ -225,7 +222,7 @@ extension Refresher {
         // If there is no current headache, then present a prediction
         if currentSeverityID == nil {
           // We got the input, so present the prediction
-          let prediction = try await self.predictor.predict(input)
+          let prediction = try await self.headacheManager.predictor.predict(input)
           try await self.presentPredictionAlert(with: prediction)
         }
         
@@ -316,7 +313,7 @@ extension Refresher {
       
       do {
         let input = try await self.headacheManager.getCurrentClassifierInput()
-        try await self.presentOutlookAlert(with: try self.predictor.predict(input))
+        try await self.presentOutlookAlert(with: try self.headacheManager.predictor.predict(input))
         task.setTaskCompleted(success: true)
       }
       catch {
@@ -390,7 +387,7 @@ extension Refresher {
     // Set the task's expiration handler
     task.expirationHandler = { [weak task, weak self] in
       // Cancel the prediction
-      self?.headacheManager.predictor?.cancelTraining()
+      self?.headacheManager.predictor.cancelTraining()
       task?.setTaskCompleted(success: false)
     }
     

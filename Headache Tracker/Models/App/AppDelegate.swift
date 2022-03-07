@@ -24,18 +24,6 @@ class AppDelegate: NSObject, UIApplicationDelegate, ObservableObject {
   /// The application's headache manager.
   var headacheManager = HeadacheManager()
   
-  /// The application's health kit manager.
-  var healthKitManager = HealthKitManager()
-  
-  /// The application's headache predictor.
-  var predictor = Predictor()
-  
-  /// The application's alert manager.
-  var alertManager = AlertManager()
-  
-  /// The application's weather manager.
-  var weatherManager = WeatherManager()
-  
   /// Whether or not to enable crash reporting.
   @AppStorage(AppSettings.enableCrashReporting) var enableCrashReporting = true
   
@@ -78,7 +66,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, ObservableObject {
     setHeadacheManagerReferences()
     
     // Check our location authorization status
-    weatherManager.setup()
+    headacheManager.weatherManager.setup()
     
     // Set up the async stuff
     Task {
@@ -90,7 +78,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, ObservableObject {
         try await checkHealthKitAuthorizationStatus()
         
         // Load our ML classifiers
-        try await predictor.load()
+        try await headacheManager.predictor.load()
         
         // Check for any training data updates
         try await headacheManager.upgradeTrainingData()
@@ -119,29 +107,23 @@ extension AppDelegate {
   private func setHeadacheManagerReferences() {
     // Refresher
     refresher.headacheManager = headacheManager
-    refresher.alertManager = alertManager
-    
-    // Headache manager
-    headacheManager.healthKitManager = healthKitManager
-    headacheManager.predictor = predictor
-    headacheManager.weatherManager = weatherManager
   }
   
   /// Setup alerts.
   private func checkAlertAuthorizationStatus() async throws {
-    if alertManager.authorizationStatus == .notDetermined {
-      try await alertManager.setup(options: [.alert, .badge, .sound])
+    if refresher.alertManager.authorizationStatus == .notDetermined {
+      try await refresher.alertManager.setup(options: [.alert, .badge, .sound])
     }
     else {
-      alertManager.removeRequests(pending: false, delivered: true)
+      refresher.alertManager.removeRequests(pending: false, delivered: true)
     }
   }
   
   /// Setup health kit (only if it hasn't been done before) and the setting
   /// is on.
   private func checkHealthKitAuthorizationStatus() async throws {
-    if healthIntegration && healthKitManager.needsAuthorization() {
-      try await healthKitManager.authorize()
+    if healthIntegration && headacheManager.healthKitManager.needsAuthorization() {
+      try await headacheManager.healthKitManager.authorize()
     }
   }
   
