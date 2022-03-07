@@ -16,9 +16,6 @@ struct Previewing {
   /// The preview headache manager.
   static let headacheManager = HeadacheManager(testing: true)
   
-  /// The preview alert manager.
-  static let alertManager = AlertManager()
-  
   /// The preview health kit manager.
   static let healthKitManager = HealthKitManager()
   

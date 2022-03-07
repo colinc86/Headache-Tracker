@@ -13,11 +13,8 @@ struct Constants {
   /// The current training data version.
   static let trainingDataVersion = "1.0"
   
-  /// The desired time between predictions.
-  static let backgroundPredictionInterval: TimeInterval = 3600.0
-  
-  /// The minimum refresh interval.
-  static let predictionRefreshInterval: TimeInterval = 600.0
+  /// The application's app group identifier.
+  static let appGroupIdentifier = "group.com.cnc.Headache-Tracker.contents"
   
   struct AssetKeys {
     
@@ -46,7 +43,13 @@ struct Constants {
     
   }
   
-  struct Identifiers {
+  struct Tasks {
+    
+    /// The desired time between predictions.
+    static let backgroundPredictionInterval: TimeInterval = 3600.0
+    
+    /// The minimum refresh interval.
+    static let predictionRefreshInterval: TimeInterval = 600.0
     
     /// The identifier to use with background training tasks.
     static let backgroundTrainingTaskIdentifier = ApplicationKey(from: "train")
@@ -73,6 +76,16 @@ struct Constants {
     
     /// The weather API password.
     static let password = "c4efa0b907f057cdb110d36651e442b3"
+    
+  }
+  
+  struct Widgets {
+    
+    /// The outlook widget's kind.
+    static let outlookWidgetKind = "com.cnc.myheadache.widget.outlook"
+    
+    /// The severity widget's kind.
+    static let severityWidgetKind = "com.cnc.myheadache.widget.severity"
     
   }
   

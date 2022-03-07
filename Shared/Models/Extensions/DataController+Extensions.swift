@@ -13,7 +13,7 @@ import Foundation
 extension DataController {
   
   /// The shared data controller.
-  static let shared = DataController(containerName: Constants.CoreData.sqliteContainerName, appGroup: SharedConstants.appGroupIdentifier)
+  static let shared = DataController(containerName: Constants.CoreData.sqliteContainerName, appGroup: Constants.appGroupIdentifier)
   
   /// Backs up the core data store to a backup file.
   func backupDatabase() async throws {
@@ -25,7 +25,7 @@ extension DataController {
         let backupUrl = backUpFolderUrl.appendingPathComponent("\(Constants.CoreData.sqliteBackupContainerName).sqlite")
         let container = NSPersistentContainer(name: Constants.CoreData.sqliteContainerName)
         
-        guard let fileContainer = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: SharedConstants.appGroupIdentifier) else {
+        guard let fileContainer = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: Constants.appGroupIdentifier) else {
           continuation.resume()
           return
         }
@@ -58,7 +58,7 @@ extension DataController {
         let backupUrl = backUpFolderUrl.appendingPathComponent("\(Constants.CoreData.sqliteBackupContainerName).sqlite")
         
         let container = NSPersistentContainer(name: Constants.CoreData.sqliteContainerName)
-        guard let fileContainer = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: SharedConstants.appGroupIdentifier) else {
+        guard let fileContainer = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: Constants.appGroupIdentifier) else {
           continuation.resume()
           return
         }

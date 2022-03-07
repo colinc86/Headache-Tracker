@@ -15,6 +15,9 @@ struct HeadachesView: View {
   /// The app's headache manager.
   @EnvironmentObject private var headacheManager: HeadacheManager
   
+  /// The app's alert manager.
+  @EnvironmentObject private var alertManager: AlertManager
+  
   /// The unresolveed headaches fetch request.
   /// Returns a list of all unresolved headaches.
   @FetchRequest(
@@ -88,7 +91,13 @@ extension HeadachesView {
       offsets.map { unresolvedHeadaches[$0] }.forEach({ headache in
         Task {
           do {
+            // Delete the headache
             try await headacheManager.deleteHeadache(identifier: headache.identifier)
+            
+            // Remove any alerts
+            if !headache.resolved {
+              alertManager.removeRequests(pending: true, delivered: false)
+            }
           }
           catch {
             logError("Error deleting headache: \(error)")
@@ -106,7 +115,13 @@ extension HeadachesView {
       offsets.map { unresolvedHeadaches[$0] }.forEach({ headache in
         Task {
           do {
+            // Delete the headache
             try await headacheManager.deleteHeadache(identifier: headache.identifier)
+            
+            // Remove any alerts
+            if !headache.resolved {
+              alertManager.removeRequests(pending: true, delivered: false)
+            }
           }
           catch {
             logError("Error deleting headache: \(error)")

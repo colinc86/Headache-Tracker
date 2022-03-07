@@ -14,6 +14,7 @@ class SharedUserDefaults {
   // MARK: Types
   
   struct Keys {
+    static let predictionDate = "prediction.date"
     static let predictedOutlook = "predicted.outlook"
     static let predictedOnset = "predicted.onset"
     static let predictedDuration = "predicted.duration"
@@ -29,9 +30,21 @@ class SharedUserDefaults {
   // MARK: Private properties
   
   /// The shared defaults.
-  private let defaults = UserDefaults(suiteName: SharedConstants.appGroupIdentifier)
+  private let defaults = UserDefaults(suiteName: Constants.appGroupIdentifier)
   
   // MARK: Public properties
+  
+  /// The last prediction date.
+  var predictionDate: Date? {
+    get {
+      return defaults?.value(forKey: Keys.predictionDate) as? Date
+    }
+    
+    set {
+      defaults?.set(newValue, forKey: Keys.predictionDate)
+      defaults?.synchronize()
+    }
+  }
   
   /// The predicted outlook.
   var predictedOutlook: Outlook? {
@@ -109,16 +122,22 @@ extension SharedUserDefaults {
   /// Sets the prediction results and requests a widget reload.
   ///
   /// - Parameters:
+  ///   - date: The prediction date.
   ///   - outlook: The predicted outlook.
   ///   - onset: The predicted onset.
   ///   - duration: The predicted duration.
   ///   - severity: The predicted severity
-  func setPredictionResults(_ outlook: Outlook?, _ onset: Date?, _ duration: TimeInterval?, _ severity: HKCategoryValueSeverity?) {
+  ///   - reloadWidget: Whether the widget's timeline should be reloaded.
+  func setPredictionResults(_ date: Date?, _ outlook: Outlook?, _ onset: Date?, _ duration: TimeInterval?, _ severity: HKCategoryValueSeverity?, reloadWidget: Bool) {
+    predictionDate = date
     predictedOutlook = outlook
     predictedOnset = onset
     predictedDuration = duration
     predictedSeverity = severity
-    WidgetCenter.shared.reloadTimelines(ofKind: SharedConstants.Widgets.outlookWidgetKind)
+    
+    if reloadWidget {
+      WidgetCenter.shared.reloadTimelines(ofKind: Constants.Widgets.outlookWidgetKind)
+    }
   }
   
   /// Sets the current severity and requests a widget reload.
@@ -126,7 +145,7 @@ extension SharedUserDefaults {
   /// - Parameter severity: The current severity.
   func setCurrentSeverity(_ severity: HKCategoryValueSeverity?) {
     currentSeverity = severity
-    WidgetCenter.shared.reloadTimelines(ofKind: SharedConstants.Widgets.severityWidgetKind)
+    WidgetCenter.shared.reloadTimelines(ofKind: Constants.Widgets.severityWidgetKind)
   }
   
 }

@@ -1,5 +1,5 @@
 //
-//  HorizontalSeverityLevelView.swift
+//  SeveritySelectionView.swift
 //  Headache Tracker
 //
 //  Created by Colin Campbell on 2/16/22.
@@ -9,7 +9,7 @@ import SwiftUI
 import HealthKit
 
 /// Draws a horizontal severity level indicator.
-struct HorizontalSeverityLevelView: View {
+struct SeveritySelectionView: View {
   
   // MARK: Public properties
   
@@ -17,13 +17,16 @@ struct HorizontalSeverityLevelView: View {
   let currentSeverity: HKCategoryValueSeverity?
   
   /// The headache's severity range to display.
-  let severityRange: SeverityRange?
+  var severityRange: SeverityRange? = nil
   
   /// The collapsed state of the view.
-  let collapsed: Bool
+  var collapsed: Bool = false
+  
+  /// Whether the view should represent links.
+  var link: Bool = false
   
   /// The action for each button.
-  let action: ((HKCategoryValueSeverity) -> Void)?
+  var action: ((HKCategoryValueSeverity) -> Void)? = nil
   
   // MARK: View body
   
@@ -38,6 +41,7 @@ struct HorizontalSeverityLevelView: View {
               selectedSeverity: currentSeverity,
               selectedSeverityRange: severityRange,
               collapsed: collapsed,
+              link: link,
               action: action)
             
             if i < 4 {
@@ -53,7 +57,7 @@ struct HorizontalSeverityLevelView: View {
 
 // MARK: Private methods
 
-extension HorizontalSeverityLevelView {
+extension SeveritySelectionView {
   
   /// The severity for a given index.
   ///
@@ -65,36 +69,36 @@ extension HorizontalSeverityLevelView {
   
 }
 
-struct HorizontalSeverityLevelView_Previews: PreviewProvider {
+struct SeveritySelectionView_Previews: PreviewProvider {
   static var previews: some View {
-    HorizontalSeverityLevelView(currentSeverity: nil, severityRange: nil, collapsed: false, action: nil)
+    SeveritySelectionView(currentSeverity: nil, severityRange: nil, collapsed: false, action: nil)
       .environment(\.managedObjectContext, Previewing.CoreData.viewContext)
       .environmentObject(Previewing.headacheManager)
-      .environmentObject(Previewing.alertManager)
+//      .environmentObject(Previewing.alertManager)
       .environmentObject(Previewing.predictor)
       .environmentObject(Previewing.healthKitManager)
       .previewLayout(PreviewLayout.fixed(width: 428, height: 130))
     
-    HorizontalSeverityLevelView(currentSeverity: .mild, severityRange: nil, collapsed: false, action: nil)
+    SeveritySelectionView(currentSeverity: .mild, severityRange: nil, collapsed: false, action: nil)
       .environment(\.managedObjectContext, Previewing.CoreData.viewContext)
       .environmentObject(Previewing.headacheManager)
-      .environmentObject(Previewing.alertManager)
+//      .environmentObject(Previewing.alertManager)
       .environmentObject(Previewing.predictor)
       .environmentObject(Previewing.healthKitManager)
       .previewLayout(PreviewLayout.fixed(width: 428, height: 130))
     
-    HorizontalSeverityLevelView(currentSeverity: nil, severityRange: SeverityRange(lowerBound: .notPresent, upperBound: .severe), collapsed: false, action: nil)
+    SeveritySelectionView(currentSeverity: nil, severityRange: SeverityRange(lowerBound: .notPresent, upperBound: .severe), collapsed: false, action: nil)
       .environment(\.managedObjectContext, Previewing.CoreData.viewContext)
       .environmentObject(Previewing.headacheManager)
-      .environmentObject(Previewing.alertManager)
+//      .environmentObject(Previewing.alertManager)
       .environmentObject(Previewing.predictor)
       .environmentObject(Previewing.healthKitManager)
       .previewLayout(PreviewLayout.fixed(width: 428, height: 130))
     
-    HorizontalSeverityLevelView(currentSeverity: nil, severityRange: nil, collapsed: true, action: nil)
+    SeveritySelectionView(currentSeverity: nil, severityRange: nil, collapsed: true, action: nil)
       .environment(\.managedObjectContext, Previewing.CoreData.viewContext)
       .environmentObject(Previewing.headacheManager)
-      .environmentObject(Previewing.alertManager)
+//      .environmentObject(Previewing.alertManager)
       .environmentObject(Previewing.predictor)
       .environmentObject(Previewing.healthKitManager)
       .previewLayout(PreviewLayout.fixed(width: 428, height: 70))
@@ -115,11 +119,14 @@ struct SeverityButton: View {
   var selectedSeverityRange: SeverityRange? = nil
   
   /// Whether or not the button should be drawn collapsed.
-  let collapsed: Bool
+  var collapsed: Bool = false
+  
+  /// Whether the button represents a link.
+  var link: Bool = false
   
   /// The button's action. If nil, then the button is drawn
   /// as a rectantle instead.
-  let action: ((HKCategoryValueSeverity) -> Void)?
+  var action: ((HKCategoryValueSeverity) -> Void)? = nil
   
   // MARK: Private properties
   
@@ -128,34 +135,48 @@ struct SeverityButton: View {
   
   /// Whether or not this button is the selected button.
   private var selected: Bool {
+    if link {
+      return severity == selectedSeverity
+    }
     return (severity == selectedSeverity) || (selectedSeverityRange?.contains(severity) ?? false)
   }
   
   var body: some View {
     VStack {
-      if let action = action {
-        Button {
-          action(severity)
-        } label: {
-          ZStack {
+      let content = ZStack {
+        RoundedRectangle(cornerRadius: 12)
+          .frame(width: dimension, height: dimension)
+          .foregroundColor(selected ? severity.uiColor : Color.secondary.opacity(0.25))
+          .overlay(
             RoundedRectangle(cornerRadius: 12)
-              .frame(width: dimension, height: dimension)
-              .foregroundColor(selected ? severity.uiColor : Color.secondary.opacity(0.25))
-              .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                  .stroke(severity.uiColor.opacity(0.25), lineWidth: 4.0)
-              )
-          }
+              .stroke(severity.uiColor.opacity(0.25), lineWidth: 4.0)
+          )
+      }
+      
+      if link {
+        Link(destination: URL(string: "myheadache://severity?rawValue=\(severity.rawValue)")!) {
+          content
         }
         .buttonStyle(BorderlessButtonStyle())
         .foregroundColor(selected ? severity.uiColor : Color.secondary.opacity(0.25))
         .cornerRadius(12)
       }
       else {
-        RoundedRectangle(cornerRadius: 12)
-          .frame(width: dimension, height: collapsed ? 8.0 : dimension)
+        if let action = action {
+          Button {
+            action(severity)
+          } label: {
+            content
+          }
+          .buttonStyle(BorderlessButtonStyle())
           .foregroundColor(selected ? severity.uiColor : Color.secondary.opacity(0.25))
-        
+          .cornerRadius(12)
+        }
+        else {
+          RoundedRectangle(cornerRadius: 12)
+            .frame(width: dimension, height: collapsed ? 8.0 : dimension)
+            .foregroundColor(selected ? severity.uiColor : Color.secondary.opacity(0.25))
+        }
       }
       
       Text(severity.title)

@@ -18,6 +18,9 @@ class AppDelegate: NSObject, UIApplicationDelegate, ObservableObject {
   
   // MARK: Public properties
   
+  /// The application's background refresher.
+  var refresher = Refresher()
+  
   /// The application's headache manager.
   var headacheManager = HeadacheManager()
   
@@ -66,10 +69,10 @@ class AppDelegate: NSObject, UIApplicationDelegate, ObservableObject {
     // Adjust the table view appearance
     UITableView.appearance().sectionFooterHeight = 0
     
-    // Make sure we register our tasks
-    headacheManager.setupPredictionRefreshTask()
-    headacheManager.setupOutlookRefreshTask()
-    headacheManager.setupTrainingProcessingTask()
+    // Set up the refresh tasks
+    refresher.setupPredictionRefreshTask()
+    refresher.setupOutlookRefreshTask()
+    refresher.setupTrainingProcessingTask()
     
     // Make sure the headache manager has a reference to the alert and health kit managers
     setHeadacheManagerReferences()
@@ -89,6 +92,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, ObservableObject {
         // Load our ML classifiers
         try await predictor.load()
         
+        // Check for any training data updates
         try await headacheManager.upgradeTrainingData()
       }
       catch {
@@ -113,7 +117,11 @@ extension AppDelegate {
   
   /// Sets up the manager's weak references.
   private func setHeadacheManagerReferences() {
-    headacheManager.alertManager = alertManager
+    // Refresher
+    refresher.headacheManager = headacheManager
+    refresher.alertManager = alertManager
+    
+    // Headache manager
     headacheManager.healthKitManager = healthKitManager
     headacheManager.predictor = predictor
     headacheManager.weatherManager = weatherManager

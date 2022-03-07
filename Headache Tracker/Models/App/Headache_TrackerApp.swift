@@ -36,6 +36,7 @@ struct Headache_TrackerApp: App {
         .environmentObject(appDelegate.predictor)
         .environmentObject(appDelegate.healthKitManager)
         .environmentObject(appDelegate.alertManager)
+        .environmentObject(appDelegate.refresher)
         .onReceive(didBecomeActiveNotificationPublisher, perform: didBecomeActive)
         .onReceive(willResignActiveNotificationPublisher, perform: willResignActive)
     }
@@ -48,9 +49,9 @@ extension Headache_TrackerApp {
   /// Called when the application becomes active.
   private func didBecomeActive(_ output: NotificationCenter.Publisher.Output) {
     logDebug("Application did become active.")
-    appDelegate.headacheManager.cancelTrainingProcessingTask()
-    appDelegate.headacheManager.cancelPredictionRefreshTask()
-    appDelegate.headacheManager.cancelOutlookRefreshTask()
+    appDelegate.refresher.cancelTrainingProcessingTask()
+    appDelegate.refresher.cancelPredictionRefreshTask()
+    appDelegate.refresher.cancelOutlookRefreshTask()
     
     Task {
       do {
@@ -69,12 +70,12 @@ extension Headache_TrackerApp {
     // Schedule our training and prediction tasks
     Task {
       do {
-        try await appDelegate.headacheManager.scheduleTrainingRefreshTask()
-        try await appDelegate.headacheManager.schedulePredictionRefreshTask()
+        try await appDelegate.refresher.scheduleTrainingRefreshTask()
+        try await appDelegate.refresher.schedulePredictionRefreshTask()
         
         // Schedule our outlook task
         if appDelegate.dailyOutlookAlerts {
-          try await appDelegate.headacheManager.scheduleOutlookRefreshTask()
+          try await appDelegate.refresher.scheduleOutlookRefreshTask()
         }
       }
       catch {

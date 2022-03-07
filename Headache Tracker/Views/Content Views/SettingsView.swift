@@ -23,6 +23,9 @@ struct SettingsView: View {
   /// The app's alert manager.
   @EnvironmentObject private var alertManager: AlertManager
   
+  /// The app's data refresher.
+  @EnvironmentObject private var refresher: Refresher
+  
   /// Whether or not to enable crash reporting.
   @AppStorage(AppSettings.enableCrashReporting) var enableCrashReporting = true
   
@@ -204,7 +207,7 @@ extension SettingsView {
     if newValue {
       Task {
         do {
-          try await headacheManager.scheduleOutlookRefreshTask()
+          try await refresher.scheduleOutlookRefreshTask()
         }
         catch {
           logError("Error scheduling outlook refresh task: \(error)")
@@ -212,7 +215,7 @@ extension SettingsView {
       }
     }
     else {
-      headacheManager.cancelOutlookRefreshTask()
+      refresher.cancelOutlookRefreshTask()
     }
   }
   

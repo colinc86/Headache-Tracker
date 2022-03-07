@@ -25,6 +25,89 @@ class Predictor: ObservableObject {
     case severityClassifier
   }
   
+  struct TrainingInput {
+    
+    let outlookTable: MLDataTable
+    let severityTable: MLDataTable
+    let onsetTable: MLDataTable
+    let durationTable: MLDataTable
+    
+    var isValid: Bool {
+      return outlookTable.isValid && outlookTable.isValid && onsetTable.isValid && durationTable.isValid
+    }
+    
+    init(trainingData: [TrainingData]) throws {
+      // Set the training tags
+      trainingData.setVolitileVariables()
+      
+      // Get the data tables
+      outlookTable = try MLDataTable(dictionary: TrainingInput.balanceTrainingData(trainingData, forModelType: .outlookClassifier).outlookDataTable())
+      severityTable = try MLDataTable(dictionary: TrainingInput.balanceTrainingData(trainingData, forModelType: .severityClassifier).severityDataTable())
+      onsetTable = try MLDataTable(dictionary: TrainingInput.balanceTrainingData(trainingData, forModelType: .onsetRegressor).onsetTableData())
+      durationTable = try MLDataTable(dictionary: TrainingInput.balanceTrainingData(trainingData, forModelType: .durationRegressor).durationTableData())
+    }
+    
+    /// Balances the training data for the given model type.
+    ///
+    /// - Parameters:
+    ///   - trainingData: The training data to balance.
+    ///   - modelType: The model type intended to train.
+    /// - Returns: The training data.
+    private static func balanceTrainingData(_ trainingData: [TrainingData], forModelType modelType: ModelType) -> [TrainingData] {
+      switch modelType {
+      case .durationRegressor:
+        return trainingData.filter({ $0.timeIntervalUntilNextHeadacheEnd != nil })
+      case .onsetRegressor:
+        return trainingData.filter({ $0.timeIntervalUntilNextHeadacheStart != nil })
+      case .severityClassifier:
+        var headacheData = trainingData.filter({ $0.severity?.headache != nil })
+        var nonHeadacheData = trainingData.filter({ $0.severity?.headache == nil })
+        
+        // Min count
+        let minCount = min(headacheData.count, nonHeadacheData.count)
+        
+        // Shuffle
+        headacheData.shuffle()
+        nonHeadacheData.shuffle()
+        
+        // Trim
+        if headacheData.count > minCount {
+          headacheData = [TrainingData](headacheData[0 ..< minCount])
+        }
+        if nonHeadacheData.count > minCount {
+          nonHeadacheData = [TrainingData](nonHeadacheData[0 ..< minCount])
+        }
+        
+        return headacheData + nonHeadacheData
+      case .outlookClassifier:
+        var headacheData = trainingData.filter({ $0.outlook == .headache })
+        var possibleHeadacheData = trainingData.filter({ $0.outlook == .possibleHeadache })
+        var noHeadacheData = trainingData.filter({ $0.outlook == .noHeadache })
+        
+        // Min count
+        let minCount = min(headacheData.count, possibleHeadacheData.count, noHeadacheData.count)
+        
+        // Shuffle
+        headacheData.shuffle()
+        possibleHeadacheData.shuffle()
+        noHeadacheData.shuffle()
+        
+        // Trim
+        if headacheData.count > minCount {
+          headacheData = [TrainingData](headacheData[0 ..< minCount])
+        }
+        if possibleHeadacheData.count > minCount {
+          possibleHeadacheData = [TrainingData](possibleHeadacheData[0 ..< minCount])
+        }
+        if noHeadacheData.count > minCount {
+          noHeadacheData = [TrainingData](noHeadacheData[0 ..< minCount])
+        }
+        
+        return headacheData + possibleHeadacheData + noHeadacheData
+      }
+    }
+  }
+  
   /// A prediction input.
   struct Input {
     
@@ -169,9 +252,6 @@ class Predictor: ObservableObject {
   /// The queue to do anything with models on.
   private var modelQueue = DispatchQueue(label: ApplicationKey(from: "modelQueue"))
   
-  /// The training background task.
-  private var trainingBackgroundTask = BackgroundTask(identifier: "training")
-  
   /// Whether or not training was cancelled.
   private var cancelledTraining = false
   
@@ -208,15 +288,15 @@ extension Predictor {
   
   /// Trains the predictor's classifiers.
   ///
-  /// - Parameter trainingData: The training data.
-  func train(with trainingData: [TrainingData]) async throws {
+  /// - Parameter input: The training input.
+  func train(_ input: TrainingInput) async throws {
     return try await withCheckedThrowingContinuation({ [weak self] (continuation: CheckedContinuation<Void, Error>) in
       guard let self = self else {
         continuation.resume()
         return
       }
       
-      self.train(with: trainingData) { error in
+      self.train(input) { error in
         if let error = error {
           continuation.resume(throwing: error)
         }
@@ -255,10 +335,12 @@ extension Predictor {
   
   /// Makes a prediction.
   ///
-  /// - Parameter input: The predictor's input.
+  /// - Parameters:
+  ///   - input: The predictor's input.
+  ///   - reloadWidget: Whether the outlook widget should be reloaded (default=true).
   /// - Returns: The predictor's output.
   @discardableResult
-  func predict(_ input: Input) async throws -> Prediction {
+  func predict(_ input: Input, reloadWidget: Bool = true) async throws -> Prediction {
     return try await withCheckedThrowingContinuation { [weak self] continuation in
       guard let self = self else {
         continuation.resume(returning: .empty)
@@ -301,10 +383,12 @@ extension Predictor {
           
           /// Save this prediction for the widget
           SharedUserDefaults.standard.setPredictionResults(
+            Date(),
             prediction.outlookClassifierOutput.prediction,
             prediction.onsetRegressorOutput.prediction,
             prediction.durationRegressorOutput.prediction,
-            prediction.severityClassifierOutput.prediction)
+            prediction.severityClassifierOutput.prediction,
+            reloadWidget: reloadWidget)
           
           // Update the prediction value
           DispatchQueue.main.async {
@@ -376,45 +460,21 @@ extension Predictor {
   /// Trains the predictor's classifiers.
   ///
   /// - Parameters:
-  ///   - trainingData: The training data.
+  ///   - input: The training input.
   ///   - completion: Called after training has completed.
-  private func train(with trainingData: [TrainingData], completion: @escaping (Error?) -> Void) {
-    guard !training && !trainingData.isEmpty else {
-      logDebug("Training data is empty.")
+  private func train(_ input: TrainingInput, completion: @escaping (Error?) -> Void) {
+    guard !training && input.isValid else {
+      logDebug("Training data is not valid.")
       completion(nil)
       return
     }
-    
-    logDebug("Train with \(trainingData.count) training data.")
-    trainingBackgroundTask.begin(expired: cancelTraining)
-    
+        
     DispatchQueue.main.async { [weak self] in self?.training = true }
     cancelledTraining = false
     
     let finished: (Error?) -> Void = { [weak self] error in
       completion(error)
       DispatchQueue.main.async { self?.training = false }
-      self?.trainingBackgroundTask.end()
-      return
-    }
-    
-    // Set the training tags
-    trainingData.setVolitileVariables()
-    
-    // Get the data table
-    let outlookTable: MLDataTable
-    let severityTable: MLDataTable
-    let onsetTable: MLDataTable
-    let durationTable: MLDataTable
-    do {
-      outlookTable = try MLDataTable(dictionary: balanceTrainingData(trainingData, forModelType: .outlookClassifier).outlookDataTable())
-      severityTable = try MLDataTable(dictionary: balanceTrainingData(trainingData, forModelType: .severityClassifier).severityDataTable())
-      onsetTable = try MLDataTable(dictionary: balanceTrainingData(trainingData, forModelType: .onsetRegressor).onsetTableData())
-      durationTable = try MLDataTable(dictionary: balanceTrainingData(trainingData, forModelType: .durationRegressor).durationTableData())
-    }
-    catch {
-      logError("Error creating data tables: \(error)")
-      finished(error)
       return
     }
     
@@ -430,7 +490,7 @@ extension Predictor {
         if !self.cancelledTraining {
           logDebug("Training outlook classifier.")
           // Train the classifier
-          let classifier = try MLBoostedTreeClassifier(trainingData: outlookTable, targetColumn: OutlookClassifierOutput.FeatureName.outlook)
+          let classifier = try MLBoostedTreeClassifier(trainingData: input.outlookTable, targetColumn: OutlookClassifierOutput.FeatureName.outlook)
           
           // Write the trained model to file
           try self.writeModel(classifier, toFileWithName: Predictor.outlookClassifierFileName)
@@ -440,7 +500,7 @@ extension Predictor {
         if !self.cancelledTraining {
           logDebug("Training severity classifier.")
           // Train the classifier
-          let classifier = try MLBoostedTreeClassifier(trainingData: severityTable, targetColumn: SeverityClassifierOutput.FeatureName.severity)
+          let classifier = try MLBoostedTreeClassifier(trainingData: input.severityTable, targetColumn: SeverityClassifierOutput.FeatureName.severity)
           
           // Write the trained model to file
           try self.writeModel(classifier, toFileWithName: Predictor.severityClassifierFileName)
@@ -450,7 +510,7 @@ extension Predictor {
         if !self.cancelledTraining {
           logDebug("Training onset regressor.")
           // Train the regressor
-          let regressor = try MLBoostedTreeRegressor(trainingData: onsetTable, targetColumn: OnsetRegressorOutput.FeatureName.onset)
+          let regressor = try MLBoostedTreeRegressor(trainingData: input.onsetTable, targetColumn: OnsetRegressorOutput.FeatureName.onset)
           
           // Write the trained model to file
           try self.writeModel(regressor, toFileWithName: Predictor.onsetRegressorFileName)
@@ -460,7 +520,7 @@ extension Predictor {
         if !self.cancelledTraining {
           logDebug("Training duration regressor.")
           // Train the regressor
-          let regressor = try MLBoostedTreeRegressor(trainingData: durationTable, targetColumn: DurationRegressorOutput.FeatureName.duration)
+          let regressor = try MLBoostedTreeRegressor(trainingData: input.durationTable, targetColumn: DurationRegressorOutput.FeatureName.duration)
           
           // Write the trained model to file
           try self.writeModel(regressor, toFileWithName: Predictor.durationRegressorFileName)
@@ -478,66 +538,6 @@ extension Predictor {
       catch {
         finished(error)
       }
-    }
-  }
-  
-  /// Balances the training data for the given model type.
-  ///
-  /// - Parameters:
-  ///   - trainingData: The training data to balance.
-  ///   - modelType: The model type intended to train.
-  /// - Returns: The training data.
-  private func balanceTrainingData(_ trainingData: [TrainingData], forModelType modelType: ModelType) -> [TrainingData] {
-    switch modelType {
-    case .durationRegressor:
-      return trainingData.filter({ $0.timeIntervalUntilNextHeadacheEnd != nil })
-    case .onsetRegressor:
-      return trainingData.filter({ $0.timeIntervalUntilNextHeadacheStart != nil })
-    case .severityClassifier:
-      var headacheData = trainingData.filter({ $0.severity?.headache != nil })
-      var nonHeadacheData = trainingData.filter({ $0.severity?.headache == nil })
-      
-      // Min count
-      let minCount = min(headacheData.count, nonHeadacheData.count)
-
-      // Shuffle
-      headacheData.shuffle()
-      nonHeadacheData.shuffle()
-      
-      // Trim
-      if headacheData.count > minCount {
-        headacheData = [TrainingData](headacheData[0 ..< minCount])
-      }
-      if nonHeadacheData.count > minCount {
-        nonHeadacheData = [TrainingData](nonHeadacheData[0 ..< minCount])
-      }
-      
-      return headacheData + nonHeadacheData
-    case .outlookClassifier:
-      var headacheData = trainingData.filter({ $0.outlook == .headache })
-      var possibleHeadacheData = trainingData.filter({ $0.outlook == .possibleHeadache })
-      var noHeadacheData = trainingData.filter({ $0.outlook == .noHeadache })
-      
-      // Min count
-      let minCount = min(headacheData.count, possibleHeadacheData.count, noHeadacheData.count)
-      
-      // Shuffle
-      headacheData.shuffle()
-      possibleHeadacheData.shuffle()
-      noHeadacheData.shuffle()
-      
-      // Trim
-      if headacheData.count > minCount {
-        headacheData = [TrainingData](headacheData[0 ..< minCount])
-      }
-      if possibleHeadacheData.count > minCount {
-        possibleHeadacheData = [TrainingData](possibleHeadacheData[0 ..< minCount])
-      }
-      if noHeadacheData.count > minCount {
-        noHeadacheData = [TrainingData](noHeadacheData[0 ..< minCount])
-      }
-      
-      return headacheData + possibleHeadacheData + noHeadacheData
     }
   }
   
@@ -576,7 +576,7 @@ extension Predictor {
   /// - Parameter name: The name of the model.
   /// - Returns: The URL of the model.
   private func modelURL(with name: String) -> URL {
-    return documentsDirectory().appendingPathComponent("models").appendingPathComponent("\(name).mlmodel")
+    return modelsDirectory().appendingPathComponent("\(name).mlmodel")
   }
   
   /// The URL of a compiled model with the given name.
@@ -584,15 +584,15 @@ extension Predictor {
   /// - Parameter name: The name of the compiled model.
   /// - Returns: The URL of the compiled model.
   private func compiledModelURL(with name: String) -> URL {
-    return documentsDirectory().appendingPathComponent("models").appendingPathComponent("\(name).mlmodelc")
+    return modelsDirectory().appendingPathComponent("\(name).mlmodelc")
   }
   
-  /// The application's document's directory.
+  /// The predictor's models directory.
   ///
   /// - Returns: A URL.
-  private func documentsDirectory() -> URL {
-    let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
-    return paths[0]
+  private func modelsDirectory() -> URL {
+    let fileContainerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: Constants.appGroupIdentifier) ?? FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+    return fileContainerURL.appendingPathComponent("models")
   }
   
 }

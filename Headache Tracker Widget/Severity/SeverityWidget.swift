@@ -10,11 +10,12 @@ import WidgetKit
 import SwiftUI
 
 struct SeverityWidget: Widget {
-  let kind: String = SharedConstants.Widgets.severityWidgetKind
+  let kind: String = Constants.Widgets.severityWidgetKind
   
   var body: some WidgetConfiguration {
     StaticConfiguration(kind: kind, provider: SeverityWidgetProvider()) { entry in
-      SeverityWidgetView(entry: entry)
+      SeveritySelectionView(currentSeverity: entry.severity, link: true)
+        .padding()
     }
     .configurationDisplayName("Track Headache")
     .description("Track your current headache.")

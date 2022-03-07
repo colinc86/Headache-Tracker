@@ -23,6 +23,9 @@ struct HeadacheView: View {
   /// The app's headache manager.
   @EnvironmentObject private var headacheManager: HeadacheManager
   
+  /// The app's alert manager.
+  @EnvironmentObject private var alertManager: AlertManager
+  
   /// The health integration setting.
   @AppStorage(AppSettings.healthIntegration) private var healthIntegration = false
   
@@ -65,7 +68,7 @@ struct HeadacheView: View {
       }
       
       Section {
-        HorizontalSeverityLevelView(currentSeverity: nil, severityRange: headache.severityRange, collapsed: true, action: nil)
+        SeveritySelectionView(currentSeverity: nil, severityRange: headache.severityRange, collapsed: true)
       } footer: {
         if !headache.resolved, let startTime = headache.severitiesArray.last?.startTime {
           Text("Last updated \(startTime.formattedNonRelative())")
@@ -192,7 +195,15 @@ extension HeadacheView {
     if let identifier = headache.identifier {
       Task {
         do {
+          // Delete the headache
           try await headacheManager.deleteHeadache(identifier: identifier)
+          
+          // Remove any alerts
+          if !headache.resolved {
+            alertManager.removeRequests(pending: true, delivered: false)
+          }
+          
+          // Dismiss the view
           presentationMode.wrappedValue.dismiss()
         }
         catch {

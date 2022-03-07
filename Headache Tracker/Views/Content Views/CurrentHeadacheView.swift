@@ -24,6 +24,12 @@ struct CurrentHeadacheView: View {
   /// The app's headache predictor.
   @EnvironmentObject private var predictor: Predictor
   
+  /// The app's refresher.
+  @EnvironmentObject private var refresher: Refresher
+  
+  /// The app's alert manager.
+  @EnvironmentObject private var alertManager: AlertManager
+  
   /// The Apple Health integration setting.
   @AppStorage(AppSettings.healthIntegration) private var healthIntegration = false
   
@@ -86,7 +92,7 @@ struct CurrentHeadacheView: View {
         // New/Current Headache
         Section {
           // New/Current Severity
-          HorizontalSeverityLevelView(currentSeverity: currentHeadache?.severity, severityRange: nil, collapsed: false, action: changeSeverity)
+          SeveritySelectionView(currentSeverity: currentHeadache?.severity, action: changeSeverity)
         } header: {
           SectionTitleView(title: currentHeadache == nil ? "New Headache" : "Current Headache")
         } footer: {
@@ -143,7 +149,7 @@ struct CurrentHeadacheView: View {
         if let prediction = predictor.prediction {
           let dailyOutlook = OutlookView(outlook: prediction.holisticOutlook)
           let durationPrediction = DurationPredictionView(duration: prediction.durationRegressorOutput.prediction)
-          let severityPrediction = HorizontalSeverityLevelView(currentSeverity: prediction.severityClassifierOutput.prediction, severityRange: nil, collapsed: true, action: nil)
+          let severityPrediction = SeveritySelectionView(currentSeverity: prediction.severityClassifierOutput.prediction, collapsed: true)
           
           if debugShowAllViews {
             Section {
@@ -276,8 +282,8 @@ extension CurrentHeadacheView {
     let now = Date()
     if let lastPredictionDate = predictor.prediction?.date {
       let timeSinceLastPrediction = now.timeIntervalSince(lastPredictionDate)
-      guard forced || timeSinceLastPrediction > Constants.predictionRefreshInterval else {
-        logDebug("Not updating prediction. Minimum interval, \(Constants.predictionRefreshInterval), not met with interval \(now.timeIntervalSince(lastPredictionDate)).")
+      guard forced || timeSinceLastPrediction > Constants.Tasks.predictionRefreshInterval else {
+        logDebug("Not updating prediction. Minimum interval, \(Constants.Tasks.predictionRefreshInterval), not met with interval \(now.timeIntervalSince(lastPredictionDate)).")
         return
       }
     }
@@ -343,7 +349,11 @@ extension CurrentHeadacheView {
     
     Task {
       do {
+        // Change the severity
         try await headacheManager.changeSeverity(to: severity)
+        
+        // Present the check-in alert if applicable
+        try await refresher.presentCheckInAlert(with: currentHeadache?.identifier)
       }
       catch {
         showAlert("Unable to Change Severity", error)
@@ -362,7 +372,11 @@ extension CurrentHeadacheView {
     
     Task {
       do {
+        // Resolve the headache
         try await headacheManager.resolve()
+        
+        // Remove any pending alerts
+        alertManager.removeRequests(pending: true, delivered: false)
       }
       catch {
         showAlert("Unable to Update Severity", error)
