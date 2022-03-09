@@ -38,9 +38,20 @@ struct BlockGraph: View {
       
       Divider().padding(0)
       
-      HStack {
+      HStack(spacing: 0.5) {
         ForEach(ranges(), id: \.self) { range in
-          VerticalSeverityLevel(range: range)
+          VStack(spacing: 0.5) {
+            ForEach(0 ..< 5) { i in
+              if range == .empty || 4 - i < range.lowerBound.orderingValue || 4 - i > range.upperBound.orderingValue {
+                Rectangle()
+                  .fill(Color.clear)
+              }
+              else {
+                Rectangle()
+                  .fill(LinearGradient(colors: [color(for: 4 - i).darker(by: 0.05), color(for: 4 - i).lighter(by: 0.05)], startPoint: .bottom, endPoint: .top))
+              }
+            }
+          }
         }
       }
     }
@@ -53,7 +64,7 @@ extension BlockGraph {
   /// The bar graph's rectangles.
   ///
   /// - Returns: An array of unit points.
-  func ranges() -> [SeverityRange] {
+  private func ranges() -> [SeverityRange] {
     guard let earliestDate = earliestDate ?? series.first?.1 else {
       return []
     }
@@ -79,6 +90,14 @@ extension BlockGraph {
     }
     
     return ranges
+  }
+  
+  /// Gets the color for the severity index.
+  ///
+  /// - Parameter index: The index of the severity.
+  /// - Returns: A color.
+  private func color(for index: Int) -> Color {
+    return (HKCategoryValueSeverity(orderingValue: index) ?? .notPresent).uiColor
   }
   
 }

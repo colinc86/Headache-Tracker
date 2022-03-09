@@ -18,14 +18,13 @@ struct DurationPredictionView: View {
   /// The id of the duration view.
   @State private var durationID = UUID()
   
-  /// A timer to update the duration view for unresolved headaches.
-  @State private var durationUpdateTimer: Timer?
-  
   /// The date the view appeared.
   @State private var startDate: Date = Date()
   
   /// The amount of time to remove from the duration
   @State private var decrement: TimeInterval = 0.0
+  
+  private let durationUpdateWaiter = Waiter()
   
   var body: some View {
     TitleCaptionView(title: "Duration", systemImage: "timer", foregroundColor: .green, caption: "Until " + Date().addingTimeInterval(duration).formattedRelative()) {
@@ -34,7 +33,7 @@ struct DurationPredictionView: View {
         .id(durationID)
     }
     .onAppear(perform: appeared)
-    .onDisappear(perform: disappeared)
+    .onDisappear(perform: durationUpdateWaiter.stop)
   }
 }
 
@@ -51,31 +50,10 @@ extension DurationPredictionView {
   func appeared() {
     startDate = Date()
     updateDurationID()
-    startDurationUpdateTimer()
-  }
-  
-  /// Called when the view disappears.
-  func disappeared() {
-    stopDurationUpdateTimer()
-  }
-  
-  /// Starts the duration update timer.
-  func startDurationUpdateTimer() {
-    durationUpdateTimer = Timer(timeInterval: 60.0, repeats: true, block: durationUpdateTimerFired)
-    durationUpdateTimer?.tolerance = 60.0 / 10.0
-    RunLoop.main.add(durationUpdateTimer!, forMode: RunLoop.Mode.default)
-  }
-  
-  /// Stops the duration update timer.
-  func stopDurationUpdateTimer() {
-    durationUpdateTimer?.invalidate()
-    durationUpdateTimer = nil
-  }
-  
-  /// Called when the duration update timer fires.
-  func durationUpdateTimerFired(_ timer: Timer) {
-    decrement = Date().timeIntervalSince(startDate)
-    updateDurationID()
+    durationUpdateWaiter.wait(for: 60.0, repeats: true) {
+      decrement = Date().timeIntervalSince(startDate)
+      updateDurationID()
+    }
   }
   
 }

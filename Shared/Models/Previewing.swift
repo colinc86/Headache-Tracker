@@ -28,8 +28,7 @@ struct Previewing {
     static let predictor = Predictor()
     
     /// The preview prediction.
-    static let prediction = Predictor.Prediction()
-    
+    static let prediction = Predictor.Prediction.empty
   }
   
   struct CoreData {

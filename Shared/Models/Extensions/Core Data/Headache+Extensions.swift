@@ -143,12 +143,12 @@ extension Headache {
   /// - Returns: A date interval of a completed severity if one's `endTime` was set, and the identifier
   ///   of the newly added Severity.
   @discardableResult
-  func addSeverity(_ severity: HKCategoryValueSeverity, startTime: Date) -> (SeverityInterval?, UUID?) {
+  func addSeverity(_ severity: HKCategoryValueSeverity, startTime: Date) -> SeverityInterval? {
     logDebug("Adding severity \(severity.title) to the headache.")
     
     // Get the context
     guard let context = managedObjectContext else {
-      return (nil, nil)
+      return nil
     }
     
     // Get the severities
@@ -168,10 +168,10 @@ extension Headache {
       addToSeverities(newSeverity)
       
       // Return the updated severity
-      return (previousSeverity?.severityInterval, newSeverity.identifier)
+      return previousSeverity?.severityInterval
     }
     
-    return (nil, nil)
+    return nil
   }
   
   /// Adds the severity to the headache with the given duration. Only use this

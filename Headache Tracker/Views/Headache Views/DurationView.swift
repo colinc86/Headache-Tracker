@@ -17,8 +17,7 @@ struct DurationView: View {
   /// The id of the duration view.
   @State private var durationID = UUID()
   
-  /// A timer to update the duration view for unresolved headaches.
-  @State private var durationUpdateTimer: Timer?
+  private let durationUpdateWaiter = Waiter()
   
   private var caption: String? {
     if headache.resolved, let endTime = headache.endTime {
@@ -36,7 +35,7 @@ struct DurationView: View {
       }
     }
     .onAppear(perform: appeared)
-    .onDisappear(perform: disappeared)
+    .onDisappear(perform: durationUpdateWaiter.stop)
   }
   
 }
@@ -55,31 +54,8 @@ extension DurationView {
     // If the headache isn't resolved, then start an update timer
     if !headache.resolved {
       updateDurationID()
-      startDurationUpdateTimer()
+      durationUpdateWaiter.wait(for: 60.0, repeats: true, completion: updateDurationID)
     }
-  }
-  
-  /// Called when the view disappears.
-  func disappeared() {
-    stopDurationUpdateTimer()
-  }
-  
-  /// Starts the duration update timer.
-  func startDurationUpdateTimer() {
-    durationUpdateTimer = Timer(timeInterval: 60.0, repeats: true, block: durationUpdateTimerFired)
-    durationUpdateTimer?.tolerance = 60.0 / 10.0
-    RunLoop.main.add(durationUpdateTimer!, forMode: RunLoop.Mode.default)
-  }
-  
-  /// Stops the duration update timer.
-  func stopDurationUpdateTimer() {
-    durationUpdateTimer?.invalidate()
-    durationUpdateTimer = nil
-  }
-  
-  /// Called when the duration update timer fires.
-  func durationUpdateTimerFired(_ timer: Timer) {
-    updateDurationID()
   }
   
 }

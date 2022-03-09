@@ -29,6 +29,8 @@ struct HeadacheCell: View {
   /// The previous severity range.
   @State private var previousSeverityRange: SeverityRange?
   
+  private let durationUpdateWaiter = Waiter()
+  
   // MARK: View body
   
   var body: some View {
@@ -50,7 +52,7 @@ struct HeadacheCell: View {
       }
     }
     .onAppear(perform: appeared)
-    .onDisappear(perform: disappeared)
+    .onDisappear(perform: durationUpdateWaiter.stop)
   }
 }
 
@@ -77,31 +79,8 @@ extension HeadacheCell {
     // If the headache isn't resolved, then start an update timer
     if !headache.resolved {
       updateDurationID()
-      startDurationUpdateTimer()
+      durationUpdateWaiter.wait(for: 60.0, repeats: true, completion: updateDurationID)
     }
-  }
-  
-  /// Called when the view disappears.
-  func disappeared() {
-    stopDurationUpdateTimer()
-  }
-  
-  /// Starts the duration update timer.
-  func startDurationUpdateTimer() {
-    durationUpdateTimer = Timer(timeInterval: 60.0, repeats: true, block: durationUpdateTimerFired)
-    durationUpdateTimer?.tolerance = 60.0 / 10.0
-    RunLoop.main.add(durationUpdateTimer!, forMode: RunLoop.Mode.default)
-  }
-  
-  /// Stops the duration update timer.
-  func stopDurationUpdateTimer() {
-    durationUpdateTimer?.invalidate()
-    durationUpdateTimer = nil
-  }
-  
-  /// Called when the duration update timer fires.
-  func durationUpdateTimerFired(_ timer: Timer) {
-    updateDurationID()
   }
   
 }

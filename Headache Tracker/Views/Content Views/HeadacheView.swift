@@ -44,8 +44,7 @@ struct HeadacheView: View {
   /// The id of the duration view.
   @State private var durationID = UUID()
   
-  /// A timer to update the duration view for unresolved headaches.
-  @State private var durationUpdateTimer: Timer?
+  private let durationUpdateWaiter = Waiter()
   
   // MARK: View body
   
@@ -124,7 +123,7 @@ struct HeadacheView: View {
       }
     }
     .onAppear(perform: appeared)
-    .onDisappear(perform: disappeared)
+    .onDisappear(perform: durationUpdateWaiter.stop)
     .navigationBarTitleDisplayMode(.inline)
     .confirmationAlert(isPresented: $showingAlert, title: alertTitle, message: alertMessage)
     .destructiveConfirmationDialog(title: alertTitle, isPresented: $showingDeleteConfirmation, destructiveActionTitle: "Delete", destructiveAction: {
@@ -234,31 +233,8 @@ extension HeadacheView {
   func appeared() {
     if !headache.resolved {
       updateDurationID()
-      startDurationUpdateTimer()
+      durationUpdateWaiter.wait(for: 60.0, repeats: true, completion: updateDurationID)
     }
-  }
-  
-  /// Called when the view disappears.
-  func disappeared() {
-    stopDurationUpdateTimer()
-  }
-  
-  /// Starts the duration update timer.
-  func startDurationUpdateTimer() {
-    durationUpdateTimer = Timer(timeInterval: 60.0, repeats: true, block: durationUpdateTimerFired)
-    durationUpdateTimer?.tolerance = 60.0 / 10.0
-    RunLoop.main.add(durationUpdateTimer!, forMode: RunLoop.Mode.default)
-  }
-  
-  /// Stops the duration update timer.
-  func stopDurationUpdateTimer() {
-    durationUpdateTimer?.invalidate()
-    durationUpdateTimer = nil
-  }
-  
-  /// Called when the duration update timer fires.
-  func durationUpdateTimerFired(_ timer: Timer) {
-    updateDurationID()
   }
   
 }

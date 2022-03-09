@@ -79,22 +79,16 @@ extension HeadacheManager {
     logDebug("Change severity to \(severity.title).")
     
     // The date interval of the severity to save to health kit
-    var severityInterval: SeverityInterval?
-    
-    // The identifier of the severity that was added
-    var severityIdentifier: UUID?
-    
-    try await currentHeadache { headache, context in
+    let severityInterval: SeverityInterval? = try await currentHeadache { headache, context in
       // Add to the current headache or create a new one
       if let headache = headache {
         logDebug("Adding severity to current headache.")
-        (severityInterval, severityIdentifier) = headache.addSeverity(severity, startTime: Date())
+        return headache.addSeverity(severity, startTime: Date())
       }
-      else {
-        logDebug("Creating new headache.")
-        let newHeadache = Headache(context: context, initialSeverity: severity, startTime: Date())
-        severityIdentifier = newHeadache.severitiesArray.first?.identifier
-      }
+      
+      logDebug("Creating new headache.")
+      _ = Headache(context: context, initialSeverity: severity, startTime: Date())
+      return nil
     }
     
     // If there wasn't an error, then update the widget data and continue
@@ -103,9 +97,8 @@ extension HeadacheManager {
     // Write the data to health kit and set our check-in alert
     try await healthKitManager.saveSeveritySamples(intervals: severityInterval == nil ? [] : [severityInterval!])
     
-    // Update the CoreML models
-    let input = try await getCurrentClassifierInput()
-    try await createTrainingData(from: input, severityIdentifier: severityIdentifier)
+    // Update the CoreML training data
+    try await createPredict()
   }
   
   /// Resolves the headache.
@@ -131,8 +124,7 @@ extension HeadacheManager {
     try await healthKitManager.saveSeveritySamples(intervals: severityInterval == nil ? [] : [severityInterval!])
     
     // Update the CoreML models
-    let input = try await getCurrentClassifierInput()
-    try await createTrainingData(from: input)
+    try await createPredict()
   }
   
   /// Deletes the current headache.
@@ -377,6 +369,18 @@ extension HeadacheManager {
     }
   }
   
+  func currentHeadacheIdentifier() async throws -> UUID? {
+    return try await currentHeadache { headache, _ in
+      return headache?.identifier
+    }
+  }
+  
+  func currentSeverityIdentifier() async throws -> UUID? {
+    return try await currentHeadache { headache, _ in
+      return headache?.severitiesArray.last?.identifier
+    }
+  }
+  
 }
 
 // MARK: Prediction
@@ -416,19 +420,34 @@ extension HeadacheManager {
     weatherManager.cancel()
   }
   
-  /// Gets classifier input appropriate for prediction.
-  /// - Parameters:
-  ///   - shouldCreateTrainingData: Set to true if the headache manager should
-  ///   - inWidget: Whether this method is being called by a widget.
-  /// - Returns: Predictor input.
-  func getCurrentClassifierInput(shouldCreateTrainingData: Bool = false, inWidget: Bool = false) async throws -> Predictor.Input {
-    guard !testing else { throw HeadacheError.testing }
-    
+  func predictorInput(inWidget: Bool = false) async throws -> Predictor.Input {
     let weather = try await weatherManager.weather()
     let now = Date()
     let interval = DateInterval(start: now.addingTimeInterval(-86400.0), end: now)
     let healthKitData = healthKitManager.readHealthKitData(in: interval, inWidget: inWidget)
     return Predictor.Input(weather: weather, healthKitData: healthKitData, date: now)
+  }
+  
+  /// Gets classifier input appropriate for prediction, saves it as traininig
+  /// data, runs a prediction, and evaluates the prediction.
+  ///
+  /// - Parameters:
+  ///   - create: Set to true if the headache manager should create training
+  ///     data with the prediction.
+  ///   - predict: Runs a prediction before returning the input if true.
+  ///   - inWidget: Whether this method is being called by a widget.
+  func createPredict(create: Bool = true, predict: Bool = true, inWidget: Bool = false) async throws {
+    let input = try await predictorInput(inWidget: inWidget)
+    
+    if create {
+      let identifier = try await currentSeverityIdentifier()
+      try await createTrainingData(from: input, severityIdentifier: identifier)
+    }
+    
+    if predict {
+      let prediction = try await predictor.predict(input, reloadWidget: !inWidget)
+      try await evaluatePrediction(prediction)
+    }
   }
   
   /// Create new training data and sets its `severity` relationship to the severity
@@ -483,42 +502,36 @@ extension HeadacheManager {
   /// - Parameter completion: Called when training is complete.
   func trainClassifiers() async throws {
     guard !testing else { throw HeadacheError.testing }
-    try await trainingData(predicate: NSPredicate(format: "version == %@", Constants.trainingDataVersion as NSString)) { [weak self] trainingData, _ in
-      guard let self = self else {
-        return
-      }
-      
-      // Get the training input
-      let input = try Predictor.TrainingInput(trainingData: trainingData)
-      
-      logDebug("Training classifiers with \(trainingData.count) data...")
+    try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
       Task {
         do {
-          try await self.predictor.train(input)
+          try await trainingData(predicate: NSPredicate(format: "version == %@", Constants.trainingDataVersion as NSString)) { [weak self] trainingData, _ in
+            guard let self = self else {
+              continuation.resume()
+              return
+            }
+            
+            // Get the training input
+            let input = try Predictor.TrainingInput(trainingData: trainingData)
+            
+            logDebug("Training classifiers with \(trainingData.count) data...")
+            Task {
+              do {
+                try await self.predictor.train(input)
+                continuation.resume()
+              }
+              catch {
+                logError("Error training classifiers: \(error)")
+                continuation.resume(throwing: error)
+              }
+            }
+          }
         }
         catch {
-          logError("Error training classifiers: \(error)")
+          continuation.resume(throwing: error)
         }
       }
     }
-  }
-  
-  /// Runs a prediction and evaluates it.
-  ///
-  /// - Parameters:
-  ///   - shouldCreateTrainingData: Whether or not training data should be created.
-  ///   - inWidget: Whether the method was called from a widget.
-  /// - Returns: A prediction
-  @discardableResult
-  func predict(_ input: Predictor.Input? = nil, shouldCreateTrainingData: Bool = false, inWidget: Bool = false) async throws -> Predictor.Prediction {
-    var input: Predictor.Input! = input
-    if input == nil {
-      input = try await getCurrentClassifierInput(shouldCreateTrainingData: shouldCreateTrainingData, inWidget: inWidget)
-    }
-    
-    let prediction = try await predictor.predict(input, reloadWidget: !inWidget)
-    try await evaluatePrediction(prediction)
-    return prediction
   }
   
   /// Evaluates the prediction and saves it to core data.

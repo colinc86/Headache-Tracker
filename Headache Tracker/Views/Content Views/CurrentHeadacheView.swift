@@ -54,12 +54,15 @@ struct CurrentHeadacheView: View {
   @State private var predictionID = UUID()
   
   /// The current (unresolved) headache.
-  private var currentHeadache: Headache? {
+  @MainActor private var currentHeadache: Headache? {
     return headaches.first
   }
   
   /// Called when the application becomes active.
   private let didBecomeActiveNotificationPublisher = NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)
+  
+  /// The waiter to automatically refresh the view.
+  private let automaticRefreshWaiter = Waiter()
   
   // MARK: View body
   
@@ -114,7 +117,9 @@ struct CurrentHeadacheView: View {
     }
     .navigationViewStyle(StackNavigationViewStyle())
     .onReceive(didBecomeActiveNotificationPublisher, perform: didBecomeActive)
+    .onChange(of: predictor.prediction, perform: predictionChanged)
     .onAppear(perform: onAppear)
+    .onDisappear(perform: automaticRefreshWaiter.stop)
     .confirmationDialog("Change headache severity to \((sceneDelegate.desiredSeverity ?? .notPresent).title.lowercased())?", isPresented: $showingSeverityConfirmation, titleVisibility: .visible) {
       AsyncButton("Change", action: confirmChangeSeverity)
       Button("Cancel", role: .cancel, action: cancelChangeSeverity)
@@ -186,7 +191,11 @@ extension CurrentHeadacheView {
     logDebug("Updating current headache view prediction.")
     
     // Run a prediction
-    try await headacheManager.predict()
+    try await headacheManager.createPredict(create: false)
+  }
+  
+  private func predictionChanged(_ newValue: Predictor.Prediction?) {
+    
   }
   
   /// Changes the severity to the desired severity if available.
@@ -218,15 +227,16 @@ extension CurrentHeadacheView {
     // Change the severity
     try await headacheManager.changeSeverity(to: severity)
     
-    // Present the check-in alert if applicable
-    try await refresher.presentCheckInAlert(with: currentHeadache?.identifier)
+    // Get the identifier
+    let identifier = try await headacheManager.currentHeadacheIdentifier()
+    try await self.refresher.presentCheckInAlert(with: identifier)
   }
   
   /// The action to perform if there is no headache.
   private func noHeadacheAction() async throws {
     logDebug("No headache action.")
     
-    _ = try await headacheManager.getCurrentClassifierInput(shouldCreateTrainingData: true)
+    try await headacheManager.createPredict()
     
     // Check if we should show the not-present training data cell
     let needsData = try await headacheManager.needsTrainingData()

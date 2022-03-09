@@ -204,7 +204,7 @@ extension Refresher {
       guard let self = self else { return }
       
       do {
-        let input = try await self.headacheManager.getCurrentClassifierInput()
+        let input = try await self.headacheManager.predictorInput()
         
         // Should we create new training data?
         // If it's been more than half an hour then yes.
@@ -215,7 +215,7 @@ extension Refresher {
         // If there is no current headache, then present a prediction
         if currentSeverityID == nil {
           // We got the input, so present the prediction
-          let prediction = try await self.headacheManager.predict(input)
+          let prediction = try await self.headacheManager.predictor.predict(input)
           try await self.presentPredictionAlert(with: prediction)
         }
         
@@ -305,7 +305,8 @@ extension Refresher {
       }
       
       do {
-        let prediction = try await self.headacheManager.predict()
+        let input = try await self.headacheManager.predictorInput()
+        let prediction = try await self.headacheManager.predictor.predict(input)
         try await self.presentOutlookAlert(with: prediction)
         
         task.setTaskCompleted(success: true)

@@ -59,7 +59,7 @@ struct OutlookWidgetProvider: TimelineProvider {
         
         if now.timeIntervalSince(content.date) >= 600.0 && headacheManager.predictor.ready && headacheManager.weatherManager.authorizedForWidgetUpdates {
           // Get a new prediction
-          try await headacheManager.predict(inWidget: true)
+          try await headacheManager.createPredict(create: false, inWidget: true)
           
           // Get the new content
           let newContent = try await currentContent()

@@ -112,16 +112,11 @@ extension HeadachesView {
   /// - Parameter offsets: The item offsets.
   private func deleteResolvedHeadaches(offsets: IndexSet) {
     withAnimation {
-      offsets.map { unresolvedHeadaches[$0] }.forEach({ headache in
+      offsets.map { resolvedHeadaches[$0] }.forEach({ headache in
         Task {
           do {
             // Delete the headache
             try await headacheManager.deleteHeadache(identifier: headache.identifier)
-            
-            // Remove any alerts
-            if !headache.resolved {
-              alertManager.removeRequests(pending: true, delivered: false)
-            }
           }
           catch {
             logError("Error deleting headache: \(error)")
