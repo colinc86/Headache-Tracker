@@ -75,6 +75,8 @@ struct DebugSettingsView: View {
     animation: .default)
   private var severeTrainingData: FetchedResults<TrainingData>
   
+  @State var evaluation: (Double, Double, Int) = (0.0, 0.0, 0)
+  
   var body: some View {
     Form {
       Section {
@@ -107,6 +109,23 @@ struct DebugSettingsView: View {
         SubtitleCell(title: "Severity Probability", subtitle: "\(predictor.prediction?.severityClassifierOutput.probability?.percentFormat() ?? "N/A")")
         SubtitleCell(title: "Onset Regressor", subtitle: "\(predictor.prediction?.onsetRegressorOutput.prediction.formattedNonRelative() ?? "0.0")")
         SubtitleCell(title: "Duration Regressor", subtitle: "\(predictor.prediction?.durationRegressorOutput.prediction ?? 0.0)")
+      }
+      
+      Section {
+        SubtitleCell(title: "Outlook Evaluation", subtitle: "\(String(format: "%0.1f%%", evaluation.0 * 100.0))")
+        SubtitleCell(title: "Severity Evaluation", subtitle: "\(String(format: "%0.1f%%", evaluation.1 * 100.0))")
+        Button("Reset Evaluation") {
+          Task {
+            do {
+              try await headacheManager.resetEvaluation()
+            }
+            catch {
+              logError("Error resetting evaluation: \(error)")
+            }
+          }
+        }
+      } footer: {
+        Text("Out of \(evaluation.2) samples.")
       }
       
       Section {
@@ -158,6 +177,16 @@ struct DebugSettingsView: View {
       }
     }
     .navigationTitle("Debug Settings")
+    .onAppear {
+      Task {
+        do {
+          evaluation = try await headacheManager.evaluation()
+        }
+        catch {
+          logError("Error evaluating models: \(error)")
+        }
+      }
+    }
   }
 }
 

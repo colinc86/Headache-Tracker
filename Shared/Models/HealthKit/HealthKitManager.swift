@@ -147,14 +147,15 @@ extension HealthKitManager {
   }
   
   /// Reads health kit training data.
-  ///
-  /// - Parameter interval: The interval of the data to query.
+  /// - Parameters:
+  ///   - interval: The interval of the data to query.
+  ///   - inWidget: Whether this method is being called by a widget.
   /// - Returns: A dictionary of training data.
-  func readHealthKitData(in interval: DateInterval) -> [HealthKitData: Double]? {
+  func readHealthKitData(in interval: DateInterval, inWidget: Bool = false) -> [HealthKitData: Double]? {
     logDebug("Read HealthKit data in \(interval).")
     
     // Only continue if we have health integration turned on
-    guard healthIntegration else {
+    guard healthIntegration || inWidget else {
       logWarning("Health integration is \(healthIntegration). Not reading HealthKit data.")
       return nil
     }

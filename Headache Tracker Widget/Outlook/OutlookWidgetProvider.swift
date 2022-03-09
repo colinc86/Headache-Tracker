@@ -16,12 +16,13 @@ struct OutlookWidgetProvider: TimelineProvider {
   let headacheManager: HeadacheManager = {
     let manager = HeadacheManager()
     manager.weatherManager.setup()
+    
     Task {
       do {
         try await manager.predictor.load()
       }
       catch {
-        logError("Error loading predictor models: \(error)")
+        NSLog("Error loading predictor models: \(error)")
       }
     }
     return manager
@@ -42,7 +43,7 @@ struct OutlookWidgetProvider: TimelineProvider {
         }
       }
       catch {
-        logError("Error getting current content: \(error)")
+        NSLog("Error getting current content: \(error)")
         completion(placeholder(in: context))
       }
     }
@@ -50,36 +51,31 @@ struct OutlookWidgetProvider: TimelineProvider {
   }
   
   func getTimeline(in context: Context, completion: @escaping (Timeline<OutlookWidgetContent>) -> ()) {
+    let now = Date()
+    
     Task {
       do {
-        let now = Date()
-        let currentContent = try await currentContent()
+        let content = try await currentContent()
         
-        if now.timeIntervalSince(currentContent.date) >= 600.0 && headacheManager.predictor.ready && headacheManager.weatherManager.authorizedForWidgetUpdates {
+        if now.timeIntervalSince(content.date) >= 600.0 && headacheManager.predictor.ready && headacheManager.weatherManager.authorizedForWidgetUpdates {
           // Get a new prediction
-          let input = try await headacheManager.getCurrentClassifierInput()
-          let prediction = try await headacheManager.predictor.predict(input, reloadWidget: false)
+          try await headacheManager.predict(inWidget: true)
           
-          let now = Date()
-          let newContent = OutlookWidgetContent(
-            date: now,
-            outlook: prediction.outlookClassifierOutput.prediction,
-            onset: prediction.onsetRegressorOutput.prediction,
-            duration: prediction.durationRegressorOutput.prediction,
-            severity: prediction.severityClassifierOutput.prediction,
-            hasCurrentHeadache: try await headacheManager.hasCurrentHeadache())
-          
-          let reloadDate = now.addingTimeInterval(600.0)
+          // Get the new content
+          let newContent = try await currentContent()
+          let reloadDate = newContent.date.addingTimeInterval(600.0)
           completion(Timeline(entries: [newContent], policy: .after(reloadDate)))
         }
         else {
-          let reloadDate = currentContent.date.addingTimeInterval(600.0)
-          completion(Timeline(entries: [currentContent], policy: .after(reloadDate)))
+          // Use old content
+          let reloadDate = content.date.addingTimeInterval(600.0)
+          completion(Timeline(entries: [content], policy: .after(reloadDate)))
         }
       }
       catch {
-        logError("Error getting current content: \(error)")
-        let reloadDate = Date().addingTimeInterval(600.0)
+        NSLog("Error getting current content: \(error)")
+              
+        let reloadDate = now.addingTimeInterval(600.0)
         completion(Timeline(entries: [placeholder(in: context)], policy: .after(reloadDate)))
       }
     }

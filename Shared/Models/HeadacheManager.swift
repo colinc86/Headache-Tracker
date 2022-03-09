@@ -5,6 +5,7 @@
 //  Created by Colin Campbell on 2/3/22.
 //
 
+import FirebaseAnalytics
 import ApplicationKey
 import CoreData
 import DataController
@@ -416,16 +417,17 @@ extension HeadacheManager {
   }
   
   /// Gets classifier input appropriate for prediction.
-  ///
-  /// - Parameter shouldCreateTrainingData: Set to true if the headache manager should
-  ///   create training data as a reesult of getting the classifier input.
-  func getCurrentClassifierInput(shouldCreateTrainingData: Bool = false) async throws -> Predictor.Input {
+  /// - Parameters:
+  ///   - shouldCreateTrainingData: Set to true if the headache manager should
+  ///   - inWidget: Whether this method is being called by a widget.
+  /// - Returns: Predictor input.
+  func getCurrentClassifierInput(shouldCreateTrainingData: Bool = false, inWidget: Bool = false) async throws -> Predictor.Input {
     guard !testing else { throw HeadacheError.testing }
     
     let weather = try await weatherManager.weather()
     let now = Date()
     let interval = DateInterval(start: now.addingTimeInterval(-86400.0), end: now)
-    let healthKitData = healthKitManager.readHealthKitData(in: interval)
+    let healthKitData = healthKitManager.readHealthKitData(in: interval, inWidget: inWidget)
     return Predictor.Input(weather: weather, healthKitData: healthKitData, date: now)
   }
   
@@ -497,6 +499,78 @@ extension HeadacheManager {
         catch {
           logError("Error training classifiers: \(error)")
         }
+      }
+    }
+  }
+  
+  /// Runs a prediction and evaluates it.
+  ///
+  /// - Parameters:
+  ///   - shouldCreateTrainingData: Whether or not training data should be created.
+  ///   - inWidget: Whether the method was called from a widget.
+  /// - Returns: A prediction
+  @discardableResult
+  func predict(_ input: Predictor.Input? = nil, shouldCreateTrainingData: Bool = false, inWidget: Bool = false) async throws -> Predictor.Prediction {
+    var input: Predictor.Input! = input
+    if input == nil {
+      input = try await getCurrentClassifierInput(shouldCreateTrainingData: shouldCreateTrainingData, inWidget: inWidget)
+    }
+    
+    let prediction = try await predictor.predict(input, reloadWidget: !inWidget)
+    try await evaluatePrediction(prediction)
+    return prediction
+  }
+  
+  /// Evaluates the prediction and saves it to core data.
+  ///
+  /// - Parameter prediction: The prediction.
+  private func evaluatePrediction(_ prediction: Predictor.Prediction) async throws {
+    let hasCurrent = try await hasCurrentHeadache()
+    let severity = try await currentHeadache { headache, _ in
+      return headache?.severity ?? .notPresent
+    }
+    
+    try await DataController.shared.performInBackground(saveOnComplete: true) { context in
+      let evaluation = Evaluation(context: context)
+      evaluation.timestamp = Date()
+      evaluation.outlook = hasCurrent && prediction.outlookClassifierOutput.prediction == .headache
+      evaluation.severity = severity == prediction.severityClassifierOutput.prediction
+    }
+  }
+  
+  /// Calculates the current model evaluation metrics for the outlook
+  /// and severity predictions.
+  ///
+  /// - Returns: A pair of evaluation metrics and a count (outlook, severity, count).
+  func evaluation() async throws -> (Double, Double, Int) {
+    return try await DataController.shared.performInBackground { context in
+      let request = Evaluation.fetchRequest()
+      let evaluations = try context.fetch(request)
+      
+      guard evaluations.count > 0 else {
+        return (0.0, 0.0, 0)
+      }
+      
+      var outlookSuccess = 0
+      var severitySuccess = 0
+      for evaluation in evaluations {
+        outlookSuccess += evaluation.outlook ? 1 : 0
+        severitySuccess += evaluation.severity ? 1 : 0
+      }
+      
+      let evaluationCount = Double(evaluations.count)
+      return (Double(outlookSuccess) / evaluationCount, Double(severitySuccess) / evaluationCount, evaluations.count)
+    }
+  }
+  
+  /// Deletes all of the stored evaluations.
+  func resetEvaluation() async throws {
+    return try await DataController.shared.performInBackground(saveOnComplete: true) { context in
+      let request = Evaluation.fetchRequest()
+      let evaluations = try context.fetch(request)
+      
+      for evaluation in evaluations {
+        context.delete(evaluation)
       }
     }
   }

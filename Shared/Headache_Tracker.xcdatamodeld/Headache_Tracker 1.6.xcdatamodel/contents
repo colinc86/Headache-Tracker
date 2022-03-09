@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="19574" systemVersion="21D62" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithCloudKit="YES" userDefinedModelVersionIdentifier="">
+    <entity name="Evaluation" representedClassName="Evaluation" syncable="YES" codeGenerationType="class">
+        <attribute name="outlook" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="severity" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="timestamp" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+    </entity>
     <entity name="Headache" representedClassName="Headache" syncable="YES" codeGenerationType="class">
         <attribute name="createdAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="identifier" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
@@ -42,5 +47,6 @@
         <element name="Headache" positionX="-63" positionY="-18" width="128" height="14"/>
         <element name="Severity" positionX="-63" positionY="9" width="128" height="119"/>
         <element name="TrainingData" positionX="-45" positionY="54" width="128" height="359"/>
+        <element name="Evaluation" positionX="-54" positionY="144" width="128" height="74"/>
     </elements>
 </model>

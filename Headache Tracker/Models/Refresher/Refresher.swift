@@ -154,24 +154,17 @@ extension Refresher {
   
   /// Schedules the refresh task for the next hour.
   @MainActor func schedulePredictionRefreshTask() async throws {
-    // Get the current seconds past midnight.
-    let secondsPastMidnight = Calendar.current.timeIntervalSinceMidnight(Date())
-    
-    // Get the number of seconds past the hour
-    let secondsPastHour = secondsPastMidnight - TimeInterval(3600 * Int(floor(secondsPastMidnight / 3600.0)))
-    
-    // Get the number of seconds until the next hour
-    var secondsUntilNextHour = 3600.0 - secondsPastHour
-    if secondsPastHour > 3540.0 {
-      secondsUntilNextHour += 3600.0
-    }
+    let secondsPerHour: UInt32 = 3600
+    let randomSeconds = TimeInterval(arc4random_uniform(secondsPerHour))
+    let interval = TimeInterval(secondsPerHour) + randomSeconds
+    let futureDate = Date(timeIntervalSinceNow: interval)
     
     // Schedule the next task
-    logDebug("Scheduling prediction refresh task with date \(Date(timeIntervalSinceNow: secondsUntilNextHour))")
-    try await predictionRefreshTask.schedule(interval: secondsUntilNextHour)
+    logDebug("Scheduling prediction refresh task with date \(futureDate)")
+    try await predictionRefreshTask.schedule(date: futureDate)
     
     logDebug("Successfully scheduled prediction refresh task.")
-    debugNextPredictionDate = Date(timeIntervalSinceNow: secondsUntilNextHour)
+    debugNextPredictionDate = futureDate
   }
   
   /// Handles the refresh task.
@@ -222,7 +215,7 @@ extension Refresher {
         // If there is no current headache, then present a prediction
         if currentSeverityID == nil {
           // We got the input, so present the prediction
-          let prediction = try await self.headacheManager.predictor.predict(input)
+          let prediction = try await self.headacheManager.predict(input)
           try await self.presentPredictionAlert(with: prediction)
         }
         
@@ -312,8 +305,9 @@ extension Refresher {
       }
       
       do {
-        let input = try await self.headacheManager.getCurrentClassifierInput()
-        try await self.presentOutlookAlert(with: try self.headacheManager.predictor.predict(input))
+        let prediction = try await self.headacheManager.predict()
+        try await self.presentOutlookAlert(with: prediction)
+        
         task.setTaskCompleted(success: true)
       }
       catch {

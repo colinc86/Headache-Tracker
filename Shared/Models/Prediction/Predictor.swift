@@ -157,7 +157,7 @@ class Predictor: ObservableObject {
     struct PredictionStatistic<T: Equatable>: Equatable {
       
       /// The statistic's severity.
-      let prediction: T
+      var prediction: T
       
       /// The statistic's probability.
       let probability: Double?
@@ -175,19 +175,19 @@ class Predictor: ObservableObject {
     }
     
     /// The outlook classifier's output
-    let outlookClassifierOutput: PredictionStatistic<Outlook>
+    var outlookClassifierOutput: PredictionStatistic<Outlook>
     
     /// The severity classifier's output.
-    let severityClassifierOutput: PredictionStatistic<HKCategoryValueSeverity>
+    var severityClassifierOutput: PredictionStatistic<HKCategoryValueSeverity>
     
     /// The onset regressor's output.
-    let onsetRegressorOutput: PredictionStatistic<Date>
+    var onsetRegressorOutput: PredictionStatistic<Date>
     
     /// The duration regressor's output.
-    let durationRegressorOutput: PredictionStatistic<TimeInterval>
+    var durationRegressorOutput: PredictionStatistic<TimeInterval>
     
     /// The date of this prediction.
-    let date = Date()
+    var date = Date()
     
     /// The prediction's holistic outlook.
     var holisticOutlook: HolisticOutlook {
@@ -235,6 +235,9 @@ class Predictor: ObservableObject {
   /// The model's last updated at date.
   @Published var modelUpdatedAt: Date?
   
+  /// The date the models were loaded.
+  @Published var modelLoadedAt: Date?
+  
   // MARK: Private properties
   
   /// The classifier for predicting headache outlook.
@@ -260,6 +263,33 @@ class Predictor: ObservableObject {
     author: "Colin Campbell",
     shortDescription: "Predicts the onset, severity and progression of headaches.",
     version: Date().description)
+  
+  /// The did change notification observer.
+  private var didChangeNotificationObserver: NSObjectProtocol?
+  
+  // MARK: Initializers
+  
+  init() {
+    didChangeNotificationObserver = SharedUserDefaults.standard.addDidChangeObserver(using: didChangeNotification)
+    updateCurrentPredictionFromDefaults()
+    
+    do {
+      logDebug("Getting creation date.")
+      if let creationDate = try dateOfFile(at: compiledModelURL(with: Predictor.outlookClassifierFileName)) {
+        logDebug("Got creation date: \(creationDate.description)")
+        DispatchQueue.main.async { self.modelUpdatedAt = creationDate }
+      }
+    }
+    catch {
+      logError("Error getting creation date: \(error)")
+    }
+  }
+  
+  deinit {
+    if let didChangeNotificationObserver = didChangeNotificationObserver {
+      SharedUserDefaults.standard.removeDidChangeObserver(didChangeNotificationObserver)
+    }
+  }
   
 }
 
@@ -333,6 +363,19 @@ extension Predictor {
     DispatchQueue.main.async { self.ready = false }
   }
   
+  /// Whether the predictor needs to load (or reload) its models.
+  func needsLoading() throws -> Bool {
+    guard let lastTrainingDate = try dateOfFile(at: compiledModelURL(with: Predictor.outlookClassifierFileName)) else {
+      return false
+    }
+    
+    guard let modelLoadedAt = modelLoadedAt else {
+      return true
+    }
+
+    return lastTrainingDate > modelLoadedAt
+  }
+  
   /// Makes a prediction.
   ///
   /// - Parameters:
@@ -341,6 +384,10 @@ extension Predictor {
   /// - Returns: The predictor's output.
   @discardableResult
   func predict(_ input: Input, reloadWidget: Bool = true) async throws -> Prediction {
+    if try needsLoading() {
+      try await load()
+    }
+    
     return try await withCheckedThrowingContinuation { [weak self] continuation in
       guard let self = self else {
         continuation.resume(returning: .empty)
@@ -381,6 +428,11 @@ extension Predictor {
               probability: nil)
           )
           
+          // Update the prediction value
+          DispatchQueue.main.async {
+            self.prediction = prediction
+          }
+          
           /// Save this prediction for the widget
           SharedUserDefaults.standard.setPredictionResults(
             Date(),
@@ -389,11 +441,6 @@ extension Predictor {
             prediction.durationRegressorOutput.prediction,
             prediction.severityClassifierOutput.prediction,
             reloadWidget: reloadWidget)
-          
-          // Update the prediction value
-          DispatchQueue.main.async {
-            self.prediction = prediction
-          }
           
           continuation.resume(returning: prediction)
         }
@@ -408,6 +455,28 @@ extension Predictor {
 }
 
 extension Predictor {
+  
+  /// Notifies the predictor that the shared prediction was changed.
+  private func didChangeNotification(_ notification: Notification) {
+    updateCurrentPredictionFromDefaults()
+  }
+  
+  /// Updates the current prediction from the shared user defaults.
+  private func updateCurrentPredictionFromDefaults() {
+    DispatchQueue.main.async {
+      var prediction = Prediction(
+        outlookClassifierOutput: Prediction.PredictionStatistic<Outlook>(
+          prediction: SharedUserDefaults.standard.predictedOutlook ?? .noHeadache, probability: nil),
+        severityClassifierOutput: Prediction.PredictionStatistic<HKCategoryValueSeverity>(
+          prediction: SharedUserDefaults.standard.predictedSeverity ?? .notPresent, probability: nil),
+        onsetRegressorOutput: Prediction.PredictionStatistic<Date>(
+          prediction: SharedUserDefaults.standard.predictedOnset ?? Date(), probability: nil),
+        durationRegressorOutput: Prediction.PredictionStatistic<TimeInterval>(
+          prediction: SharedUserDefaults.standard.predictedDuration ?? 0.0, probability: nil))
+      prediction.date = SharedUserDefaults.standard.predictionDate ?? Date()
+      self.prediction = prediction
+    }
+  }
   
   /// Loads the predictor's models.
   ///
@@ -438,21 +507,14 @@ extension Predictor {
         let durationRegressorModelURL = self.compiledModelURL(with: Predictor.durationRegressorFileName)
         self.durationRegressor = try Model<InputUnion, DurationRegressorOutput>(contentsOf: durationRegressorModelURL)
         
-        logDebug("Getting creation date.")
-        if let creationDate = try self.trainingDateOfCompiledModel(at: severityClassifierModelURL) {
-          logDebug("Got creation date: \(creationDate.description)")
-          DispatchQueue.main.async { self.modelUpdatedAt = creationDate }
-        }
-        else {
-          logWarning("Unable to get recent model creation date.")
-        }
-        
         completion(nil)
-        DispatchQueue.main.async { self.ready = true }
+        DispatchQueue.main.async {
+          self.modelLoadedAt = Date()
+          self.ready = true
+        }
       }
       catch {
         completion(error)
-        DispatchQueue.main.async { self.ready = false }
       }
     }
   }
@@ -526,6 +588,15 @@ extension Predictor {
           try self.writeModel(regressor, toFileWithName: Predictor.durationRegressorFileName)
         }
         
+        logDebug("Getting creation date.")
+        if let creationDate = try self.dateOfFile(at: self.compiledModelURL(with: Predictor.outlookClassifierFileName)) {
+          logDebug("Got creation date: \(creationDate.description)")
+          DispatchQueue.main.async { self.modelUpdatedAt = creationDate }
+        }
+        else {
+          logWarning("Unable to get recent model creation date.")
+        }
+        
         if self.cancelledTraining {
           finished(nil)
         }
@@ -562,11 +633,11 @@ extension Predictor {
     try FileManager.default.removeItem(at: modelURL)
   }
   
-  /// The compilation date of the compiled model file with the given url.
+  /// The date of the file with the given url.
   ///
-  /// - Parameter url: The url of the model.
+  /// - Parameter url: The url of the file.
   /// - Returns: The file's creation date.
-  private func trainingDateOfCompiledModel(at url: URL) throws -> Date? {
+  private func dateOfFile(at url: URL) throws -> Date? {
     let attributes = try FileManager.default.attributesOfItem(atPath: url.path)
     return attributes[.modificationDate] as? Date ?? attributes[.creationDate] as? Date
   }

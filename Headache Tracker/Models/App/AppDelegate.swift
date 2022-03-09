@@ -79,9 +79,6 @@ class AppDelegate: NSObject, UIApplicationDelegate, ObservableObject {
         
         // Load our ML classifiers
         try await headacheManager.predictor.load()
-        
-        // Check for any training data updates
-        try await headacheManager.upgradeTrainingData()
       }
       catch {
         logError("Error handling async process: \(error)")

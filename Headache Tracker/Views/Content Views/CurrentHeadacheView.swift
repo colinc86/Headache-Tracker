@@ -293,8 +293,7 @@ extension CurrentHeadacheView {
     // Run a prediction
     Task {
       do {
-        let input = try await headacheManager.getCurrentClassifierInput()
-        try await predictor.predict(input)
+        try await headacheManager.predict()
       }
       catch {
         logError("Error getting prediction: \(error)")

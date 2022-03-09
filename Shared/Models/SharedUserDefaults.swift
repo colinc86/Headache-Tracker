@@ -119,6 +119,21 @@ class SharedUserDefaults {
 
 extension SharedUserDefaults {
   
+  /// Adds an observer to the notification center's did change notification.
+  ///
+  /// - Parameter block: The block to execute.
+  /// - Returns: An observer.
+  func addDidChangeObserver(using block: @escaping (Notification) -> Void) -> NSObjectProtocol {
+    return NotificationCenter.default.addObserver(forName: UserDefaults.didChangeNotification, object: defaults, queue: nil, using: block)
+  }
+  
+  /// Removes a did change observer.
+  ///
+  /// - Parameter observer: The observer to remove.
+  func removeDidChangeObserver(_ observer: Any) {
+    NotificationCenter.default.removeObserver(observer, name: UserDefaults.didChangeNotification, object: defaults)
+  }
+  
   /// Sets the prediction results and requests a widget reload.
   ///
   /// - Parameters:
@@ -146,6 +161,10 @@ extension SharedUserDefaults {
   func setCurrentSeverity(_ severity: HKCategoryValueSeverity?) {
     currentSeverity = severity
     WidgetCenter.shared.reloadTimelines(ofKind: Constants.Widgets.severityWidgetKind)
+    
+    if severity == nil {
+      WidgetCenter.shared.reloadTimelines(ofKind: Constants.Widgets.outlookWidgetKind)
+    }
   }
   
 }
