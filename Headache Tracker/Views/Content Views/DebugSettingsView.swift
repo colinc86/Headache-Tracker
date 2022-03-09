@@ -114,31 +114,13 @@ struct DebugSettingsView: View {
       Section {
         SubtitleCell(title: "Outlook Evaluation", subtitle: "\(String(format: "%0.1f%%", evaluation.0 * 100.0))")
         SubtitleCell(title: "Severity Evaluation", subtitle: "\(String(format: "%0.1f%%", evaluation.1 * 100.0))")
-        Button("Reset Evaluation") {
-          Task {
-            do {
-              try await headacheManager.resetEvaluation()
-            }
-            catch {
-              logError("Error resetting evaluation: \(error)")
-            }
-          }
-        }
+        AsyncButton("Reset Evaluation", mode: .afterContent, action: headacheManager.resetEvaluation)
       } footer: {
         Text("Out of \(evaluation.2) samples.")
       }
       
       Section {
-        Button("Train Models") {
-          Task {
-            do {
-              try await headacheManager.trainClassifiers()
-            }
-            catch {
-              logError("Error training classifiers: \(error)")
-            }
-          }
-        }
+        AsyncButton("Train Models", mode: .afterContent, action: headacheManager.trainClassifiers)
       } footer: {
         Text("Models last trained \(predictor.modelUpdatedAt?.formattedNonRelative() ?? "N/A")")
       }
@@ -153,38 +135,17 @@ struct DebugSettingsView: View {
       }
       
       Section {
-        Button("Backup Database") {
-          Task {
-            do {
-              try await DataController.shared.backupDatabase()
-            }
-            catch {
-              logError("Error backing up database: \(error)")
-            }
-          }
-        }
-        
-        Button("Restore Database") {
-          Task {
-            do {
-              try await DataController.shared.restoreDatabase()
-            }
-            catch {
-              logError("Error restoring database: \(error)")
-            }
-          }
-        }
+        AsyncButton("Backup Database", mode: .afterContent, action: DataController.shared.backupDatabase)
+        AsyncButton("Restore Database", mode: .afterContent, action: DataController.shared.restoreDatabase)
       }
     }
     .navigationTitle("Debug Settings")
-    .onAppear {
-      Task {
-        do {
-          evaluation = try await headacheManager.evaluation()
-        }
-        catch {
-          logError("Error evaluating models: \(error)")
-        }
+    .task {
+      do {
+        evaluation = try await headacheManager.evaluation()
+      }
+      catch {
+        logError("Error evaluating models: \(error)")
       }
     }
   }
@@ -195,6 +156,6 @@ struct DebugSettingsView_Previews: PreviewProvider {
     DebugSettingsView()
       .environment(\.managedObjectContext, Previewing.CoreData.viewContext)
       .environmentObject(Previewing.headacheManager)
-      .environmentObject(Previewing.predictor)
+      .environmentObject(Previewing.Prediction.predictor)
   }
 }

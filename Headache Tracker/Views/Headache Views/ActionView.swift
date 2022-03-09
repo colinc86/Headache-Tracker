@@ -18,11 +18,11 @@ struct ActionView: View {
   var foregroundColor: Color = .accentColor
   
   /// The action to perform when the user taps the no headache button.
-  let action: () -> Void
+  let action: () async throws -> Void
   
   var body: some View {
     TitleCaptionView(title: title, systemImage: systemImage, foregroundColor: foregroundColor) {
-      Button(buttonTitle, action: action)
+      AsyncButton(buttonTitle, action: action)
         .buttonStyle(BorderlessButtonStyle())
         .font(.title)
         .foregroundColor(foregroundColor)

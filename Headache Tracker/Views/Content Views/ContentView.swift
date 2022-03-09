@@ -48,7 +48,7 @@ struct ContentView_Previews: PreviewProvider {
       .environment(\.managedObjectContext, Previewing.CoreData.viewContext)
       .environmentObject(Previewing.headacheManager)
       .environmentObject(Previewing.alertManager)
-      .environmentObject(Previewing.predictor)
+      .environmentObject(Previewing.Prediction.predictor)
       .environmentObject(Previewing.healthKitManager)
   }
 }

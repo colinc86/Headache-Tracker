@@ -32,9 +32,6 @@ struct CurrentHeadacheView: View {
   
   /// The Apple Health integration setting.
   @AppStorage(AppSettings.healthIntegration) private var healthIntegration = false
-  
-  /// A debug setting to show all views in the prediction section.
-  @AppStorage(AppSettings.debugShowAllViews) private var debugShowAllViews = false
     
   /// The headaches fetch request.
   /// Should only return one headache.
@@ -44,36 +41,16 @@ struct CurrentHeadacheView: View {
     animation: .default)
   private var headaches: FetchedResults<Headache>
   
-  /// The alert's title.
-  @State private var alertTitle = ""
-  
-  /// The alert's message.
-  @State private var alertMessage = ""
-  
-  /// Whether or not the alert is visible.
-  @State private var showingAlert = false
-  
-  /// Whether the resolve confirmation alert is visible.
-  @State private var showingResolveConfirmation = false
-  
   /// Whether the change severity confirmation alert is visible.
   @State private var showingSeverityConfirmation = false
-  
-  /// True iff the current headache is being updated.
-  @State private var updatingHeadache = false
-  
-  /// The last error produced by prediction.
-  @State private var predictionError: Error? = nil
   
   /// Whether or not the headache manager needs more not-present headache training data.
   @State private var needsInput: Bool = false
   
-  /// Whether or not we are handling headache training data.
-  @State private var handlingInput: Bool = false
-  
   /// The application's first appearance.
   @State private var firstAppearance: Bool = true
   
+  /// The identifier of the predection views.
   @State private var predictionID = UUID()
   
   /// The current (unresolved) headache.
@@ -115,91 +92,12 @@ struct CurrentHeadacheView: View {
         }
         // Current Headache Information
         else if let currentHeadache = currentHeadache {
-          // Onset
-          if let onset = currentHeadache.startTime {
-            Section {
-              OnsetView(onset: onset)
-            }
-          }
-          
-          // Duration
-          Section {
-            DurationView(headache: currentHeadache)
-          }
-          
-          // Progression
-          if currentHeadache.severitiesArray.count > 1 {
-            Section {
-              TitleCaptionView(title: "Progression", systemImage: "chart.xyaxis.line", foregroundColor: .orange) {
-                LineGraph(series: currentHeadache.severitySignal, gradient: Gradient(colors: currentHeadache.severityColorRange))
-                  .frame(height: 100)
-              }
-            }
-          }
-          
-          // Resolve the Headache
-          Section {
-            ActionView(title: "Resolve Headache", buttonTitle: "Resolve", systemImage: "face.smiling.fill", foregroundColor: .teal, action: resolveConfirmation)
-          } footer: {
-            Text("Is your headache gone? Tap Resolve to let the app know!")
-          }
+          CurrentHeadacheViews(headache: currentHeadache)
         }
         
         // Predictions
         if let prediction = predictor.prediction {
-          let dailyOutlook = OutlookView(outlook: prediction.holisticOutlook)
-          let durationPrediction = DurationPredictionView(duration: prediction.durationRegressorOutput.prediction)
-          let severityPrediction = SeveritySelectionView(currentSeverity: prediction.severityClassifierOutput.prediction, collapsed: true)
-          
-          if debugShowAllViews {
-            Section {
-              dailyOutlook
-            } header: {
-              SectionTitleView(title: "Predictions")
-            }
-            
-            Section {
-              durationPrediction
-            }
-            
-            Section {
-              severityPrediction
-            } footer: {
-              if let lastPredictionDate = predictor.prediction?.date {
-                Text("Updated \(lastPredictionDate.formattedNonRelative()).")
-              }
-            }
-          }
-          else if currentHeadache == nil {
-            Section {
-              dailyOutlook
-            } header: {
-              SectionTitleView(title: "Predictions")
-            }
-            
-            Section {
-              severityPrediction
-            } footer: {
-              if let lastPredictionDate = predictor.prediction?.date {
-                Text("Updated at \(lastPredictionDate.formattedNonRelative()).")
-              }
-            }
-          }
-          else {
-            Section {
-              durationPrediction
-            } header: {
-              SectionTitleView(title: "Predictions")
-            }
-            
-            Section {
-              severityPrediction
-            } footer: {
-              if let lastPredictionDate = predictor.prediction?.date {
-                Text("Updated \(lastPredictionDate.formattedNonRelative()).")
-              }
-            }
-          }
+          PredictionViews(prediction: prediction)
         }
       }
       .background(Color(UIColor.systemGroupedBackground))
@@ -217,12 +115,8 @@ struct CurrentHeadacheView: View {
     .navigationViewStyle(StackNavigationViewStyle())
     .onReceive(didBecomeActiveNotificationPublisher, perform: didBecomeActive)
     .onAppear(perform: onAppear)
-    .confirmationAlert(isPresented: $showingAlert, title: alertTitle, message: alertMessage)
-    .confirmationDialog("Resolve Headache? It will be available in the Headaches tab.", isPresented: $showingResolveConfirmation, titleVisibility: .visible) {
-      Button("Resolve", role: .destructive, action: resolve)
-    }
     .confirmationDialog("Change headache severity to \((sceneDelegate.desiredSeverity ?? .notPresent).title.lowercased())?", isPresented: $showingSeverityConfirmation, titleVisibility: .visible) {
-      Button("Change", action: confirmChangeSeverity)
+      AsyncButton("Change", action: confirmChangeSeverity)
       Button("Cancel", role: .cancel, action: cancelChangeSeverity)
     }
   }
@@ -274,8 +168,9 @@ extension CurrentHeadacheView {
   /// Updates the classifier input.
   private func predict(forced: Bool = false) async throws {
     let needsData = try await headacheManager.needsTrainingData()
-    withAnimation {
-      needsInput = needsData
+    
+    await MainActor.run {
+      withAnimation { needsInput = needsData }
     }
     
     // Check if we should run a prediction
@@ -291,34 +186,11 @@ extension CurrentHeadacheView {
     logDebug("Updating current headache view prediction.")
     
     // Run a prediction
-    Task {
-      do {
-        try await headacheManager.predict()
-      }
-      catch {
-        logError("Error getting prediction: \(error)")
-      }
-    }
-  }
-  
-  /// Displays the reset confirmation alert to the user.
-  private func resolveConfirmation() {
-    withAnimation { showingResolveConfirmation = true }
-  }
-  
-  /// Shows an alert to the user.
-  ///
-  /// - Parameters:
-  ///   - title: The alert's title.
-  ///   - message: The alert's message.
-  private func showAlert(_ title: String, _ error: Error) {
-    alertTitle = title
-    alertMessage = error.localizedDescription
-    withAnimation { showingAlert = true }
+    try await headacheManager.predict()
   }
   
   /// Changes the severity to the desired severity if available.
-  private func confirmChangeSeverity() {
+  private func confirmChangeSeverity() async throws {
     guard let severity = sceneDelegate.desiredSeverity else {
       return
     }
@@ -327,7 +199,7 @@ extension CurrentHeadacheView {
     sceneDelegate.desiredSeverity = nil
     
     // Change the severity
-    changeSeverity(to: severity)
+    try await changeSeverity(to: severity)
   }
   
   /// Cancels the severity change.
@@ -340,74 +212,27 @@ extension CurrentHeadacheView {
   /// doesn't exist.
   ///
   /// - Parameter severity: The new severity.
-  private func changeSeverity(to severity: HKCategoryValueSeverity) {
-    guard !updatingHeadache else { return }
+  private func changeSeverity(to severity: HKCategoryValueSeverity) async throws {
     logDebug("Change severity to \(severity.title).")
-    
-    withAnimation { updatingHeadache = true }
-    
-    Task {
-      do {
-        // Change the severity
-        try await headacheManager.changeSeverity(to: severity)
         
-        // Present the check-in alert if applicable
-        try await refresher.presentCheckInAlert(with: currentHeadache?.identifier)
-      }
-      catch {
-        showAlert("Unable to Change Severity", error)
-      }
-      
-      withAnimation { updatingHeadache = false }
-    }
-  }
-  
-  /// Resolves the current headache.
-  private func resolve() {
-    guard !updatingHeadache else { return }
-    logDebug("Resolve current headache.")
+    // Change the severity
+    try await headacheManager.changeSeverity(to: severity)
     
-    withAnimation { updatingHeadache = true }
-    
-    Task {
-      do {
-        // Resolve the headache
-        try await headacheManager.resolve()
-        
-        // Remove any pending alerts
-        alertManager.removeRequests(pending: true, delivered: false)
-      }
-      catch {
-        showAlert("Unable to Update Severity", error)
-      }
-      
-      withAnimation { updatingHeadache = false }
-    }
+    // Present the check-in alert if applicable
+    try await refresher.presentCheckInAlert(with: currentHeadache?.identifier)
   }
   
   /// The action to perform if there is no headache.
-  private func noHeadacheAction() {
-    guard !handlingInput else { return }
+  private func noHeadacheAction() async throws {
     logDebug("No headache action.")
     
-    handlingInput = true
+    _ = try await headacheManager.getCurrentClassifierInput(shouldCreateTrainingData: true)
     
-    Task {
-      do {
-        let input = try await headacheManager.getCurrentClassifierInput()
-        try await headacheManager.createTrainingData(from: input)
-        
-        // Check if we should show the not-present training data cell
-        let needsData = try await headacheManager.needsTrainingData()
-        withAnimation {
-          needsInput = needsData
-        }
-      }
-      catch {
-        showAlert("Error Saving Data", error)
-      }
-      
-      handlingInput = false
+    // Check if we should show the not-present training data cell
+    let needsData = try await headacheManager.needsTrainingData()
+    
+    await MainActor.run {
+      withAnimation { needsInput = needsData }
     }
   }
   
@@ -420,7 +245,7 @@ struct CurrentHeadacheView_Previews: PreviewProvider {
       .environment(\.managedObjectContext, Previewing.CoreData.viewContext)
       .environmentObject(Previewing.headacheManager)
       .environmentObject(Previewing.alertManager)
-      .environmentObject(Previewing.predictor)
+      .environmentObject(Previewing.Prediction.predictor)
       .environmentObject(Previewing.healthKitManager)
   }
 }

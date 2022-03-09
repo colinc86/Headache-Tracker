@@ -26,7 +26,7 @@ struct SeveritySelectionView: View {
   var link: Bool = false
   
   /// The action for each button.
-  var action: ((HKCategoryValueSeverity) -> Void)? = nil
+  var action: ((HKCategoryValueSeverity) async throws -> Void)? = nil
   
   // MARK: View body
   
@@ -75,7 +75,7 @@ struct SeveritySelectionView_Previews: PreviewProvider {
       .environment(\.managedObjectContext, Previewing.CoreData.viewContext)
       .environmentObject(Previewing.headacheManager)
 //      .environmentObject(Previewing.alertManager)
-      .environmentObject(Previewing.predictor)
+      .environmentObject(Previewing.Prediction.predictor)
       .environmentObject(Previewing.healthKitManager)
       .previewLayout(PreviewLayout.fixed(width: 428, height: 130))
     
@@ -83,7 +83,7 @@ struct SeveritySelectionView_Previews: PreviewProvider {
       .environment(\.managedObjectContext, Previewing.CoreData.viewContext)
       .environmentObject(Previewing.headacheManager)
 //      .environmentObject(Previewing.alertManager)
-      .environmentObject(Previewing.predictor)
+      .environmentObject(Previewing.Prediction.predictor)
       .environmentObject(Previewing.healthKitManager)
       .previewLayout(PreviewLayout.fixed(width: 428, height: 130))
     
@@ -91,7 +91,7 @@ struct SeveritySelectionView_Previews: PreviewProvider {
       .environment(\.managedObjectContext, Previewing.CoreData.viewContext)
       .environmentObject(Previewing.headacheManager)
 //      .environmentObject(Previewing.alertManager)
-      .environmentObject(Previewing.predictor)
+      .environmentObject(Previewing.Prediction.predictor)
       .environmentObject(Previewing.healthKitManager)
       .previewLayout(PreviewLayout.fixed(width: 428, height: 130))
     
@@ -99,7 +99,7 @@ struct SeveritySelectionView_Previews: PreviewProvider {
       .environment(\.managedObjectContext, Previewing.CoreData.viewContext)
       .environmentObject(Previewing.headacheManager)
 //      .environmentObject(Previewing.alertManager)
-      .environmentObject(Previewing.predictor)
+      .environmentObject(Previewing.Prediction.predictor)
       .environmentObject(Previewing.healthKitManager)
       .previewLayout(PreviewLayout.fixed(width: 428, height: 70))
   }
@@ -126,7 +126,7 @@ struct SeverityButton: View {
   
   /// The button's action. If nil, then the button is drawn
   /// as a rectantle instead.
-  var action: ((HKCategoryValueSeverity) -> Void)? = nil
+  var action: ((HKCategoryValueSeverity) async throws -> Void)? = nil
   
   // MARK: Private properties
   
@@ -163,8 +163,8 @@ struct SeverityButton: View {
       }
       else {
         if let action = action {
-          Button {
-            action(severity)
+          AsyncButton {
+            try await action(severity)
           } label: {
             content
           }

@@ -19,8 +19,18 @@ struct Previewing {
   /// The preview health kit manager.
   static let healthKitManager = HealthKitManager()
   
-  /// The preview predictor.
-  static let predictor = Predictor()
+  @State static var booleanFalseValue: Bool = false
+  @State static var booleanTrueValue: Bool = true
+  
+  struct Prediction {
+    
+    /// The preview predictor.
+    static let predictor = Predictor()
+    
+    /// The preview prediction.
+    static let prediction = Predictor.Prediction()
+    
+  }
   
   struct CoreData {
     

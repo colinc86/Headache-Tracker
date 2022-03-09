@@ -66,7 +66,7 @@ struct VerticalSeverityLevel_Previews: PreviewProvider {
       .environment(\.managedObjectContext, Previewing.CoreData.viewContext)
       .environmentObject(Previewing.headacheManager)
       .environmentObject(Previewing.alertManager)
-      .environmentObject(Previewing.predictor)
+      .environmentObject(Previewing.Prediction.predictor)
       .environmentObject(Previewing.healthKitManager)
       .previewLayout(PreviewLayout.fixed(width: 20, height: 50))
   }

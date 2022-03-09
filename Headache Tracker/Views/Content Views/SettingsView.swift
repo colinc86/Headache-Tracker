@@ -231,7 +231,7 @@ struct SettingsView_Previews: PreviewProvider {
     SettingsView()
       .environment(\.managedObjectContext, Previewing.CoreData.viewContext)
       .environmentObject(Previewing.headacheManager)
-      .environmentObject(Previewing.predictor)
+      .environmentObject(Previewing.Prediction.predictor)
       .environmentObject(Previewing.healthKitManager)
       .environmentObject(Previewing.alertManager)
   }

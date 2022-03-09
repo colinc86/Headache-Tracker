@@ -679,6 +679,26 @@ class Predictor: ObservableObject {
     case severityClassifier
   }
   
+  struct TrainingInput {
+    
+    var isValid: Bool {
+      return true
+    }
+    
+    init(trainingData: [TrainingData]) throws {}
+    
+    /// Balances the training data for the given model type.
+    ///
+    /// - Parameters:
+    ///   - trainingData: The training data to balance.
+    ///   - modelType: The model type intended to train.
+    /// - Returns: The training data.
+    private static func balanceTrainingData(_ trainingData: [TrainingData], forModelType modelType: ModelType) -> [TrainingData] {
+      return []
+    }
+    
+  }
+  
   /// A prediction input.
   struct Input {
     
@@ -715,13 +735,13 @@ class Predictor: ObservableObject {
   }
   
   /// A headache prediction.
-  struct Prediction {
+  struct Prediction: Equatable {
     
     /// An empty prediction.
     static let empty = Prediction()
     
     /// A prediction statistic pairs a severity to a probability.
-    struct PredictionStatistic<T> {
+    struct PredictionStatistic<T: Equatable>: Equatable {
       
       /// The statistic's severity.
       let prediction: T
@@ -734,6 +754,10 @@ class Predictor: ObservableObject {
       init(prediction: T, probability: Double?) {
         self.prediction = prediction
         self.probability = probability
+      }
+      
+      static func == (lhs: Self, rhs: Self) -> Bool {
+        return lhs.prediction == rhs.prediction && lhs.probability == rhs.probability
       }
     }
     
@@ -773,6 +797,9 @@ class Predictor: ObservableObject {
   
   /// The model's last updated at date.
   @Published var modelUpdatedAt: Date?
+  
+  init() {}
+  deinit {}
 
 }
 
@@ -786,7 +813,7 @@ extension Predictor {
   /// Trains the predictor's classifiers.
   ///
   /// - Parameter trainingData: The training data.
-  func train(with trainingData: [TrainingData]) async throws {}
+  func train(_ input: TrainingInput) async throws {}
   
   /// Cancels the current training session.
   func cancelTraining() {}
@@ -794,11 +821,15 @@ extension Predictor {
   /// Resets the predictor and its classifiers.
   func reset() {}
   
+  func needsLoading() throws -> Bool {
+    return false
+  }
+  
   /// Makes a prediction.
   ///
   /// - Parameter input: The predictor's input.
   /// - Returns: The predictor's output.
-  func predict(_ input: Input) throws -> Prediction {
+  func predict(_ input: Input, reloadWidget: Bool = true) async throws -> Prediction {
     return Prediction()
   }
   
