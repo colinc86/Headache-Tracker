@@ -27,6 +27,17 @@ extension MLDataTable {
       }
     }
     
+    switch modelType {
+    case .onsetRegressor:
+      dictionaryInputs[OnsetRegressorOutput.FeatureName.onset] = inputs.map({ $0.timeIntervalUntilNextHeadacheStart ?? 0.0 })
+    case .durationRegressor:
+      dictionaryInputs[DurationRegressorOutput.FeatureName.duration] = inputs.map({ $0.timeIntervalUntilNextHeadacheEnd ?? 0.0 })
+    case .outlookClassifier:
+      dictionaryInputs[OutlookClassifierOutput.FeatureName.outlook] = inputs.map({ $0.outlook.rawValue })
+    case .severityClassifier:
+      dictionaryInputs[SeverityClassifierOutput.FeatureName.severity] = inputs.map({ $0.severity.title })
+    }
+    
     try self.init(dictionary: dictionaryInputs)
   }
   

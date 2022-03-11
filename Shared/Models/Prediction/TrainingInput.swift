@@ -23,13 +23,18 @@ struct TrainingInput {
   }
   
   init(trainingData: [TrainingData]) throws {
+    logDebug("Creating training data.")
+    
     // Set the training classes
+    logDebug("Setting the training classes.")
     trainingData.setVolitileVariables()
     
     // Convert the training data to model inputs
+    logDebug("Converting the training data to model inputs.")
     let inputs = trainingData.map({ $0.modelInput })
     
     // Get the data tables
+    logDebug("Getting the data tables.")
     outlookTable = try MLDataTable(inputs: TrainingInput.balanceInputs(inputs, forModelType: .outlookClassifier), forModelType: .outlookClassifier)
     severityTable = try MLDataTable(inputs: TrainingInput.balanceInputs(inputs, forModelType: .severityClassifier), forModelType: .severityClassifier)
     onsetTable = try MLDataTable(inputs: TrainingInput.balanceInputs(inputs, forModelType: .onsetRegressor), forModelType: .onsetRegressor)
@@ -43,6 +48,8 @@ struct TrainingInput {
   ///   - modelType: The model type intended to train.
   /// - Returns: The balanced inputs.
   private static func balanceInputs(_ inputs: [ModelInput], forModelType modelType: Predictor.ModelType) -> [ModelInput] {
+    logDebug("Balance inputs (\(inputs.count)) for model type \(modelType).")
+    
     switch modelType {
     case .durationRegressor:
       return inputs.filter({ $0.timeIntervalUntilNextHeadacheEnd != nil })
@@ -54,6 +61,7 @@ struct TrainingInput {
   }
   
   private static func smote(_ inputs: [ModelInput], forModelType modelType: Predictor.ModelType) -> [ModelInput] {
+    logDebug("SMOTE (\(inputs.count)) inputs for model type \(modelType).")
     // Get the class names
     var targetClasses = [String]()
     switch modelType {
@@ -105,6 +113,8 @@ struct TrainingInput {
   }
   
   static func synthesize(_ count: Int, from inputs: [ModelInput]) -> [ModelInput] {
+    logDebug("Synthesize \(count) inputs from \(inputs.count) inputs.")
+    
     var syntheticInputs = [ModelInput]()
     while syntheticInputs.count < count {
       // Select an input at random

@@ -140,6 +140,7 @@ struct DebugSettingsView: View {
       }
     }
     .navigationTitle("Debug Settings")
+    .animation(.default, value: predictor.prediction)
     .task {
       do {
         evaluation = try await headacheManager.evaluation()
