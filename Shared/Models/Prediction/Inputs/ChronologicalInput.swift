@@ -1,5 +1,5 @@
 //
-//  TimeInput.swift
+//  ChronologicalInput.swift
 //  Headache Tracker
 //
 //  Created by Colin Campbell on 2/27/22.
@@ -7,7 +7,7 @@
 
 import CoreML
 
-class TimeInput: MLFeatureProvider {
+class ChronologicalInput: MLFeatureProvider {
   
   struct FeatureName {
     static let secondsSinceMidnight = "Seconds Since Midnight"

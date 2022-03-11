@@ -16,7 +16,7 @@ struct OutlookWidgetView: View {
   
   var body: some View {
     if entry.hasCurrentHeadache {
-      DurationPredictionView(duration: entry.duration ?? 0.0)
+      DurationPredictionView(duration: entry.duration ?? 0.0, date: entry.date)
         .padding()
     }
     else {

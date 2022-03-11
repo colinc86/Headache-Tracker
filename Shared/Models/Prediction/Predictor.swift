@@ -25,188 +25,6 @@ class Predictor: ObservableObject {
     case severityClassifier
   }
   
-  struct TrainingInput {
-    
-    let outlookTable: MLDataTable
-    let severityTable: MLDataTable
-    let onsetTable: MLDataTable
-    let durationTable: MLDataTable
-    
-    var isValid: Bool {
-      return outlookTable.isValid && outlookTable.isValid && onsetTable.isValid && durationTable.isValid
-    }
-    
-    init(trainingData: [TrainingData]) throws {
-      // Set the training tags
-      trainingData.setVolitileVariables()
-      
-      // Get the data tables
-      outlookTable = try MLDataTable(dictionary: TrainingInput.balanceTrainingData(trainingData, forModelType: .outlookClassifier).outlookDataTable())
-      severityTable = try MLDataTable(dictionary: TrainingInput.balanceTrainingData(trainingData, forModelType: .severityClassifier).severityDataTable())
-      onsetTable = try MLDataTable(dictionary: TrainingInput.balanceTrainingData(trainingData, forModelType: .onsetRegressor).onsetTableData())
-      durationTable = try MLDataTable(dictionary: TrainingInput.balanceTrainingData(trainingData, forModelType: .durationRegressor).durationTableData())
-    }
-    
-    /// Balances the training data for the given model type.
-    ///
-    /// - Parameters:
-    ///   - trainingData: The training data to balance.
-    ///   - modelType: The model type intended to train.
-    /// - Returns: The training data.
-    private static func balanceTrainingData(_ trainingData: [TrainingData], forModelType modelType: ModelType) -> [TrainingData] {
-      switch modelType {
-      case .durationRegressor:
-        return trainingData.filter({ $0.timeIntervalUntilNextHeadacheEnd != nil })
-      case .onsetRegressor:
-        return trainingData.filter({ $0.timeIntervalUntilNextHeadacheStart != nil })
-      case .severityClassifier:
-        var headacheData = trainingData.filter({ $0.severity?.headache != nil })
-        var nonHeadacheData = trainingData.filter({ $0.severity?.headache == nil })
-        
-        // Min count
-        let minCount = min(headacheData.count, nonHeadacheData.count)
-        
-        // Shuffle
-        headacheData.shuffle()
-        nonHeadacheData.shuffle()
-        
-        // Trim
-        if headacheData.count > minCount {
-          headacheData = [TrainingData](headacheData[0 ..< minCount])
-        }
-        if nonHeadacheData.count > minCount {
-          nonHeadacheData = [TrainingData](nonHeadacheData[0 ..< minCount])
-        }
-        
-        return headacheData + nonHeadacheData
-      case .outlookClassifier:
-        var headacheData = trainingData.filter({ $0.outlook == .headache })
-        var possibleHeadacheData = trainingData.filter({ $0.outlook == .possibleHeadache })
-        var noHeadacheData = trainingData.filter({ $0.outlook == .noHeadache })
-        
-        // Min count
-        let minCount = min(headacheData.count, possibleHeadacheData.count, noHeadacheData.count)
-        
-        // Shuffle
-        headacheData.shuffle()
-        possibleHeadacheData.shuffle()
-        noHeadacheData.shuffle()
-        
-        // Trim
-        if headacheData.count > minCount {
-          headacheData = [TrainingData](headacheData[0 ..< minCount])
-        }
-        if possibleHeadacheData.count > minCount {
-          possibleHeadacheData = [TrainingData](possibleHeadacheData[0 ..< minCount])
-        }
-        if noHeadacheData.count > minCount {
-          noHeadacheData = [TrainingData](noHeadacheData[0 ..< minCount])
-        }
-        
-        return headacheData + possibleHeadacheData + noHeadacheData
-      }
-    }
-  }
-  
-  /// A prediction input.
-  struct Input {
-    
-    /// The input weather data.
-    var weather: Weather?
-    
-    /// The input health kit data.
-    var healthKitData: [HealthKitData: Double]?
-    
-    /// The input date.
-    var date: Date
-    
-    /// The full model input.
-    func fullInput() -> InputUnion {
-      return InputUnion(providers: [controlledUserInput(), environmentalInput(), timeInput(), uncontrolledUserInput()])
-    }
-    
-    private func controlledUserInput() -> ControlledUserInput {
-      return ControlledUserInput(healthKitData: healthKitData ?? [:])
-    }
-    
-    private func environmentalInput() -> EnvironmentalInput {
-      return EnvironmentalInput(weather: weather, healthKitData: healthKitData ?? [:])
-    }
-    
-    private func timeInput() -> TimeInput {
-      return TimeInput(date: date)
-    }
-    
-    private func uncontrolledUserInput() -> UncontrolledUserInput {
-      return UncontrolledUserInput(healthKitData: healthKitData ?? [:])
-    }
-    
-  }
-  
-  /// A headache prediction.
-  struct Prediction: Equatable {
-    
-    /// An empty prediction.
-    static let empty = Prediction(
-      outlookClassifierOutput: PredictionStatistic<Outlook>(prediction: .noHeadache, probability: 0),
-      severityClassifierOutput: PredictionStatistic<HKCategoryValueSeverity>(prediction: .notPresent, probability: 0),
-      onsetRegressorOutput: PredictionStatistic<Date>(prediction: Date(timeIntervalSince1970: 0), probability: nil),
-      durationRegressorOutput: PredictionStatistic<TimeInterval>(prediction: 0, probability: nil))
-    
-    /// A prediction statistic pairs a severity to a probability.
-    struct PredictionStatistic<T: Equatable>: Equatable {
-      
-      /// The statistic's severity.
-      var prediction: T
-      
-      /// The statistic's probability.
-      let probability: Double?
-      
-      // MARK: Initializers
-      
-      init(prediction: T, probability: Double?) {
-        self.prediction = prediction
-        self.probability = probability
-      }
-      
-      static func == (lhs: Self, rhs: Self) -> Bool {
-        return lhs.prediction == rhs.prediction && lhs.probability == rhs.probability
-      }
-    }
-    
-    /// The outlook classifier's output
-    var outlookClassifierOutput: PredictionStatistic<Outlook>
-    
-    /// The severity classifier's output.
-    var severityClassifierOutput: PredictionStatistic<HKCategoryValueSeverity>
-    
-    /// The onset regressor's output.
-    var onsetRegressorOutput: PredictionStatistic<Date>
-    
-    /// The duration regressor's output.
-    var durationRegressorOutput: PredictionStatistic<TimeInterval>
-    
-    /// The date of this prediction.
-    var date = Date()
-    
-    /// The prediction's holistic outlook.
-    var holisticOutlook: HolisticOutlook {
-      return HolisticOutlook(
-        outlook: outlookClassifierOutput.prediction,
-        onset: onsetRegressorOutput.prediction,
-        duration: durationRegressorOutput.prediction,
-        severity: severityClassifierOutput.prediction)
-    }
-    
-    static func == (lhs: Self, rhs: Self) -> Bool {
-      return lhs.outlookClassifierOutput == rhs.outlookClassifierOutput &&
-        lhs.severityClassifierOutput == rhs.severityClassifierOutput &&
-        lhs.onsetRegressorOutput == rhs.onsetRegressorOutput &&
-        lhs.durationRegressorOutput == rhs.durationRegressorOutput
-    }
-    
-  }
-  
   // MARK: Static properties
   
   /// The filename to use for the outlook classifier.
@@ -230,7 +48,7 @@ class Predictor: ObservableObject {
   @Published var ready: Bool = false
   
   /// The predictor's latest prediction.
-  @Published var prediction: Prediction?
+  @Published var prediction: PredictionOutput?
   
   /// The model's last updated at date.
   @Published var modelUpdatedAt: Date?
@@ -383,7 +201,7 @@ extension Predictor {
   ///   - reloadWidget: Whether the outlook widget should be reloaded (default=true).
   /// - Returns: The predictor's output.
   @discardableResult
-  func predict(_ input: Input, reloadWidget: Bool = true) async throws -> Prediction {
+  func predict(_ input: ModelInput, reloadWidget: Bool = true) async throws -> PredictionOutput {
     if try needsLoading() {
       try await load()
     }
@@ -410,20 +228,20 @@ extension Predictor {
           let onsetPrediction = try onsetRegressor.prediction(input: fullInput)
           let durationPrediction = try durationRegressor.prediction(input: fullInput)
           
-          let prediction = Prediction(
-            outlookClassifierOutput: Prediction.PredictionStatistic(
+          let prediction = PredictionOutput(
+            outlookClassifierOutput: PredictionOutput.PredictionStatistic(
               prediction: Outlook(rawValue: outlookPrediction.Outlook) ?? .noHeadache,
               probability: outlookPrediction.OutlookProbability[outlookPrediction.Outlook]),
             
-            severityClassifierOutput: Prediction.PredictionStatistic(
+            severityClassifierOutput: PredictionOutput.PredictionStatistic(
               prediction: HKCategoryValueSeverity(title: severityPrediction.Severity)!,
               probability: severityPrediction.SeverityProbability[severityPrediction.Severity]),
             
-            onsetRegressorOutput: Prediction.PredictionStatistic<Date>(
+            onsetRegressorOutput: PredictionOutput.PredictionStatistic<Date>(
               prediction: Date().addingTimeInterval(onsetPrediction.Onset),
               probability: nil),
             
-            durationRegressorOutput: Prediction.PredictionStatistic<TimeInterval>(
+            durationRegressorOutput: PredictionOutput.PredictionStatistic<TimeInterval>(
               prediction: durationPrediction.Duration,
               probability: nil)
           )
@@ -464,14 +282,14 @@ extension Predictor {
   /// Updates the current prediction from the shared user defaults.
   private func updateCurrentPredictionFromDefaults() {
     DispatchQueue.main.async {
-      var prediction = Prediction(
-        outlookClassifierOutput: Prediction.PredictionStatistic<Outlook>(
+      var prediction = PredictionOutput(
+        outlookClassifierOutput: PredictionOutput.PredictionStatistic<Outlook>(
           prediction: SharedUserDefaults.standard.predictedOutlook ?? .noHeadache, probability: nil),
-        severityClassifierOutput: Prediction.PredictionStatistic<HKCategoryValueSeverity>(
+        severityClassifierOutput: PredictionOutput.PredictionStatistic<HKCategoryValueSeverity>(
           prediction: SharedUserDefaults.standard.predictedSeverity ?? .notPresent, probability: nil),
-        onsetRegressorOutput: Prediction.PredictionStatistic<Date>(
+        onsetRegressorOutput: PredictionOutput.PredictionStatistic<Date>(
           prediction: SharedUserDefaults.standard.predictedOnset ?? Date(), probability: nil),
-        durationRegressorOutput: Prediction.PredictionStatistic<TimeInterval>(
+        durationRegressorOutput: PredictionOutput.PredictionStatistic<TimeInterval>(
           prediction: SharedUserDefaults.standard.predictedDuration ?? 0.0, probability: nil))
       prediction.date = SharedUserDefaults.standard.predictionDate ?? Date()
       self.prediction = prediction
@@ -664,173 +482,6 @@ extension Predictor {
   private func modelsDirectory() -> URL {
     let fileContainerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: Constants.appGroupIdentifier) ?? FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
     return fileContainerURL.appendingPathComponent("models")
-  }
-  
-}
-#else
-class Predictor: ObservableObject {
-  
-  // MARK: Types
-  
-  enum ModelType {
-    case durationRegressor
-    case onsetRegressor
-    case outlookClassifier
-    case severityClassifier
-  }
-  
-  struct TrainingInput {
-    
-    var isValid: Bool {
-      return true
-    }
-    
-    init(trainingData: [TrainingData]) throws {}
-    
-    /// Balances the training data for the given model type.
-    ///
-    /// - Parameters:
-    ///   - trainingData: The training data to balance.
-    ///   - modelType: The model type intended to train.
-    /// - Returns: The training data.
-    private static func balanceTrainingData(_ trainingData: [TrainingData], forModelType modelType: ModelType) -> [TrainingData] {
-      return []
-    }
-    
-  }
-  
-  /// A prediction input.
-  struct Input {
-    
-    /// The input weather data.
-    var weather: Weather?
-    
-    /// The input health kit data.
-    var healthKitData: [HealthKitData: Double]?
-    
-    /// The input date.
-    var date: Date
-    
-    /// The full model input.
-    func fullInput() -> InputUnion {
-      return InputUnion(providers: [controlledUserInput(), environmentalInput(), timeInput(), uncontrolledUserInput()])
-    }
-    
-    private func controlledUserInput() -> ControlledUserInput {
-      return ControlledUserInput(healthKitData: healthKitData ?? [:])
-    }
-    
-    private func environmentalInput() -> EnvironmentalInput {
-      return EnvironmentalInput(weather: weather, healthKitData: healthKitData ?? [:])
-    }
-    
-    private func timeInput() -> TimeInput {
-      return TimeInput(date: date)
-    }
-    
-    private func uncontrolledUserInput() -> UncontrolledUserInput {
-      return UncontrolledUserInput(healthKitData: healthKitData ?? [:])
-    }
-    
-  }
-  
-  /// A headache prediction.
-  struct Prediction: Equatable {
-    
-    /// An empty prediction.
-    static let empty = Prediction()
-    
-    /// A prediction statistic pairs a severity to a probability.
-    struct PredictionStatistic<T: Equatable>: Equatable {
-      
-      /// The statistic's severity.
-      let prediction: T
-      
-      /// The statistic's probability.
-      let probability: Double?
-      
-      // MARK: Initializers
-      
-      init(prediction: T, probability: Double?) {
-        self.prediction = prediction
-        self.probability = probability
-      }
-      
-      static func == (lhs: Self, rhs: Self) -> Bool {
-        return lhs.prediction == rhs.prediction && lhs.probability == rhs.probability
-      }
-    }
-    
-    /// The outlook classifier's output
-    let outlookClassifierOutput: PredictionStatistic<Outlook> = PredictionStatistic<Outlook>(prediction: .noHeadache, probability: 0)
-    
-    /// The severity classifier's output.
-    let severityClassifierOutput: PredictionStatistic<HKCategoryValueSeverity> = PredictionStatistic<HKCategoryValueSeverity>(prediction: .notPresent, probability: 0)
-    
-    /// The onset regressor's output.
-    let onsetRegressorOutput: PredictionStatistic<Date> = PredictionStatistic<Date>(prediction: Date(timeIntervalSince1970: 0), probability: nil)
-    
-    /// The duration regressor's output.
-    let durationRegressorOutput: PredictionStatistic<TimeInterval> = PredictionStatistic<TimeInterval>(prediction: 0, probability: nil)
-    
-    /// The date of this prediction.
-    let date = Date()
-    
-    init() {
-      
-    }
-    
-    var holisticOutlook: HolisticOutlook {
-      return .noHeadache
-    }
-    
-  }
-
-  /// Whether or not the predictor is training.
-  @Published var training: Bool = false
-  
-  /// Whether or not the predictor is ready to predict.
-  @Published var ready: Bool = false
-  
-  /// The predictor's latest prediction.
-  @Published var prediction: Prediction?
-  
-  /// The model's last updated at date.
-  @Published var modelUpdatedAt: Date?
-  
-  init() {}
-  deinit {}
-
-}
-
-// MARK: Public methods
-
-extension Predictor {
-  
-  /// Loads the predictor's models.
-  func load() async throws {}
-  
-  /// Trains the predictor's classifiers.
-  ///
-  /// - Parameter trainingData: The training data.
-  func train(_ input: TrainingInput) async throws {}
-  
-  /// Cancels the current training session.
-  func cancelTraining() {}
-  
-  /// Resets the predictor and its classifiers.
-  func reset() {}
-  
-  func needsLoading() throws -> Bool {
-    return false
-  }
-  
-  /// Makes a prediction.
-  ///
-  /// - Parameter input: The predictor's input.
-  /// - Returns: The predictor's output.
-  func predict(_ input: Input, reloadWidget: Bool = true) async throws -> Prediction {
-    return Prediction()
   }
   
 }

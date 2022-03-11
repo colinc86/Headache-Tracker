@@ -63,13 +63,13 @@ class ControlledUserInput: MLFeatureProvider {
     return nil
   }
   
-  convenience init(healthKitData: [HealthKitData: Double]) {
+  convenience init(healthKitData: [HealthKitData: Double]?) {
     self.init(
-      Mindful_Session: healthKitData[HealthKitData.mindfulSession] ?? 0.0,
-      Sleep_Seconds: healthKitData[HealthKitData.sleepSeconds] ?? 0.0,
-      Sleep_Onset: healthKitData[HealthKitData.sleepOnset] ?? 0.0,
-      Headphone_Audio_Exposure: healthKitData[HealthKitData.headphoneAudioExposure] ?? 0.0,
-      Step_Count: healthKitData[HealthKitData.stepCount] ?? 0.0
+      Mindful_Session: healthKitData?[HealthKitData.mindfulSession] ?? 0.0,
+      Sleep_Seconds: healthKitData?[HealthKitData.sleepSeconds] ?? 0.0,
+      Sleep_Onset: healthKitData?[HealthKitData.sleepOnset] ?? 0.0,
+      Headphone_Audio_Exposure: healthKitData?[HealthKitData.headphoneAudioExposure] ?? 0.0,
+      Step_Count: healthKitData?[HealthKitData.stepCount] ?? 0.0
     )
   }
   

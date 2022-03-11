@@ -194,7 +194,7 @@ extension CurrentHeadacheView {
     try await headacheManager.createPredict(create: false)
   }
   
-  private func predictionChanged(_ newValue: Predictor.Prediction?) {
+  private func predictionChanged(_ newValue: PredictionOutput?) {
     
   }
   

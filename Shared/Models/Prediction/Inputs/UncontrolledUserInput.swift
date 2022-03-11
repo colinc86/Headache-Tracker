@@ -71,14 +71,14 @@ class UncontrolledUserInput: MLFeatureProvider {
     return nil
   }
   
-  convenience init(healthKitData: [HealthKitData: Double]) {
+  convenience init(healthKitData: [HealthKitData: Double]?) {
     self.init(
-      Heart_Rate: healthKitData[HealthKitData.heartRate] ?? 0.0,
-      Respiratory_Rate: healthKitData[HealthKitData.respiratoryRate] ?? 0.0,
-      Oxygen_Saturation: healthKitData[HealthKitData.oxygenSaturation] ?? 0.0,
-      Heart_Rate_Variability: healthKitData[HealthKitData.heartRateVariabilitySDNN] ?? 0.0,
-      Walking_Heart_Rate_Average: healthKitData[HealthKitData.walkingHeartRateAverage] ?? 0.0,
-      Resting_Heart_Rate: healthKitData[HealthKitData.restingHeartRate] ?? 0.0
+      Heart_Rate: healthKitData?[HealthKitData.heartRate] ?? 0.0,
+      Respiratory_Rate: healthKitData?[HealthKitData.respiratoryRate] ?? 0.0,
+      Oxygen_Saturation: healthKitData?[HealthKitData.oxygenSaturation] ?? 0.0,
+      Heart_Rate_Variability: healthKitData?[HealthKitData.heartRateVariabilitySDNN] ?? 0.0,
+      Walking_Heart_Rate_Average: healthKitData?[HealthKitData.walkingHeartRateAverage] ?? 0.0,
+      Resting_Heart_Rate: healthKitData?[HealthKitData.restingHeartRate] ?? 0.0
     )
   }
   

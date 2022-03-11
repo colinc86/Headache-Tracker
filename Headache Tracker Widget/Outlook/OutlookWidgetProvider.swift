@@ -39,7 +39,7 @@ struct OutlookWidgetProvider: TimelineProvider {
           completion(placeholder(in: context))
         }
         else {
-          completion(try await currentContent())
+          completion((try await currentContent()).first!)
         }
       }
       catch {
@@ -56,20 +56,37 @@ struct OutlookWidgetProvider: TimelineProvider {
     Task {
       do {
         let content = try await currentContent()
+        let firstDate = content.first!.date
         
-        if now.timeIntervalSince(content.date) >= 600.0 && headacheManager.predictor.ready && headacheManager.weatherManager.authorizedForWidgetUpdates {
+        if now.timeIntervalSince(firstDate) >= 600.0 && headacheManager.predictor.ready && headacheManager.weatherManager.authorizedForWidgetUpdates {
           // Get a new prediction
           try await headacheManager.createPredict(create: false, inWidget: true)
           
           // Get the new content
           let newContent = try await currentContent()
-          let reloadDate = newContent.date.addingTimeInterval(600.0)
-          completion(Timeline(entries: [newContent], policy: .after(reloadDate)))
+          
+          // Use new content
+          if newContent.first!.hasCurrentHeadache {
+            // Duration prediction in headache
+            completion(Timeline(entries: newContent, policy: .atEnd))
+          }
+          else {
+            // Reload on a future date
+            let reloadDate = firstDate.addingTimeInterval(600.0)
+            completion(Timeline(entries: newContent, policy: .after(reloadDate)))
+          }
         }
         else {
           // Use old content
-          let reloadDate = content.date.addingTimeInterval(600.0)
-          completion(Timeline(entries: [content], policy: .after(reloadDate)))
+          if content.first!.hasCurrentHeadache {
+            // Duration prediction in headache
+            completion(Timeline(entries: content, policy: .atEnd))
+          }
+          else {
+            // Reload on a future date
+            let reloadDate = firstDate.addingTimeInterval(600.0)
+            completion(Timeline(entries: content, policy: .after(reloadDate)))
+          }
         }
       }
       catch {
@@ -86,15 +103,43 @@ struct OutlookWidgetProvider: TimelineProvider {
 extension OutlookWidgetProvider {
   
   /// The current outlook content.
-  private func currentContent() async throws -> OutlookWidgetContent {
-    return OutlookWidgetContent(
-      date: SharedUserDefaults.standard.predictionDate ?? Date(timeIntervalSinceNow: -600.0),
-      outlook: SharedUserDefaults.standard.predictedOutlook ?? .noHeadache,
-      onset: SharedUserDefaults.standard.predictedOnset,
-      duration: SharedUserDefaults.standard.predictedDuration,
-      severity: SharedUserDefaults.standard.predictedSeverity,
-      hasCurrentHeadache: try await headacheManager.hasCurrentHeadache()
-    )
+  private func currentContent() async throws -> [OutlookWidgetContent] {
+    let headache = try await headacheManager.hasCurrentHeadache()
+    let startDate = SharedUserDefaults.standard.predictionDate ?? Date(timeIntervalSinceNow: -600.0)
+    let outlook = SharedUserDefaults.standard.predictedOutlook ?? .noHeadache
+    let onset = SharedUserDefaults.standard.predictedOnset ?? Date()
+    let duration = SharedUserDefaults.standard.predictedDuration ?? 0.0
+    let severity = SharedUserDefaults.standard.predictedSeverity ?? .notPresent
+    
+    if headache {
+      // If we're in a current headache, then we'll want to add
+      // 10 entries - one for each minute.
+      var entries = [OutlookWidgetContent]()
+      for i in 0 ..< 10 {
+        // We're not in a headache, so use the single entry with a
+        // future reload date.
+        entries.append(OutlookWidgetContent(
+          date: startDate.addingTimeInterval(TimeInterval(i) * 60.0),
+          outlook: outlook,
+          onset: onset,
+          duration: duration - (TimeInterval(i) * 60.0),
+          severity: severity,
+          hasCurrentHeadache: true
+        ))
+      }
+      return entries
+    }
+    
+    // We're not in a headache, so use the single entry with a
+    // future reload date.
+    return [OutlookWidgetContent(
+      date: startDate,
+      outlook: outlook,
+      onset: onset,
+      duration: duration,
+      severity: severity,
+      hasCurrentHeadache: false
+    )]
   }
   
 }

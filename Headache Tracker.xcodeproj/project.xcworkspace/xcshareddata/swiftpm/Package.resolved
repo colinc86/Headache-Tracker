@@ -12,7 +12,7 @@
       },
       {
         "package": "ApplicationKey",
-        "repositoryURL": "https://github.com/colinc86/ApplicationKey",
+        "repositoryURL": "https://github.com/colinc86/ApplicationKey.git",
         "state": {
           "branch": null,
           "revision": "4be5075a63dad03bb071d17401d0c25dc0019cb4",
@@ -39,7 +39,7 @@
       },
       {
         "package": "CocoaLumberjack",
-        "repositoryURL": "git@github.com:CocoaLumberjack/CocoaLumberjack.git",
+        "repositoryURL": "https://github.com/CocoaLumberjack/CocoaLumberjack.git",
         "state": {
           "branch": null,
           "revision": "80ada1f753b0d53d9b57c465936a7c4169375002",
@@ -48,7 +48,7 @@
       },
       {
         "package": "DataController",
-        "repositoryURL": "git@github.com:colinc86/DataController.git",
+        "repositoryURL": "https://github.com/colinc86/DataController.git",
         "state": {
           "branch": null,
           "revision": "dd206f7d819249a27dd1e876b6a5e00d47c31e39",
@@ -138,7 +138,7 @@
       },
       {
         "package": "Surge",
-        "repositoryURL": "git@github.com:Jounce/Surge.git",
+        "repositoryURL": "https://github.com/Jounce/Surge.git",
         "state": {
           "branch": null,
           "revision": "6e4a47e63da8801afe6188cf039e9f04eb577721",
@@ -165,7 +165,7 @@
       },
       {
         "package": "Shapes",
-        "repositoryURL": "git@github.com:spacenation/swiftui-shapes.git",
+        "repositoryURL": "https://github.com/spacenation/swiftui-shapes.git",
         "state": {
           "branch": null,
           "revision": "c58b15c37eae9bd20525c6daa93a06a689ca75cb",

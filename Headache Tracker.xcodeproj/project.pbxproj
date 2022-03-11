@@ -19,7 +19,6 @@
 		3B09191427BCCF9500844F6C /* TitleCaptionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B09191327BCCF9500844F6C /* TitleCaptionView.swift */; };
 		3B09191627BCD38300844F6C /* DurationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B09191527BCD38300844F6C /* DurationView.swift */; };
 		3B09191A27BD58A100844F6C /* SeveritySelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B09191927BD58A100844F6C /* SeveritySelectionView.swift */; };
-		3B09191F27BD84FE00844F6C /* Shapes in Frameworks */ = {isa = PBXBuildFile; productRef = 3B09191E27BD84FE00844F6C /* Shapes */; };
 		3B09192127BD851700844F6C /* LineGraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B09192027BD851700844F6C /* LineGraph.swift */; };
 		3B09192327BD91F400844F6C /* SectionTitleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B09192227BD91F400844F6C /* SectionTitleView.swift */; };
 		3B1C7DB427D2005E000B3A99 /* StatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1C7DB327D2005E000B3A99 /* StatusView.swift */; };
@@ -71,8 +70,8 @@
 		3B3FFEB427D592A000DFACC1 /* DurationRegressorOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFE6527D592A000DFACC1 /* DurationRegressorOutput.swift */; };
 		3B3FFEB527D592A000DFACC1 /* UncontrolledUserInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFE6727D592A000DFACC1 /* UncontrolledUserInput.swift */; };
 		3B3FFEB627D592A000DFACC1 /* UncontrolledUserInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFE6727D592A000DFACC1 /* UncontrolledUserInput.swift */; };
-		3B3FFEB727D592A000DFACC1 /* TimeInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFE6827D592A000DFACC1 /* TimeInput.swift */; };
-		3B3FFEB827D592A000DFACC1 /* TimeInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFE6827D592A000DFACC1 /* TimeInput.swift */; };
+		3B3FFEB727D592A000DFACC1 /* ChronologicalInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFE6827D592A000DFACC1 /* ChronologicalInput.swift */; };
+		3B3FFEB827D592A000DFACC1 /* ChronologicalInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFE6827D592A000DFACC1 /* ChronologicalInput.swift */; };
 		3B3FFEB927D592A000DFACC1 /* ControlledUserInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFE6927D592A000DFACC1 /* ControlledUserInput.swift */; };
 		3B3FFEBA27D592A000DFACC1 /* ControlledUserInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFE6927D592A000DFACC1 /* ControlledUserInput.swift */; };
 		3B3FFEBB27D592A000DFACC1 /* InputUnion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFE6A27D592A000DFACC1 /* InputUnion.swift */; };
@@ -131,12 +130,7 @@
 		3B3FFEF327D592A000DFACC1 /* DDBugfenderLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFE8B27D592A000DFACC1 /* DDBugfenderLogger.swift */; };
 		3B3FFEF527D592A000DFACC1 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFE8C27D592A000DFACC1 /* Logger.swift */; };
 		3B3FFEF627D592A000DFACC1 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFE8C27D592A000DFACC1 /* Logger.swift */; };
-		3B3FFEF827D597C500DFACC1 /* CocoaLumberjack in Frameworks */ = {isa = PBXBuildFile; productRef = 3B3FFEF727D597C500DFACC1 /* CocoaLumberjack */; };
-		3B3FFEFA27D597C500DFACC1 /* CocoaLumberjackSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 3B3FFEF927D597C500DFACC1 /* CocoaLumberjackSwift */; };
-		3B3FFEFC27D597C500DFACC1 /* CocoaLumberjackSwiftLogBackend in Frameworks */ = {isa = PBXBuildFile; productRef = 3B3FFEFB27D597C500DFACC1 /* CocoaLumberjackSwiftLogBackend */; };
 		3B3FFEFE27D5994700DFACC1 /* Refresher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFEFD27D5994700DFACC1 /* Refresher.swift */; };
-		3B3FFF0427D5A1F200DFACC1 /* DataController in Frameworks */ = {isa = PBXBuildFile; productRef = 3B3FFF0327D5A1F200DFACC1 /* DataController */; };
-		3B3FFF0627D5A1F200DFACC1 /* Surge in Frameworks */ = {isa = PBXBuildFile; productRef = 3B3FFF0527D5A1F200DFACC1 /* Surge */; };
 		3B3FFF0827D5A22200DFACC1 /* Previewing+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFF0727D5A22200DFACC1 /* Previewing+Extensions.swift */; };
 		3B3FFF0B27D5CF5600DFACC1 /* DurationPredictionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9332E527CEF7AC00BACE93 /* DurationPredictionView.swift */; };
 		3B3FFF0D27D5CFC500DFACC1 /* OutlookWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFF0C27D5CFC500DFACC1 /* OutlookWidgetView.swift */; };
@@ -150,9 +144,18 @@
 		3B3FFF1927D88C3200DFACC1 /* ErrorButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFF1427D87EAE00DFACC1 /* ErrorButton.swift */; };
 		3B3FFF1B27D897B700DFACC1 /* Waiter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFF1A27D897B700DFACC1 /* Waiter.swift */; };
 		3B3FFF1C27D8987600DFACC1 /* Waiter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFF1A27D897B700DFACC1 /* Waiter.swift */; };
+		3B3FFF1E27DA84DB00DFACC1 /* TestPredictor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFF1D27DA84DB00DFACC1 /* TestPredictor.swift */; };
+		3B3FFF2227DA8C0300DFACC1 /* ModelInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFF2127DA8C0300DFACC1 /* ModelInput.swift */; };
+		3B3FFF2427DA8C5E00DFACC1 /* PredictionOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFF2327DA8C5E00DFACC1 /* PredictionOutput.swift */; };
+		3B3FFF2627DA8D2300DFACC1 /* TrainingInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFF2527DA8D2300DFACC1 /* TrainingInput.swift */; };
+		3B3FFF2727DA8D2300DFACC1 /* TrainingInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFF2527DA8D2300DFACC1 /* TrainingInput.swift */; };
+		3B3FFF2827DA8E8100DFACC1 /* ModelInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFF2127DA8C0300DFACC1 /* ModelInput.swift */; };
+		3B3FFF2927DA8E8400DFACC1 /* PredictionOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFF2327DA8C5E00DFACC1 /* PredictionOutput.swift */; };
+		3B3FFF2A27DA8E8B00DFACC1 /* TestPredictor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFF1D27DA84DB00DFACC1 /* TestPredictor.swift */; };
+		3B3FFF2C27DAA89500DFACC1 /* WeatherStatistics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFF2B27DAA89500DFACC1 /* WeatherStatistics.swift */; };
+		3B3FFF2D27DAA89500DFACC1 /* WeatherStatistics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFF2B27DAA89500DFACC1 /* WeatherStatistics.swift */; };
 		3B68BDF927BDFCD3007AAAC6 /* AnalyzeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BDF827BDFCD3007AAAC6 /* AnalyzeView.swift */; };
 		3B68BDFB27BE0F00007AAAC6 /* BarGraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BDFA27BE0F00007AAAC6 /* BarGraph.swift */; };
-		3B68BE0127BEF949007AAAC6 /* Surge in Frameworks */ = {isa = PBXBuildFile; productRef = 3B68BE0027BEF949007AAAC6 /* Surge */; };
 		3B68BE0C27BF5899007AAAC6 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B68BE0B27BF5899007AAAC6 /* GoogleService-Info.plist */; };
 		3B68BE0D27BF58A7007AAAC6 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B68BE0B27BF5899007AAAC6 /* GoogleService-Info.plist */; };
 		3B68BE0E27BF58A8007AAAC6 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B68BE0B27BF5899007AAAC6 /* GoogleService-Info.plist */; };
@@ -164,7 +167,6 @@
 		3B68BE5927C349BA007AAAC6 /* Headache Tracker WidgetExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 3B68BE4C27C349B9007AAAC6 /* Headache Tracker WidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		3B68BE6127C34B8E007AAAC6 /* OutlookWidgetContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BE5F27C34B89007AAAC6 /* OutlookWidgetContent.swift */; };
 		3B68BE6A27C35778007AAAC6 /* OutlookView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BE6627C35644007AAAC6 /* OutlookView.swift */; };
-		3B68BE7327C36928007AAAC6 /* ApplicationKey in Frameworks */ = {isa = PBXBuildFile; productRef = 3B68BE7227C36928007AAAC6 /* ApplicationKey */; };
 		3B68BE7827C41FDE007AAAC6 /* TrainingDataListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BE7727C41FDE007AAAC6 /* TrainingDataListView.swift */; };
 		3B9332BC27CDC1B300BACE93 /* FirebaseAnalyticsSwift-Beta in Frameworks */ = {isa = PBXBuildFile; productRef = 3B9332BB27CDC1B300BACE93 /* FirebaseAnalyticsSwift-Beta */; };
 		3B9332C927CDFFAD00BACE93 /* BugfenderLibrary in Frameworks */ = {isa = PBXBuildFile; productRef = 3B9332C827CDFFAD00BACE93 /* BugfenderLibrary */; };
@@ -173,12 +175,8 @@
 		3B9332CF27CE004400BACE93 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B9332CE27CE004400BACE93 /* CoreServices.framework */; };
 		3B9332D127CE005200BACE93 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B9332D027CE005200BACE93 /* CoreGraphics.framework */; };
 		3B9332D327CE006800BACE93 /* libc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B9332D227CE005B00BACE93 /* libc++.tbd */; };
-		3B9332D927CE03E700BACE93 /* CocoaLumberjack in Frameworks */ = {isa = PBXBuildFile; productRef = 3B9332D827CE03E700BACE93 /* CocoaLumberjack */; };
-		3B9332DB27CE03E700BACE93 /* CocoaLumberjackSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 3B9332DA27CE03E700BACE93 /* CocoaLumberjackSwift */; };
-		3B9332DD27CE048000BACE93 /* CocoaLumberjackSwiftLogBackend in Frameworks */ = {isa = PBXBuildFile; productRef = 3B9332DC27CE048000BACE93 /* CocoaLumberjackSwiftLogBackend */; };
 		3B9332E627CEF7AC00BACE93 /* DurationPredictionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9332E527CEF7AC00BACE93 /* DurationPredictionView.swift */; };
 		3B9332EA27CF1E8400BACE93 /* FeedbackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9332E927CF1E8400BACE93 /* FeedbackView.swift */; };
-		3B9332EE27CF38B300BACE93 /* ApplicationKey in Frameworks */ = {isa = PBXBuildFile; productRef = 3B9332ED27CF38B300BACE93 /* ApplicationKey */; };
 		3B9332F127CF3B5300BACE93 /* OutlookWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9332EF27CF3ADB00BACE93 /* OutlookWidget.swift */; };
 		3B9332F427CF3BB200BACE93 /* SeverityWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9332F227CF3BAF00BACE93 /* SeverityWidget.swift */; };
 		3B9332F827CF3CA600BACE93 /* OutlookWidgetProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9332F727CF3CA600BACE93 /* OutlookWidgetProvider.swift */; };
@@ -191,6 +189,17 @@
 		3BAAA69327CC8A5800C0DDC4 /* GraphList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BAAA69227CC8A5800C0DDC4 /* GraphList.swift */; };
 		3BAAA69727CCA7A200C0DDC4 /* TouchLocatingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BAAA69627CCA7A200C0DDC4 /* TouchLocatingView.swift */; };
 		3BAAA69927CD5B0100C0DDC4 /* DebugSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BAAA69827CD5B0100C0DDC4 /* DebugSettingsView.swift */; };
+		3BE731FA27DB11DB007C013B /* CocoaLumberjack in Frameworks */ = {isa = PBXBuildFile; productRef = 3BE731F927DB11DB007C013B /* CocoaLumberjack */; };
+		3BE731FC27DB11DB007C013B /* CocoaLumberjackSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 3BE731FB27DB11DB007C013B /* CocoaLumberjackSwift */; };
+		3BE731FE27DB11DB007C013B /* CocoaLumberjackSwiftLogBackend in Frameworks */ = {isa = PBXBuildFile; productRef = 3BE731FD27DB11DB007C013B /* CocoaLumberjackSwiftLogBackend */; };
+		3BE7320127DB1206007C013B /* Surge in Frameworks */ = {isa = PBXBuildFile; productRef = 3BE7320027DB1206007C013B /* Surge */; };
+		3BE7320427DB122F007C013B /* Shapes in Frameworks */ = {isa = PBXBuildFile; productRef = 3BE7320327DB122F007C013B /* Shapes */; };
+		3BE7320727DB1259007C013B /* ApplicationKey in Frameworks */ = {isa = PBXBuildFile; productRef = 3BE7320627DB1259007C013B /* ApplicationKey */; };
+		3BE7320A27DB129C007C013B /* DataController in Frameworks */ = {isa = PBXBuildFile; productRef = 3BE7320927DB129C007C013B /* DataController */; };
+		3BE7320C27DB1318007C013B /* CocoaLumberjackSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 3BE7320B27DB1318007C013B /* CocoaLumberjackSwift */; };
+		3BE7320E27DB135A007C013B /* Surge in Frameworks */ = {isa = PBXBuildFile; productRef = 3BE7320D27DB135A007C013B /* Surge */; };
+		3BE7321027DB1360007C013B /* DataController in Frameworks */ = {isa = PBXBuildFile; productRef = 3BE7320F27DB1360007C013B /* DataController */; };
+		3BE7321227DB1368007C013B /* ApplicationKey in Frameworks */ = {isa = PBXBuildFile; productRef = 3BE7321127DB1368007C013B /* ApplicationKey */; };
 		3BF5313727ACE18D00056673 /* Headache_TrackerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF5313627ACE18D00056673 /* Headache_TrackerApp.swift */; };
 		3BF5313927ACE18D00056673 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF5313827ACE18D00056673 /* ContentView.swift */; };
 		3BF5313B27ACE18F00056673 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3BF5313A27ACE18F00056673 /* Assets.xcassets */; };
@@ -200,7 +209,6 @@
 		3BF5315727ACE18F00056673 /* Headache_TrackerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF5315627ACE18F00056673 /* Headache_TrackerUITests.swift */; };
 		3BF5315927ACE18F00056673 /* Headache_TrackerUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF5315827ACE18F00056673 /* Headache_TrackerUITestsLaunchTests.swift */; };
 		3BF5316827ACE1DA00056673 /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3BF5316727ACE1DA00056673 /* HealthKit.framework */; };
-		3BF5316D27ACEAC600056673 /* DataController in Frameworks */ = {isa = PBXBuildFile; productRef = 3BF5316C27ACEAC600056673 /* DataController */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -285,7 +293,7 @@
 		3B3FFE6427D592A000DFACC1 /* OutlookClassifierOutput.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OutlookClassifierOutput.swift; sourceTree = "<group>"; };
 		3B3FFE6527D592A000DFACC1 /* DurationRegressorOutput.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DurationRegressorOutput.swift; sourceTree = "<group>"; };
 		3B3FFE6727D592A000DFACC1 /* UncontrolledUserInput.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UncontrolledUserInput.swift; sourceTree = "<group>"; };
-		3B3FFE6827D592A000DFACC1 /* TimeInput.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TimeInput.swift; sourceTree = "<group>"; };
+		3B3FFE6827D592A000DFACC1 /* ChronologicalInput.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChronologicalInput.swift; sourceTree = "<group>"; };
 		3B3FFE6927D592A000DFACC1 /* ControlledUserInput.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ControlledUserInput.swift; sourceTree = "<group>"; };
 		3B3FFE6A27D592A000DFACC1 /* InputUnion.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InputUnion.swift; sourceTree = "<group>"; };
 		3B3FFE6B27D592A000DFACC1 /* EnvironmentalInput.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EnvironmentalInput.swift; sourceTree = "<group>"; };
@@ -325,6 +333,11 @@
 		3B3FFF1227D868F300DFACC1 /* CurrentHeadacheViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentHeadacheViews.swift; sourceTree = "<group>"; };
 		3B3FFF1427D87EAE00DFACC1 /* ErrorButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorButton.swift; sourceTree = "<group>"; };
 		3B3FFF1A27D897B700DFACC1 /* Waiter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Waiter.swift; sourceTree = "<group>"; };
+		3B3FFF1D27DA84DB00DFACC1 /* TestPredictor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestPredictor.swift; sourceTree = "<group>"; };
+		3B3FFF2127DA8C0300DFACC1 /* ModelInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelInput.swift; sourceTree = "<group>"; };
+		3B3FFF2327DA8C5E00DFACC1 /* PredictionOutput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PredictionOutput.swift; sourceTree = "<group>"; };
+		3B3FFF2527DA8D2300DFACC1 /* TrainingInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingInput.swift; sourceTree = "<group>"; };
+		3B3FFF2B27DAA89500DFACC1 /* WeatherStatistics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherStatistics.swift; sourceTree = "<group>"; };
 		3B4BA6F327B6289C00F38851 /* Headache_Tracker 1.2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Headache_Tracker 1.2.xcdatamodel"; sourceTree = "<group>"; };
 		3B68BDF827BDFCD3007AAAC6 /* AnalyzeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyzeView.swift; sourceTree = "<group>"; };
 		3B68BDFA27BE0F00007AAAC6 /* BarGraph.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarGraph.swift; sourceTree = "<group>"; };
@@ -381,14 +394,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3B3FFEF827D597C500DFACC1 /* CocoaLumberjack in Frameworks */,
+				3BE7321027DB1360007C013B /* DataController in Frameworks */,
+				3BE7321227DB1368007C013B /* ApplicationKey in Frameworks */,
 				3B68BE5027C349B9007AAAC6 /* SwiftUI.framework in Frameworks */,
-				3B9332EE27CF38B300BACE93 /* ApplicationKey in Frameworks */,
-				3B3FFF0627D5A1F200DFACC1 /* Surge in Frameworks */,
-				3B3FFF0427D5A1F200DFACC1 /* DataController in Frameworks */,
 				3B68BE4E27C349B9007AAAC6 /* WidgetKit.framework in Frameworks */,
-				3B3FFEFC27D597C500DFACC1 /* CocoaLumberjackSwiftLogBackend in Frameworks */,
-				3B3FFEFA27D597C500DFACC1 /* CocoaLumberjackSwift in Frameworks */,
+				3BE7320C27DB1318007C013B /* CocoaLumberjackSwift in Frameworks */,
+				3BE7320E27DB135A007C013B /* Surge in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -396,22 +407,22 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3BE7320127DB1206007C013B /* Surge in Frameworks */,
 				3B9332D127CE005200BACE93 /* CoreGraphics.framework in Frameworks */,
+				3BE7320427DB122F007C013B /* Shapes in Frameworks */,
 				3B9332C927CDFFAD00BACE93 /* BugfenderLibrary in Frameworks */,
-				3B9332D927CE03E700BACE93 /* CocoaLumberjack in Frameworks */,
-				3B68BE0127BEF949007AAAC6 /* Surge in Frameworks */,
 				3B9332CD27CE003D00BACE93 /* Security.framework in Frameworks */,
 				3B9332BC27CDC1B300BACE93 /* FirebaseAnalyticsSwift-Beta in Frameworks */,
-				3B68BE7327C36928007AAAC6 /* ApplicationKey in Frameworks */,
 				3B68BE1327BF599F007AAAC6 /* FirebaseCrashlytics in Frameworks */,
 				3B9332D327CE006800BACE93 /* libc++.tbd in Frameworks */,
 				3B9332CF27CE004400BACE93 /* CoreServices.framework in Frameworks */,
-				3B9332DD27CE048000BACE93 /* CocoaLumberjackSwiftLogBackend in Frameworks */,
 				3B9332CB27CE003300BACE93 /* SystemConfiguration.framework in Frameworks */,
-				3BF5316D27ACEAC600056673 /* DataController in Frameworks */,
-				3B09191F27BD84FE00844F6C /* Shapes in Frameworks */,
+				3BE731FA27DB11DB007C013B /* CocoaLumberjack in Frameworks */,
 				3BF5316827ACE1DA00056673 /* HealthKit.framework in Frameworks */,
-				3B9332DB27CE03E700BACE93 /* CocoaLumberjackSwift in Frameworks */,
+				3BE7320A27DB129C007C013B /* DataController in Frameworks */,
+				3BE731FE27DB11DB007C013B /* CocoaLumberjackSwiftLogBackend in Frameworks */,
+				3BE7320727DB1259007C013B /* ApplicationKey in Frameworks */,
+				3BE731FC27DB11DB007C013B /* CocoaLumberjackSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -582,7 +593,11 @@
 				3B3FFE6627D592A000DFACC1 /* Inputs */,
 				3B3FFE6127D592A000DFACC1 /* Outputs */,
 				3B3FFE5F27D592A000DFACC1 /* Model.swift */,
+				3B3FFF2127DA8C0300DFACC1 /* ModelInput.swift */,
+				3B3FFF2327DA8C5E00DFACC1 /* PredictionOutput.swift */,
 				3B3FFE6027D592A000DFACC1 /* Predictor.swift */,
+				3B3FFF2527DA8D2300DFACC1 /* TrainingInput.swift */,
+				3B3FFF1D27DA84DB00DFACC1 /* TestPredictor.swift */,
 			);
 			path = Prediction;
 			sourceTree = "<group>";
@@ -601,11 +616,11 @@
 		3B3FFE6627D592A000DFACC1 /* Inputs */ = {
 			isa = PBXGroup;
 			children = (
-				3B3FFE6727D592A000DFACC1 /* UncontrolledUserInput.swift */,
-				3B3FFE6827D592A000DFACC1 /* TimeInput.swift */,
+				3B3FFE6827D592A000DFACC1 /* ChronologicalInput.swift */,
 				3B3FFE6927D592A000DFACC1 /* ControlledUserInput.swift */,
-				3B3FFE6A27D592A000DFACC1 /* InputUnion.swift */,
 				3B3FFE6B27D592A000DFACC1 /* EnvironmentalInput.swift */,
+				3B3FFE6A27D592A000DFACC1 /* InputUnion.swift */,
+				3B3FFE6727D592A000DFACC1 /* UncontrolledUserInput.swift */,
 			);
 			path = Inputs;
 			sourceTree = "<group>";
@@ -655,6 +670,7 @@
 				3B3FFE8527D592A000DFACC1 /* MotionManager.swift */,
 				3B3FFE8427D592A000DFACC1 /* Weather.swift */,
 				3B3FFE8327D592A000DFACC1 /* WeatherManager.swift */,
+				3B3FFF2B27DAA89500DFACC1 /* WeatherStatistics.swift */,
 			);
 			path = Weather;
 			sourceTree = "<group>";
@@ -760,12 +776,12 @@
 			isa = PBXGroup;
 			children = (
 				3B68BE6B27C35EB9007AAAC6 /* Headache Tracker WidgetExtension.entitlements */,
+				3B68BE6227C3534B007AAAC6 /* Shared */,
 				3BF5313527ACE18D00056673 /* Headache Tracker */,
 				3BF5314B27ACE18F00056673 /* Headache TrackerTests */,
 				3BF5315527ACE18F00056673 /* Headache TrackerUITests */,
 				3B68BE5127C349B9007AAAC6 /* Headache Tracker Widget */,
 				3BF5313427ACE18D00056673 /* Products */,
-				3B68BE6227C3534B007AAAC6 /* Shared */,
 				3BF5316627ACE1DA00056673 /* Frameworks */,
 			);
 			sourceTree = "<group>";
@@ -853,12 +869,10 @@
 			);
 			name = "Headache Tracker WidgetExtension";
 			packageProductDependencies = (
-				3B9332ED27CF38B300BACE93 /* ApplicationKey */,
-				3B3FFEF727D597C500DFACC1 /* CocoaLumberjack */,
-				3B3FFEF927D597C500DFACC1 /* CocoaLumberjackSwift */,
-				3B3FFEFB27D597C500DFACC1 /* CocoaLumberjackSwiftLogBackend */,
-				3B3FFF0327D5A1F200DFACC1 /* DataController */,
-				3B3FFF0527D5A1F200DFACC1 /* Surge */,
+				3BE7320B27DB1318007C013B /* CocoaLumberjackSwift */,
+				3BE7320D27DB135A007C013B /* Surge */,
+				3BE7320F27DB1360007C013B /* DataController */,
+				3BE7321127DB1368007C013B /* ApplicationKey */,
 			);
 			productName = "Headache Tracker WidgetExtension";
 			productReference = 3B68BE4C27C349B9007AAAC6 /* Headache Tracker WidgetExtension.appex */;
@@ -882,16 +896,16 @@
 			);
 			name = "Headache Tracker";
 			packageProductDependencies = (
-				3BF5316C27ACEAC600056673 /* DataController */,
-				3B09191E27BD84FE00844F6C /* Shapes */,
-				3B68BE0027BEF949007AAAC6 /* Surge */,
 				3B68BE1227BF599F007AAAC6 /* FirebaseCrashlytics */,
-				3B68BE7227C36928007AAAC6 /* ApplicationKey */,
 				3B9332BB27CDC1B300BACE93 /* FirebaseAnalyticsSwift-Beta */,
 				3B9332C827CDFFAD00BACE93 /* BugfenderLibrary */,
-				3B9332D827CE03E700BACE93 /* CocoaLumberjack */,
-				3B9332DA27CE03E700BACE93 /* CocoaLumberjackSwift */,
-				3B9332DC27CE048000BACE93 /* CocoaLumberjackSwiftLogBackend */,
+				3BE731F927DB11DB007C013B /* CocoaLumberjack */,
+				3BE731FB27DB11DB007C013B /* CocoaLumberjackSwift */,
+				3BE731FD27DB11DB007C013B /* CocoaLumberjackSwiftLogBackend */,
+				3BE7320027DB1206007C013B /* Surge */,
+				3BE7320327DB122F007C013B /* Shapes */,
+				3BE7320627DB1259007C013B /* ApplicationKey */,
+				3BE7320927DB129C007C013B /* DataController */,
 			);
 			productName = "Headache Tracker";
 			productReference = 3BF5313327ACE18D00056673 /* Headache Tracker.app */;
@@ -969,13 +983,13 @@
 			);
 			mainGroup = 3BF5312A27ACE18D00056673;
 			packageReferences = (
-				3BF5316B27ACEAC600056673 /* XCRemoteSwiftPackageReference "DataController" */,
-				3B09191D27BD84FD00844F6C /* XCRemoteSwiftPackageReference "swiftui-shapes" */,
-				3B68BDFF27BEF949007AAAC6 /* XCRemoteSwiftPackageReference "Surge" */,
 				3B68BE0F27BF599F007AAAC6 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
-				3B68BE7127C36928007AAAC6 /* XCRemoteSwiftPackageReference "ApplicationKey" */,
 				3B9332C727CDFFAD00BACE93 /* XCRemoteSwiftPackageReference "BugfenderSDK-iOS" */,
-				3B9332D727CE03E700BACE93 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */,
+				3BE731F827DB11DB007C013B /* XCRemoteSwiftPackageReference "CocoaLumberjack" */,
+				3BE731FF27DB1205007C013B /* XCRemoteSwiftPackageReference "Surge" */,
+				3BE7320227DB122F007C013B /* XCRemoteSwiftPackageReference "swiftui-shapes" */,
+				3BE7320527DB1259007C013B /* XCRemoteSwiftPackageReference "ApplicationKey" */,
+				3BE7320827DB129B007C013B /* XCRemoteSwiftPackageReference "DataController" */,
 			);
 			productRefGroup = 3BF5313427ACE18D00056673 /* Products */;
 			projectDirPath = "";
@@ -1112,6 +1126,7 @@
 				3B3FFF1827D88ADC00DFACC1 /* DestructiveConfirmationDialog.swift in Sources */,
 				3B9332F127CF3B5300BACE93 /* OutlookWidget.swift in Sources */,
 				3B3FFEF227D592A000DFACC1 /* Formatters.swift in Sources */,
+				3B3FFF2A27DA8E8B00DFACC1 /* TestPredictor.swift in Sources */,
 				3B3FFED027D592A000DFACC1 /* Calendar+Extensions.swift in Sources */,
 				3B3FFF1627D88A7C00DFACC1 /* AsyncButton.swift in Sources */,
 				3B3FFE9E27D592A000DFACC1 /* TrainingData+CoreDataClass.swift in Sources */,
@@ -1125,18 +1140,21 @@
 				3B3FFE9427D592A000DFACC1 /* HeadacheStatistics.swift in Sources */,
 				3B3FFF1727D88AD800DFACC1 /* ConfirmationAlert.swift in Sources */,
 				3B3FFEC627D592A000DFACC1 /* Severity+Extensions.swift in Sources */,
+				3B3FFF2827DA8E8100DFACC1 /* ModelInput.swift in Sources */,
 				3B3FFEB027D592A000DFACC1 /* OnsetRegressorOutput.swift in Sources */,
 				3B3FFEAA27D592A000DFACC1 /* Model.swift in Sources */,
 				3B3FFEBE27D592A000DFACC1 /* EnvironmentalInput.swift in Sources */,
 				3B3FFE8E27D592A000DFACC1 /* Constants.swift in Sources */,
 				3B3FFECC27D592A000DFACC1 /* DataController+Extensions.swift in Sources */,
 				3B3FFEDC27D592A000DFACC1 /* Numeric+Extensions.swift in Sources */,
+				3B3FFF2727DA8D2300DFACC1 /* TrainingInput.swift in Sources */,
 				3B3FFE9627D592A000DFACC1 /* SeverityInterval.swift in Sources */,
 				3B3FFD7527D58D5400DFACC1 /* SeveritySelectionView.swift in Sources */,
 				3B68BE5327C349B9007AAAC6 /* Headache_Tracker_Widget.swift in Sources */,
 				3B3FFEE827D592A000DFACC1 /* Weather.swift in Sources */,
 				3B3FFF1C27D8987600DFACC1 /* Waiter.swift in Sources */,
 				3B3FFEEE27D592A000DFACC1 /* HolisticOutlook.swift in Sources */,
+				3B3FFF2927DA8E8400DFACC1 /* PredictionOutput.swift in Sources */,
 				3B68BE6127C34B8E007AAAC6 /* OutlookWidgetContent.swift in Sources */,
 				3B3FFED627D592A000DFACC1 /* Color+Extensions.swift in Sources */,
 				3B3FFEC827D592A000DFACC1 /* Headache+Extensions.swift in Sources */,
@@ -1144,7 +1162,7 @@
 				3B3FFEF027D592A000DFACC1 /* Previewing.swift in Sources */,
 				3B3FFECA27D592A000DFACC1 /* String+Extensions.swift in Sources */,
 				3B3FFEA027D592A000DFACC1 /* Outlook.swift in Sources */,
-				3B3FFEB827D592A000DFACC1 /* TimeInput.swift in Sources */,
+				3B3FFEB827D592A000DFACC1 /* ChronologicalInput.swift in Sources */,
 				3B3FFEAC27D592A000DFACC1 /* Predictor.swift in Sources */,
 				3B9332FE27CF40A300BACE93 /* SeverityWidgetProvider.swift in Sources */,
 				3B9332F427CF3BB200BACE93 /* SeverityWidget.swift in Sources */,
@@ -1153,6 +1171,7 @@
 				3B3FFE9A27D592A000DFACC1 /* AppSettings.swift in Sources */,
 				3B3FFEB227D592A000DFACC1 /* OutlookClassifierOutput.swift in Sources */,
 				3B3FFEAE27D592A000DFACC1 /* SeverityClassifierOutput.swift in Sources */,
+				3B3FFF2D27DAA89500DFACC1 /* WeatherStatistics.swift in Sources */,
 				3B3FFEE227D592A000DFACC1 /* UnitRate.swift in Sources */,
 				3B3FFF0B27D5CF5600DFACC1 /* DurationPredictionView.swift in Sources */,
 				3B3FFEC427D592A000DFACC1 /* TrainingData+Extensions.swift in Sources */,
@@ -1167,8 +1186,9 @@
 			files = (
 				3B3FFF1527D87EAE00DFACC1 /* ErrorButton.swift in Sources */,
 				3B051A8F27B0FA9B0017131D /* HeadacheCell.swift in Sources */,
-				3B3FFEB727D592A000DFACC1 /* TimeInput.swift in Sources */,
+				3B3FFEB727D592A000DFACC1 /* ChronologicalInput.swift in Sources */,
 				3BAAA69727CCA7A200C0DDC4 /* TouchLocatingView.swift in Sources */,
+				3B3FFF2427DA8C5E00DFACC1 /* PredictionOutput.swift in Sources */,
 				3B1C7DB427D2005E000B3A99 /* StatusView.swift in Sources */,
 				3B93330227CF51C600BACE93 /* AppDelegate.swift in Sources */,
 				3B3FFEAB27D592A000DFACC1 /* Predictor.swift in Sources */,
@@ -1189,12 +1209,14 @@
 				3B93A6E027D5591F00BCBDE1 /* BlockGraph.swift in Sources */,
 				3B3FFEA927D592A000DFACC1 /* Model.swift in Sources */,
 				3B3FFEDB27D592A000DFACC1 /* Numeric+Extensions.swift in Sources */,
+				3B3FFF2C27DAA89500DFACC1 /* WeatherStatistics.swift in Sources */,
 				3B3FFE9B27D592A000DFACC1 /* SharedUserDefaults.swift in Sources */,
 				3B3FFEE727D592A000DFACC1 /* Weather.swift in Sources */,
 				3B051AA027B3577B0017131D /* DestructiveConfirmationDialog.swift in Sources */,
 				3B1C7DB627D205EE000B3A99 /* ActionView.swift in Sources */,
 				3BAAA69327CC8A5800C0DDC4 /* GraphList.swift in Sources */,
 				3B3FFECF27D592A000DFACC1 /* Calendar+Extensions.swift in Sources */,
+				3B3FFF1E27DA84DB00DFACC1 /* TestPredictor.swift in Sources */,
 				3B3FFEB527D592A000DFACC1 /* UncontrolledUserInput.swift in Sources */,
 				3B3FFEDF27D592A000DFACC1 /* AlertManager.swift in Sources */,
 				3B3FFEE927D592A000DFACC1 /* MotionManager.swift in Sources */,
@@ -1213,6 +1235,7 @@
 				3B3FFE9927D592A000DFACC1 /* AppSettings.swift in Sources */,
 				3BF5313927ACE18D00056673 /* ContentView.swift in Sources */,
 				3B3FFEA727D592A000DFACC1 /* HealthKitManager.swift in Sources */,
+				3B3FFF2227DA8C0300DFACC1 /* ModelInput.swift in Sources */,
 				3BAAA69927CD5B0100C0DDC4 /* DebugSettingsView.swift in Sources */,
 				3B3FFED727D592A000DFACC1 /* Bundle+Extensions.swift in Sources */,
 				3B9332E627CEF7AC00BACE93 /* DurationPredictionView.swift in Sources */,
@@ -1236,6 +1259,7 @@
 				3B3FFEB327D592A000DFACC1 /* DurationRegressorOutput.swift in Sources */,
 				3B3FFEA327D592A000DFACC1 /* HeadacheManager.swift in Sources */,
 				3B3FFF0827D5A22200DFACC1 /* Previewing+Extensions.swift in Sources */,
+				3B3FFF2627DA8D2300DFACC1 /* TrainingInput.swift in Sources */,
 				3BF5314327ACE18F00056673 /* Headache_Tracker.xcdatamodeld in Sources */,
 				3B3FFE8D27D592A000DFACC1 /* Constants.swift in Sources */,
 				3B051A9E27B3555E0017131D /* ConfirmationAlert.swift in Sources */,
@@ -1850,36 +1874,12 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		3B09191D27BD84FD00844F6C /* XCRemoteSwiftPackageReference "swiftui-shapes" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "git@github.com:spacenation/swiftui-shapes.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.1.0;
-			};
-		};
-		3B68BDFF27BEF949007AAAC6 /* XCRemoteSwiftPackageReference "Surge" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "git@github.com:Jounce/Surge.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 2.3.0;
-			};
-		};
 		3B68BE0F27BF599F007AAAC6 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 8.12.1;
-			};
-		};
-		3B68BE7127C36928007AAAC6 /* XCRemoteSwiftPackageReference "ApplicationKey" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/colinc86/ApplicationKey";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.0;
 			};
 		};
 		3B9332C727CDFFAD00BACE93 /* XCRemoteSwiftPackageReference "BugfenderSDK-iOS" */ = {
@@ -1890,69 +1890,53 @@
 				minimumVersion = 1.10.5;
 			};
 		};
-		3B9332D727CE03E700BACE93 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */ = {
+		3BE731F827DB11DB007C013B /* XCRemoteSwiftPackageReference "CocoaLumberjack" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "git@github.com:CocoaLumberjack/CocoaLumberjack.git";
+			repositoryURL = "https://github.com/CocoaLumberjack/CocoaLumberjack.git";
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 3.7.4;
 			};
 		};
-		3BF5316B27ACEAC600056673 /* XCRemoteSwiftPackageReference "DataController" */ = {
+		3BE731FF27DB1205007C013B /* XCRemoteSwiftPackageReference "Surge" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "git@github.com:colinc86/DataController.git";
+			repositoryURL = "https://github.com/Jounce/Surge.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
+		3BE7320227DB122F007C013B /* XCRemoteSwiftPackageReference "swiftui-shapes" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/spacenation/swiftui-shapes.git";
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 1.0.0;
 			};
 		};
+		3BE7320527DB1259007C013B /* XCRemoteSwiftPackageReference "ApplicationKey" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/colinc86/ApplicationKey.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
+		3BE7320827DB129B007C013B /* XCRemoteSwiftPackageReference "DataController" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/colinc86/DataController.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.6;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		3B09191E27BD84FE00844F6C /* Shapes */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 3B09191D27BD84FD00844F6C /* XCRemoteSwiftPackageReference "swiftui-shapes" */;
-			productName = Shapes;
-		};
-		3B3FFEF727D597C500DFACC1 /* CocoaLumberjack */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 3B9332D727CE03E700BACE93 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */;
-			productName = CocoaLumberjack;
-		};
-		3B3FFEF927D597C500DFACC1 /* CocoaLumberjackSwift */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 3B9332D727CE03E700BACE93 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */;
-			productName = CocoaLumberjackSwift;
-		};
-		3B3FFEFB27D597C500DFACC1 /* CocoaLumberjackSwiftLogBackend */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 3B9332D727CE03E700BACE93 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */;
-			productName = CocoaLumberjackSwiftLogBackend;
-		};
-		3B3FFF0327D5A1F200DFACC1 /* DataController */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 3BF5316B27ACEAC600056673 /* XCRemoteSwiftPackageReference "DataController" */;
-			productName = DataController;
-		};
-		3B3FFF0527D5A1F200DFACC1 /* Surge */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 3B68BDFF27BEF949007AAAC6 /* XCRemoteSwiftPackageReference "Surge" */;
-			productName = Surge;
-		};
-		3B68BE0027BEF949007AAAC6 /* Surge */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 3B68BDFF27BEF949007AAAC6 /* XCRemoteSwiftPackageReference "Surge" */;
-			productName = Surge;
-		};
 		3B68BE1227BF599F007AAAC6 /* FirebaseCrashlytics */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 3B68BE0F27BF599F007AAAC6 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseCrashlytics;
-		};
-		3B68BE7227C36928007AAAC6 /* ApplicationKey */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 3B68BE7127C36928007AAAC6 /* XCRemoteSwiftPackageReference "ApplicationKey" */;
-			productName = ApplicationKey;
 		};
 		3B9332BB27CDC1B300BACE93 /* FirebaseAnalyticsSwift-Beta */ = {
 			isa = XCSwiftPackageProductDependency;
@@ -1964,30 +1948,60 @@
 			package = 3B9332C727CDFFAD00BACE93 /* XCRemoteSwiftPackageReference "BugfenderSDK-iOS" */;
 			productName = BugfenderLibrary;
 		};
-		3B9332D827CE03E700BACE93 /* CocoaLumberjack */ = {
+		3BE731F927DB11DB007C013B /* CocoaLumberjack */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 3B9332D727CE03E700BACE93 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */;
+			package = 3BE731F827DB11DB007C013B /* XCRemoteSwiftPackageReference "CocoaLumberjack" */;
 			productName = CocoaLumberjack;
 		};
-		3B9332DA27CE03E700BACE93 /* CocoaLumberjackSwift */ = {
+		3BE731FB27DB11DB007C013B /* CocoaLumberjackSwift */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 3B9332D727CE03E700BACE93 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */;
+			package = 3BE731F827DB11DB007C013B /* XCRemoteSwiftPackageReference "CocoaLumberjack" */;
 			productName = CocoaLumberjackSwift;
 		};
-		3B9332DC27CE048000BACE93 /* CocoaLumberjackSwiftLogBackend */ = {
+		3BE731FD27DB11DB007C013B /* CocoaLumberjackSwiftLogBackend */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 3B9332D727CE03E700BACE93 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */;
+			package = 3BE731F827DB11DB007C013B /* XCRemoteSwiftPackageReference "CocoaLumberjack" */;
 			productName = CocoaLumberjackSwiftLogBackend;
 		};
-		3B9332ED27CF38B300BACE93 /* ApplicationKey */ = {
+		3BE7320027DB1206007C013B /* Surge */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 3B68BE7127C36928007AAAC6 /* XCRemoteSwiftPackageReference "ApplicationKey" */;
+			package = 3BE731FF27DB1205007C013B /* XCRemoteSwiftPackageReference "Surge" */;
+			productName = Surge;
+		};
+		3BE7320327DB122F007C013B /* Shapes */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3BE7320227DB122F007C013B /* XCRemoteSwiftPackageReference "swiftui-shapes" */;
+			productName = Shapes;
+		};
+		3BE7320627DB1259007C013B /* ApplicationKey */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3BE7320527DB1259007C013B /* XCRemoteSwiftPackageReference "ApplicationKey" */;
 			productName = ApplicationKey;
 		};
-		3BF5316C27ACEAC600056673 /* DataController */ = {
+		3BE7320927DB129C007C013B /* DataController */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 3BF5316B27ACEAC600056673 /* XCRemoteSwiftPackageReference "DataController" */;
+			package = 3BE7320827DB129B007C013B /* XCRemoteSwiftPackageReference "DataController" */;
 			productName = DataController;
+		};
+		3BE7320B27DB1318007C013B /* CocoaLumberjackSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3BE731F827DB11DB007C013B /* XCRemoteSwiftPackageReference "CocoaLumberjack" */;
+			productName = CocoaLumberjackSwift;
+		};
+		3BE7320D27DB135A007C013B /* Surge */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3BE731FF27DB1205007C013B /* XCRemoteSwiftPackageReference "Surge" */;
+			productName = Surge;
+		};
+		3BE7320F27DB1360007C013B /* DataController */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3BE7320827DB129B007C013B /* XCRemoteSwiftPackageReference "DataController" */;
+			productName = DataController;
+		};
+		3BE7321127DB1368007C013B /* ApplicationKey */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3BE7320527DB1259007C013B /* XCRemoteSwiftPackageReference "ApplicationKey" */;
+			productName = ApplicationKey;
 		};
 /* End XCSwiftPackageProductDependency section */
 

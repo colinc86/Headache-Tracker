@@ -13,22 +13,22 @@ struct DurationPredictionView: View {
   /// The view's predicted duration.
   let duration: TimeInterval
   
+  /// The prediction date.
+  let date: Date
+  
   // MARK: Private properties
   
   /// The id of the duration view.
   @State private var durationID = UUID()
   
-  /// The date the view appeared.
-  @State private var startDate: Date = Date()
-  
-  /// The amount of time to remove from the duration
-  @State private var decrement: TimeInterval = 0.0
-  
+  /// The waiter responsible for updating the view's duration.
   private let durationUpdateWaiter = Waiter()
   
+  // MARK: View body
+  
   var body: some View {
-    TitleCaptionView(title: "Duration", systemImage: "timer", foregroundColor: .green, caption: "Until " + Date().addingTimeInterval(duration).formattedRelative()) {
-      Text(Formatters.dateComponentsFormatter.string(from: duration - decrement) ?? "N/A")
+    TitleCaptionView(title: "Duration", systemImage: "timer", foregroundColor: .green, caption: "Until " + date.addingTimeInterval(duration).formattedRelative()) {
+      Text(Formatters.dateComponentsFormatter.string(from: duration - Date().timeIntervalSince(date)) ?? "N/A")
         .font(.title)
         .id(durationID)
     }
@@ -48,10 +48,8 @@ extension DurationPredictionView {
   
   /// Called when the view appears.
   func appeared() {
-    startDate = Date()
     updateDurationID()
     durationUpdateWaiter.wait(for: 60.0, repeats: true) {
-      decrement = Date().timeIntervalSince(startDate)
       updateDurationID()
     }
   }
@@ -60,7 +58,7 @@ extension DurationPredictionView {
 
 struct DurationPredictionView_Previews: PreviewProvider {
   static var previews: some View {
-    DurationPredictionView(duration: 0.0)
+    DurationPredictionView(duration: 0.0, date: Date())
       .environment(\.managedObjectContext, Previewing.CoreData.viewContext)
       .environmentObject(Previewing.headacheManager)
       .environmentObject(Previewing.Prediction.predictor)

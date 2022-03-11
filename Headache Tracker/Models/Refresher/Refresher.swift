@@ -103,7 +103,7 @@ extension Refresher {
   /// Presents a prediction alert now.
   ///
   /// - Parameter prediction: The prediction.
-  func presentPredictionAlert(with prediction: Predictor.Prediction?) async throws {
+  func presentPredictionAlert(with prediction: PredictionOutput?) async throws {
     // Only continue if we have a prediction and prediction alerts are turned on
     guard realTimeAlerts, let prediction = prediction,
           prediction.severityClassifierOutput.prediction != .notPresent &&
@@ -121,7 +121,7 @@ extension Refresher {
   /// Presents an outlook alert now.
   ///
   /// - Parameter prediction: The prediction.
-  func presentOutlookAlert(with prediction: Predictor.Prediction?) async throws {
+  func presentOutlookAlert(with prediction: PredictionOutput?) async throws {
     // Only continue if we have a prediction and prediction alerts are turned on
     guard dailyOutlookAlerts, let prediction = prediction else {
       return

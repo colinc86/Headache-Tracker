@@ -79,15 +79,15 @@ class EnvironmentalInput: MLFeatureProvider {
     return nil
   }
   
-  convenience init(weather: Weather?, healthKitData: [HealthKitData: Double]) {
+  convenience init(weatherStatistics: WeatherStatistics?, healthKitData: [HealthKitData: Double]?) {
     self.init(
-      Current_Pressure: weather?.devicePressure.converted(to: .kilopascals).value ?? (weather?.currentPressure.converted(to: .kilopascals).value ?? 0.0),
-      Current_Humidity: weather?.currentHumidity.converted(to: .decimal).value ?? 0.0,
-      Current_Temperature: weather?.currentTemperature.converted(to: .celsius).value ?? 0.0,
-      Sigma_Pressure: weather?.sigmaPressure ?? 0.0,
-      Sigma_Humidity: weather?.sigmaHumidity ?? 0.0,
-      Sigma_Temperature: weather?.sigmaTemperature ?? 0.0,
-      Environment_Audio_Exposure: healthKitData[HealthKitData.environmentalAudioExposure] ?? 0.0
+      Current_Pressure: weatherStatistics?.barometricPressure ?? (weatherStatistics?.currentPressure ?? 0.0),
+      Current_Humidity: weatherStatistics?.currentHumidity ?? 0.0,
+      Current_Temperature: weatherStatistics?.currentTemperature ?? 0.0,
+      Sigma_Pressure: weatherStatistics?.sigmaPressure ?? 0.0,
+      Sigma_Humidity: weatherStatistics?.sigmaHumidity ?? 0.0,
+      Sigma_Temperature: weatherStatistics?.sigmaTemperature ?? 0.0,
+      Environment_Audio_Exposure: healthKitData?[HealthKitData.environmentalAudioExposure] ?? 0.0
     )
   }
   

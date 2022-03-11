@@ -10,7 +10,7 @@ import SwiftUI
 struct PredictionViews: View {
   
   /// The view's prediction.
-  let prediction: Predictor.Prediction
+  let prediction: PredictionOutput
   
   // MARK: Private properties
   
@@ -34,7 +34,7 @@ struct PredictionViews: View {
   
   var body: some View {
     let dailyOutlook = OutlookView(outlook: prediction.holisticOutlook)
-    let durationPrediction = DurationPredictionView(duration: prediction.durationRegressorOutput.prediction)
+    let durationPrediction = DurationPredictionView(duration: prediction.durationRegressorOutput.prediction, date: prediction.date)
     let severityPrediction = SeveritySelectionView(currentSeverity: prediction.severityClassifierOutput.prediction, collapsed: true)
     
     if debugShowAllViews {

@@ -24,6 +24,7 @@ class Weather: CustomStringConvertible {
     }
     
     struct WeatherLocation: Codable, CustomStringConvertible {
+      static let null = WeatherLocation(latitude: 0.0, longitude: 0.0)
       var description: String {
         return "{ latitude: \(latitude), longitude: \(longitude) }"
       }
@@ -48,48 +49,37 @@ class Weather: CustomStringConvertible {
   
   var weatherSpread: WeatherSpread
   var devicePressure: Measurement<UnitPressure>
-  
-  var currentHumidity: Measurement<UnitRate> {
-    return Measurement(value: weatherSpread.current.humidity, unit: .percent)
-  }
-  
-  var currentPressure: Measurement<UnitPressure> {
-    return Measurement(value: weatherSpread.current.pressure, unit: UnitPressure.millibars)
-  }
-  
-  var currentTemperature: Measurement<UnitTemperature> {
-    return Measurement(value: weatherSpread.current.temp, unit: UnitTemperature.kelvin)
-  }
-  
-  var currentTime: Date {
-    return Date(timeIntervalSince1970: weatherSpread.current.dt)
-  }
-  
-  var sigmaHumidity: Double {
-    return (abs(weatherSpread.current.humidity - weatherSpread.future.humidity) + abs(weatherSpread.current.humidity - weatherSpread.past.humidity)) / 100.0
-  }
-  
-  var sigmaPressure: Double {
-    let cPressure = Measurement(value: weatherSpread.current.pressure, unit: UnitPressure.millibars).converted(to: .kilopascals).value
-    let fPressure = Measurement(value: weatherSpread.future.pressure, unit: UnitPressure.millibars).converted(to: .kilopascals).value
-    let pPressure = Measurement(value: weatherSpread.past.pressure, unit: UnitPressure.millibars).converted(to: .kilopascals).value
-    return abs(cPressure - fPressure) + abs(cPressure - pPressure)
-  }
-  
-  var sigmaTemperature: Double {
-    let cTemperature = Measurement(value: weatherSpread.current.pressure, unit: UnitTemperature.kelvin).converted(to: .celsius).value
-    let fTemperature = Measurement(value: weatherSpread.future.pressure, unit: UnitTemperature.kelvin).converted(to: .celsius).value
-    let pTemperature = Measurement(value: weatherSpread.past.pressure, unit: UnitTemperature.kelvin).converted(to: .celsius).value
-    return abs(cTemperature - fTemperature) + abs(cTemperature - pTemperature)
-  }
-  
-  var sigmaTime: TimeInterval {
-    return abs(weatherSpread.current.dt - weatherSpread.future.dt) + abs(weatherSpread.current.dt - weatherSpread.past.dt)
-  }
+  var statistics: WeatherStatistics
   
   init(spread: WeatherSpread, pressure: Measurement<UnitPressure>) {
     weatherSpread = spread
     devicePressure = pressure
+    
+    // Calculate stats
+    let currentPressure = Measurement(value: spread.current.pressure, unit: UnitPressure.millibars).converted(to: .kilopascals).value
+    let currentHumidity = Measurement(value: spread.current.humidity, unit: UnitRate.percent).converted(to: .decimal).value
+    let currentTemperature = Measurement(value: spread.current.temp, unit: UnitTemperature.kelvin).converted(to: .celsius).value
+    
+    let sigmaHumidity = (abs(spread.current.humidity - spread.future.humidity) + abs(spread.current.humidity - spread.past.humidity)) / 100.0
+    
+    let cPressure = Measurement(value: spread.current.pressure, unit: UnitPressure.millibars).converted(to: .kilopascals).value
+    let fPressure = Measurement(value: spread.future.pressure, unit: UnitPressure.millibars).converted(to: .kilopascals).value
+    let pPressure = Measurement(value: spread.past.pressure, unit: UnitPressure.millibars).converted(to: .kilopascals).value
+    let sigmaPressure = abs(cPressure - fPressure) + abs(cPressure - pPressure)
+    
+    let cTemperature = Measurement(value: spread.current.pressure, unit: UnitTemperature.kelvin).converted(to: .celsius).value
+    let fTemperature = Measurement(value: spread.future.pressure, unit: UnitTemperature.kelvin).converted(to: .celsius).value
+    let pTemperature = Measurement(value: spread.past.pressure, unit: UnitTemperature.kelvin).converted(to: .celsius).value
+    let sigmaTemperature = abs(cTemperature - fTemperature) + abs(cTemperature - pTemperature)
+    
+    statistics = WeatherStatistics(
+      barometricPressure: pressure.converted(to: .kilopascals).value,
+      currentPressure: currentPressure,
+      currentHumidity: currentHumidity,
+      currentTemperature: currentTemperature,
+      sigmaPressure: sigmaPressure,
+      sigmaHumidity: sigmaHumidity,
+      sigmaTemperature: sigmaTemperature)
   }
   
 }

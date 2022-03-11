@@ -16,36 +16,64 @@ import CreateML
 extension TrainingData {
   
   var devicePressureMeasurement: Measurement<UnitPressure> {
-    return Measurement(value: barometricPressure, unit: .kilopascals)
+    Measurement(value: barometricPressure, unit: .kilopascals)
   }
   
   var pressureMeasurement: Measurement<UnitPressure> {
-    return Measurement(value: currentPressure, unit: .kilopascals)
+    Measurement(value: currentPressure, unit: .kilopascals)
   }
   
   var humidityMeasurement: Measurement<UnitRate> {
-    return Measurement(value: currentHumidity, unit: .decimal)
+    Measurement(value: currentHumidity, unit: .decimal)
   }
   
   var temperatureMeasurement: Measurement<UnitTemperature> {
-    return Measurement(value: currentTemperature, unit: .celsius)
+    Measurement(value: currentTemperature, unit: .celsius)
+  }
+  
+  var weatherStatistics: WeatherStatistics {
+    WeatherStatistics(
+      barometricPressure: barometricPressure,
+      currentPressure: currentPressure,
+      currentHumidity: currentHumidity,
+      currentTemperature: currentTemperature,
+      sigmaPressure: sigmaPressure,
+      sigmaHumidity: sigmaHumidity,
+      sigmaTemperature: sigmaTemperature)
+  }
+  
+  var healthKitData: [HealthKitData: Double] {
+    return [
+      .heartRate: heartRate,
+      .mindfulSession: mindfulSeconds,
+      .sleepSeconds: sleepSeconds,
+      .sleepOnset: sleepOnset,
+      .respiratoryRate: respiratoryRate,
+      .oxygenSaturation: oxygenSaturation,
+      .heartRateVariabilitySDNN: heartRateVariability,
+      .walkingHeartRateAverage: walkingHeartRateAverage,
+      .restingHeartRate: restingHeartRate,
+      .headphoneAudioExposure: headphoneAudioExposure,
+      .environmentalAudioExposure: environmentalAudioExposure,
+      .stepCount: stepCount
+    ]
   }
   
   // MARK: Initializers
   
-  convenience init(context: NSManagedObjectContext, input: Predictor.Input?) {
+  convenience init(context: NSManagedObjectContext, input: ModelInput?) {
     self.init(context: context)
     
     logDebug("Creating training data.")
     
     self.timestamp = input?.date
-    self.barometricPressure = input?.weather?.devicePressure.converted(to: .kilopascals).value ?? 0.0
-    self.currentPressure = input?.weather?.currentPressure.converted(to: .kilopascals).value ?? 0.0
-    self.currentHumidity = input?.weather?.currentHumidity.converted(to: .decimal).value ?? 0.0
-    self.currentTemperature = input?.weather?.currentTemperature.converted(to: .celsius).value ?? 0.0
-    self.sigmaPressure = input?.weather?.sigmaPressure ?? 0.0
-    self.sigmaHumidity = input?.weather?.sigmaHumidity ?? 0.0
-    self.sigmaTemperature = input?.weather?.sigmaTemperature ?? 0.0
+    self.barometricPressure = input?.weatherStatistics?.barometricPressure ?? 0.0
+    self.currentPressure = input?.weatherStatistics?.currentPressure ?? 0.0
+    self.currentHumidity = input?.weatherStatistics?.currentHumidity ?? 0.0
+    self.currentTemperature = input?.weatherStatistics?.currentTemperature ?? 0.0
+    self.sigmaPressure = input?.weatherStatistics?.sigmaPressure ?? 0.0
+    self.sigmaHumidity = input?.weatherStatistics?.sigmaHumidity ?? 0.0
+    self.sigmaTemperature = input?.weatherStatistics?.sigmaTemperature ?? 0.0
     self.updateWithHealthKitData(input?.healthKitData)
   }
 }
@@ -140,13 +168,13 @@ extension Array where Element == TrainingData {
     table[EnvironmentalInput.FeatureName.environmentAudioExposure] = map({ $0.environmentalAudioExposure })
     
     // Time input
-    table[TimeInput.FeatureName.secondsSinceMidnight] = map({ data -> Double in
+    table[ChronologicalInput.FeatureName.secondsSinceMidnight] = map({ data -> Double in
       if let timestamp = data.timestamp {
         return Double(Calendar.current.timeIntervalSinceMidnight(timestamp))
       }
       return Double(0.0)
     })
-    table[TimeInput.FeatureName.weekday] = map({ data -> Double in
+    table[ChronologicalInput.FeatureName.weekday] = map({ data -> Double in
       if let timestamp = data.timestamp {
         return Double(Calendar.current.dayOfWeek(timestamp))
       }
@@ -190,13 +218,13 @@ extension Array where Element == TrainingData {
     table[EnvironmentalInput.FeatureName.environmentAudioExposure] = map({ $0.environmentalAudioExposure })
     
     // Time input
-    table[TimeInput.FeatureName.secondsSinceMidnight] = map({ data -> Double in
+    table[ChronologicalInput.FeatureName.secondsSinceMidnight] = map({ data -> Double in
       if let timestamp = data.timestamp {
         return Double(Calendar.current.timeIntervalSinceMidnight(timestamp))
       }
       return Double(0.0)
     })
-    table[TimeInput.FeatureName.weekday] = map({ data -> Double in
+    table[ChronologicalInput.FeatureName.weekday] = map({ data -> Double in
       if let timestamp = data.timestamp {
         return Double(Calendar.current.dayOfWeek(timestamp))
       }
@@ -240,13 +268,13 @@ extension Array where Element == TrainingData {
     table[EnvironmentalInput.FeatureName.environmentAudioExposure] = map({ $0.environmentalAudioExposure })
     
     // Time input
-    table[TimeInput.FeatureName.secondsSinceMidnight] = map({ data -> Double in
+    table[ChronologicalInput.FeatureName.secondsSinceMidnight] = map({ data -> Double in
       if let timestamp = data.timestamp {
         return Double(Calendar.current.timeIntervalSinceMidnight(timestamp))
       }
       return Double(0.0)
     })
-    table[TimeInput.FeatureName.weekday] = map({ data -> Double in
+    table[ChronologicalInput.FeatureName.weekday] = map({ data -> Double in
       if let timestamp = data.timestamp {
         return Double(Calendar.current.dayOfWeek(timestamp))
       }
@@ -289,13 +317,13 @@ extension Array where Element == TrainingData {
     table[EnvironmentalInput.FeatureName.environmentAudioExposure] = map({ $0.environmentalAudioExposure })
     
     // Time input
-    table[TimeInput.FeatureName.secondsSinceMidnight] = map({ data -> Double in
+    table[ChronologicalInput.FeatureName.secondsSinceMidnight] = map({ data -> Double in
       if let timestamp = data.timestamp {
         return Double(Calendar.current.timeIntervalSinceMidnight(timestamp))
       }
       return Double(0.0)
     })
-    table[TimeInput.FeatureName.weekday] = map({ data -> Double in
+    table[ChronologicalInput.FeatureName.weekday] = map({ data -> Double in
       if let timestamp = data.timestamp {
         return Double(Calendar.current.dayOfWeek(timestamp))
       }

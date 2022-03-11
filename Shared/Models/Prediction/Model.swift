@@ -22,7 +22,7 @@ extension MLBoostedTreeClassifier: CoreMLModel {}
 extension MLBoostedTreeRegressor: CoreMLModel {}
 
 /// Class for model loading and prediction
-class Model<Input: MLFeatureProvider, Output: MLFeatureInitializable> {
+class Model<ModelInput: MLFeatureProvider, Output: MLFeatureInitializable> {
   
   let model: MLModel
   
@@ -96,7 +96,7 @@ class Model<Input: MLFeatureProvider, Output: MLFeatureInitializable> {
    
    - returns: the result of the prediction as ClassifierProtoOutput
    */
-  func prediction(input: Input) throws -> Output {
+  func prediction(input: ModelInput) throws -> Output {
     return try self.prediction(input: input, options: MLPredictionOptions())
   }
   
@@ -111,7 +111,7 @@ class Model<Input: MLFeatureProvider, Output: MLFeatureInitializable> {
    
    - returns: the result of the prediction as ClassifierProtoOutput
    */
-  func prediction(input: Input, options: MLPredictionOptions) throws -> Output {
+  func prediction(input: ModelInput, options: MLPredictionOptions) throws -> Output {
     let outFeatures = try model.prediction(from: input, options:options)
     return Output(features: outFeatures)
   }
@@ -127,7 +127,7 @@ class Model<Input: MLFeatureProvider, Output: MLFeatureInitializable> {
    
    - returns: the result of the prediction as [ClassifierProtoOutput]
    */
-  func predictions(inputs: [Input], options: MLPredictionOptions = MLPredictionOptions()) throws -> [Output] {
+  func predictions(inputs: [ModelInput], options: MLPredictionOptions = MLPredictionOptions()) throws -> [Output] {
     let batchIn = MLArrayBatchProvider(array: inputs)
     let batchOut = try model.predictions(from: batchIn, options: options)
     var results: [Output] = []

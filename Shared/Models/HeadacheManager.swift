@@ -420,12 +420,12 @@ extension HeadacheManager {
     weatherManager.cancel()
   }
   
-  func predictorInput(inWidget: Bool = false) async throws -> Predictor.Input {
+  func predictorInput(inWidget: Bool = false) async throws -> ModelInput {
     let weather = try await weatherManager.weather()
     let now = Date()
     let interval = DateInterval(start: now.addingTimeInterval(-86400.0), end: now)
     let healthKitData = healthKitManager.readHealthKitData(in: interval, inWidget: inWidget)
-    return Predictor.Input(weather: weather, healthKitData: healthKitData, date: now)
+    return ModelInput(date: now, weatherStatistics: weather.statistics, healthKitData: healthKitData)
   }
   
   /// Gets classifier input appropriate for prediction, saves it as traininig
@@ -457,7 +457,7 @@ extension HeadacheManager {
   /// - Parameters:
   ///   - input: The input data to create the training data from.
   ///   - severityIdentifier: The identifier of the training data's parent severity, if any.
-  func createTrainingData(from input: Predictor.Input, severityIdentifier: UUID? = nil) async throws {
+  func createTrainingData(from input: ModelInput, severityIdentifier: UUID? = nil) async throws {
     guard !testing else { throw HeadacheError.testing }
     
     logInfo("Creating training data...")
@@ -512,7 +512,7 @@ extension HeadacheManager {
             }
             
             // Get the training input
-            let input = try Predictor.TrainingInput(trainingData: trainingData)
+            let input = try TrainingInput(trainingData: trainingData)
             
             logDebug("Training classifiers with \(trainingData.count) data...")
             Task {
@@ -537,7 +537,7 @@ extension HeadacheManager {
   /// Evaluates the prediction and saves it to core data.
   ///
   /// - Parameter prediction: The prediction.
-  private func evaluatePrediction(_ prediction: Predictor.Prediction) async throws {
+  private func evaluatePrediction(_ prediction: PredictionOutput) async throws {
     let hasCurrent = try await hasCurrentHeadache()
     let severity = try await currentHeadache { headache, _ in
       return headache?.severity ?? .notPresent
