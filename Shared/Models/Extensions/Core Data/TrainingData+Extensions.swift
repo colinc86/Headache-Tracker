@@ -59,6 +59,17 @@ extension TrainingData {
     ]
   }
   
+  var modelInput: ModelInput {
+    ModelInput(
+      date: timestamp ?? Date(),
+      weatherStatistics: weatherStatistics,
+      healthKitData: healthKitData,
+      timeIntervalUntilNextHeadacheStart: timeIntervalUntilNextHeadacheStart,
+      timeIntervalUntilNextHeadacheEnd: timeIntervalUntilNextHeadacheEnd,
+      outlook: outlook ?? .noHeadache,
+      severity: severity?.severity ?? .notPresent)
+  }
+  
   // MARK: Initializers
   
   convenience init(context: NSManagedObjectContext, input: ModelInput?) {

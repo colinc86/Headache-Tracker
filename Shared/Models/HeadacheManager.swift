@@ -420,6 +420,11 @@ extension HeadacheManager {
     weatherManager.cancel()
   }
   
+  /// Creates model input ready for prediction.
+  ///
+  /// - Parameter inWidget: Whether this method is being called from
+  ///   within a widget.
+  /// - Returns: Model input.
   func predictorInput(inWidget: Bool = false) async throws -> ModelInput {
     let weather = try await weatherManager.weather()
     let now = Date()

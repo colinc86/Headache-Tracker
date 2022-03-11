@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import HealthKit
 
 /// A prediction input.
 struct ModelInput {
@@ -19,30 +20,60 @@ struct ModelInput {
   /// The input health kit data.
   var healthKitData: [HealthKitData: Double]?
   
+  /// The time interval until the next headache begins.
+  var timeIntervalUntilNextHeadacheStart: TimeInterval?
+  
+  /// The time interval until the current headache ends.
+  var timeIntervalUntilNextHeadacheEnd: TimeInterval?
+  
+  /// The input's outlook.
+  var outlook: Outlook
+  
+  /// The input's severity.
+  var severity: HKCategoryValueSeverity
+  
   // MARK: Initializers
   
   /// Initializes new model input.
-  /// - Parameters:
-  ///   - date: <#date description#>
-  ///   - weatherStatistics: <#weatherStatistics description#>
-  ///   - healthKitData: <#healthKitData description#>
-  init(date: Date, weatherStatistics: WeatherStatistics?, healthKitData: [HealthKitData: Double]?) {
+  init(date: Date, weatherStatistics: WeatherStatistics?, healthKitData: [HealthKitData: Double]?, timeIntervalUntilNextHeadacheStart: TimeInterval? = 0.0, timeIntervalUntilNextHeadacheEnd: TimeInterval? = 0.0, outlook: Outlook = .noHeadache, severity: HKCategoryValueSeverity = .notPresent) {
     self.date = date
     self.weatherStatistics = weatherStatistics
     self.healthKitData = healthKitData
+    self.timeIntervalUntilNextHeadacheStart = timeIntervalUntilNextHeadacheStart
+    self.timeIntervalUntilNextHeadacheEnd = timeIntervalUntilNextHeadacheEnd
+    self.outlook = outlook
+    self.severity = severity
   }
   
+  /// Initializes new model input.
+  ///
+  /// - Parameter trainingData: The input's training data.
   init(trainingData: TrainingData) {
     self.init(
       date: trainingData.timestamp ?? Date(),
       weatherStatistics: trainingData.weatherStatistics,
-      healthKitData: trainingData.healthKitData)
+      healthKitData: trainingData.healthKitData,
+      timeIntervalUntilNextHeadacheStart: trainingData.timeIntervalUntilNextHeadacheStart,
+      timeIntervalUntilNextHeadacheEnd: trainingData.timeIntervalUntilNextHeadacheEnd,
+      outlook: trainingData.outlook ?? .noHeadache,
+      severity: trainingData.severity?.severity ?? .notPresent)
   }
   
   /// The full model input.
   func fullInput() -> InputUnion {
     return InputUnion(providers: [controlledUserInput(), environmentalInput(), chronologicalInput(), uncontrolledUserInput()])
   }
+  
+  func buffer() -> [Double] {
+    let input = fullInput()
+    return input.featureNames.map({ input.featureValue(for: $0)?.doubleValue ?? 0.0 })
+  }
+  
+}
+
+// MARK: Private methods
+
+extension ModelInput {
   
   private func controlledUserInput() -> ControlledUserInput {
     return ControlledUserInput(healthKitData: healthKitData)

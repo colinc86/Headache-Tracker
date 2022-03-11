@@ -200,6 +200,10 @@
 		3BE7320E27DB135A007C013B /* Surge in Frameworks */ = {isa = PBXBuildFile; productRef = 3BE7320D27DB135A007C013B /* Surge */; };
 		3BE7321027DB1360007C013B /* DataController in Frameworks */ = {isa = PBXBuildFile; productRef = 3BE7320F27DB1360007C013B /* DataController */; };
 		3BE7321227DB1368007C013B /* ApplicationKey in Frameworks */ = {isa = PBXBuildFile; productRef = 3BE7321127DB1368007C013B /* ApplicationKey */; };
+		3BE7321427DB1FC5007C013B /* MLDataTable+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BE7321327DB1FC5007C013B /* MLDataTable+Extensions.swift */; };
+		3BE7321627DB265A007C013B /* MLDataTable+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BE7321327DB1FC5007C013B /* MLDataTable+Extensions.swift */; };
+		3BE7321827DB2963007C013B /* Sequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BE7321727DB2963007C013B /* Sequence.swift */; };
+		3BE7321927DB2963007C013B /* Sequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BE7321727DB2963007C013B /* Sequence.swift */; };
 		3BF5313727ACE18D00056673 /* Headache_TrackerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF5313627ACE18D00056673 /* Headache_TrackerApp.swift */; };
 		3BF5313927ACE18D00056673 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF5313827ACE18D00056673 /* ContentView.swift */; };
 		3BF5313B27ACE18F00056673 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3BF5313A27ACE18F00056673 /* Assets.xcassets */; };
@@ -374,6 +378,8 @@
 		3BAAA69227CC8A5800C0DDC4 /* GraphList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphList.swift; sourceTree = "<group>"; };
 		3BAAA69627CCA7A200C0DDC4 /* TouchLocatingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TouchLocatingView.swift; sourceTree = "<group>"; };
 		3BAAA69827CD5B0100C0DDC4 /* DebugSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugSettingsView.swift; sourceTree = "<group>"; };
+		3BE7321327DB1FC5007C013B /* MLDataTable+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MLDataTable+Extensions.swift"; sourceTree = "<group>"; };
+		3BE7321727DB2963007C013B /* Sequence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sequence.swift; sourceTree = "<group>"; };
 		3BF5313327ACE18D00056673 /* Headache Tracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Headache Tracker.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3BF5313627ACE18D00056673 /* Headache_TrackerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Headache_TrackerApp.swift; sourceTree = "<group>"; };
 		3BF5313827ACE18D00056673 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -635,7 +641,9 @@
 				3B3FFE7427D592A000DFACC1 /* DataController+Extensions.swift */,
 				3B3FFE7B27D592A000DFACC1 /* Date+Extensions.swift */,
 				3B3FFE6E27D592A000DFACC1 /* HKCategoryValueSeverity+Extensions.swift */,
+				3BE7321327DB1FC5007C013B /* MLDataTable+Extensions.swift */,
 				3B3FFE7C27D592A000DFACC1 /* Numeric+Extensions.swift */,
+				3BE7321727DB2963007C013B /* Sequence.swift */,
 				3B3FFE7327D592A000DFACC1 /* String+Extensions.swift */,
 				3B3FFE7527D592A000DFACC1 /* UIColor+Extensions.swift */,
 				3B3FFE7827D592A000DFACC1 /* UUID+Extensions.swift */,
@@ -1122,6 +1130,7 @@
 				3B3FFEC227D592A000DFACC1 /* HKCategoryValueSeverity+Extensions.swift in Sources */,
 				3B3FFD6E27D58CED00DFACC1 /* Headache_Tracker.xcdatamodeld in Sources */,
 				3B3FFD7727D58D5400DFACC1 /* OutlookView.swift in Sources */,
+				3BE7321927DB2963007C013B /* Sequence.swift in Sources */,
 				3B3FFEB427D592A000DFACC1 /* DurationRegressorOutput.swift in Sources */,
 				3B3FFF1827D88ADC00DFACC1 /* DestructiveConfirmationDialog.swift in Sources */,
 				3B9332F127CF3B5300BACE93 /* OutlookWidget.swift in Sources */,
@@ -1135,6 +1144,7 @@
 				3B3FFE9227D592A000DFACC1 /* Trend.swift in Sources */,
 				3B3FFEEC27D592A000DFACC1 /* LocationManager.swift in Sources */,
 				3B3FFEB627D592A000DFACC1 /* UncontrolledUserInput.swift in Sources */,
+				3BE7321627DB265A007C013B /* MLDataTable+Extensions.swift in Sources */,
 				3B3FFEC027D592A000DFACC1 /* DescribableError.swift in Sources */,
 				3B3FFEA627D592A000DFACC1 /* HealthKitData.swift in Sources */,
 				3B3FFE9427D592A000DFACC1 /* HeadacheStatistics.swift in Sources */,
@@ -1209,6 +1219,7 @@
 				3B93A6E027D5591F00BCBDE1 /* BlockGraph.swift in Sources */,
 				3B3FFEA927D592A000DFACC1 /* Model.swift in Sources */,
 				3B3FFEDB27D592A000DFACC1 /* Numeric+Extensions.swift in Sources */,
+				3BE7321427DB1FC5007C013B /* MLDataTable+Extensions.swift in Sources */,
 				3B3FFF2C27DAA89500DFACC1 /* WeatherStatistics.swift in Sources */,
 				3B3FFE9B27D592A000DFACC1 /* SharedUserDefaults.swift in Sources */,
 				3B3FFEE727D592A000DFACC1 /* Weather.swift in Sources */,
@@ -1220,6 +1231,7 @@
 				3B3FFEB527D592A000DFACC1 /* UncontrolledUserInput.swift in Sources */,
 				3B3FFEDF27D592A000DFACC1 /* AlertManager.swift in Sources */,
 				3B3FFEE927D592A000DFACC1 /* MotionManager.swift in Sources */,
+				3BE7321827DB2963007C013B /* Sequence.swift in Sources */,
 				3B3FFEF327D592A000DFACC1 /* DDBugfenderLogger.swift in Sources */,
 				3B3FFEED27D592A000DFACC1 /* HolisticOutlook.swift in Sources */,
 				3B3FFEF527D592A000DFACC1 /* Logger.swift in Sources */,

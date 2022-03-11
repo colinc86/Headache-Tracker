@@ -11,17 +11,6 @@ import CoreData
 @objc(TrainingData)
 public class TrainingData: NSManagedObject {
   
-  enum TrainingTag {
-    // A headache is possible later in the day.
-    case outlookPossibleHeadache
-    
-    // A headache is in progress.
-    case outlookHeadache
-    
-    // There is no headache later in the day.
-    case outlookNoHeadache
-  }
-  
   // MARK: Volitile variables
   
   /// The time interval until the next headache begins.
