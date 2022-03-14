@@ -185,6 +185,8 @@
 		3B93330227CF51C600BACE93 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B93330127CF51C600BACE93 /* AppDelegate.swift */; };
 		3B93330427CF51D500BACE93 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B93330327CF51D500BACE93 /* SceneDelegate.swift */; };
 		3B93A6E027D5591F00BCBDE1 /* BlockGraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B93A6DF27D5591F00BCBDE1 /* BlockGraph.swift */; };
+		3BA933AD27DF23E100BAD5A4 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 3BA933AC27DF23E100BAD5A4 /* Alamofire */; };
+		3BA933AF27DF23EC00BAD5A4 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 3BA933AE27DF23EC00BAD5A4 /* Alamofire */; };
 		3BAAA68D27CC3D9300C0DDC4 /* TrainingDataView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BAAA68C27CC3D9300C0DDC4 /* TrainingDataView.swift */; };
 		3BAAA69327CC8A5800C0DDC4 /* GraphList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BAAA69227CC8A5800C0DDC4 /* GraphList.swift */; };
 		3BAAA69727CCA7A200C0DDC4 /* TouchLocatingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BAAA69627CCA7A200C0DDC4 /* TouchLocatingView.swift */; };
@@ -401,6 +403,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3BE7321027DB1360007C013B /* DataController in Frameworks */,
+				3BA933AF27DF23EC00BAD5A4 /* Alamofire in Frameworks */,
 				3BE7321227DB1368007C013B /* ApplicationKey in Frameworks */,
 				3B68BE5027C349B9007AAAC6 /* SwiftUI.framework in Frameworks */,
 				3B68BE4E27C349B9007AAAC6 /* WidgetKit.framework in Frameworks */,
@@ -425,6 +428,7 @@
 				3B9332CB27CE003300BACE93 /* SystemConfiguration.framework in Frameworks */,
 				3BE731FA27DB11DB007C013B /* CocoaLumberjack in Frameworks */,
 				3BF5316827ACE1DA00056673 /* HealthKit.framework in Frameworks */,
+				3BA933AD27DF23E100BAD5A4 /* Alamofire in Frameworks */,
 				3BE7320A27DB129C007C013B /* DataController in Frameworks */,
 				3BE731FE27DB11DB007C013B /* CocoaLumberjackSwiftLogBackend in Frameworks */,
 				3BE7320727DB1259007C013B /* ApplicationKey in Frameworks */,
@@ -881,6 +885,7 @@
 				3BE7320D27DB135A007C013B /* Surge */,
 				3BE7320F27DB1360007C013B /* DataController */,
 				3BE7321127DB1368007C013B /* ApplicationKey */,
+				3BA933AE27DF23EC00BAD5A4 /* Alamofire */,
 			);
 			productName = "Headache Tracker WidgetExtension";
 			productReference = 3B68BE4C27C349B9007AAAC6 /* Headache Tracker WidgetExtension.appex */;
@@ -914,6 +919,7 @@
 				3BE7320327DB122F007C013B /* Shapes */,
 				3BE7320627DB1259007C013B /* ApplicationKey */,
 				3BE7320927DB129C007C013B /* DataController */,
+				3BA933AC27DF23E100BAD5A4 /* Alamofire */,
 			);
 			productName = "Headache Tracker";
 			productReference = 3BF5313327ACE18D00056673 /* Headache Tracker.app */;
@@ -998,6 +1004,7 @@
 				3BE7320227DB122F007C013B /* XCRemoteSwiftPackageReference "swiftui-shapes" */,
 				3BE7320527DB1259007C013B /* XCRemoteSwiftPackageReference "ApplicationKey" */,
 				3BE7320827DB129B007C013B /* XCRemoteSwiftPackageReference "DataController" */,
+				3BA933AB27DF23E100BAD5A4 /* XCRemoteSwiftPackageReference "Alamofire" */,
 			);
 			productRefGroup = 3BF5313427ACE18D00056673 /* Products */;
 			projectDirPath = "";
@@ -1902,6 +1909,14 @@
 				minimumVersion = 1.10.5;
 			};
 		};
+		3BA933AB27DF23E100BAD5A4 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Alamofire/Alamofire.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.5.0;
+			};
+		};
 		3BE731F827DB11DB007C013B /* XCRemoteSwiftPackageReference "CocoaLumberjack" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/CocoaLumberjack/CocoaLumberjack.git";
@@ -1959,6 +1974,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 3B9332C727CDFFAD00BACE93 /* XCRemoteSwiftPackageReference "BugfenderSDK-iOS" */;
 			productName = BugfenderLibrary;
+		};
+		3BA933AC27DF23E100BAD5A4 /* Alamofire */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3BA933AB27DF23E100BAD5A4 /* XCRemoteSwiftPackageReference "Alamofire" */;
+			productName = Alamofire;
+		};
+		3BA933AE27DF23EC00BAD5A4 /* Alamofire */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3BA933AB27DF23E100BAD5A4 /* XCRemoteSwiftPackageReference "Alamofire" */;
+			productName = Alamofire;
 		};
 		3BE731F927DB11DB007C013B /* CocoaLumberjack */ = {
 			isa = XCSwiftPackageProductDependency;

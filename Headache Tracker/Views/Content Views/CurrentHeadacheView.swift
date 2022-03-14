@@ -191,7 +191,7 @@ extension CurrentHeadacheView {
     logDebug("Updating current headache view prediction.")
     
     // Run a prediction
-    try await headacheManager.createPredict(create: false)
+    try await headacheManager.createPredict(create: false, inWidget: false)
   }
   
   private func predictionChanged(_ newValue: PredictionOutput?) {
@@ -236,7 +236,7 @@ extension CurrentHeadacheView {
   private func noHeadacheAction() async throws {
     logDebug("No headache action.")
     
-    try await headacheManager.createPredict()
+    try await headacheManager.createPredict(inWidget: false)
     
     // Check if we should show the not-present training data cell
     let needsData = try await headacheManager.needsTrainingData()

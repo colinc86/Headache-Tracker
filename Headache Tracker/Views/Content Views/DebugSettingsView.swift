@@ -92,6 +92,7 @@ struct DebugSettingsView: View {
         }
         
         SubtitleCell(title: "Data Version", subtitle: Constants.trainingDataVersion)
+        SubtitleCell(title: "Weather Version", subtitle: Constants.trainingDataWeatherVersion)
       }
       
       Section {

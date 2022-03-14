@@ -178,21 +178,22 @@ struct TrainingInput {
     // Weather data
     let iws = input.weatherStatistics ?? .empty
     let nws = neighbor.weatherStatistics ?? .empty
-    let synthesizedBarometricPressure = interpolate(percent, iws.barometricPressure, nws.barometricPressure)
-    let synthesizedPressure = interpolate(percent, iws.currentPressure, nws.currentPressure)
-    let synthesizedHumitidy = interpolate(percent, iws.currentHumidity, nws.currentHumidity)
-    let synthesizedTemperature = interpolate(percent, iws.currentTemperature, nws.currentTemperature)
-    let synthesizedSigmaPressure = interpolate(percent, iws.sigmaPressure, nws.sigmaPressure)
-    let synthesizedSigmaHumidity = interpolate(percent, iws.sigmaHumidity, nws.sigmaHumidity)
-    let synthesizedSigmaTemperature = interpolate(percent, iws.sigmaTemperature, nws.sigmaTemperature)
+    
+    let inter: (Double, Double?, Double?) -> Double? = { percent, lhs, rhs in
+      if let lhs = lhs, let rhs = rhs {
+        return interpolate(percent, lhs, rhs)
+      }
+      return nil
+    }
+    
     let synthesizedWeatherStatistics = WeatherStatistics(
-      barometricPressure: synthesizedBarometricPressure,
-      currentPressure: synthesizedPressure,
-      currentHumidity: synthesizedHumitidy,
-      currentTemperature: synthesizedTemperature,
-      sigmaPressure: synthesizedSigmaPressure,
-      sigmaHumidity: synthesizedSigmaHumidity,
-      sigmaTemperature: synthesizedSigmaTemperature)
+      barometricPressure: inter(percent, iws.barometricPressure, nws.barometricPressure),
+      currentPressure: inter(percent, iws.currentPressure, nws.currentPressure),
+      currentHumidity: inter(percent, iws.currentHumidity, nws.currentHumidity),
+      currentTemperature: inter(percent, iws.currentTemperature, nws.currentTemperature),
+      sigmaPressure: inter(percent, iws.sigmaPressure, nws.sigmaPressure),
+      sigmaHumidity: inter(percent, iws.sigmaHumidity, nws.sigmaHumidity),
+      sigmaTemperature: inter(percent, iws.sigmaTemperature, nws.sigmaTemperature))
     
     // Date
     let synthesizedSecondsSinceMidnight = interpolate(percent, Calendar.current.timeIntervalSinceMidnight(input.date), Calendar.current.timeIntervalSinceMidnight(neighbor.date))

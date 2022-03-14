@@ -215,7 +215,7 @@ extension Refresher {
         // If there is no current headache, then present a prediction
         if currentSeverityID == nil {
           // We got the input, so present the prediction
-          let prediction = try await self.headacheManager.predictor.predict(input)
+          let prediction = try await self.headacheManager.predictor.predict(input, inWidget: false)
           try await self.presentPredictionAlert(with: prediction)
         }
         
@@ -306,7 +306,7 @@ extension Refresher {
       
       do {
         let input = try await self.headacheManager.predictorInput()
-        let prediction = try await self.headacheManager.predictor.predict(input)
+        let prediction = try await self.headacheManager.predictor.predict(input, inWidget: false)
         try await self.presentOutlookAlert(with: prediction)
         
         task.setTaskCompleted(success: true)

@@ -22,7 +22,10 @@ class SharedUserDefaults {
     static let currentSeverity = "current.severity"
   }
   
-  // MARK: Static properties  
+  // MARK: Static properties
+  
+  /// The notification to signify that the prediction value changed.
+  static let predictionDidChangeNotification = Notification.Name(rawValue: "predictionDidChangeNotification")
   
   /// The shared standard user defaults.
   static let standard = SharedUserDefaults()
@@ -119,19 +122,19 @@ class SharedUserDefaults {
 
 extension SharedUserDefaults {
   
-  /// Adds an observer to the notification center's did change notification.
+  /// Adds a prediction observer.
   ///
   /// - Parameter block: The block to execute.
   /// - Returns: An observer.
-  func addDidChangeObserver(using block: @escaping (Notification) -> Void) -> NSObjectProtocol {
-    return NotificationCenter.default.addObserver(forName: UserDefaults.didChangeNotification, object: defaults, queue: nil, using: block)
+  func addPredictionObserver(using block: @escaping (Notification) -> Void) -> NSObjectProtocol {
+    return NotificationCenter.default.addObserver(forName: SharedUserDefaults.predictionDidChangeNotification, object: nil, queue: nil, using: block)
   }
   
-  /// Removes a did change observer.
+  /// Removes a prediction observer.
   ///
   /// - Parameter observer: The observer to remove.
-  func removeDidChangeObserver(_ observer: Any) {
-    NotificationCenter.default.removeObserver(observer, name: UserDefaults.didChangeNotification, object: defaults)
+  func removePredictionObserver(_ observer: Any) {
+    NotificationCenter.default.removeObserver(observer, name: SharedUserDefaults.predictionDidChangeNotification, object: nil)
   }
   
   /// Sets the prediction results and requests a widget reload.
@@ -142,15 +145,18 @@ extension SharedUserDefaults {
   ///   - onset: The predicted onset.
   ///   - duration: The predicted duration.
   ///   - severity: The predicted severity
-  ///   - reloadWidget: Whether the widget's timeline should be reloaded.
-  func setPredictionResults(_ date: Date?, _ outlook: Outlook?, _ onset: Date?, _ duration: TimeInterval?, _ severity: HKCategoryValueSeverity?, reloadWidget: Bool) {
+  ///   - inWidget: Whether the method is being called from a widget.
+  func setPredictionResults(_ date: Date?, _ outlook: Outlook?, _ onset: Date?, _ duration: TimeInterval?, _ severity: HKCategoryValueSeverity?, inWidget: Bool) {
     predictionDate = date
     predictedOutlook = outlook
     predictedOnset = onset
     predictedDuration = duration
     predictedSeverity = severity
     
-    if reloadWidget {
+    if inWidget {
+      NotificationCenter.default.post(name: SharedUserDefaults.predictionDidChangeNotification, object: self)
+    }
+    else {
       WidgetCenter.shared.reloadTimelines(ofKind: Constants.Widgets.outlookWidgetKind)
     }
   }

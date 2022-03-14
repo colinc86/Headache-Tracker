@@ -9,26 +9,33 @@ import Foundation
 
 struct WeatherStatistics: Codable, Equatable {
   
-  static let empty = WeatherStatistics(barometricPressure: 0.0, currentPressure: 0.0, currentHumidity: 0.0, currentTemperature: 0.0, sigmaPressure: 0.0, sigmaHumidity: 0.0, sigmaTemperature: 0.0)
+  static let empty = WeatherStatistics(
+    barometricPressure: nil,
+    currentPressure: nil,
+    currentHumidity: nil,
+    currentTemperature: nil,
+    sigmaPressure: nil,
+    sigmaHumidity: nil,
+    sigmaTemperature: nil)
   
   /// The device's barometric pressure in Kilopascals.
-  let barometricPressure: Double
+  let barometricPressure: Double?
   
   /// The current pressure in Kilopascals.
-  let currentPressure: Double
+  let currentPressure: Double?
   
   /// The current humidity in decimal percent.
-  let currentHumidity: Double
+  let currentHumidity: Double?
   
   /// The current temperature in degrees celcius.
-  let currentTemperature: Double
+  let currentTemperature: Double?
   
   /// The sigma pressure in Kilopascals.
-  let sigmaPressure: Double
+  let sigmaPressure: Double?
   
   /// The sigma humidity in decimal percent.
-  let sigmaHumidity: Double
+  let sigmaHumidity: Double?
   
   /// The sigma temperature in degrees celcius.
-  let sigmaTemperature: Double
+  let sigmaTemperature: Double?
 }

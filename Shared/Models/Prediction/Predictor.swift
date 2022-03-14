@@ -82,13 +82,13 @@ class Predictor: ObservableObject {
     shortDescription: "Predicts the onset, severity and progression of headaches.",
     version: Date().description)
   
-  /// The did change notification observer.
-  private var didChangeNotificationObserver: NSObjectProtocol?
+  /// The prediction observer.
+  private var predictionObserver: NSObjectProtocol?
   
   // MARK: Initializers
   
   init() {
-    didChangeNotificationObserver = SharedUserDefaults.standard.addDidChangeObserver(using: didChangeNotification)
+    predictionObserver = SharedUserDefaults.standard.addPredictionObserver(using: predictionNotification)
     updateCurrentPredictionFromDefaults()
     
     do {
@@ -104,8 +104,8 @@ class Predictor: ObservableObject {
   }
   
   deinit {
-    if let didChangeNotificationObserver = didChangeNotificationObserver {
-      SharedUserDefaults.standard.removeDidChangeObserver(didChangeNotificationObserver)
+    if let predictionObserver = predictionObserver {
+      SharedUserDefaults.standard.removePredictionObserver(predictionObserver)
     }
   }
   
@@ -198,10 +198,10 @@ extension Predictor {
   ///
   /// - Parameters:
   ///   - input: The predictor's input.
-  ///   - reloadWidget: Whether the outlook widget should be reloaded (default=true).
+  ///   - inWidget: Whether the method is being called from a widget.
   /// - Returns: The predictor's output.
   @discardableResult
-  func predict(_ input: ModelInput, reloadWidget: Bool = true) async throws -> PredictionOutput {
+  func predict(_ input: ModelInput, inWidget: Bool) async throws -> PredictionOutput {
     if try needsLoading() {
       try await load()
     }
@@ -251,14 +251,14 @@ extension Predictor {
             self.prediction = prediction
           }
           
-          /// Save this prediction for the widget
+          // Save this prediction for the widget
           SharedUserDefaults.standard.setPredictionResults(
             Date(),
             prediction.outlookClassifierOutput.prediction,
             prediction.onsetRegressorOutput.prediction,
             prediction.durationRegressorOutput.prediction,
             prediction.severityClassifierOutput.prediction,
-            reloadWidget: reloadWidget)
+            inWidget: inWidget)
           
           continuation.resume(returning: prediction)
         }
@@ -275,7 +275,7 @@ extension Predictor {
 extension Predictor {
   
   /// Notifies the predictor that the shared prediction was changed.
-  private func didChangeNotification(_ notification: Notification) {
+  private func predictionNotification(_ notification: Notification) {
     updateCurrentPredictionFromDefaults()
   }
   

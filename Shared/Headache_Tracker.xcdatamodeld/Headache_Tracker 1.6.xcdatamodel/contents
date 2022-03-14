@@ -41,12 +41,13 @@
         <attribute name="timestamp" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="version" optional="YES" attributeType="String"/>
         <attribute name="walkingHeartRateAverage" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="weatherVersion" optional="YES" attributeType="String"/>
         <relationship name="severity" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Severity" inverseName="trainingData" inverseEntity="Severity"/>
     </entity>
     <elements>
+        <element name="Evaluation" positionX="-54" positionY="144" width="128" height="74"/>
         <element name="Headache" positionX="-63" positionY="-18" width="128" height="14"/>
         <element name="Severity" positionX="-63" positionY="9" width="128" height="119"/>
-        <element name="TrainingData" positionX="-45" positionY="54" width="128" height="359"/>
-        <element name="Evaluation" positionX="-54" positionY="144" width="128" height="74"/>
+        <element name="TrainingData" positionX="-45" positionY="54" width="128" height="374"/>
     </elements>
 </model>

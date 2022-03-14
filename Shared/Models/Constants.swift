@@ -13,6 +13,9 @@ struct Constants {
   /// The current training data version.
   static let trainingDataVersion = "1.0"
   
+  /// The weather training data version.
+  static let trainingDataWeatherVersion = "1.0"
+  
   /// The application's app group identifier.
   static let appGroupIdentifier = "group.com.cnc.Headache-Tracker.contents"
   

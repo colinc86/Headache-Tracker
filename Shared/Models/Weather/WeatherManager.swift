@@ -5,6 +5,7 @@
 //  Created by Colin Campbell on 2/25/22.
 //
 
+import Alamofire
 import Foundation
 import CoreLocation
 
@@ -65,66 +66,58 @@ extension WeatherManager {
   
   /// Gets the current weather at the device.
   ///
+  /// - Parameter date: The date of the weather reading.
   /// - Returns: The weather.
-  func weather() async throws -> Weather {
+  func weather(date: Date = Date()) async throws -> Weather {
     logInfo("Get weather.")
-    let location = try await locationManager.location()
-    let spread = try await getWeatherSpread(location: location)
-    let pressure = try await motionManager.barometricPressure()
+    
+    // Try to get the weather spread
+    var spread: Weather.WeatherSpread?
+    do {
+      let location = try await locationManager.location()
+      spread = try await getWeatherSpread(location: location, date: date)
+    }
+    catch {
+      logError("Error getting weather spread: \(error)")
+    }
+    
+    var pressure: Measurement<UnitPressure>?
+    do {
+      pressure = try await motionManager.barometricPressure()
+    }
+    catch {
+      logError("Error getting pressure: \(error)")
+    }
+    
     return Weather(spread: spread, pressure: pressure)
   }
   
+}
+
+fileprivate struct WeatherAPIParams: Codable {
+  let latitude: Double
+  let longitude: Double
+  let spread: Int
+  let time: Int
 }
 
 extension WeatherManager {
   
   /// Gets the weather spread from the weather API.
   ///
-  /// - Parameter location: The location to get the spread for.
-  private func getWeatherSpread(location: CLLocation) async throws -> Weather.WeatherSpread {
-    return try await withCheckedThrowingContinuation { [weak self] continuation in
-      guard let self = self else {
-        continuation.resume(throwing: WeatherError.deallocated)
-        return
-      }
-      
-      let loginString = String(format: "%@:%@", Constants.WeatherAPI.username, Constants.WeatherAPI.password)
-      let loginData = loginString.data(using: String.Encoding.utf8)!
-      let base64LoginString = loginData.base64EncodedString()
-      
-      // create the request
-      guard let url = URL(string: "https://weatherstats.app/spread?latitude=\(location.coordinate.latitude)&longitude=\(location.coordinate.longitude)&spread=6") else {
-        continuation.resume(throwing: WeatherError.badRequest)
-        return
-      }
-      
-      var request = URLRequest(url: url)
-      request.httpMethod = "GET"
-      request.setValue("Basic \(base64LoginString)", forHTTPHeaderField: "Authorization")
-      
-      self.weatherSpreadTask = URLSession.shared.dataTask(with: request) { data, response, error in
-        if let data = data {
-          logDebug("Got data: \(data.count) bytes")
-          do {
-            continuation.resume(returning: try JSONDecoder().decode(Weather.WeatherSpread.self, from: data))
-          }
-          catch let decodingError {
-            logDebug("Error decoding response: \(decodingError)")
-            continuation.resume(throwing: decodingError)
-          }
-        }
-        else if let error = error {
-          logDebug("Unable to get data: \(error)")
-          continuation.resume(throwing: error)
-        }
-        else {
-          logDebug("Unable to get data or error.")
-          continuation.resume(throwing: WeatherError.missing)
-        }
-      }
-      
-      self.weatherSpreadTask?.resume()
+  /// - Parameters:
+  ///   - location: The location to get the spread for.
+  ///   - date: The date of the weather reading.
+  /// - Returns: The weather spread.
+  private func getWeatherSpread(location: CLLocation, date: Date) async throws -> Weather.WeatherSpread? {
+    // create the request
+    guard let url = URL(string: "https://weatherstats.app/spread") else {
+      return nil
     }
+    
+    let parameters = WeatherAPIParams(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude, spread: 6, time: Int(date.timeIntervalSince1970))
+    let headers: HTTPHeaders = [.authorization(username: Constants.WeatherAPI.username, password: Constants.WeatherAPI.password)]
+    return try await AF.request(url, method: .get, parameters: parameters, encoder: URLEncodedFormParameterEncoder.default, headers: headers).serializingDecodable(Weather.WeatherSpread?.self).value
   }
   
 }

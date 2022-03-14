@@ -28,6 +28,7 @@ struct TrainingDataView: View {
         SubtitleCell(title: "Severity", subtitle: trainingData.severity?.severity.title ?? "-")
         SubtitleCell(title: "Timestamp", subtitle: trainingData.timestamp?.formattedNonRelative() ?? "N/A")
         SubtitleCell(title: "Data Version", subtitle: "\(trainingData.version ?? "")")
+        SubtitleCell(title: "Weather Version", subtitle: "\(trainingData.weatherVersion ?? "")")
       }
       
       Section {

@@ -98,7 +98,7 @@ extension HeadacheManager {
     try await healthKitManager.saveSeveritySamples(intervals: severityInterval == nil ? [] : [severityInterval!])
     
     // Update the CoreML training data
-    try await createPredict()
+    try await createPredict(inWidget: false)
   }
   
   /// Resolves the headache.
@@ -124,7 +124,7 @@ extension HeadacheManager {
     try await healthKitManager.saveSeveritySamples(intervals: severityInterval == nil ? [] : [severityInterval!])
     
     // Update the CoreML models
-    try await createPredict()
+    try await createPredict(inWidget: false)
   }
   
   /// Deletes the current headache.
@@ -441,7 +441,7 @@ extension HeadacheManager {
   ///     data with the prediction.
   ///   - predict: Runs a prediction before returning the input if true.
   ///   - inWidget: Whether this method is being called by a widget.
-  func createPredict(create: Bool = true, predict: Bool = true, inWidget: Bool = false) async throws {
+  func createPredict(create: Bool = true, predict: Bool = true, inWidget: Bool) async throws {
     let input = try await predictorInput(inWidget: inWidget)
     
     if create {
@@ -450,7 +450,7 @@ extension HeadacheManager {
     }
     
     if predict {
-      let prediction = try await predictor.predict(input, reloadWidget: !inWidget)
+      let prediction = try await predictor.predict(input, inWidget: inWidget)
       try await evaluatePrediction(prediction)
     }
   }
@@ -499,6 +499,38 @@ extension HeadacheManager {
         trainingDatum.updateWithHealthKitData(data)
       }
       logDebug("Finished upgrading data.")
+    }
+    
+    logInfo("Upgrading weather training data.")
+    try await trainingData(predicate: NSPredicate(format: "(weatherVersion != %@) OR (weatherVersion == %@)", Constants.trainingDataWeatherVersion as NSString, NSNull())) { [weak self] trainingData, context in
+      guard let self = self else {
+        return
+      }
+      
+      logInfo("Performing weather upgrade on \(trainingData.count) data.")
+      // Perform the upgrade
+      let group = DispatchGroup()
+      for trainingDatum in trainingData {
+        guard let timestamp = trainingDatum.timestamp else {
+          continue
+        }
+        
+        group.enter()
+        Task {
+          do {
+            let weather = try await self.weatherManager.weather(date: timestamp)
+            await context.perform {
+              trainingDatum.updateWithWeatherStatistics(weather.statistics)
+            }
+          }
+          catch {
+            logError("Error upgrading weather: \(error)")
+          }
+          
+          group.leave()
+        }
+      }
+      group.wait()
     }
   }
   
@@ -551,7 +583,7 @@ extension HeadacheManager {
     try await DataController.shared.performInBackground(saveOnComplete: true) { context in
       let evaluation = Evaluation(context: context)
       evaluation.timestamp = Date()
-      evaluation.outlook = hasCurrent && prediction.outlookClassifierOutput.prediction == .headache
+      evaluation.outlook = (hasCurrent && prediction.outlookClassifierOutput.prediction == .headache) || (!hasCurrent && prediction.outlookClassifierOutput.prediction == .noHeadache)
       evaluation.severity = severity == prediction.severityClassifierOutput.prediction
     }
   }
