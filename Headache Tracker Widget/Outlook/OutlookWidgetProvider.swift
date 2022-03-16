@@ -105,11 +105,7 @@ extension OutlookWidgetProvider {
   /// The current outlook content.
   private func currentContent() async throws -> [OutlookWidgetContent] {
     let headache = try await headacheManager.hasCurrentHeadache()
-    let startDate = SharedUserDefaults.standard.predictionDate ?? Date(timeIntervalSinceNow: -600.0)
-    let outlook = SharedUserDefaults.standard.predictedOutlook ?? .noHeadache
-    let onset = SharedUserDefaults.standard.predictedOnset ?? Date()
-    let duration = SharedUserDefaults.standard.predictedDuration ?? 0.0
-    let severity = SharedUserDefaults.standard.predictedSeverity ?? .notPresent
+    let prediction = SharedUserDefaults.standard.currentPrediction ?? .empty
     
     if headache {
       // If we're in a current headache, then we'll want to add
@@ -119,11 +115,11 @@ extension OutlookWidgetProvider {
         // We're not in a headache, so use the single entry with a
         // future reload date.
         entries.append(OutlookWidgetContent(
-          date: startDate.addingTimeInterval(TimeInterval(i) * 60.0),
-          outlook: outlook,
-          onset: onset,
-          duration: duration - (TimeInterval(i) * 60.0),
-          severity: severity,
+          date: prediction.date.addingTimeInterval(TimeInterval(i) * 60.0),
+          outlook: prediction.outlookClassifierOutput.prediction,
+          onset: prediction.onsetRegressorOutput.prediction,
+          duration: prediction.durationRegressorOutput.prediction - (TimeInterval(i) * 60.0),
+          severity: prediction.severityClassifierOutput.prediction,
           hasCurrentHeadache: true
         ))
       }
@@ -133,11 +129,11 @@ extension OutlookWidgetProvider {
     // We're not in a headache, so use the single entry with a
     // future reload date.
     return [OutlookWidgetContent(
-      date: startDate,
-      outlook: outlook,
-      onset: onset,
-      duration: duration,
-      severity: severity,
+      date: prediction.date,
+      outlook: prediction.outlookClassifierOutput.prediction,
+      onset: prediction.onsetRegressorOutput.prediction,
+      duration: prediction.durationRegressorOutput.prediction,
+      severity: prediction.severityClassifierOutput.prediction,
       hasCurrentHeadache: false
     )]
   }

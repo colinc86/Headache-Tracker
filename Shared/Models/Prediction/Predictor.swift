@@ -229,6 +229,8 @@ extension Predictor {
           let durationPrediction = try durationRegressor.prediction(input: fullInput)
           
           let prediction = PredictionOutput(
+            input: input,
+            
             outlookClassifierOutput: PredictionOutput.PredictionStatistic(
               prediction: Outlook(rawValue: outlookPrediction.Outlook) ?? .noHeadache,
               probability: outlookPrediction.OutlookProbability[outlookPrediction.Outlook]),
@@ -252,13 +254,7 @@ extension Predictor {
           }
           
           // Save this prediction for the widget
-          SharedUserDefaults.standard.setPredictionResults(
-            Date(),
-            prediction.outlookClassifierOutput.prediction,
-            prediction.onsetRegressorOutput.prediction,
-            prediction.durationRegressorOutput.prediction,
-            prediction.severityClassifierOutput.prediction,
-            inWidget: inWidget)
+          SharedUserDefaults.standard.setCurrentPrediction(prediction, inWidget: inWidget)
           
           continuation.resume(returning: prediction)
         }
@@ -282,17 +278,7 @@ extension Predictor {
   /// Updates the current prediction from the shared user defaults.
   private func updateCurrentPredictionFromDefaults() {
     DispatchQueue.main.async {
-      var prediction = PredictionOutput(
-        outlookClassifierOutput: PredictionOutput.PredictionStatistic<Outlook>(
-          prediction: SharedUserDefaults.standard.predictedOutlook ?? .noHeadache, probability: nil),
-        severityClassifierOutput: PredictionOutput.PredictionStatistic<HKCategoryValueSeverity>(
-          prediction: SharedUserDefaults.standard.predictedSeverity ?? .notPresent, probability: nil),
-        onsetRegressorOutput: PredictionOutput.PredictionStatistic<Date>(
-          prediction: SharedUserDefaults.standard.predictedOnset ?? Date(), probability: nil),
-        durationRegressorOutput: PredictionOutput.PredictionStatistic<TimeInterval>(
-          prediction: SharedUserDefaults.standard.predictedDuration ?? 0.0, probability: nil))
-      prediction.date = SharedUserDefaults.standard.predictionDate ?? Date()
-      self.prediction = prediction
+      self.prediction = SharedUserDefaults.standard.currentPrediction
     }
   }
   

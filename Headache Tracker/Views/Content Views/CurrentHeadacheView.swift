@@ -117,7 +117,6 @@ struct CurrentHeadacheView: View {
     }
     .navigationViewStyle(StackNavigationViewStyle())
     .onReceive(didBecomeActiveNotificationPublisher, perform: didBecomeActive)
-    .onChange(of: predictor.prediction, perform: predictionChanged)
     .onAppear(perform: onAppear)
     .onDisappear(perform: automaticRefreshWaiter.stop)
     .confirmationDialog("Change headache severity to \((sceneDelegate.desiredSeverity ?? .notPresent).title.lowercased())?", isPresented: $showingSeverityConfirmation, titleVisibility: .visible) {
@@ -194,10 +193,6 @@ extension CurrentHeadacheView {
     try await headacheManager.createPredict(create: false, inWidget: false)
   }
   
-  private func predictionChanged(_ newValue: PredictionOutput?) {
-    
-  }
-  
   /// Changes the severity to the desired severity if available.
   private func confirmChangeSeverity() async throws {
     guard let severity = sceneDelegate.desiredSeverity else {
@@ -257,5 +252,8 @@ struct CurrentHeadacheView_Previews: PreviewProvider {
       .environmentObject(Previewing.alertManager)
       .environmentObject(Previewing.Prediction.predictor)
       .environmentObject(Previewing.healthKitManager)
+      .onAppear {
+        Previewing.Prediction.predictor.prediction = .empty
+      }
   }
 }

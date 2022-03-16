@@ -6,6 +6,7 @@
 //
 
 import CoreML
+import SwiftUI
 
 class EnvironmentalInput: MLFeatureProvider {
   
@@ -18,6 +19,11 @@ class EnvironmentalInput: MLFeatureProvider {
     static let sigmaTemperature = "Sigma Temperature"
     static let environmentAudioExposure = "Environment Audio Exposure"
   }
+  
+  @AppStorage(AppSettings.Predictors.barometricPressure) var predictorBarometricPressure = true
+  @AppStorage(AppSettings.Predictors.humidity) var predictorHumidity = true
+  @AppStorage(AppSettings.Predictors.temperature) var predictorTemperature = true
+  @AppStorage(AppSettings.Predictors.environmentalAudioExposure) var predictorEnvironmentalAudioExposure = true
   
   /// Current Pressure as double value
   var Current_Pressure: Double
@@ -42,15 +48,23 @@ class EnvironmentalInput: MLFeatureProvider {
   
   var featureNames: Set<String> {
     get {
-      return [
-        FeatureName.currentPressure,
-        FeatureName.currentHumidity,
-        FeatureName.currentTemperature,
-        FeatureName.sigmaPressure,
-        FeatureName.sigmaHumidity,
-        FeatureName.sigmaTemperature,
-        FeatureName.environmentAudioExposure
-      ]
+      var names = Set<String>()
+      if predictorBarometricPressure {
+        names.insert(FeatureName.currentPressure)
+        names.insert(FeatureName.sigmaPressure)
+      }
+      if predictorHumidity {
+        names.insert(FeatureName.currentHumidity)
+        names.insert(FeatureName.sigmaHumidity)
+      }
+      if predictorTemperature {
+        names.insert(FeatureName.currentTemperature)
+        names.insert(FeatureName.sigmaTemperature)
+      }
+      if predictorEnvironmentalAudioExposure {
+        names.insert(FeatureName.environmentAudioExposure)
+      }
+      return names
     }
   }
   

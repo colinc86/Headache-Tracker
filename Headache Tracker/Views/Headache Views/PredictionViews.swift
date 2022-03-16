@@ -14,9 +14,6 @@ struct PredictionViews: View {
   
   // MARK: Private properties
   
-  /// A debug setting to show all views in the prediction section.
-  @AppStorage(AppSettings.debugShowAllViews) private var debugShowAllViews = false
-  
   /// The headaches fetch request.
   /// Should only return one headache.
   @FetchRequest(
@@ -33,57 +30,25 @@ struct PredictionViews: View {
   // MARK: View body
   
   var body: some View {
-    let dailyOutlook = OutlookView(outlook: prediction.holisticOutlook)
-    let durationPrediction = DurationPredictionView(duration: prediction.durationRegressorOutput.prediction, date: prediction.date)
-    let severityPrediction = SeveritySelectionView(currentSeverity: prediction.severityClassifierOutput.prediction, collapsed: true)
+    Section {
+      NavigationLink {
+        ModelInputView(input: prediction.input)
+      } label: {
+        OutlookView(outlook: currentHeadache == nil ? prediction.holisticOutlook : .headache(severity: prediction.severityClassifierOutput.prediction, end: Date(timeIntervalSinceNow: prediction.durationRegressorOutput.prediction)))
+      }
+    } header: {
+      SectionTitleView(title: "Predictions")
+    }
     
-    if debugShowAllViews {
-      Section {
-        dailyOutlook
-      } header: {
-        SectionTitleView(title: "Predictions")
+    Section {
+      NavigationLink {
+        ModelInputView(input: prediction.input)
+      } label: {
+        SeveritySelectionView(currentSeverity: prediction.severityClassifierOutput.prediction, collapsed: true)
       }
-      
-      Section {
-        durationPrediction
-      }
-      
-      Section {
-        severityPrediction
-      } footer: {
-        if let lastPredictionDate = prediction.date {
-          Text("Updated \(lastPredictionDate.formattedNonRelative()).")
-        }
-      }
-    }
-    else if currentHeadache == nil {
-      Section {
-        dailyOutlook
-      } header: {
-        SectionTitleView(title: "Predictions")
-      }
-      
-      Section {
-        severityPrediction
-      } footer: {
-        if let lastPredictionDate = prediction.date {
-          Text("Updated at \(lastPredictionDate.formattedNonRelative()).")
-        }
-      }
-    }
-    else {
-      Section {
-        durationPrediction
-      } header: {
-        SectionTitleView(title: "Predictions")
-      }
-      
-      Section {
-        severityPrediction
-      } footer: {
-        if let lastPredictionDate = prediction.date {
-          Text("Updated \(lastPredictionDate.formattedNonRelative()).")
-        }
+    } footer: {
+      if let lastPredictionDate = prediction.date {
+        Text("Updated \(lastPredictionDate.formattedNonRelative()).")
       }
     }
   }

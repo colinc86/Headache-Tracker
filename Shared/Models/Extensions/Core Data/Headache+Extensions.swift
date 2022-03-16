@@ -114,7 +114,7 @@ extension Headache {
   convenience init(context: NSManagedObjectContext, initialSeverity: HKCategoryValueSeverity, startTime: Date, endTime: Date? = nil) {
     self.init(context: context)
     identifier = UUID()
-    createdAt = Date()
+    createdAt = startTime
     resolved = false
     addSeverity(initialSeverity, startTime: startTime, endTime: endTime)
   }
@@ -153,6 +153,8 @@ extension Headache {
     for i in 0 ..< severities.count - 1 {
       severities[i].endTime = severities[i + 1].startTime
     }
+    
+    createdAt = severities.first?.startTime
   }
   
   /// Adds the severity to the headache.

@@ -6,6 +6,7 @@
 //
 
 import CoreML
+import SwiftUI
 
 class UncontrolledUserInput: MLFeatureProvider {
   
@@ -17,6 +18,13 @@ class UncontrolledUserInput: MLFeatureProvider {
     static let walkingHeartRateAverage = "Walking Heart Rate Average"
     static let restingHeartRate = "Resting Heart Rate"
   }
+  
+  @AppStorage(AppSettings.Predictors.heartRate) var predictorHeartRate = true
+  @AppStorage(AppSettings.Predictors.respiratoryRate) var predictorRespiratoryRate = true
+  @AppStorage(AppSettings.Predictors.oxygenSaturation) var predictorOxygenSaturation = true
+  @AppStorage(AppSettings.Predictors.heartRateVariability) var predictorHeartRateVariability = true
+  @AppStorage(AppSettings.Predictors.walkingHeartRateAverage) var predictorWalkingHeartRateAverage = true
+  @AppStorage(AppSettings.Predictors.restingHeartRate) var predictorRestingHeartRate = true
   
   /// Heart Rate as double value
   var Heart_Rate: Double
@@ -38,14 +46,26 @@ class UncontrolledUserInput: MLFeatureProvider {
   
   var featureNames: Set<String> {
     get {
-      return [
-        FeatureName.heartRate,
-        FeatureName.respiratoryRate,
-        FeatureName.oxygenSaturation,
-        FeatureName.heartRateVariability,
-        FeatureName.walkingHeartRateAverage,
-        FeatureName.restingHeartRate
-      ]
+      var names = Set<String>()
+      if predictorHeartRate {
+        names.insert(FeatureName.heartRate)
+      }
+      if predictorRespiratoryRate {
+        names.insert(FeatureName.respiratoryRate)
+      }
+      if predictorOxygenSaturation {
+        names.insert(FeatureName.oxygenSaturation)
+      }
+      if predictorHeartRateVariability {
+        names.insert(FeatureName.heartRateVariability)
+      }
+      if predictorWalkingHeartRateAverage {
+        names.insert(FeatureName.walkingHeartRateAverage)
+      }
+      if predictorRestingHeartRate {
+        names.insert(FeatureName.restingHeartRate)
+      }
+      return names
     }
   }
   

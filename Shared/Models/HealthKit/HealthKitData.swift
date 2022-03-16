@@ -21,7 +21,7 @@ enum HealthKitDataQueryType {
 }
 
 /// HealthKit data.
-enum HealthKitData: CaseIterable {
+enum HealthKitData: CaseIterable, Codable {
   case headache
   case sleepSeconds
   case sleepOnset

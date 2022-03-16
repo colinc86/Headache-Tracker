@@ -49,9 +49,6 @@ class HeadacheManager: ObservableObject {
   /// The Apple Health app integration setting.
   @AppStorage(AppSettings.healthIntegration) private var healthIntegration = false
   
-  /// A debug setting to show all views in the prediction section.
-  @AppStorage(AppSettings.debugShowAllViews) private var debugShowAllViews = false
-  
   /// Whether or not the manager is in test mode. If in test mode, it will not
   /// write to or delete from the health kit store.
   private let testing: Bool

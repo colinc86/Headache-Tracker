@@ -6,6 +6,7 @@
 //
 
 import CoreML
+import SwiftUI
 
 class ChronologicalInput: MLFeatureProvider {
   
@@ -13,6 +14,9 @@ class ChronologicalInput: MLFeatureProvider {
     static let secondsSinceMidnight = "Seconds Since Midnight"
     static let weekday = "Weekday"
   }
+  
+  @AppStorage(AppSettings.Predictors.secondsSinceMidnight) var predictorSecondsSinceMidnight = true
+  @AppStorage(AppSettings.Predictors.weekday) var predictorWeekday = true
   
   /// Seconds Since Midnight as double value
   var Seconds_Since_Midnight: Double
@@ -22,10 +26,14 @@ class ChronologicalInput: MLFeatureProvider {
   
   var featureNames: Set<String> {
     get {
-      return [
-        FeatureName.secondsSinceMidnight,
-        FeatureName.weekday
-      ]
+      var names = Set<String>()
+      if predictorSecondsSinceMidnight {
+        names.insert(FeatureName.secondsSinceMidnight)
+      }
+      if predictorWeekday {
+        names.insert(FeatureName.weekday)
+      }
+      return names
     }
   }
   

@@ -14,11 +14,7 @@ class SharedUserDefaults {
   // MARK: Types
   
   struct Keys {
-    static let predictionDate = "prediction.date"
-    static let predictedOutlook = "predicted.outlook"
-    static let predictedOnset = "predicted.onset"
-    static let predictedDuration = "predicted.duration"
-    static let predictedSeverity = "predicted.severity"
+    static let currentPrediction = "current.prediction"
     static let currentSeverity = "current.severity"
   }
   
@@ -37,73 +33,29 @@ class SharedUserDefaults {
   
   // MARK: Public properties
   
-  /// The last prediction date.
-  var predictionDate: Date? {
+  /// The current prediction. Don't set this value directly - use the `setCurrentPrediction`
+  /// method instead.
+  var currentPrediction: PredictionOutput? {
     get {
-      return defaults?.value(forKey: Keys.predictionDate) as? Date
-    }
-    
-    set {
-      defaults?.set(newValue, forKey: Keys.predictionDate)
-      defaults?.synchronize()
-    }
-  }
-  
-  /// The predicted outlook.
-  var predictedOutlook: Outlook? {
-    get {
-      if let outlook = defaults?.string(forKey: Keys.predictedOutlook) {
-        return Outlook(rawValue: outlook) ?? .noHeadache
+      guard let predictionData = defaults?.value(forKey: Keys.currentPrediction) as? Data else {
+        return nil
       }
-      return .noHeadache
+      
+      return try? JSONDecoder().decode(PredictionOutput?.self, from: predictionData)
     }
     
     set {
-      defaults?.set(newValue?.rawValue, forKey: Keys.predictedOutlook)
-      defaults?.synchronize()
-    }
-  }
-  
-  /// The predicted onset.
-  var predictedOnset: Date? {
-    get {
-      return defaults?.value(forKey: Keys.predictedOnset) as? Date
-    }
-    
-    set {
-      defaults?.set(newValue, forKey: Keys.predictedOnset)
-      defaults?.synchronize()
-    }
-  }
-  
-  /// The predicted duration.
-  var predictedDuration: TimeInterval? {
-    get {
-      return defaults?.value(forKey: Keys.predictedDuration) as? TimeInterval
-    }
-    
-    set {
-      defaults?.set(newValue, forKey: Keys.predictedDuration)
-      defaults?.synchronize()
-    }
-  }
-  
-  /// The predicted severity.
-  var predictedSeverity: HKCategoryValueSeverity? {
-    get {
-      if let rawValue = defaults?.integer(forKey: Keys.predictedSeverity) {
-        return HKCategoryValueSeverity(rawValue: rawValue) ?? .notPresent
+      guard let predictionData = try? JSONEncoder().encode(newValue) else {
+        return
       }
-      return .notPresent
-    }
-    
-    set {
-      defaults?.set(newValue?.rawValue, forKey: Keys.predictedSeverity)
+      
+      defaults?.set(predictionData, forKey: Keys.currentPrediction)
       defaults?.synchronize()
     }
   }
   
-  /// The current severity.
+  /// The current severity. Don't set this value directly - use the `setCurrentSeverity`
+  /// method instead.
   var currentSeverity: HKCategoryValueSeverity? {
     get {
       if let rawValue = defaults?.value(forKey: Keys.currentSeverity) as? Int {
@@ -140,18 +92,10 @@ extension SharedUserDefaults {
   /// Sets the prediction results and requests a widget reload.
   ///
   /// - Parameters:
-  ///   - date: The prediction date.
-  ///   - outlook: The predicted outlook.
-  ///   - onset: The predicted onset.
-  ///   - duration: The predicted duration.
-  ///   - severity: The predicted severity
+  ///   - prediction: The prediction.
   ///   - inWidget: Whether the method is being called from a widget.
-  func setPredictionResults(_ date: Date?, _ outlook: Outlook?, _ onset: Date?, _ duration: TimeInterval?, _ severity: HKCategoryValueSeverity?, inWidget: Bool) {
-    predictionDate = date
-    predictedOutlook = outlook
-    predictedOnset = onset
-    predictedDuration = duration
-    predictedSeverity = severity
+  func setCurrentPrediction(_ prediction: PredictionOutput, inWidget: Bool) {
+    currentPrediction = prediction
     
     if inWidget {
       NotificationCenter.default.post(name: SharedUserDefaults.predictionDidChangeNotification, object: self)

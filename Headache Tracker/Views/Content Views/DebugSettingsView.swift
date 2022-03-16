@@ -19,9 +19,6 @@ struct DebugSettingsView: View {
   /// The app's headache predictor.
   @EnvironmentObject private var predictor: Predictor
   
-  /// A debug setting to show all views in the prediction section.
-  @AppStorage(AppSettings.debugShowAllViews) private var debugShowAllViews = false
-  
   /// A debug last outlook date setting.
   @AppStorage(AppSettings.debugLastOutlookDate) private var debugLastOutlookDate: Date?
   
@@ -79,11 +76,6 @@ struct DebugSettingsView: View {
   
   var body: some View {
     Form {
-      Section {
-        Toggle("Show All Views", isOn: $debugShowAllViews)
-          .tint(.accentColor)
-      }
-      
       Section {
         NavigationLink {
           TrainingDataListView()

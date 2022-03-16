@@ -8,7 +8,7 @@
 import Foundation
 
 /// A headache outlook.
-enum Outlook: String {
+enum Outlook: String, Codable {
   
   /// A headache is in progress.
   case headache = "Headache"

@@ -9,7 +9,17 @@ import Foundation
 import HealthKit
 
 /// A prediction input.
-struct ModelInput {
+struct ModelInput: Codable {
+  
+  enum CodingKeys: CodingKey {
+    case date
+    case weatherStatistics
+    case healthKitData
+    case outlook
+    case severity
+  }
+  
+  static let empty = ModelInput(date: Date(), weatherStatistics: nil, healthKitData: nil, timeIntervalUntilNextHeadacheStart: nil, timeIntervalUntilNextHeadacheEnd: nil, outlook: .noHeadache, severity: .notPresent)
   
   /// The input date.
   var date: Date

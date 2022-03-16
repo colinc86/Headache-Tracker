@@ -9,7 +9,7 @@ import Foundation
 import HealthKit
 import SwiftUI
 
-extension HKCategoryValueSeverity {
+extension HKCategoryValueSeverity: Codable {
   
   /// The severity's title suitable for a user.
   public var title: String {

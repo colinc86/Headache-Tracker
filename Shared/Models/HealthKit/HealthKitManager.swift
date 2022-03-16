@@ -75,6 +75,33 @@ extension HealthKitManager {
     return (readTypes.union(shareTypes)).contains(where: { store.authorizationStatus(for: $0) == .notDetermined })
   }
   
+  func authorizationStatus(for data: HealthKitData) -> HKAuthorizationStatus {
+    // Is health kit data available?
+    guard HKHealthStore.isHealthDataAvailable() else {
+      return .sharingDenied
+    }
+    
+    if let type = data.type {
+      return store.authorizationStatus(for: type)
+    }
+    return .notDetermined
+  }
+  
+  func authorize(for data: HealthKitData) async throws {
+    guard authorizationStatus(for: data) == .notDetermined else {
+      return
+    }
+    
+    if let type = data.type as? HKSampleType {
+      if data.isShareType {
+        try await store.requestAuthorization(toShare: [type], read: [])
+      }
+      else {
+        try await store.requestAuthorization(toShare: [], read: [type])
+      }
+    }
+  }
+  
   /// Authorizes the manager with health kit.
   func authorize() async throws {
     if needsAuthorization() {

@@ -38,4 +38,24 @@ struct WeatherStatistics: Codable, Equatable {
   
   /// The sigma temperature in degrees celcius.
   let sigmaTemperature: Double?
+  
+  var pressureMeasurement: Measurement<UnitPressure>? {
+    let pressure = barometricPressure ?? currentPressure
+    guard let pressure = pressure else {
+      return nil
+    }
+    return Measurement(value: pressure, unit: .kilopascals)
+  }
+  var temperatureMeasurement: Measurement<UnitTemperature>? {
+    guard let currentTemperature = currentTemperature else {
+      return nil
+    }
+    return Measurement(value: currentTemperature, unit: .celsius)
+  }
+  var humidityMeasurement: Measurement<UnitRate>? {
+    guard let currentHumidity = currentHumidity else {
+      return nil
+    }
+    return Measurement(value: currentHumidity, unit: .decimal)
+  }
 }

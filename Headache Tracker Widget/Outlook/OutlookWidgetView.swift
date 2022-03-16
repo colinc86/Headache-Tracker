@@ -12,21 +12,22 @@ struct OutlookWidgetView: View {
   /// The view's entry.
   let entry: OutlookWidgetContent
   
+  var outlook: HolisticOutlook {
+    if entry.hasCurrentHeadache {
+      return .headache(severity: entry.severity ?? .notPresent, end: entry.date.addingTimeInterval(entry.duration ?? 0.0))
+    }
+    return HolisticOutlook(
+      outlook: entry.outlook ?? .noHeadache,
+      onset: entry.onset ?? Date(timeIntervalSinceNow: 86400.0),
+      duration: entry.duration ?? 0.0,
+      severity: entry.severity ?? .notPresent)
+  }
+  
   // MARK: View body
   
   var body: some View {
-    if entry.hasCurrentHeadache {
-      DurationPredictionView(duration: entry.duration ?? 0.0, date: entry.date)
-        .padding()
-    }
-    else {
-      OutlookView(outlook: HolisticOutlook(
-        outlook: entry.outlook ?? .noHeadache,
-        onset: entry.onset ?? Date(timeIntervalSinceNow: 86400.0),
-        duration: entry.duration ?? 0.0,
-        severity: entry.severity ?? .notPresent))
-        .padding()
-    }
+    OutlookView(outlook: outlook)
+      .padding()
   }
 }
 

@@ -9,17 +9,19 @@ import Foundation
 import HealthKit
 
 /// A headache prediction.
-struct PredictionOutput: Equatable {
+struct PredictionOutput: Equatable, Codable {
   
   /// An empty prediction.
   static let empty = PredictionOutput(
+    input: .empty,
     outlookClassifierOutput: PredictionStatistic<Outlook>(prediction: .noHeadache, probability: 0),
     severityClassifierOutput: PredictionStatistic<HKCategoryValueSeverity>(prediction: .notPresent, probability: 0),
     onsetRegressorOutput: PredictionStatistic<Date>(prediction: Date(timeIntervalSince1970: 0), probability: nil),
-    durationRegressorOutput: PredictionStatistic<TimeInterval>(prediction: 0, probability: nil))
+    durationRegressorOutput: PredictionStatistic<TimeInterval>(prediction: 0, probability: nil),
+    date: Date(timeIntervalSinceNow: -600.0))
   
   /// A prediction statistic pairs a severity to a probability.
-  struct PredictionStatistic<T: Equatable>: Equatable {
+  struct PredictionStatistic<T: Equatable & Codable>: Equatable, Codable {
     
     /// The statistic's severity.
     var prediction: T
@@ -38,6 +40,9 @@ struct PredictionOutput: Equatable {
       return lhs.prediction == rhs.prediction && lhs.probability == rhs.probability
     }
   }
+  
+  /// The model input that generated this prediction.
+  var input: ModelInput
   
   /// The outlook classifier's output
   var outlookClassifierOutput: PredictionStatistic<Outlook>

@@ -6,6 +6,7 @@
 //
 
 import CoreML
+import SwiftUI
 
 class ControlledUserInput: MLFeatureProvider {
   
@@ -16,6 +17,12 @@ class ControlledUserInput: MLFeatureProvider {
     static let headphoneAudioExposure = "Headphone Audio Exposure"
     static let stepCount = "Step Count"
   }
+  
+  @AppStorage(AppSettings.Predictors.mindfulSession) var predictorMindfulSession = true
+  @AppStorage(AppSettings.Predictors.sleepSeconds) var predictorSleepSeconds = true
+  @AppStorage(AppSettings.Predictors.sleepOnset) var predictorSleepOnset = true
+  @AppStorage(AppSettings.Predictors.headphoneAudioExposure) var predictorHeadphoneAudioExposure = true
+  @AppStorage(AppSettings.Predictors.stepCount) var predictorStepCount = true
   
   /// Mindful Session as double value
   var Mindful_Session: Double
@@ -34,13 +41,23 @@ class ControlledUserInput: MLFeatureProvider {
   
   var featureNames: Set<String> {
     get {
-      return [
-        FeatureName.mindfulSession,
-        FeatureName.sleepSeconds,
-        FeatureName.sleepOnset,
-        FeatureName.headphoneAudioExposure,
-        FeatureName.stepCount
-      ]
+      var names = Set<String>()
+      if predictorMindfulSession {
+        names.insert(FeatureName.mindfulSession)
+      }
+      if predictorSleepSeconds {
+        names.insert(FeatureName.sleepSeconds)
+      }
+      if predictorSleepOnset {
+        names.insert(FeatureName.sleepOnset)
+      }
+      if predictorHeadphoneAudioExposure {
+        names.insert(FeatureName.headphoneAudioExposure)
+      }
+      if predictorStepCount {
+        names.insert(FeatureName.stepCount)
+      }
+      return names
     }
   }
   

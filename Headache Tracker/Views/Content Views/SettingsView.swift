@@ -9,6 +9,16 @@ import BugfenderSDK
 import FirebaseCrashlytics
 import SwiftUI
 
+enum MeasurementSystem: String {
+  case metric
+  case imperial
+  case base
+  
+  var title: String {
+    return rawValue.capitalized
+  }
+}
+
 /// Displays the application's settings.
 struct SettingsView: View {
   
@@ -25,6 +35,9 @@ struct SettingsView: View {
   
   /// The app's data refresher.
   @EnvironmentObject private var refresher: Refresher
+  
+  /// The application's measurement system.
+  @AppStorage(AppSettings.measurementSystem) var measurementSystem: MeasurementSystem = NSLocale.system.usesMetricSystem ? .metric : .imperial
   
   /// Whether or not to enable crash reporting.
   @AppStorage(AppSettings.enableCrashReporting) var enableCrashReporting = true
@@ -46,6 +59,24 @@ struct SettingsView: View {
   
   /// The daily outlook alert time.
   @AppStorage(AppSettings.dailyOutlookTime) private var dailyOutlookTime = TimeInterval(28800.0)
+  
+  @AppStorage(AppSettings.Predictors.secondsSinceMidnight) var predictorSecondsSinceMidnight = true
+  @AppStorage(AppSettings.Predictors.weekday) var predictorWeekday = true
+  @AppStorage(AppSettings.Predictors.mindfulSession) var predictorMindfulSession = true
+  @AppStorage(AppSettings.Predictors.sleepSeconds) var predictorSleepSeconds = true
+  @AppStorage(AppSettings.Predictors.sleepOnset) var predictorSleepOnset = true
+  @AppStorage(AppSettings.Predictors.headphoneAudioExposure) var predictorHeadphoneAudioExposure = true
+  @AppStorage(AppSettings.Predictors.stepCount) var predictorStepCount = true
+  @AppStorage(AppSettings.Predictors.barometricPressure) var predictorBarometricPressure = true
+  @AppStorage(AppSettings.Predictors.humidity) var predictorHumidity = true
+  @AppStorage(AppSettings.Predictors.temperature) var predictorTemperature = true
+  @AppStorage(AppSettings.Predictors.environmentalAudioExposure) var predictorEnvironmentalAudioExposure = true
+  @AppStorage(AppSettings.Predictors.heartRate) var predictorHeartRate = true
+  @AppStorage(AppSettings.Predictors.respiratoryRate) var predictorRespiratoryRate = true
+  @AppStorage(AppSettings.Predictors.oxygenSaturation) var predictorOxygenSaturation = true
+  @AppStorage(AppSettings.Predictors.heartRateVariability) var predictorHeartRateVariability = true
+  @AppStorage(AppSettings.Predictors.walkingHeartRateAverage) var predictorWalkingHeartRateAverage = true
+  @AppStorage(AppSettings.Predictors.restingHeartRate) var predictorRestingHeartRate = true
   
   /// Whether we are showing the bug report content view.
   @State private var showingReportBug = false
@@ -96,32 +127,40 @@ struct SettingsView: View {
       Form {
         // Integrations
         Section("Integrations") {
-          Toggle(isOn: healthAppIntegration) {
-            Text("Health App Integration")
-          }
-          .tint(.accentColor)
+          Toggle("Health App Integration", isOn: healthAppIntegration)
+            .tint(.accentColor)
         }
         
-        // Notifications
+        // Predictions
         Section {
-          Toggle(isOn: $dailyOutlookAlerts) {
-            Text("Daily Outlook")
+          NavigationLink {
+            PredictorsView()
+          } label: {
+            SubtitleCell(title: "My Predictors", subtitle: "\(settingsDictionary().reduce(0, { $0 + ($1.value ? 1 : 0) }))/\(settingsDictionary().keys.count)")
           }
-          .onChange(of: dailyOutlookAlerts, perform: dailyOutlookAlertsChanged)
-          .tint(.accentColor)
+          
+          Toggle("Prediction Notifications", isOn: $realTimeAlerts)
+            .tint(.accentColor)
+        } header: {
+          Text("Predictions")
+        }
+        
+        // Outlook
+        Section {
+          Toggle("Daily Outlook", isOn: $dailyOutlookAlerts)
+            .onChange(of: dailyOutlookAlerts, perform: dailyOutlookAlertsChanged)
+            .tint(.accentColor)
           
           DatePicker("Daily Outlook Time", selection: dailyOutlookDate, displayedComponents: .hourAndMinute)
             .disabled(!dailyOutlookAlerts)
-          
-          Toggle(isOn: $realTimeAlerts) {
-            Text("Hourly Predictions")
-          }
-          .tint(.accentColor)
-          
-          Toggle(isOn: $checkInAlerts) {
-            Text("Headache Check-Ins")
-          }
-          .tint(.accentColor)
+        } header: {
+          Text("Outlook")
+        }
+        
+        // Check-ins
+        Section {
+          Toggle("Headache Check-Ins", isOn: $checkInAlerts)
+            .tint(.accentColor)
           
           Picker(selection: $checkInInterval) {
             ForEach(1 ..< 25) { i in
@@ -132,28 +171,26 @@ struct SettingsView: View {
           }
           .disabled(!checkInAlerts)
         } header: {
-          Text("Notifications")
-        } footer: {
-          if alertsDenied {
-            Text("Visit the Settings app to update the app's notification settings.")
-          }
-          else {
-            Text("Send a notification to check in to the app the specified number of hours after your last update. The notification will only be sent once per update.")
-          }
+          Text("Check-Ins")
         }
         .disabled(alertsDenied)
         
         // Information
         Section {
+          Picker(selection: $measurementSystem) {
+            Text(MeasurementSystem.metric.title).tag(MeasurementSystem.metric)
+            Text(MeasurementSystem.imperial.title).tag(MeasurementSystem.imperial)
+          } label: {
+            Text("Measurement System")
+          }
+          
           Button("Report Bug", action: reportBug)
           
           Button("Share Feedback", action: shareFeedback)
           
-          Toggle(isOn: $enableCrashReporting) {
-            Text("Submit Crash Data")
-          }
-          .onChange(of: enableCrashReporting, perform: enableCrashReportingValueChanged)
-          .tint(.accentColor)
+          Toggle("Submit Crash Data", isOn: $enableCrashReporting)
+            .onChange(of: enableCrashReporting, perform: enableCrashReportingValueChanged)
+            .tint(.accentColor)
           
           SubtitleCell(title: "Version", subtitle: Bundle.main.humanReadableVersionString)
         } header: {
@@ -222,6 +259,28 @@ extension SettingsView {
   /// Turns crash reporting on or off.
   private func enableCrashReportingValueChanged(_ newValue: Bool) {
     Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(newValue)
+  }
+  
+  private func settingsDictionary() -> [String: Bool] {
+    return [
+      AppSettings.Predictors.secondsSinceMidnight: predictorSecondsSinceMidnight,
+      AppSettings.Predictors.weekday: predictorWeekday,
+      AppSettings.Predictors.mindfulSession: predictorMindfulSession,
+      AppSettings.Predictors.sleepSeconds: predictorSleepSeconds,
+      AppSettings.Predictors.sleepOnset: predictorSleepOnset,
+      AppSettings.Predictors.headphoneAudioExposure: predictorHeadphoneAudioExposure,
+      AppSettings.Predictors.stepCount: predictorStepCount,
+      AppSettings.Predictors.barometricPressure: predictorBarometricPressure,
+      AppSettings.Predictors.humidity: predictorHumidity,
+      AppSettings.Predictors.temperature: predictorTemperature,
+      AppSettings.Predictors.environmentalAudioExposure: predictorEnvironmentalAudioExposure,
+      AppSettings.Predictors.heartRate: predictorHeartRate,
+      AppSettings.Predictors.respiratoryRate: predictorRespiratoryRate,
+      AppSettings.Predictors.oxygenSaturation: predictorOxygenSaturation,
+      AppSettings.Predictors.heartRateVariability: predictorHeartRateVariability,
+      AppSettings.Predictors.walkingHeartRateAverage: predictorWalkingHeartRateAverage,
+      AppSettings.Predictors.restingHeartRate: predictorRestingHeartRate
+    ]
   }
   
 }
