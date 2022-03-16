@@ -41,6 +41,9 @@ struct SeverityRange: CustomStringConvertible, Equatable, Hashable {
   
   // MARK: Public methods
   
+  /// Whether or not the range contains the severity.
+  ///
+  /// - Parameter severity: The severity to test.
   func contains(_ severity: HKCategoryValueSeverity) -> Bool {
     return lowerBound.orderingValue <= severity.orderingValue && severity.orderingValue <= upperBound.orderingValue
   }

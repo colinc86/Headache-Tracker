@@ -1,5 +1,5 @@
 //
-//  Sequence.swift
+//  Sequence+Extensions.swift
 //  Headache Tracker
 //
 //  Created by Colin Campbell on 3/11/22.

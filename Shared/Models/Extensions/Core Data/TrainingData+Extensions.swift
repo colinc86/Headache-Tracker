@@ -33,13 +33,13 @@ extension TrainingData {
   
   var weatherStatistics: WeatherStatistics {
     WeatherStatistics(
-      barometricPressure: barometricPressure,
-      currentPressure: currentPressure,
-      currentHumidity: currentHumidity,
-      currentTemperature: currentTemperature,
-      sigmaPressure: sigmaPressure,
-      sigmaHumidity: sigmaHumidity,
-      sigmaTemperature: sigmaTemperature)
+      barometricPressure: barometricPressure == 0.0 ? nil : barometricPressure,
+      currentPressure: currentPressure == 0.0 ? nil : currentPressure,
+      currentHumidity: currentPressure == 0.0 ? nil : currentHumidity,
+      currentTemperature: currentPressure == 0.0 ? nil : currentTemperature,
+      sigmaPressure: currentPressure == 0.0 ? nil : sigmaPressure,
+      sigmaHumidity: currentPressure == 0.0 ? nil : sigmaHumidity,
+      sigmaTemperature: currentPressure == 0.0 ? nil : sigmaTemperature)
   }
   
   var healthKitData: [HealthKitData: Double] {
@@ -103,6 +103,9 @@ extension TrainingData {
       // Update the data version if everything went well
       if let currentPressure = weatherStatistics.currentPressure, currentPressure != 0.0 && weatherStatistics.sigmaPressure != nil {
         weatherVersion = Constants.trainingDataWeatherVersion
+      }
+      else {
+        weatherVersion = nil
       }
     }
   }

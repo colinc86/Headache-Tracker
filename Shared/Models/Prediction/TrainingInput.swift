@@ -209,4 +209,14 @@ struct TrainingInput {
     return valueA + step
   }
 }
+#else
+struct TrainingInput {
+  
+  var isValid: Bool {
+    return true
+  }
+  
+  init(trainingData: [TrainingData]) throws {
+  }
+}
 #endif

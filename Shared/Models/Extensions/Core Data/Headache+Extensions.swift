@@ -12,6 +12,25 @@ import SwiftUI
 
 extension Headache {
   
+  /// A structure to track severity updates to a headache.
+  struct SeverityUpdates {
+    
+    /// An empty set of severity updates.
+    static let empty = SeverityUpdates(createdSeverityIdentifier: nil, createdSeverityStartTime: nil, updatedSeverityIdentifier: nil, updatedSeverityInterval: nil)
+    
+    /// The severity that was added to the headache.
+    let createdSeverityIdentifier: UUID?
+    
+    /// The start time of the severity that was created.
+    let createdSeverityStartTime: Date?
+    
+    /// The severity that was updated in the headache.
+    let updatedSeverityIdentifier: UUID?
+    
+    /// The interval of the severity that was updated.
+    let updatedSeverityInterval: SeverityInterval?
+  }
+  
   /// Gets the headache's severities as a sorted array.
   var severitiesArray: [Severity] {
     return (severities?.sortedArray(using: [NSSortDescriptor(key: "startTime", ascending: true)]) as? [Severity]) ?? []
@@ -91,12 +110,13 @@ extension Headache {
   ///   - context: The context to create the headache in.
   ///   - initialSeverity: The headache's initial severity. Must not be `not present`.
   ///   - startTime: The headache's start time.
-  convenience init(context: NSManagedObjectContext, initialSeverity: HKCategoryValueSeverity, startTime: Date) {
+  ///   - endTime: The headache's end time.
+  convenience init(context: NSManagedObjectContext, initialSeverity: HKCategoryValueSeverity, startTime: Date, endTime: Date? = nil) {
     self.init(context: context)
     identifier = UUID()
     createdAt = Date()
     resolved = false
-    addSeverity(initialSeverity, startTime: startTime)
+    addSeverity(initialSeverity, startTime: startTime, endTime: endTime)
   }
   
 }
@@ -140,15 +160,15 @@ extension Headache {
   /// - Parameters:
   ///   - severity: The severity.
   ///   - startTime: The severity's start time.
-  /// - Returns: A date interval of a completed severity if one's `endTime` was set, and the identifier
-  ///   of the newly added Severity.
+  ///   - endTime: The severity's end time.
+  /// - Returns: Information about the updated and added severities.
   @discardableResult
-  func addSeverity(_ severity: HKCategoryValueSeverity, startTime: Date) -> SeverityInterval? {
+  func addSeverity(_ severity: HKCategoryValueSeverity, startTime: Date, endTime: Date? = nil) -> SeverityUpdates {
     logDebug("Adding severity \(severity.title) to the headache.")
     
     // Get the context
     guard let context = managedObjectContext else {
-      return nil
+      return .empty
     }
     
     // Get the severities
@@ -163,15 +183,22 @@ extension Headache {
         previousSeverity.endTime = startTime
       }
       
-      // Add a new open-ended severity
-      let newSeverity = Severity(context: context, severity: severity, startTime: startTime)
+      // Add a new (possibly open-ended) severity
+      let newSeverity = Severity(context: context, severity: severity, startTime: startTime, endTime: endTime)
+      
+      // If we were given an end time, then mark this headache as resolved
+      if endTime != nil {
+        resolved = true
+      }
+      
+      // Add the severity to the headache
       addToSeverities(newSeverity)
       
       // Return the updated severity
-      return previousSeverity?.severityInterval
+      return SeverityUpdates(createdSeverityIdentifier: newSeverity.identifier, createdSeverityStartTime: startTime, updatedSeverityIdentifier: previousSeverity?.identifier, updatedSeverityInterval: previousSeverity?.severityInterval)
     }
     
-    return nil
+    return .empty
   }
   
   /// Adds the severity to the headache with the given duration. Only use this
@@ -181,12 +208,12 @@ extension Headache {
   ///   - severity: The severity.
   ///   - duration: The severity's duration.
   @discardableResult
-  func addSeverity(_ severity: HKCategoryValueSeverity, duration: TimeInterval) -> SeverityInterval? {
+  func addSeverity(_ severity: HKCategoryValueSeverity, duration: TimeInterval) -> SeverityUpdates {
     logDebug("Adding severity \(severity.title) with duration \(duration) seconds.")
     
     // Get the context
     guard resolved, let context = managedObjectContext else {
-      return nil
+      return .empty
     }
     
     // Get the severities
@@ -195,13 +222,12 @@ extension Headache {
     // Get the previous severity
     if let previousSeverity = severities.last, let startTime = previousSeverity.endTime {
       // Add a new open-ended severity
-      let newSeverity = Severity(context: context, severity: severity, startTime: startTime)
-      newSeverity.endTime = startTime.addingTimeInterval(duration)
+      let newSeverity = Severity(context: context, severity: severity, startTime: startTime, endTime: startTime.addingTimeInterval(duration))
       addToSeverities(newSeverity)
-      return newSeverity.severityInterval
+      return SeverityUpdates(createdSeverityIdentifier: newSeverity.identifier, createdSeverityStartTime: startTime, updatedSeverityIdentifier: previousSeverity.identifier, updatedSeverityInterval: previousSeverity.severityInterval)
     }
     
-    return nil
+    return .empty
   }
   
   /// Resolves the headache by setting an end time to the last
@@ -209,7 +235,7 @@ extension Headache {
   /// to true.
   ///
   /// - Parameter endTime: The headache's end time.
-  func resolve(endTime: Date) -> SeverityInterval? {
+  func resolve(endTime: Date) -> SeverityUpdates {
     logDebug("Adding severity \(severity.title) to the headache.")
     
     // Resolve the headache
@@ -221,10 +247,10 @@ extension Headache {
     // Get the previous severity and end it
     if let previousSeverity = severities.last {
       previousSeverity.endTime = endTime
-      return previousSeverity.severityInterval
+      return SeverityUpdates(createdSeverityIdentifier: nil, createdSeverityStartTime: nil, updatedSeverityIdentifier: previousSeverity.identifier, updatedSeverityInterval: previousSeverity.severityInterval)
     }
     
-    return nil
+    return .empty
   }
   
 }

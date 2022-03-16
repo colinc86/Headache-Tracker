@@ -48,8 +48,8 @@ struct TrainingDataView: View {
           TextField("𝚺 Temperature", value: $trainingData.sigmaTemperature, format: .number, prompt: Text("𝚺 Temperature"))
         }
         else {
-          SubtitleCell(title: "Barometric Pressure", subtitle: trainingData.pressureMeasurement.formatted())
-          SubtitleCell(title: "Current Pressure", subtitle: trainingData.devicePressureMeasurement.formatted())
+          SubtitleCell(title: "Barometric Pressure", subtitle: trainingData.devicePressureMeasurement.formatted())
+          SubtitleCell(title: "Current Pressure", subtitle: trainingData.pressureMeasurement.formatted())
           SubtitleCell(title: "Current Humidity", subtitle: trainingData.humidityMeasurement.formatted())
           SubtitleCell(title: "Current Temperature", subtitle: trainingData.temperatureMeasurement.formatted())
           SubtitleCell(title: "𝚺 Pressure", subtitle: "\(trainingData.sigmaPressure) kPa")

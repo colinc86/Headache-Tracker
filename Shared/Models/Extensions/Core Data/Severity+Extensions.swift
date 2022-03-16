@@ -35,10 +35,12 @@ extension Severity {
   ///   - context: The context to create the severity in.
   ///   - initialSeverity: The severity.
   ///   - startTime: The severity's start time.
-  convenience init(context: NSManagedObjectContext, severity: HKCategoryValueSeverity, startTime: Date) {
+  ///   - endTime: The severity's end time.
+  convenience init(context: NSManagedObjectContext, severity: HKCategoryValueSeverity, startTime: Date, endTime: Date?) {
     self.init(context: context)
     self.severity = severity
     self.startTime = startTime
+    self.endTime = endTime
     self.identifier = UUID()
   }
   

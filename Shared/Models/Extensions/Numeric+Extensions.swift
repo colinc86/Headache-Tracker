@@ -19,6 +19,11 @@ extension Double {
     return numberToRound.rounded() / n
   }
   
+  /// Creates a percent format string with the given number of decimal places.
+  ///
+  /// - Parameter decimalPlaces: The decimal places to create the percent
+  ///   with.
+  /// - Returns: A string.
   func percentFormat(decimalPlaces: Int = 0) -> String {
     let formatString = "%0.\(decimalPlaces)f%%"
     return String(format: formatString, self * 100.0)

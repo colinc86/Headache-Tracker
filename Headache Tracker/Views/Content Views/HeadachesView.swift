@@ -34,6 +34,8 @@ struct HeadachesView: View {
     animation: .default)
   private var resolvedHeadaches: FetchedResults<Headache>
   
+  @State private var showingAddHeadache: Bool = false
+  
   // MARK: View body
   
   var body: some View {
@@ -72,9 +74,20 @@ struct HeadachesView: View {
         ToolbarItem(placement: .navigationBarTrailing) {
           EditButton()
         }
+        
+        ToolbarItem(placement: .automatic) {
+          Button(action: addHeadache) {
+            Label("Add", systemImage: "plus")
+          }
+        }
       }
     }
     .navigationViewStyle(StackNavigationViewStyle())
+    .sheet(isPresented: $showingAddHeadache, onDismiss: nil) {
+      NavigationView {
+        AddHeadacheView()
+      }
+    }
   }
   
 }
@@ -82,6 +95,10 @@ struct HeadachesView: View {
 // MARK: Private methods
 
 extension HeadachesView {
+  
+  private func addHeadache() {
+    withAnimation { showingAddHeadache = true }
+  }
   
   /// Deletes the items at the given offsets.
   ///

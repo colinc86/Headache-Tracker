@@ -187,25 +187,26 @@
 		3B93A6E027D5591F00BCBDE1 /* BlockGraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B93A6DF27D5591F00BCBDE1 /* BlockGraph.swift */; };
 		3BA933AD27DF23E100BAD5A4 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 3BA933AC27DF23E100BAD5A4 /* Alamofire */; };
 		3BA933AF27DF23EC00BAD5A4 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 3BA933AE27DF23EC00BAD5A4 /* Alamofire */; };
+		3BA933B127DFA5D000BAD5A4 /* AddHeadacheView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BA933B027DFA5D000BAD5A4 /* AddHeadacheView.swift */; };
 		3BAAA68D27CC3D9300C0DDC4 /* TrainingDataView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BAAA68C27CC3D9300C0DDC4 /* TrainingDataView.swift */; };
 		3BAAA69327CC8A5800C0DDC4 /* GraphList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BAAA69227CC8A5800C0DDC4 /* GraphList.swift */; };
 		3BAAA69727CCA7A200C0DDC4 /* TouchLocatingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BAAA69627CCA7A200C0DDC4 /* TouchLocatingView.swift */; };
 		3BAAA69927CD5B0100C0DDC4 /* DebugSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BAAA69827CD5B0100C0DDC4 /* DebugSettingsView.swift */; };
+		3BD1D34027E12DBC0072A576 /* ApplicationKey in Frameworks */ = {isa = PBXBuildFile; productRef = 3BD1D33F27E12DBC0072A576 /* ApplicationKey */; };
+		3BD1D34327E12DEA0072A576 /* DataController in Frameworks */ = {isa = PBXBuildFile; productRef = 3BD1D34227E12DEA0072A576 /* DataController */; };
+		3BD1D34527E12E0E0072A576 /* ApplicationKey in Frameworks */ = {isa = PBXBuildFile; productRef = 3BD1D34427E12E0E0072A576 /* ApplicationKey */; };
+		3BD1D34727E12E0E0072A576 /* DataController in Frameworks */ = {isa = PBXBuildFile; productRef = 3BD1D34627E12E0E0072A576 /* DataController */; };
 		3BE731FA27DB11DB007C013B /* CocoaLumberjack in Frameworks */ = {isa = PBXBuildFile; productRef = 3BE731F927DB11DB007C013B /* CocoaLumberjack */; };
 		3BE731FC27DB11DB007C013B /* CocoaLumberjackSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 3BE731FB27DB11DB007C013B /* CocoaLumberjackSwift */; };
 		3BE731FE27DB11DB007C013B /* CocoaLumberjackSwiftLogBackend in Frameworks */ = {isa = PBXBuildFile; productRef = 3BE731FD27DB11DB007C013B /* CocoaLumberjackSwiftLogBackend */; };
 		3BE7320127DB1206007C013B /* Surge in Frameworks */ = {isa = PBXBuildFile; productRef = 3BE7320027DB1206007C013B /* Surge */; };
 		3BE7320427DB122F007C013B /* Shapes in Frameworks */ = {isa = PBXBuildFile; productRef = 3BE7320327DB122F007C013B /* Shapes */; };
-		3BE7320727DB1259007C013B /* ApplicationKey in Frameworks */ = {isa = PBXBuildFile; productRef = 3BE7320627DB1259007C013B /* ApplicationKey */; };
-		3BE7320A27DB129C007C013B /* DataController in Frameworks */ = {isa = PBXBuildFile; productRef = 3BE7320927DB129C007C013B /* DataController */; };
 		3BE7320C27DB1318007C013B /* CocoaLumberjackSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 3BE7320B27DB1318007C013B /* CocoaLumberjackSwift */; };
 		3BE7320E27DB135A007C013B /* Surge in Frameworks */ = {isa = PBXBuildFile; productRef = 3BE7320D27DB135A007C013B /* Surge */; };
-		3BE7321027DB1360007C013B /* DataController in Frameworks */ = {isa = PBXBuildFile; productRef = 3BE7320F27DB1360007C013B /* DataController */; };
-		3BE7321227DB1368007C013B /* ApplicationKey in Frameworks */ = {isa = PBXBuildFile; productRef = 3BE7321127DB1368007C013B /* ApplicationKey */; };
 		3BE7321427DB1FC5007C013B /* MLDataTable+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BE7321327DB1FC5007C013B /* MLDataTable+Extensions.swift */; };
 		3BE7321627DB265A007C013B /* MLDataTable+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BE7321327DB1FC5007C013B /* MLDataTable+Extensions.swift */; };
-		3BE7321827DB2963007C013B /* Sequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BE7321727DB2963007C013B /* Sequence.swift */; };
-		3BE7321927DB2963007C013B /* Sequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BE7321727DB2963007C013B /* Sequence.swift */; };
+		3BE7321827DB2963007C013B /* Sequence+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BE7321727DB2963007C013B /* Sequence+Extensions.swift */; };
+		3BE7321927DB2963007C013B /* Sequence+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BE7321727DB2963007C013B /* Sequence+Extensions.swift */; };
 		3BF5313727ACE18D00056673 /* Headache_TrackerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF5313627ACE18D00056673 /* Headache_TrackerApp.swift */; };
 		3BF5313927ACE18D00056673 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF5313827ACE18D00056673 /* ContentView.swift */; };
 		3BF5313B27ACE18F00056673 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3BF5313A27ACE18F00056673 /* Assets.xcassets */; };
@@ -215,6 +216,7 @@
 		3BF5315727ACE18F00056673 /* Headache_TrackerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF5315627ACE18F00056673 /* Headache_TrackerUITests.swift */; };
 		3BF5315927ACE18F00056673 /* Headache_TrackerUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF5315827ACE18F00056673 /* Headache_TrackerUITestsLaunchTests.swift */; };
 		3BF5316827ACE1DA00056673 /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3BF5316727ACE1DA00056673 /* HealthKit.framework */; };
+		3BF7943927DFB6970094C531 /* EditableDateTimeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF7943827DFB6970094C531 /* EditableDateTimeView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -375,13 +377,14 @@
 		3B93330127CF51C600BACE93 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		3B93330327CF51D500BACE93 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		3B93A6DF27D5591F00BCBDE1 /* BlockGraph.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockGraph.swift; sourceTree = "<group>"; };
+		3BA933B027DFA5D000BAD5A4 /* AddHeadacheView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddHeadacheView.swift; sourceTree = "<group>"; };
 		3BAAA67D27C94B9B00C0DDC4 /* Headache_Tracker 1.5.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Headache_Tracker 1.5.xcdatamodel"; sourceTree = "<group>"; };
 		3BAAA68C27CC3D9300C0DDC4 /* TrainingDataView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingDataView.swift; sourceTree = "<group>"; };
 		3BAAA69227CC8A5800C0DDC4 /* GraphList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphList.swift; sourceTree = "<group>"; };
 		3BAAA69627CCA7A200C0DDC4 /* TouchLocatingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TouchLocatingView.swift; sourceTree = "<group>"; };
 		3BAAA69827CD5B0100C0DDC4 /* DebugSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugSettingsView.swift; sourceTree = "<group>"; };
 		3BE7321327DB1FC5007C013B /* MLDataTable+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MLDataTable+Extensions.swift"; sourceTree = "<group>"; };
-		3BE7321727DB2963007C013B /* Sequence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sequence.swift; sourceTree = "<group>"; };
+		3BE7321727DB2963007C013B /* Sequence+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sequence+Extensions.swift"; sourceTree = "<group>"; };
 		3BF5313327ACE18D00056673 /* Headache Tracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Headache Tracker.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3BF5313627ACE18D00056673 /* Headache_TrackerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Headache_TrackerApp.swift; sourceTree = "<group>"; };
 		3BF5313827ACE18D00056673 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -395,6 +398,7 @@
 		3BF5315827ACE18F00056673 /* Headache_TrackerUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Headache_TrackerUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		3BF5316527ACE1D900056673 /* Headache Tracker.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Headache Tracker.entitlements"; sourceTree = "<group>"; };
 		3BF5316727ACE1DA00056673 /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = SDKROOT; };
+		3BF7943827DFB6970094C531 /* EditableDateTimeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditableDateTimeView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -402,10 +406,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3BE7321027DB1360007C013B /* DataController in Frameworks */,
 				3BA933AF27DF23EC00BAD5A4 /* Alamofire in Frameworks */,
-				3BE7321227DB1368007C013B /* ApplicationKey in Frameworks */,
+				3BD1D34527E12E0E0072A576 /* ApplicationKey in Frameworks */,
 				3B68BE5027C349B9007AAAC6 /* SwiftUI.framework in Frameworks */,
+				3BD1D34727E12E0E0072A576 /* DataController in Frameworks */,
 				3B68BE4E27C349B9007AAAC6 /* WidgetKit.framework in Frameworks */,
 				3BE7320C27DB1318007C013B /* CocoaLumberjackSwift in Frameworks */,
 				3BE7320E27DB135A007C013B /* Surge in Frameworks */,
@@ -427,11 +431,11 @@
 				3B9332CF27CE004400BACE93 /* CoreServices.framework in Frameworks */,
 				3B9332CB27CE003300BACE93 /* SystemConfiguration.framework in Frameworks */,
 				3BE731FA27DB11DB007C013B /* CocoaLumberjack in Frameworks */,
+				3BD1D34327E12DEA0072A576 /* DataController in Frameworks */,
+				3BD1D34027E12DBC0072A576 /* ApplicationKey in Frameworks */,
 				3BF5316827ACE1DA00056673 /* HealthKit.framework in Frameworks */,
 				3BA933AD27DF23E100BAD5A4 /* Alamofire in Frameworks */,
-				3BE7320A27DB129C007C013B /* DataController in Frameworks */,
 				3BE731FE27DB11DB007C013B /* CocoaLumberjackSwiftLogBackend in Frameworks */,
-				3BE7320727DB1259007C013B /* ApplicationKey in Frameworks */,
 				3BE731FC27DB11DB007C013B /* CocoaLumberjackSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -464,6 +468,7 @@
 				3BAAA69227CC8A5800C0DDC4 /* GraphList.swift */,
 				3B051A4D27B0E9060017131D /* HeadachesView.swift */,
 				3B051A9027B0FACA0017131D /* HeadacheView.swift */,
+				3BA933B027DFA5D000BAD5A4 /* AddHeadacheView.swift */,
 				3B39DAE327AD06EA00D39BB5 /* SettingsView.swift */,
 				3B051AA627B37D060017131D /* SeverityView.swift */,
 				3B68BE7727C41FDE007AAAC6 /* TrainingDataListView.swift */,
@@ -496,6 +501,7 @@
 				3B1C7DB527D205EE000B3A99 /* ActionView.swift */,
 				3B3FFF1227D868F300DFACC1 /* CurrentHeadacheViews.swift */,
 				3B09191527BCD38300844F6C /* DurationView.swift */,
+				3BF7943827DFB6970094C531 /* EditableDateTimeView.swift */,
 				3B09191127BCCE1C00844F6C /* OnsetView.swift */,
 				3B3FFF1027D8604600DFACC1 /* PredictionViews.swift */,
 				3B1C7DB327D2005E000B3A99 /* StatusView.swift */,
@@ -647,7 +653,7 @@
 				3B3FFE6E27D592A000DFACC1 /* HKCategoryValueSeverity+Extensions.swift */,
 				3BE7321327DB1FC5007C013B /* MLDataTable+Extensions.swift */,
 				3B3FFE7C27D592A000DFACC1 /* Numeric+Extensions.swift */,
-				3BE7321727DB2963007C013B /* Sequence.swift */,
+				3BE7321727DB2963007C013B /* Sequence+Extensions.swift */,
 				3B3FFE7327D592A000DFACC1 /* String+Extensions.swift */,
 				3B3FFE7527D592A000DFACC1 /* UIColor+Extensions.swift */,
 				3B3FFE7827D592A000DFACC1 /* UUID+Extensions.swift */,
@@ -883,9 +889,9 @@
 			packageProductDependencies = (
 				3BE7320B27DB1318007C013B /* CocoaLumberjackSwift */,
 				3BE7320D27DB135A007C013B /* Surge */,
-				3BE7320F27DB1360007C013B /* DataController */,
-				3BE7321127DB1368007C013B /* ApplicationKey */,
 				3BA933AE27DF23EC00BAD5A4 /* Alamofire */,
+				3BD1D34427E12E0E0072A576 /* ApplicationKey */,
+				3BD1D34627E12E0E0072A576 /* DataController */,
 			);
 			productName = "Headache Tracker WidgetExtension";
 			productReference = 3B68BE4C27C349B9007AAAC6 /* Headache Tracker WidgetExtension.appex */;
@@ -917,9 +923,9 @@
 				3BE731FD27DB11DB007C013B /* CocoaLumberjackSwiftLogBackend */,
 				3BE7320027DB1206007C013B /* Surge */,
 				3BE7320327DB122F007C013B /* Shapes */,
-				3BE7320627DB1259007C013B /* ApplicationKey */,
-				3BE7320927DB129C007C013B /* DataController */,
 				3BA933AC27DF23E100BAD5A4 /* Alamofire */,
+				3BD1D33F27E12DBC0072A576 /* ApplicationKey */,
+				3BD1D34227E12DEA0072A576 /* DataController */,
 			);
 			productName = "Headache Tracker";
 			productReference = 3BF5313327ACE18D00056673 /* Headache Tracker.app */;
@@ -1002,9 +1008,9 @@
 				3BE731F827DB11DB007C013B /* XCRemoteSwiftPackageReference "CocoaLumberjack" */,
 				3BE731FF27DB1205007C013B /* XCRemoteSwiftPackageReference "Surge" */,
 				3BE7320227DB122F007C013B /* XCRemoteSwiftPackageReference "swiftui-shapes" */,
-				3BE7320527DB1259007C013B /* XCRemoteSwiftPackageReference "ApplicationKey" */,
-				3BE7320827DB129B007C013B /* XCRemoteSwiftPackageReference "DataController" */,
 				3BA933AB27DF23E100BAD5A4 /* XCRemoteSwiftPackageReference "Alamofire" */,
+				3BD1D33E27E12DBC0072A576 /* XCRemoteSwiftPackageReference "ApplicationKey" */,
+				3BD1D34127E12DEA0072A576 /* XCRemoteSwiftPackageReference "DataController" */,
 			);
 			productRefGroup = 3BF5313427ACE18D00056673 /* Products */;
 			projectDirPath = "";
@@ -1137,7 +1143,7 @@
 				3B3FFEC227D592A000DFACC1 /* HKCategoryValueSeverity+Extensions.swift in Sources */,
 				3B3FFD6E27D58CED00DFACC1 /* Headache_Tracker.xcdatamodeld in Sources */,
 				3B3FFD7727D58D5400DFACC1 /* OutlookView.swift in Sources */,
-				3BE7321927DB2963007C013B /* Sequence.swift in Sources */,
+				3BE7321927DB2963007C013B /* Sequence+Extensions.swift in Sources */,
 				3B3FFEB427D592A000DFACC1 /* DurationRegressorOutput.swift in Sources */,
 				3B3FFF1827D88ADC00DFACC1 /* DestructiveConfirmationDialog.swift in Sources */,
 				3B9332F127CF3B5300BACE93 /* OutlookWidget.swift in Sources */,
@@ -1211,6 +1217,7 @@
 				3B3FFEAB27D592A000DFACC1 /* Predictor.swift in Sources */,
 				3B68BDFB27BE0F00007AAAC6 /* BarGraph.swift in Sources */,
 				3B3FFEAD27D592A000DFACC1 /* SeverityClassifierOutput.swift in Sources */,
+				3BA933B127DFA5D000BAD5A4 /* AddHeadacheView.swift in Sources */,
 				3B9332EA27CF1E8400BACE93 /* FeedbackView.swift in Sources */,
 				3B09191227BCCE1C00844F6C /* OnsetView.swift in Sources */,
 				3B3FFE9327D592A000DFACC1 /* HeadacheStatistics.swift in Sources */,
@@ -1238,7 +1245,7 @@
 				3B3FFEB527D592A000DFACC1 /* UncontrolledUserInput.swift in Sources */,
 				3B3FFEDF27D592A000DFACC1 /* AlertManager.swift in Sources */,
 				3B3FFEE927D592A000DFACC1 /* MotionManager.swift in Sources */,
-				3BE7321827DB2963007C013B /* Sequence.swift in Sources */,
+				3BE7321827DB2963007C013B /* Sequence+Extensions.swift in Sources */,
 				3B3FFEF327D592A000DFACC1 /* DDBugfenderLogger.swift in Sources */,
 				3B3FFEED27D592A000DFACC1 /* HolisticOutlook.swift in Sources */,
 				3B3FFEF527D592A000DFACC1 /* Logger.swift in Sources */,
@@ -1265,6 +1272,7 @@
 				3B3FFEC927D592A000DFACC1 /* String+Extensions.swift in Sources */,
 				3B3FFEE327D592A000DFACC1 /* BackgroundTask.swift in Sources */,
 				3B3FFECD27D592A000DFACC1 /* UIColor+Extensions.swift in Sources */,
+				3BF7943927DFB6970094C531 /* EditableDateTimeView.swift in Sources */,
 				3B09191A27BD58A100844F6C /* SeveritySelectionView.swift in Sources */,
 				3B09192127BD851700844F6C /* LineGraph.swift in Sources */,
 				3B3FFEEF27D592A000DFACC1 /* Previewing.swift in Sources */,
@@ -1917,6 +1925,22 @@
 				minimumVersion = 5.5.0;
 			};
 		};
+		3BD1D33E27E12DBC0072A576 /* XCRemoteSwiftPackageReference "ApplicationKey" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/colinc86/ApplicationKey.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
+		3BD1D34127E12DEA0072A576 /* XCRemoteSwiftPackageReference "DataController" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/colinc86/DataController.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.7;
+			};
+		};
 		3BE731F827DB11DB007C013B /* XCRemoteSwiftPackageReference "CocoaLumberjack" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/CocoaLumberjack/CocoaLumberjack.git";
@@ -1939,22 +1963,6 @@
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 1.0.0;
-			};
-		};
-		3BE7320527DB1259007C013B /* XCRemoteSwiftPackageReference "ApplicationKey" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/colinc86/ApplicationKey.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.0;
-			};
-		};
-		3BE7320827DB129B007C013B /* XCRemoteSwiftPackageReference "DataController" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/colinc86/DataController.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.6;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
@@ -1985,6 +1993,26 @@
 			package = 3BA933AB27DF23E100BAD5A4 /* XCRemoteSwiftPackageReference "Alamofire" */;
 			productName = Alamofire;
 		};
+		3BD1D33F27E12DBC0072A576 /* ApplicationKey */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3BD1D33E27E12DBC0072A576 /* XCRemoteSwiftPackageReference "ApplicationKey" */;
+			productName = ApplicationKey;
+		};
+		3BD1D34227E12DEA0072A576 /* DataController */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3BD1D34127E12DEA0072A576 /* XCRemoteSwiftPackageReference "DataController" */;
+			productName = DataController;
+		};
+		3BD1D34427E12E0E0072A576 /* ApplicationKey */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3BD1D33E27E12DBC0072A576 /* XCRemoteSwiftPackageReference "ApplicationKey" */;
+			productName = ApplicationKey;
+		};
+		3BD1D34627E12E0E0072A576 /* DataController */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3BD1D34127E12DEA0072A576 /* XCRemoteSwiftPackageReference "DataController" */;
+			productName = DataController;
+		};
 		3BE731F927DB11DB007C013B /* CocoaLumberjack */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 3BE731F827DB11DB007C013B /* XCRemoteSwiftPackageReference "CocoaLumberjack" */;
@@ -2010,16 +2038,6 @@
 			package = 3BE7320227DB122F007C013B /* XCRemoteSwiftPackageReference "swiftui-shapes" */;
 			productName = Shapes;
 		};
-		3BE7320627DB1259007C013B /* ApplicationKey */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 3BE7320527DB1259007C013B /* XCRemoteSwiftPackageReference "ApplicationKey" */;
-			productName = ApplicationKey;
-		};
-		3BE7320927DB129C007C013B /* DataController */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 3BE7320827DB129B007C013B /* XCRemoteSwiftPackageReference "DataController" */;
-			productName = DataController;
-		};
 		3BE7320B27DB1318007C013B /* CocoaLumberjackSwift */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 3BE731F827DB11DB007C013B /* XCRemoteSwiftPackageReference "CocoaLumberjack" */;
@@ -2029,16 +2047,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 3BE731FF27DB1205007C013B /* XCRemoteSwiftPackageReference "Surge" */;
 			productName = Surge;
-		};
-		3BE7320F27DB1360007C013B /* DataController */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 3BE7320827DB129B007C013B /* XCRemoteSwiftPackageReference "DataController" */;
-			productName = DataController;
-		};
-		3BE7321127DB1368007C013B /* ApplicationKey */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 3BE7320527DB1259007C013B /* XCRemoteSwiftPackageReference "ApplicationKey" */;
-			productName = ApplicationKey;
 		};
 /* End XCSwiftPackageProductDependency section */
 

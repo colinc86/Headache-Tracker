@@ -68,7 +68,7 @@ extension WeatherManager {
   ///
   /// - Parameter date: The date of the weather reading.
   /// - Returns: The weather.
-  func weather(date: Date = Date()) async throws -> Weather {
+  func weather(at date: Date = Date()) async throws -> Weather {
     logInfo("Get weather.")
     
     // Try to get the weather spread
@@ -81,12 +81,16 @@ extension WeatherManager {
       logError("Error getting weather spread: \(error)")
     }
     
+    // Only get the barometric pressure if the requested date is
+    // "near" the current date.
     var pressure: Measurement<UnitPressure>?
-    do {
-      pressure = try await motionManager.barometricPressure()
-    }
-    catch {
-      logError("Error getting pressure: \(error)")
+    if abs(Date().timeIntervalSince(date)) < 60.0 {
+      do {
+        pressure = try await motionManager.barometricPressure()
+      }
+      catch {
+        logError("Error getting pressure: \(error)")
+      }
     }
     
     return Weather(spread: spread, pressure: pressure)

@@ -19,6 +19,7 @@ class HeadacheManager: ObservableObject {
   enum HeadacheError: Error, CustomStringConvertible {
     case testing
     case missing
+    case headacheDateRange
     
     var description: String {
       switch self {
@@ -26,6 +27,8 @@ class HeadacheManager: ObservableObject {
         return "This operation is not allowed in test mode."
       case .missing:
         return "The required data was missing."
+      case .headacheDateRange:
+        return "The headache's onset must be before its end."
       }
     }
   }
@@ -79,7 +82,7 @@ extension HeadacheManager {
     logDebug("Change severity to \(severity.title).")
     
     // The date interval of the severity to save to health kit
-    let severityInterval: SeverityInterval? = try await currentHeadache { headache, context in
+    let severityUpdates: Headache.SeverityUpdates = try await currentHeadache { headache, context in
       // Add to the current headache or create a new one
       if let headache = headache {
         logDebug("Adding severity to current headache.")
@@ -88,14 +91,16 @@ extension HeadacheManager {
       
       logDebug("Creating new headache.")
       _ = Headache(context: context, initialSeverity: severity, startTime: Date())
-      return nil
+      return .empty
     }
     
     // If there wasn't an error, then update the widget data and continue
     SharedUserDefaults.standard.setCurrentSeverity(severity)
     
     // Write the data to health kit and set our check-in alert
-    try await healthKitManager.saveSeveritySamples(intervals: severityInterval == nil ? [] : [severityInterval!])
+    if let interval = severityUpdates.updatedSeverityInterval {
+      try await healthKitManager.saveSeveritySamples(intervals: [interval])
+    }
     
     // Update the CoreML training data
     try await createPredict(inWidget: false)
@@ -106,7 +111,7 @@ extension HeadacheManager {
     logDebug("Resolve headache.")
     
     // Get the current headache
-    let severityInterval: SeverityInterval? = try await currentHeadache { headache, context in
+    let severityUpdates: Headache.SeverityUpdates = try await currentHeadache { headache, context in
       // Resolve the headache
       if let headache = headache {
         return headache.resolve(endTime: Date())
@@ -114,14 +119,16 @@ extension HeadacheManager {
       else {
         logWarning("No current headache to resolve.")
       }
-      return nil
+      return .empty
     }
     
     // If there wasn't an error, then update the widget data and continue
     SharedUserDefaults.standard.setCurrentSeverity(nil)
     
     // Write the data to health kit
-    try await healthKitManager.saveSeveritySamples(intervals: severityInterval == nil ? [] : [severityInterval!])
+    if let interval = severityUpdates.updatedSeverityInterval {
+      try await healthKitManager.saveSeveritySamples(intervals: [interval])
+    }
     
     // Update the CoreML models
     try await createPredict(inWidget: false)
@@ -166,24 +173,47 @@ extension HeadacheManager {
 
 extension HeadacheManager {
   
+  /// Creates a headache with the given starting severity.
+  ///
+  /// - Parameters:
+  ///   - severity: The headache's starting severity.
+  ///   - startTime: The headache's start time.
+  ///   - endTime: The headache's end time.
+  func createHeadache(severity: HKCategoryValueSeverity, startTime: Date, endTime: Date?) async throws {
+    let severityIdentifier = try await DataController.shared.performInBackground(saveOnComplete: true) { (context) -> UUID? in
+      let headache = Headache(context: context, initialSeverity: severity, startTime: startTime, endTime: endTime)
+      return headache.severitiesArray.first?.identifier
+    }
+    
+    // Create the training data
+    let input = try await predictorInput(atDate: startTime, inWidget: false)
+    try await createTrainingData(from: input, severityIdentifier: severityIdentifier)
+  }
+  
   /// Adds a new severity to the headache with the given identifier.
   ///
   /// - Parameter identifier: The headache's identifier.
   func addSeverityToHeadache(identifier: UUID) async throws {
     logDebug("Add severity.")
     
-    // The date interval of the severity to save to health kit
-    
-    
     // Get the headache
-    let severityInterval: SeverityInterval? = try await headacheWithIdentifier(identifier: identifier) { headache, context in
+    let severityUpdates: Headache.SeverityUpdates = try await headacheWithIdentifier(identifier: identifier) { headache, context in
       if let headache = headache {
         return headache.addSeverity(.notPresent, duration: 3600.0)
       }
-      return nil
+      return .empty
     }
     
-    try await healthKitManager.saveSeveritySamples(intervals: severityInterval == nil ? [] : [severityInterval!])
+    // Create the training data
+    if let identifier = severityUpdates.createdSeverityIdentifier, let startTime = severityUpdates.createdSeverityStartTime {
+      let input = try await predictorInput(atDate: startTime, inWidget: false)
+      try await createTrainingData(from: input, severityIdentifier: identifier)
+    }
+    
+    // Update the health kit samples
+    if let interval = severityUpdates.updatedSeverityInterval {
+      try await healthKitManager.saveSeveritySamples(intervals: [interval])
+    }
   }
   
   /// Deletes the headache with the given identifier and it's associated health kit data.
@@ -269,8 +299,12 @@ extension HeadacheManager {
     var originalHeadacheInterval: DateInterval?
     var newSeveritySamples = [SeverityInterval]()
     
-    try await severityWithIdentifier(identifier: identifier) { severity, context in
+    let modified = try await severityWithIdentifier(identifier: identifier) { (severity, context) -> Bool in
+      var modified = false
+      
       if let severity = severity {
+        modified = severity.startTime != startTime
+        
         let headache = severity.headache
         originalHeadacheInterval = headache?.dateInterval
         severity.severity = value
@@ -283,6 +317,14 @@ extension HeadacheManager {
           newSeveritySamples.append(interval)
         }
       }
+      
+      return modified
+    }
+    
+    // Update the training data if needed
+    if modified {
+      let input = try await predictorInput(atDate: startTime, inWidget: false)
+      try await createTrainingData(from: input, severityIdentifier: identifier, replacingExistingData: true)
     }
     
     // Check to see if we need to delete and re-add samples
@@ -363,18 +405,21 @@ extension HeadacheManager {
     }
   }
   
+  /// Whether there is a current headache.
   func hasCurrentHeadache() async throws -> Bool {
     return try await currentHeadache { headache, _ in
       return headache != nil
     }
   }
   
+  /// The identifier of the current headache.
   func currentHeadacheIdentifier() async throws -> UUID? {
     return try await currentHeadache { headache, _ in
       return headache?.identifier
     }
   }
   
+  /// The identifier of the current headache's current severity identifier.
   func currentSeverityIdentifier() async throws -> UUID? {
     return try await currentHeadache { headache, _ in
       return headache?.severitiesArray.last?.identifier
@@ -420,20 +465,20 @@ extension HeadacheManager {
     weatherManager.cancel()
   }
   
-  /// Creates model input ready for prediction.
+  /// Creates a model input ready for prediction.
   ///
-  /// - Parameter inWidget: Whether this method is being called from
-  ///   within a widget.
-  /// - Returns: Model input.
-  func predictorInput(inWidget: Bool = false) async throws -> ModelInput {
-    let weather = try await weatherManager.weather()
-    let now = Date()
-    let interval = DateInterval(start: now.addingTimeInterval(-86400.0), end: now)
+  /// - Parameters:
+  ///   - date: The date of the predictor's desired input.
+  ///   - inWidget: Whether this method is being called from within a widget.
+  /// - Returns: Model input for the specified date.
+  func predictorInput(atDate date: Date, inWidget: Bool) async throws -> ModelInput {
+    let weather = try await weatherManager.weather(at: date)
+    let interval = DateInterval(start: date.addingTimeInterval(-86400.0), end: date)
     let healthKitData = healthKitManager.readHealthKitData(in: interval, inWidget: inWidget)
-    return ModelInput(date: now, weatherStatistics: weather.statistics, healthKitData: healthKitData)
+    return ModelInput(date: date, weatherStatistics: weather.statistics, healthKitData: healthKitData)
   }
   
-  /// Gets classifier input appropriate for prediction, saves it as traininig
+  /// Gets classifier input appropriate for prediction, saves it as training
   /// data, runs a prediction, and evaluates the prediction.
   ///
   /// - Parameters:
@@ -442,7 +487,7 @@ extension HeadacheManager {
   ///   - predict: Runs a prediction before returning the input if true.
   ///   - inWidget: Whether this method is being called by a widget.
   func createPredict(create: Bool = true, predict: Bool = true, inWidget: Bool) async throws {
-    let input = try await predictorInput(inWidget: inWidget)
+    let input = try await predictorInput(atDate: Date(), inWidget: inWidget)
     
     if create {
       let identifier = try await currentSeverityIdentifier()
@@ -462,7 +507,8 @@ extension HeadacheManager {
   /// - Parameters:
   ///   - input: The input data to create the training data from.
   ///   - severityIdentifier: The identifier of the training data's parent severity, if any.
-  func createTrainingData(from input: ModelInput, severityIdentifier: UUID? = nil) async throws {
+  ///   - replacingExistingData: Whether the severity's existing training data should be replaced with the new data.
+  func createTrainingData(from input: ModelInput, severityIdentifier: UUID? = nil, replacingExistingData: Bool = false) async throws {
     guard !testing else { throw HeadacheError.testing }
     
     logInfo("Creating training data...")
@@ -474,6 +520,16 @@ extension HeadacheManager {
       if let severityIdentifier = severityIdentifier {
         let request = Severity.fetchRequest(withIdentifier: severityIdentifier)
         if let severity = ((try? context.fetch(request)) ?? []).first {
+          if replacingExistingData {
+            if let existingTrainingData = severity.trainingData {
+              for data in existingTrainingData {
+                guard let uData = data as? TrainingData else { continue }
+                severity.removeFromTrainingData(uData)
+                context.delete(uData)
+              }
+            }
+          }
+          
           severity.addToTrainingData(trainingData)
         }
         else {
@@ -518,7 +574,7 @@ extension HeadacheManager {
         group.enter()
         Task {
           do {
-            let weather = try await self.weatherManager.weather(date: timestamp)
+            let weather = try await self.weatherManager.weather(at: timestamp)
             await context.perform {
               trainingDatum.updateWithWeatherStatistics(weather.statistics)
             }

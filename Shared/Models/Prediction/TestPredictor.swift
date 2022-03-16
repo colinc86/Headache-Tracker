@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import HealthKit
 
 #if !NON_PREVIEW
 class Predictor: ObservableObject {
@@ -17,26 +18,6 @@ class Predictor: ObservableObject {
     case onsetRegressor
     case outlookClassifier
     case severityClassifier
-  }
-  
-  struct TrainingInput {
-    
-    var isValid: Bool {
-      return true
-    }
-    
-    init(trainingData: [TrainingData]) throws {}
-    
-    /// Balances the training data for the given model type.
-    ///
-    /// - Parameters:
-    ///   - trainingData: The training data to balance.
-    ///   - modelType: The model type intended to train.
-    /// - Returns: The training data.
-    private static func balanceTrainingData(_ trainingData: [TrainingData], forModelType modelType: ModelType) -> [TrainingData] {
-      return []
-    }
-    
   }
   
   /// A prediction input.
@@ -53,7 +34,7 @@ class Predictor: ObservableObject {
     
     /// The full model input.
     func fullInput() -> InputUnion {
-      return InputUnion(providers: [controlledUserInput(), environmentalInput(), ChronologicalInput(), uncontrolledUserInput()])
+      return InputUnion(providers: [controlledUserInput(), environmentalInput(), chronologicalInput(), uncontrolledUserInput()])
     }
     
     private func controlledUserInput() -> ControlledUserInput {
@@ -61,10 +42,10 @@ class Predictor: ObservableObject {
     }
     
     private func environmentalInput() -> EnvironmentalInput {
-      return EnvironmentalInput(weather: weather, healthKitData: healthKitData ?? [:])
+      return EnvironmentalInput(weatherStatistics: weather?.statistics, healthKitData: healthKitData ?? [:])
     }
     
-    private func ChronologicalInput() -> ChronologicalInput {
+    private func chronologicalInput() -> ChronologicalInput {
       return ChronologicalInput(date: date)
     }
     
@@ -133,7 +114,7 @@ class Predictor: ObservableObject {
   @Published var ready: Bool = false
   
   /// The predictor's latest prediction.
-  @Published var prediction: Prediction?
+  @Published var prediction: PredictionOutput?
   
   /// The model's last updated at date.
   @Published var modelUpdatedAt: Date?
@@ -169,8 +150,8 @@ extension Predictor {
   ///
   /// - Parameter input: The predictor's input.
   /// - Returns: The predictor's output.
-  func predict(_ input: Input, reloadWidget: Bool = true) async throws -> Prediction {
-    return Prediction()
+  func predict(_ input: ModelInput, inWidget: Bool) async throws -> PredictionOutput {
+    return PredictionOutput.empty
   }
   
 }
