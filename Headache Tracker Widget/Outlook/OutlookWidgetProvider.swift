@@ -15,7 +15,7 @@ struct OutlookWidgetProvider: TimelineProvider {
   
   let headacheManager: HeadacheManager = {
     let manager = HeadacheManager()
-    manager.weatherManager.setup()
+    manager.locationManager.setup()
     
     Task {
       do {
@@ -58,7 +58,7 @@ struct OutlookWidgetProvider: TimelineProvider {
         let content = try await currentContent()
         let firstDate = content.first!.date
         
-        if now.timeIntervalSince(firstDate) >= 600.0 && headacheManager.predictor.ready && headacheManager.weatherManager.authorizedForWidgetUpdates {
+        if now.timeIntervalSince(firstDate) >= 600.0 && headacheManager.predictor.ready && headacheManager.authorizedForWidgetUpdates {
           // Get a new prediction
           try await headacheManager.createPredict(create: false, inWidget: true)
           

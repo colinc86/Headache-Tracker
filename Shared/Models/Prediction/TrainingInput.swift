@@ -11,6 +11,7 @@ import Foundation
 #if NON_PREVIEW
 import CreateML
 
+/// Creates and houses the tables for training.
 struct TrainingInput {
   
   let outlookTable: MLDataTable
@@ -18,10 +19,16 @@ struct TrainingInput {
   let onsetTable: MLDataTable
   let durationTable: MLDataTable
   
+  /// Whether the input's data tables are valid.
   var isValid: Bool {
     return outlookTable.isValid && outlookTable.isValid && onsetTable.isValid && durationTable.isValid
   }
   
+  // MARK: Initializers
+  
+  /// Initializes new training input with an array of traning data.
+  ///
+  /// - Parameter trainingData: The training data.
   init(trainingData: [TrainingData]) throws {
     logDebug("Creating training data.")
     
@@ -188,19 +195,20 @@ struct TrainingInput {
     
     let synthesizedWeatherStatistics = WeatherStatistics(
       barometricPressure: inter(percent, iws.barometricPressure, nws.barometricPressure),
-      currentPressure: inter(percent, iws.currentPressure, nws.currentPressure),
-      currentHumidity: inter(percent, iws.currentHumidity, nws.currentHumidity),
-      currentTemperature: inter(percent, iws.currentTemperature, nws.currentTemperature),
-      sigmaPressure: inter(percent, iws.sigmaPressure, nws.sigmaPressure),
-      sigmaHumidity: inter(percent, iws.sigmaHumidity, nws.sigmaHumidity),
-      sigmaTemperature: inter(percent, iws.sigmaTemperature, nws.sigmaTemperature))
+      currentPressure: inter(percent, iws.currentPressure, nws.currentPressure) ?? 0.0,
+      currentHumidity: inter(percent, iws.currentHumidity, nws.currentHumidity) ?? 0.0,
+      currentTemperature: inter(percent, iws.currentTemperature, nws.currentTemperature) ?? 0.0,
+      sigmaPressure: inter(percent, iws.sigmaPressure, nws.sigmaPressure) ?? 0.0,
+      sigmaHumidity: inter(percent, iws.sigmaHumidity, nws.sigmaHumidity) ?? 0.0,
+      sigmaTemperature: inter(percent, iws.sigmaTemperature, nws.sigmaTemperature) ?? 0.0)
     
     // Date
     let synthesizedSecondsSinceMidnight = interpolate(percent, Calendar.current.timeIntervalSinceMidnight(input.date), Calendar.current.timeIntervalSinceMidnight(neighbor.date))
     let middleDate = Date(timeIntervalSince1970: interpolate(percent, input.date.timeIntervalSince1970, neighbor.date.timeIntervalSince1970))
     let synthesizedDate = Calendar.current.startOfDay(for: middleDate).addingTimeInterval(synthesizedSecondsSinceMidnight)
     
-    return ModelInput(date: synthesizedDate, weatherStatistics: synthesizedWeatherStatistics, healthKitData: synthesizedHealthKitData)
+    // Finished
+    return ModelInput(date: synthesizedDate, location: input.location, weatherStatistics: synthesizedWeatherStatistics, healthKitData: synthesizedHealthKitData)
   }
   
   static func interpolate(_ percent: Double, _ valueA: Double, _ valueB: Double) -> Double {

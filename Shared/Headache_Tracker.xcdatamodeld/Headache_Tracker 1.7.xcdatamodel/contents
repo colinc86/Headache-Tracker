@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="20086" systemVersion="21E230" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithCloudKit="YES" userDefinedModelVersionIdentifier="">
+    <entity name="Evaluation" representedClassName="Evaluation" syncable="YES" codeGenerationType="class">
+        <attribute name="outlook" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="severity" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="timestamp" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+    </entity>
+    <entity name="Headache" representedClassName="Headache" syncable="YES" codeGenerationType="class">
+        <attribute name="createdAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="identifier" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="resolved" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <relationship name="severities" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Severity" inverseName="headache" inverseEntity="Severity"/>
+    </entity>
+    <entity name="HealthData" representedClassName="HealthData" syncable="YES" codeGenerationType="class">
+        <attribute name="environmentalAudioExposure" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="headphoneAudioExposure" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="heartRate" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="heartRateVariability" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="mindfulSeconds" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="oxygenSaturation" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="respiratoryRate" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="restingHeartRate" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="sleepOnset" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="sleepSeconds" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="stepCount" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="timestamp" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="version" optional="YES" attributeType="String"/>
+        <attribute name="walkingHeartRateAverage" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <relationship name="trainingData" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TrainingData" inverseName="healthData" inverseEntity="TrainingData"/>
+    </entity>
+    <entity name="Location" representedClassName="Location" syncable="YES" codeGenerationType="class">
+        <attribute name="altitude" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="horizontalAccuracy" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="latitude" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="longitude" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="timestamp" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="verticalAccuracy" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <relationship name="trainingData" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TrainingData" inverseName="location" inverseEntity="TrainingData"/>
+    </entity>
+    <entity name="Severity" representedClassName="Severity" syncable="YES" codeGenerationType="class">
+        <attribute name="endTime" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="identifier" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="rawValue" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="startTime" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <relationship name="headache" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Headache" inverseName="severities" inverseEntity="Headache"/>
+        <relationship name="trainingData" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="TrainingData" inverseName="severity" inverseEntity="TrainingData"/>
+    </entity>
+    <entity name="TrainingData" representedClassName="TrainingData" syncable="YES" codeGenerationType="category">
+        <attribute name="timestamp" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <relationship name="healthData" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="HealthData" inverseName="trainingData" inverseEntity="HealthData"/>
+        <relationship name="location" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="Location" inverseName="trainingData" inverseEntity="Location"/>
+        <relationship name="severity" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Severity" inverseName="trainingData" inverseEntity="Severity"/>
+        <relationship name="weatherData" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="WeatherData" inverseName="trainingData" inverseEntity="WeatherData"/>
+    </entity>
+    <entity name="WeatherData" representedClassName="WeatherData" syncable="YES" codeGenerationType="class">
+        <attribute name="devicePressure" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="humidity" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="pressure" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="sigmaHumidity" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="sigmaPressure" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="sigmaTemperature" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="temperature" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="timestamp" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="version" optional="YES" attributeType="String"/>
+        <relationship name="trainingData" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TrainingData" inverseName="weatherData" inverseEntity="TrainingData"/>
+    </entity>
+    <elements>
+        <element name="Evaluation" positionX="-54" positionY="144" width="128" height="74"/>
+        <element name="Headache" positionX="-63" positionY="-18" width="128" height="14"/>
+        <element name="HealthData" positionX="-36" positionY="162" width="128" height="254"/>
+        <element name="Location" positionX="-54" positionY="144" width="128" height="134"/>
+        <element name="Severity" positionX="-63" positionY="9" width="128" height="119"/>
+        <element name="TrainingData" positionX="-45" positionY="54" width="128" height="104"/>
+        <element name="WeatherData" positionX="-45" positionY="153" width="128" height="179"/>
+    </elements>
+</model>

@@ -6,6 +6,7 @@
 //
 
 import CoreData
+import CoreLocation
 import DataController
 import Foundation
 import SwiftUI
@@ -21,6 +22,7 @@ struct Previewing {
   
   @State static var booleanFalseValue: Bool = false
   @State static var booleanTrueValue: Bool = true
+  @State static var location: CLLocation = CLLocation(coordinate: CLLocationCoordinate2D(latitude: 32.781334, longitude: -96.778609), altitude: 139.0, horizontalAccuracy: 1000.0, verticalAccuracy: 10.0, timestamp: Date())
   
   struct Prediction {
     

@@ -5,6 +5,7 @@
 //  Created by Colin Campbell on 3/10/22.
 //
 
+import CoreLocation
 import Foundation
 import HealthKit
 
@@ -19,10 +20,13 @@ struct ModelInput: Codable {
     case severity
   }
   
-  static let empty = ModelInput(date: Date(), weatherStatistics: nil, healthKitData: nil, timeIntervalUntilNextHeadacheStart: nil, timeIntervalUntilNextHeadacheEnd: nil, outlook: .noHeadache, severity: .notPresent)
+  static let empty = ModelInput(date: Date(), location: nil, weatherStatistics: nil, healthKitData: nil, timeIntervalUntilNextHeadacheStart: nil, timeIntervalUntilNextHeadacheEnd: nil, outlook: .noHeadache, severity: .notPresent)
   
   /// The input date.
   var date: Date
+  
+  /// The location of the weather data.
+  var location: CLLocation?
   
   /// The input weather data.
   var weatherStatistics: WeatherStatistics?
@@ -45,8 +49,9 @@ struct ModelInput: Codable {
   // MARK: Initializers
   
   /// Initializes new model input.
-  init(date: Date, weatherStatistics: WeatherStatistics?, healthKitData: [HealthKitData: Double]?, timeIntervalUntilNextHeadacheStart: TimeInterval? = 0.0, timeIntervalUntilNextHeadacheEnd: TimeInterval? = 0.0, outlook: Outlook = .noHeadache, severity: HKCategoryValueSeverity = .notPresent) {
+  init(date: Date, location: CLLocation?, weatherStatistics: WeatherStatistics?, healthKitData: [HealthKitData: Double]?, timeIntervalUntilNextHeadacheStart: TimeInterval? = 0.0, timeIntervalUntilNextHeadacheEnd: TimeInterval? = 0.0, outlook: Outlook = .noHeadache, severity: HKCategoryValueSeverity = .notPresent) {
     self.date = date
+    self.location = location
     self.weatherStatistics = weatherStatistics
     self.healthKitData = healthKitData
     self.timeIntervalUntilNextHeadacheStart = timeIntervalUntilNextHeadacheStart
@@ -61,8 +66,9 @@ struct ModelInput: Codable {
   init(trainingData: TrainingData) {
     self.init(
       date: trainingData.timestamp ?? Date(),
-      weatherStatistics: trainingData.weatherStatistics,
-      healthKitData: trainingData.healthKitData,
+      location: trainingData.location?.location,
+      weatherStatistics: trainingData.weatherData?.weatherStatistics,
+      healthKitData: trainingData.healthData?.healthKitData,
       timeIntervalUntilNextHeadacheStart: trainingData.timeIntervalUntilNextHeadacheStart,
       timeIntervalUntilNextHeadacheEnd: trainingData.timeIntervalUntilNextHeadacheEnd,
       outlook: trainingData.outlook ?? .noHeadache,

@@ -204,7 +204,7 @@ extension Refresher {
       guard let self = self else { return }
       
       do {
-        let input = try await self.headacheManager.predictorInput(atDate: Date(), inWidget: false)
+        let input = await self.headacheManager.predictorInput(atDate: Date(), inWidget: false)
         
         // Should we create new training data?
         // If it's been more than half an hour then yes.
@@ -305,7 +305,7 @@ extension Refresher {
       }
       
       do {
-        let input = try await self.headacheManager.predictorInput(atDate: Date(), inWidget: false)
+        let input = await self.headacheManager.predictorInput(atDate: Date(), inWidget: false)
         let prediction = try await self.headacheManager.predictor.predict(input, inWidget: false)
         try await self.presentOutlookAlert(with: prediction)
         

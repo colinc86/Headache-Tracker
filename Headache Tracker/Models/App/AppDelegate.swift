@@ -66,7 +66,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, ObservableObject {
     setHeadacheManagerReferences()
     
     // Check our location authorization status
-    headacheManager.weatherManager.setup()
+    headacheManager.locationManager.setup()
     
     // Set up the async stuff
     Task {

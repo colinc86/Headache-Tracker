@@ -8,6 +8,7 @@
 import FirebaseAnalytics
 import ApplicationKey
 import CoreData
+import CoreLocation
 import DataController
 import Foundation
 import HealthKit
@@ -43,6 +44,14 @@ class HeadacheManager: ObservableObject {
   
   /// The headache predictor.
   let predictor = Predictor()
+  
+  /// The manager's location manager.
+  let locationManager = LocationManager()
+  
+  /// Whether a widget is authorized for location updates.
+  var authorizedForWidgetUpdates: Bool {
+    return locationManager.authorizedForWidgetUpdates
+  }
   
   // MARK: Private properties
   
@@ -183,7 +192,7 @@ extension HeadacheManager {
     }
     
     // Create the training data
-    let input = try await predictorInput(atDate: startTime, inWidget: false)
+    let input = await predictorInput(atDate: startTime, inWidget: false)
     try await createTrainingData(from: input, severityIdentifier: severityIdentifier)
   }
   
@@ -203,7 +212,7 @@ extension HeadacheManager {
     
     // Create the training data
     if let identifier = severityUpdates.createdSeverityIdentifier, let startTime = severityUpdates.createdSeverityStartTime {
-      let input = try await predictorInput(atDate: startTime, inWidget: false)
+      let input = await predictorInput(atDate: startTime, inWidget: false)
       try await createTrainingData(from: input, severityIdentifier: identifier)
     }
     
@@ -320,7 +329,7 @@ extension HeadacheManager {
     
     // Update the training data if needed
     if modified {
-      let input = try await predictorInput(atDate: startTime, inWidget: false)
+      let input = await predictorInput(atDate: startTime, inWidget: false)
       try await createTrainingData(from: input, severityIdentifier: identifier, replacingExistingData: true)
     }
     
@@ -460,6 +469,7 @@ extension HeadacheManager {
   /// Cancels the current classification input reading.
   func cancelClassificationInput() {
     weatherManager.cancel()
+    locationManager.cancel()
   }
   
   /// Creates a model input ready for prediction.
@@ -468,11 +478,36 @@ extension HeadacheManager {
   ///   - date: The date of the predictor's desired input.
   ///   - inWidget: Whether this method is being called from within a widget.
   /// - Returns: Model input for the specified date.
-  func predictorInput(atDate date: Date, inWidget: Bool) async throws -> ModelInput {
-    let weather = try await weatherManager.weather(at: date)
+  func predictorInput(atDate date: Date, inWidget: Bool) async -> ModelInput {
+    // Get the location
+    var location: CLLocation?
+    do {
+      location = try await locationManager.location()
+    }
+    catch {
+      logError("Error getting location: \(error)")
+    }
+    
+    // Get the weather
+    var weather: Weather?
+    if let location = location {
+      do {
+        weather = try await weatherManager.weather(at: date, for: location)
+      }
+      catch {
+        logError("Error getting weather: \(error)")
+      }
+    }
+    else {
+      logWarning("Location was nil - not fetching weather.")
+    }
+    
+    // Get the health kit data
     let interval = DateInterval(start: date.addingTimeInterval(-86400.0), end: date)
     let healthKitData = healthKitManager.readHealthKitData(in: interval, inWidget: inWidget)
-    return ModelInput(date: date, weatherStatistics: weather.statistics, healthKitData: healthKitData)
+    
+    // Return the model input
+    return ModelInput(date: date, location: location, weatherStatistics: weather?.statistics, healthKitData: healthKitData)
   }
   
   /// Gets classifier input appropriate for prediction, saves it as training
@@ -484,7 +519,7 @@ extension HeadacheManager {
   ///   - predict: Runs a prediction before returning the input if true.
   ///   - inWidget: Whether this method is being called by a widget.
   func createPredict(create: Bool = true, predict: Bool = true, inWidget: Bool) async throws {
-    let input = try await predictorInput(atDate: Date(), inWidget: inWidget)
+    let input = await predictorInput(atDate: Date(), inWidget: inWidget)
     
     if create {
       let identifier = try await currentSeverityIdentifier()
@@ -538,8 +573,8 @@ extension HeadacheManager {
   
   /// Upgrades the app's training data.
   func upgradeTrainingData() async throws {
-    logInfo("Upgrading training data.")
-    try await trainingData(predicate: NSPredicate(format: "(version != %@) OR (version == %@)", Constants.trainingDataVersion as NSString, NSNull())) { [weak self] trainingData, _ in
+    logInfo("Upgrading health kit training data.")
+    try await trainingData(predicate: NSPredicate(format: "(healthData.version != %@) OR (healthData.version == %@)", Constants.trainingDataVersion as NSString, NSNull())) { [weak self] trainingData, _ in
       logInfo("Performing upgrade on \(trainingData.count) data.")
       // Perform the upgrade
       for trainingDatum in trainingData {
@@ -548,14 +583,15 @@ extension HeadacheManager {
         }
 
         let interval = DateInterval(start: timestamp.addingTimeInterval(-86400.0), end: timestamp)
-        let data = self?.healthKitManager.readHealthKitData(in: interval)
-        trainingDatum.updateWithHealthKitData(data)
+        if let data = self?.healthKitManager.readHealthKitData(in: interval) {
+          trainingDatum.updateWithHealthKitData(data, at: timestamp)
+        }
       }
-      logDebug("Finished upgrading data.")
+      logDebug("Finished upgrading health kit training data.")
     }
     
     logInfo("Upgrading weather training data.")
-    try await trainingData(predicate: NSPredicate(format: "(weatherVersion != %@) OR (weatherVersion == %@)", Constants.trainingDataWeatherVersion as NSString, NSNull())) { [weak self] trainingData, context in
+    try await trainingData(predicate: NSPredicate(format: "(weatherData.version != %@) OR (weatherData.version == %@)", Constants.trainingDataWeatherVersion as NSString, NSNull())) { [weak self] trainingData, context in
       guard let self = self else {
         return
       }
@@ -567,23 +603,25 @@ extension HeadacheManager {
         guard let timestamp = trainingDatum.timestamp else {
           continue
         }
-        
+
         group.enter()
         Task {
           do {
-            let weather = try await self.weatherManager.weather(at: timestamp)
+            let location = try await self.locationManager.location()
+            let weather = try await self.weatherManager.weather(at: timestamp, for: location)
             await context.perform {
-              trainingDatum.updateWithWeatherStatistics(weather.statistics)
+              trainingDatum.updateWithWeatherStatistics(weather.statistics, at: timestamp)
             }
           }
           catch {
             logError("Error upgrading weather: \(error)")
           }
-          
+
           group.leave()
         }
       }
       group.wait()
+      logDebug("Finished upgrading weather training data.")
     }
   }
   

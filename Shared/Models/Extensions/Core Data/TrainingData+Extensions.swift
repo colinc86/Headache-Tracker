@@ -6,64 +6,19 @@
 //
 
 import CoreData
+import CoreLocation
 import CoreML
 import Foundation
 
-#if NON_PREVIEW
-import CreateML
-#endif
-
 extension TrainingData {
   
-  var devicePressureMeasurement: Measurement<UnitPressure> {
-    Measurement(value: barometricPressure, unit: .kilopascals)
-  }
-  
-  var pressureMeasurement: Measurement<UnitPressure> {
-    Measurement(value: currentPressure, unit: .kilopascals)
-  }
-  
-  var humidityMeasurement: Measurement<UnitRate> {
-    Measurement(value: currentHumidity, unit: .decimal)
-  }
-  
-  var temperatureMeasurement: Measurement<UnitTemperature> {
-    Measurement(value: currentTemperature, unit: .celsius)
-  }
-  
-  var weatherStatistics: WeatherStatistics {
-    WeatherStatistics(
-      barometricPressure: barometricPressure == 0.0 ? nil : barometricPressure,
-      currentPressure: currentPressure == 0.0 ? nil : currentPressure,
-      currentHumidity: currentPressure == 0.0 ? nil : currentHumidity,
-      currentTemperature: currentPressure == 0.0 ? nil : currentTemperature,
-      sigmaPressure: currentPressure == 0.0 ? nil : sigmaPressure,
-      sigmaHumidity: currentPressure == 0.0 ? nil : sigmaHumidity,
-      sigmaTemperature: currentPressure == 0.0 ? nil : sigmaTemperature)
-  }
-  
-  var healthKitData: [HealthKitData: Double] {
-    return [
-      .heartRate: heartRate,
-      .mindfulSession: mindfulSeconds,
-      .sleepSeconds: sleepSeconds,
-      .sleepOnset: sleepOnset,
-      .respiratoryRate: respiratoryRate,
-      .oxygenSaturation: oxygenSaturation,
-      .heartRateVariabilitySDNN: heartRateVariability,
-      .walkingHeartRateAverage: walkingHeartRateAverage,
-      .restingHeartRate: restingHeartRate,
-      .headphoneAudioExposure: headphoneAudioExposure,
-      .environmentalAudioExposure: environmentalAudioExposure,
-      .stepCount: stepCount
-    ]
-  }
-  
+  /// The training data's model input.
   var modelInput: ModelInput {
     ModelInput(
       date: timestamp ?? Date(),
-      weatherStatistics: weatherStatistics,
-      healthKitData: healthKitData,
+      location: location?.location,
+      weatherStatistics: weatherData?.weatherStatistics,
+      healthKitData: healthData?.healthKitData,
       timeIntervalUntilNextHeadacheStart: timeIntervalUntilNextHeadacheStart,
       timeIntervalUntilNextHeadacheEnd: timeIntervalUntilNextHeadacheEnd,
       outlook: outlook ?? .noHeadache,
@@ -76,10 +31,7 @@ extension TrainingData {
     self.init(context: context)
     
     logDebug("Creating training data.")
-    
-    self.timestamp = input?.date
-    self.updateWithWeatherStatistics(input?.weatherStatistics)
-    self.updateWithHealthKitData(input?.healthKitData)
+    updateWithModelInput(input)
   }
 }
   
@@ -87,60 +39,55 @@ extension TrainingData {
   
 extension TrainingData {
   
-  /// Updates the training data with the given weather statistics.
+  /// Updates the training data with the given model input.
   ///
-  /// - Parameter weatherStatistics: The weather statistics.
-  func updateWithWeatherStatistics(_ weatherStatistics: WeatherStatistics?) {
-    if let weatherStatistics = weatherStatistics {
-      barometricPressure = weatherStatistics.barometricPressure ?? 0.0
-      currentPressure = weatherStatistics.currentPressure ?? 0.0
-      currentHumidity = weatherStatistics.currentHumidity ?? 0.0
-      currentTemperature = weatherStatistics.currentTemperature ?? 0.0
-      sigmaPressure = weatherStatistics.sigmaPressure ?? 0.0
-      sigmaHumidity = weatherStatistics.sigmaHumidity ?? 0.0
-      sigmaTemperature = weatherStatistics.sigmaTemperature ?? 0.0
-      
-      // Update the data version if everything went well
-      if let currentPressure = weatherStatistics.currentPressure, currentPressure != 0.0 && weatherStatistics.sigmaPressure != nil {
-        weatherVersion = Constants.trainingDataWeatherVersion
-      }
-      else {
-        weatherVersion = nil
-      }
-    }
+  /// - Parameter modelInput: The model input.
+  func updateWithModelInput(_ modelInput: ModelInput?) {
+    timestamp = modelInput?.date
+    updateWithLocation(modelInput?.location)
+    updateWithWeatherStatistics(modelInput?.weatherStatistics, at: modelInput?.date)
+    updateWithHealthKitData(modelInput?.healthKitData, at: modelInput?.date)
   }
   
-  /// Updates the training data with the given health kit data.
+  /// Updates the location with the given location.
   ///
-  /// - Parameter healthKitData: The health kit data.
-  func updateWithHealthKitData(_ healthKitData: [HealthKitData: Double]?) {
-    if let healthKitData = healthKitData {
-      for (key, value) in healthKitData {
-        switch key {
-        case .heartRate: heartRate = value
-        case .mindfulSession: mindfulSeconds = value
-        case .sleepSeconds: sleepSeconds = value
-        case .sleepOnset: sleepOnset = value
-        case .respiratoryRate: respiratoryRate = value
-        case .oxygenSaturation: oxygenSaturation = value
-        case .heartRateVariabilitySDNN: heartRateVariability = value
-        case .walkingHeartRateAverage: walkingHeartRateAverage = value
-        case .restingHeartRate: restingHeartRate = value
-        case .headphoneAudioExposure: headphoneAudioExposure = value
-        case .environmentalAudioExposure: environmentalAudioExposure = value
-        case .stepCount: stepCount = value
-        default: continue
-        }
-      }
-      
-      // Update the data version
-      version = Constants.trainingDataVersion
+  /// - Parameter clLocation: The location.
+  func updateWithLocation(_ clLocation: CLLocation?) {
+    if location == nil, let context = managedObjectContext {
+      location = Location(context: context)
     }
+    
+    location?.updateWithLocation(clLocation)
+  }
+  
+  /// Updates the weather data with the given weather statistics.
+  ///
+  /// - Parameters:
+  ///   - weatherStatistics: The weather statistics.
+  ///   - timestamp: The weather statistic's timestamp.
+  func updateWithWeatherStatistics(_ weatherStatistics: WeatherStatistics?, at timestamp: Date?) {
+    if weatherData == nil, let context = managedObjectContext {
+      weatherData = WeatherData(context: context)
+    }
+    
+    weatherData?.updateWithWeatherStatistics(weatherStatistics, at: timestamp)
+  }
+  
+  /// Updates the health data with the given health kit data.
+  ///
+  /// - Parameters:
+  ///   - healthKitData: The health kit data.
+  ///   - timestamp: The data's timestamp.
+  func updateWithHealthKitData(_ healthKitData: [HealthKitData: Double]?, at timestamp: Date?) {
+    if healthData == nil, let context = managedObjectContext {
+      healthData = HealthData(context: context)
+    }
+    
+    healthData?.updateWithHealthKitData(healthKitData, at: timestamp)
   }
   
 }
 
-#if NON_PREVIEW
 extension Array where Element == TrainingData {
   
   /// Sets the volitile training variables.
@@ -180,4 +127,3 @@ extension Array where Element == TrainingData {
   }
   
 }
-#endif
