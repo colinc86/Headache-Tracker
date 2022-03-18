@@ -127,7 +127,7 @@ struct GraphList: View {
             BarGraph(
               graphUnit: .duration,
               statistic: statistics.durations,
-              yAxis: ["0m", Formatters.dateComponentsFormatter.string(from: statistics.durations.max ) ?? "-"],
+              yAxis: ["0m", Formatters.formatInterval(statistics.durations.max)],
               gradient: Gradient(colors: [.green.darker(by: 0.1), .green.lighter(by: 0.1)]),
               earliestDate: earliestDate)
               .frame(height: 100)

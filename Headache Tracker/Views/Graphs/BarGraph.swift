@@ -197,7 +197,7 @@ extension BarGraph {
     case .time:
       return Calendar.current.startOfDay(for: Date()).addingTimeInterval(value).formattedTime()
     case .duration:
-      return Formatters.dateComponentsFormatter.string(from: value)
+      return Formatters.formatInterval(value)
     }
   }
   

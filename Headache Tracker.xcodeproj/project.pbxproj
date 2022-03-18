@@ -167,6 +167,8 @@
 		3B68BE6127C34B8E007AAAC6 /* OutlookWidgetContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BE5F27C34B89007AAAC6 /* OutlookWidgetContent.swift */; };
 		3B68BE6A27C35778007AAAC6 /* OutlookView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BE6627C35644007AAAC6 /* OutlookView.swift */; };
 		3B68BE7827C41FDE007AAAC6 /* TrainingDataListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BE7727C41FDE007AAAC6 /* TrainingDataListView.swift */; };
+		3B86C6E327E40B5B00CCD7A0 /* MeasurementSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B86C6E227E40B5B00CCD7A0 /* MeasurementSystem.swift */; };
+		3B86C6E427E40B5B00CCD7A0 /* MeasurementSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B86C6E227E40B5B00CCD7A0 /* MeasurementSystem.swift */; };
 		3B9332BC27CDC1B300BACE93 /* FirebaseAnalyticsSwift-Beta in Frameworks */ = {isa = PBXBuildFile; productRef = 3B9332BB27CDC1B300BACE93 /* FirebaseAnalyticsSwift-Beta */; };
 		3B9332C927CDFFAD00BACE93 /* BugfenderLibrary in Frameworks */ = {isa = PBXBuildFile; productRef = 3B9332C827CDFFAD00BACE93 /* BugfenderLibrary */; };
 		3B9332CB27CE003300BACE93 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B9332CA27CE003200BACE93 /* SystemConfiguration.framework */; };
@@ -364,6 +366,7 @@
 		3B68BE6627C35644007AAAC6 /* OutlookView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutlookView.swift; sourceTree = "<group>"; };
 		3B68BE6B27C35EB9007AAAC6 /* Headache Tracker WidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Headache Tracker WidgetExtension.entitlements"; sourceTree = "<group>"; };
 		3B68BE7727C41FDE007AAAC6 /* TrainingDataListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingDataListView.swift; sourceTree = "<group>"; };
+		3B86C6E227E40B5B00CCD7A0 /* MeasurementSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeasurementSystem.swift; sourceTree = "<group>"; };
 		3B9332CA27CE003200BACE93 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		3B9332CC27CE003C00BACE93 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		3B9332CE27CE004400BACE93 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
@@ -570,6 +573,7 @@
 				3B3FFE8927D592A000DFACC1 /* Formatters.swift */,
 				3B3FFE5A27D592A000DFACC1 /* HeadacheManager.swift */,
 				3B3FFE8727D592A000DFACC1 /* HolisticOutlook.swift */,
+				3B86C6E227E40B5B00CCD7A0 /* MeasurementSystem.swift */,
 				3B3FFE5827D592A000DFACC1 /* Outlook.swift */,
 				3B3FFE8827D592A000DFACC1 /* Previewing.swift */,
 				3B3FFE5227D592A000DFACC1 /* SeverityInterval.swift */,
@@ -1200,6 +1204,7 @@
 				3B3FFEF027D592A000DFACC1 /* Previewing.swift in Sources */,
 				3B3FFECA27D592A000DFACC1 /* String+Extensions.swift in Sources */,
 				3B3FFEA027D592A000DFACC1 /* Outlook.swift in Sources */,
+				3B86C6E427E40B5B00CCD7A0 /* MeasurementSystem.swift in Sources */,
 				3B3FFEB827D592A000DFACC1 /* ChronologicalInput.swift in Sources */,
 				3B3FFEAC27D592A000DFACC1 /* Predictor.swift in Sources */,
 				3B9332FE27CF40A300BACE93 /* SeverityWidgetProvider.swift in Sources */,
@@ -1226,6 +1231,7 @@
 				3B3FFEB727D592A000DFACC1 /* ChronologicalInput.swift in Sources */,
 				3BAAA69727CCA7A200C0DDC4 /* TouchLocatingView.swift in Sources */,
 				3B3FFF2427DA8C5E00DFACC1 /* PredictionOutput.swift in Sources */,
+				3B86C6E327E40B5B00CCD7A0 /* MeasurementSystem.swift in Sources */,
 				3B1C7DB427D2005E000B3A99 /* StatusView.swift in Sources */,
 				3B93330227CF51C600BACE93 /* AppDelegate.swift in Sources */,
 				3B3FFEAB27D592A000DFACC1 /* Predictor.swift in Sources */,

@@ -16,6 +16,7 @@ class SharedUserDefaults {
   struct Keys {
     static let currentPrediction = "current.prediction"
     static let currentSeverity = "current.severity"
+    static let measurementSystem = "measurement.system"
   }
   
   // MARK: Static properties

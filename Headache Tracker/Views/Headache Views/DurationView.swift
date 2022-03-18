@@ -29,7 +29,7 @@ struct DurationView: View {
   var body: some View {
     TitleCaptionView(title: "Duration", systemImage: "timer", foregroundColor: .green, caption: caption) {
       VStack(alignment: .leading) {
-        Text(Formatters.dateComponentsFormatter.string(from: headache.duration) ?? "N/A")
+        Text(Formatters.formatInterval(headache.duration))
           .font(.title)
           .id(durationID)
       }

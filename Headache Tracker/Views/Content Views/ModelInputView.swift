@@ -9,6 +9,9 @@ import SwiftUI
 
 struct ModelInputView: View {
   
+  /// The application's measurement system.
+  @AppStorage(AppSettings.measurementSystem) var measurementSystem: MeasurementSystem = NSLocale.system.usesMetricSystem ? .metric : .imperial
+  
   let input: ModelInput
   
   var body: some View {
@@ -17,7 +20,7 @@ struct ModelInputView: View {
         if let pressure = weather.pressureMeasurement {
           Section {
             TitleCaptionView(title: "Barometric Pressure", systemImage: "barometer", foregroundColor: .accentColor) {
-              Text(pressure.formatted())
+              Text(Formatters.formatMeasurement(pressure))
                 .font(.title)
             }
           } header: {
@@ -28,7 +31,7 @@ struct ModelInputView: View {
         if let temperature = weather.temperatureMeasurement {
           Section {
             TitleCaptionView(title: "Temperature", systemImage: "thermometer", foregroundColor: .accentColor) {
-              Text(temperature.formatted())
+              Text(Formatters.formatMeasurement(temperature))
                 .font(.title)
             }
           }
@@ -37,7 +40,7 @@ struct ModelInputView: View {
         if let humidity = weather.humidityMeasurement {
           Section {
             TitleCaptionView(title: "Humidity", systemImage: "humidity", foregroundColor: .accentColor) {
-              Text(humidity.formatted())
+              Text(Formatters.formatMeasurement(humidity))
                 .font(.title)
             }
           }

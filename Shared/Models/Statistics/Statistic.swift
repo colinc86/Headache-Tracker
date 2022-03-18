@@ -201,14 +201,14 @@ class SeverityStatistic: Statistic {
 
 class OnsetStatistic: Statistic {
   override func description(for value: Double) -> String {
-    return Formatters.timeFormatter.string(from: Calendar.current
-                                            .startOfDay(for: Date())
-                                            .addingTimeInterval(value))
+    return Formatters.formatTime(Calendar.current
+      .startOfDay(for: Date())
+      .addingTimeInterval(value))
   }
 }
 
 class DurationStatistic: Statistic {
   override func description(for value: Double) -> String {
-    return Formatters.dateComponentsFormatter.string(from: value) ?? ""
+    return Formatters.formatInterval(value)
   }
 }

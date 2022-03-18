@@ -9,16 +9,6 @@ import BugfenderSDK
 import FirebaseCrashlytics
 import SwiftUI
 
-enum MeasurementSystem: String {
-  case metric
-  case imperial
-  case base
-  
-  var title: String {
-    return rawValue.capitalized
-  }
-}
-
 /// Displays the application's settings.
 struct SettingsView: View {
   

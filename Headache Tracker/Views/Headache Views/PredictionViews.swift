@@ -41,11 +41,7 @@ struct PredictionViews: View {
     }
     
     Section {
-      NavigationLink {
-        ModelInputView(input: prediction.input)
-      } label: {
-        SeveritySelectionView(currentSeverity: prediction.severityClassifierOutput.prediction, collapsed: true)
-      }
+      SeveritySelectionView(currentSeverity: prediction.severityClassifierOutput.prediction, collapsed: true)
     } footer: {
       if let lastPredictionDate = prediction.date {
         Text("Updated \(lastPredictionDate.formattedNonRelative()).")
