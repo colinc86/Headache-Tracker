@@ -30,6 +30,14 @@ struct AppSettings {
   static let debugLastPredictionDate = ApplicationKey(from: "debugLastPredictionDate")
   static let debugNextPredictionDate = ApplicationKey(from: "debugNextPredictionDate")
   
+  struct ListOptions {
+    static let onset = ApplicationKey(from: "listoptions.onset")
+    static let duration = ApplicationKey(from: "listoptions.duration")
+    static let progression = ApplicationKey(from: "listoptions.progression")
+    static let outlook = ApplicationKey(from: "listoptions.outlook")
+    static let severity = ApplicationKey(from: "listoptions.severity")
+  }
+  
   struct Predictors {
     static let secondsSinceMidnight = ApplicationKey(from: "secondsSinceMidnight")
     static let weekday = ApplicationKey(from: "weekday")

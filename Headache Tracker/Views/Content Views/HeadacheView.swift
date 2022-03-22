@@ -51,9 +51,17 @@ struct HeadacheView: View {
   var body: some View {
     List {
       Section {
-        StatusView(resolved: headache.resolved)
+        SeveritySelectionView(currentSeverity: nil, severityRange: headache.severityRange, collapsed: true)
       } header: {
         SectionTitleView(title: "Headache")
+      } footer: {
+        if !headache.resolved, let startTime = headache.severitiesArray.last?.startTime {
+          Text("Last updated \(startTime.formattedNonRelative())")
+        }
+      }
+      
+      Section {
+        StatusView(resolved: headache.resolved)
       }
       
       if let onset = headache.startTime {
@@ -64,14 +72,6 @@ struct HeadacheView: View {
       
       Section {
         DurationView(headache: headache)
-      }
-      
-      Section {
-        SeveritySelectionView(currentSeverity: nil, severityRange: headache.severityRange, collapsed: true)
-      } footer: {
-        if !headache.resolved, let startTime = headache.severitiesArray.last?.startTime {
-          Text("Last updated \(startTime.formattedNonRelative())")
-        }
       }
       
       Section {

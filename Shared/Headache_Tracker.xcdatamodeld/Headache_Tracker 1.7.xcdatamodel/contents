@@ -8,8 +8,10 @@
     <entity name="Headache" representedClassName="Headache" syncable="YES" codeGenerationType="class">
         <attribute name="createdAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="identifier" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="notes" optional="YES" attributeType="String"/>
         <attribute name="resolved" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
         <relationship name="severities" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Severity" inverseName="headache" inverseEntity="Severity"/>
+        <relationship name="tags" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Tag" inverseName="headaches" inverseEntity="Tag"/>
     </entity>
     <entity name="HealthData" representedClassName="HealthData" syncable="YES" codeGenerationType="class">
         <attribute name="environmentalAudioExposure" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
@@ -45,6 +47,10 @@
         <relationship name="headache" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Headache" inverseName="severities" inverseEntity="Headache"/>
         <relationship name="trainingData" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="TrainingData" inverseName="severity" inverseEntity="TrainingData"/>
     </entity>
+    <entity name="Tag" representedClassName="Tag" syncable="YES" codeGenerationType="class">
+        <attribute name="value" optional="YES" attributeType="String"/>
+        <relationship name="headaches" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Headache" inverseName="tags" inverseEntity="Headache"/>
+    </entity>
     <entity name="TrainingData" representedClassName="TrainingData" syncable="YES" codeGenerationType="category">
         <attribute name="timestamp" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <relationship name="healthData" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="HealthData" inverseName="trainingData" inverseEntity="HealthData"/>
@@ -66,11 +72,12 @@
     </entity>
     <elements>
         <element name="Evaluation" positionX="-54" positionY="144" width="128" height="74"/>
-        <element name="Headache" positionX="-63" positionY="-18" width="128" height="14"/>
+        <element name="Headache" positionX="-63" positionY="-18" width="128" height="119"/>
         <element name="HealthData" positionX="-36" positionY="162" width="128" height="254"/>
         <element name="Location" positionX="-54" positionY="144" width="128" height="134"/>
         <element name="Severity" positionX="-63" positionY="9" width="128" height="119"/>
         <element name="TrainingData" positionX="-45" positionY="54" width="128" height="104"/>
         <element name="WeatherData" positionX="-45" positionY="153" width="128" height="179"/>
+        <element name="Tag" positionX="-45" positionY="144" width="128" height="59"/>
     </elements>
 </model>

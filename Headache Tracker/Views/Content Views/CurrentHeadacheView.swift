@@ -30,6 +30,21 @@ struct CurrentHeadacheView: View {
   /// The app's alert manager.
   @EnvironmentObject private var alertManager: AlertManager
   
+  /// Whether the onset view should be shown.
+  @AppStorage(AppSettings.ListOptions.onset) private var showOnsetView = true
+  
+  /// Whether the duration view should be shown.
+  @AppStorage(AppSettings.ListOptions.duration) private var showDurationView = true
+  
+  /// Whether the progression view should be shown.
+  @AppStorage(AppSettings.ListOptions.progression) private var showProgressionView = true
+  
+  /// Whether the outlook view should be shown.
+  @AppStorage(AppSettings.ListOptions.outlook) private var showOutlookView = true
+  
+  /// Whether the severity view should be shown.
+  @AppStorage(AppSettings.ListOptions.severity) private var showSeverityView = true
+  
   /// The Apple Health integration setting.
   @AppStorage(AppSettings.healthIntegration) private var healthIntegration = false
     
@@ -93,6 +108,7 @@ struct CurrentHeadacheView: View {
             Text("No Headache? Tap above to let the app know.")
           }
         }
+        
         // Current Headache Information
         else if let currentHeadache = currentHeadache {
           CurrentHeadacheViews(headache: currentHeadache)
@@ -106,12 +122,22 @@ struct CurrentHeadacheView: View {
       .background(Color(UIColor.systemGroupedBackground))
       .navigationTitle("Track")
       .animation(.default, value: predictor.prediction)
+      .animation(.default, value: showOnsetView)
+      .animation(.default, value: showDurationView)
+      .animation(.default, value: showProgressionView)
+      .animation(.default, value: showOutlookView)
+      .animation(.default, value: showSeverityView)
       .refreshable {
         do {
           try await predict(forced: true)
         }
         catch {
           logError("Error refreshing view: \(error)")
+        }
+      }
+      .toolbar {
+        ToolbarItem(placement: .automatic) {
+          ListOptionsMenu()
         }
       }
     }

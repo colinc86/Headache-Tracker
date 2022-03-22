@@ -14,6 +14,15 @@ struct CurrentHeadacheViews: View {
   
   // MARK: Private properties
   
+  /// Whether the onset view should be shown.
+  @AppStorage(AppSettings.ListOptions.onset) private var showOnsetView = true
+  
+  /// Whether the duration view should be shown.
+  @AppStorage(AppSettings.ListOptions.duration) private var showDurationView = true
+  
+  /// Whether the progression view should be shown.
+  @AppStorage(AppSettings.ListOptions.progression) private var showProgressionView = true
+  
   /// The app's headache manager.
   @EnvironmentObject private var headacheManager: HeadacheManager
   
@@ -34,33 +43,35 @@ struct CurrentHeadacheViews: View {
   
   var body: some View {
     Group {
+      // Resolve the Headache
+      Section {
+        ActionView(title: "Resolve Headache", buttonTitle: "Resolve", systemImage: "face.smiling.fill", foregroundColor: .teal, action: resolveConfirmation)
+      } footer: {
+        Text("Is your headache gone? Tap Resolve to let the app know.")
+      }
+      
       // Onset
-      if let onset = headache.startTime {
+      if showOnsetView, let onset = headache.startTime {
         Section {
           OnsetView(onset: onset)
         }
       }
       
       // Duration
-      Section {
-        DurationView(headache: headache)
+      if showDurationView {
+        Section {
+          DurationView(headache: headache)
+        }
       }
       
       // Progression
-      if headache.severitiesArray.count > 1 {
+      if showProgressionView, headache.severitiesArray.count > 1 {
         Section {
           TitleCaptionView(title: "Progression", systemImage: "chart.xyaxis.line", foregroundColor: .orange) {
             LineGraph(series: headache.severitySignal, gradient: Gradient(colors: headache.severityColorRange))
               .frame(height: 100)
           }
         }
-      }
-      
-      // Resolve the Headache
-      Section {
-        ActionView(title: "Resolve Headache", buttonTitle: "Resolve", systemImage: "face.smiling.fill", foregroundColor: .teal, action: resolveConfirmation)
-      } footer: {
-        Text("Is your headache gone? Tap Resolve to let the app know.")
       }
     }
     .confirmationAlert(isPresented: $showingAlert, title: alertTitle, message: alertMessage)
