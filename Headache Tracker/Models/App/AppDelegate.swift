@@ -111,9 +111,6 @@ extension AppDelegate {
     if refresher.alertManager.authorizationStatus == .notDetermined {
       try await refresher.alertManager.setup(options: [.alert, .badge, .sound])
     }
-    else {
-      refresher.alertManager.removeRequests(pending: false, delivered: true)
-    }
   }
   
   /// Setup health kit (only if it hasn't been done before) and the setting

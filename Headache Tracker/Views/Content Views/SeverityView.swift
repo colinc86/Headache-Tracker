@@ -61,6 +61,10 @@ struct SeverityView: View {
   var body: some View {
     List {
       Section {
+        if let location = severity.trainingDataArray.first?.location?.location {
+          MapCell(location: location)
+        }
+        
         if editing {
           Picker("Severity", selection: $editSeverity) {
             Text("Not Present").tag(HKCategoryValueSeverity.notPresent)

@@ -633,7 +633,7 @@ extension HeadacheManager {
     try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
       Task {
         do {
-          try await trainingData(predicate: NSPredicate(format: "version == %@", Constants.trainingDataVersion as NSString)) { [weak self] trainingData, _ in
+          try await trainingData(predicate: NSPredicate(format: "(healthData.version == %@) AND (weatherData.version == %@)", Constants.trainingDataVersion as NSString, Constants.trainingDataWeatherVersion as NSString)) { [weak self] trainingData, _ in
             guard let self = self else {
               continuation.resume()
               return

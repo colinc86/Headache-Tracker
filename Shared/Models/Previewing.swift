@@ -20,9 +20,22 @@ struct Previewing {
   /// The preview health kit manager.
   static let healthKitManager = HealthKitManager()
   
+  /// A false value.
   @State static var booleanFalseValue: Bool = false
+  
+  /// A true value.
   @State static var booleanTrueValue: Bool = true
-  @State static var location: CLLocation = CLLocation(coordinate: CLLocationCoordinate2D(latitude: 32.781334, longitude: -96.778609), altitude: 139.0, horizontalAccuracy: 1000.0, verticalAccuracy: 10.0, timestamp: Date())
+  
+  /// A test loction.
+  static var location: CLLocation = CLLocation(coordinate: CLLocationCoordinate2D(latitude: 32.781334, longitude: -96.778609), altitude: 139.0, horizontalAccuracy: 1000.0, verticalAccuracy: 10.0, timestamp: Date())
+  
+  /// Test weather statistics.
+  static var weatherStatistics = WeatherStatistics(barometricPressure: 1000.0, currentPressure: 1000.0, currentHumidity: 0.8, currentTemperature: 50.0, sigmaPressure: 0.3, sigmaHumidity: 0.01, sigmaTemperature: 2.0)
+  
+  /// Test health kit data.
+  static var healthKitData: [HealthKitData: Double] = [
+    .heartRate: 70.0,
+  ]
   
   struct Prediction {
     
@@ -69,8 +82,8 @@ struct Previewing {
     
     /// The preview data controller.
     private static let controller: DataController = DataController(containerName: "Headache_Tracker", inMemory: true)
+    
     private static var _resolvedHeadache: Headache? = nil
-    private static var _unresolvedHeadache: Headache? = nil
     private static func addResolvedHeadache(to context: NSManagedObjectContext) -> Headache {
       let now = Date()
       let headache = Headache(context: context, initialSeverity: .mild, startTime: now.addingTimeInterval(-3600.0))
@@ -79,6 +92,10 @@ struct Previewing {
       headache.addSeverity(.moderate, startTime: now.addingTimeInterval(-1200.0))
       headache.addSeverity(.notPresent, startTime: now.addingTimeInterval(-600.0))
       headache.resolved = true
+      
+      for severity in headache.severitiesArray {
+        severity.addToTrainingData(createTrainingData(in: context))
+      }
       
       do {
         try context.save()
@@ -90,12 +107,17 @@ struct Previewing {
       return headache
     }
     
+    private static var _unresolvedHeadache: Headache? = nil
     private static func addUnresolvedHeadache(to context: NSManagedObjectContext) -> Headache {
       let now = Date()
       let headache = Headache(context: context, initialSeverity: .mild, startTime: now.addingTimeInterval(-3600.0))
       headache.addSeverity(.moderate, startTime: now.addingTimeInterval(-3000.0))
       headache.addSeverity(.severe, startTime: now.addingTimeInterval(-2400.0))
       headache.resolved = false
+      
+      for severity in headache.severitiesArray {
+        severity.addToTrainingData(createTrainingData(in: context))
+      }
       
       do {
         try context.save()
@@ -105,6 +127,11 @@ struct Previewing {
       }
       
       return headache
+    }
+    
+    private static func createTrainingData(in context: NSManagedObjectContext) -> TrainingData {
+      let input = ModelInput(date: Date(), location: Previewing.location, weatherStatistics: Previewing.weatherStatistics, healthKitData: Previewing.healthKitData)
+      return TrainingData(context: context, input: input)
     }
     
   }

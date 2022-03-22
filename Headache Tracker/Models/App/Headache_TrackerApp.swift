@@ -52,6 +52,7 @@ extension Headache_TrackerApp {
     appDelegate.refresher.cancelTrainingProcessingTask()
     appDelegate.refresher.cancelPredictionRefreshTask()
     appDelegate.refresher.cancelOutlookRefreshTask()
+    appDelegate.refresher.alertManager.removeRequests(pending: false, delivered: true)
     
     Task {
       do {

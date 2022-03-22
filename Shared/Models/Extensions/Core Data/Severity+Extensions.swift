@@ -27,6 +27,11 @@ extension Severity {
     return SeverityInterval(severity: severity, interval: DateInterval(start: startTime, end: endTime))
   }
   
+  /// The severity's training data as an array.
+  var trainingDataArray: [TrainingData] {
+    return (trainingData?.sortedArray(using: [NSSortDescriptor(key: "timestamp", ascending: true)]) as? [TrainingData]) ?? []
+  }
+  
   // MARK: Initializers
   
   /// Initializes a severity.
