@@ -18,6 +18,9 @@ struct ListOptionsMenu: View {
   /// Whether the progression view should be shown.
   @AppStorage(AppSettings.ListOptions.progression) private var progression = true
   
+  /// Whether the notes view should be shown.
+  @AppStorage(AppSettings.ListOptions.notes) private var notes = true
+  
   /// Whether the outlook view should be shown.
   @AppStorage(AppSettings.ListOptions.outlook) private var outlook = true
   
@@ -27,62 +30,15 @@ struct ListOptionsMenu: View {
   var body: some View {
     Menu {
       Section {
-        Button {
-          onset = !onset
-        } label: {
-          if onset {
-            Label("Onset", systemImage: "checkmark")
-          }
-          else {
-            Text("Onset")
-          }
-        }
-        
-        Button {
-          duration = !duration
-        } label: {
-          if duration {
-            Label("Duration", systemImage: "checkmark")
-          }
-          else {
-            Text("Duration")
-          }
-        }
-        
-        Button {
-          progression = !progression
-        } label: {
-          if progression {
-            Label("Progression", systemImage: "checkmark")
-          }
-          else {
-            Text("Progression")
-          }
-        }
+        CheckmarkButton(title: "Onset", checked: $onset)
+        CheckmarkButton(title: "Duration", checked: $duration)
+        CheckmarkButton(title: "Progression", checked: $progression)
+        CheckmarkButton(title: "Notes", checked: $notes)
       }
       
       Section {
-        Button {
-          outlook = !outlook
-        } label: {
-          if outlook {
-            Label("Outlook", systemImage: "checkmark")
-          }
-          else {
-            Text("Outlook")
-          }
-        }
-        
-        Button {
-          severity = !severity
-        } label: {
-          if severity {
-            Label("Severity", systemImage: "checkmark")
-          }
-          else {
-            Text("Severity")
-          }
-        }
+        CheckmarkButton(title: "Outlook", checked: $outlook)
+        CheckmarkButton(title: "Severity", checked: $severity)
       }
     } label: {
       Label("View Options", systemImage: "list.bullet.below.rectangle")

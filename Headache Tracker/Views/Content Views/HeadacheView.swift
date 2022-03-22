@@ -41,6 +41,9 @@ struct HeadacheView: View {
   /// Whether or not the delete confirmation alert is visible.
   @State private var showingDeleteConfirmation = false
   
+  /// Whether the edit notes view is visible.
+  @State private var showingEditNotesView = false
+  
   /// The id of the duration view.
   @State private var durationID = UUID()
   
@@ -76,9 +79,7 @@ struct HeadacheView: View {
       
       Section {
         if headache.severities?.count ?? 0 > 1 {
-          LineGraph(series: headache.severitySignal, gradient: Gradient(colors: headache.severityColorRange))
-            .frame(height: 100.0)
-            .padding([.top, .bottom], 10)
+          ProgressionView(headache: headache)
           
           ForEach(headache.severitiesArray, id: \.self) { severity in
             NavigationLink {
@@ -96,8 +97,10 @@ struct HeadacheView: View {
             SubtitleCell(title: severity.severity.title, subtitle: severity.startTime?.formattedNonRelative() ?? "N/A")
           }
         }
-      } header: {
-        SectionTitleView(title: "Progression")
+      }
+      
+      Section {
+        NotesView(notes: headache.notes, editButtonAction: editNotesAction)
       }
       
       Section {
@@ -130,6 +133,9 @@ struct HeadacheView: View {
       delete()
       withAnimation { showingDeleteConfirmation = false }
     })
+    .sheet(isPresented: $showingEditNotesView) {
+      EditNotesView(notes: headache.notes, identifier: headache.identifier)
+    }
   }
   
 }
@@ -235,6 +241,10 @@ extension HeadacheView {
       updateDurationID()
       durationUpdateWaiter.wait(for: 60.0, repeats: true, completion: updateDurationID)
     }
+  }
+  
+  private func editNotesAction() {
+    withAnimation { showingEditNotesView = true }
   }
   
 }

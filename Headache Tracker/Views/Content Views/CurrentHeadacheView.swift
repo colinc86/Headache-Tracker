@@ -42,6 +42,9 @@ struct CurrentHeadacheView: View {
   /// Whether the outlook view should be shown.
   @AppStorage(AppSettings.ListOptions.outlook) private var showOutlookView = true
   
+  /// Whether the notes view should be shown.
+  @AppStorage(AppSettings.ListOptions.notes) private var showNotesView = true
+  
   /// Whether the severity view should be shown.
   @AppStorage(AppSettings.ListOptions.severity) private var showSeverityView = true
   
@@ -125,6 +128,7 @@ struct CurrentHeadacheView: View {
       .animation(.default, value: showOnsetView)
       .animation(.default, value: showDurationView)
       .animation(.default, value: showProgressionView)
+      .animation(.default, value: showNotesView)
       .animation(.default, value: showOutlookView)
       .animation(.default, value: showSeverityView)
       .refreshable {

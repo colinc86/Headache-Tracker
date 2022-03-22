@@ -24,6 +24,10 @@
 		3B1C7DB427D2005E000B3A99 /* StatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1C7DB327D2005E000B3A99 /* StatusView.swift */; };
 		3B1C7DB627D205EE000B3A99 /* ActionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1C7DB527D205EE000B3A99 /* ActionView.swift */; };
 		3B29F73627E983F800C8772C /* ListOptionsMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B29F73527E983F800C8772C /* ListOptionsMenu.swift */; };
+		3B29F73827E98AE100C8772C /* NotesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B29F73727E98AE100C8772C /* NotesView.swift */; };
+		3B29F73A27E98E1600C8772C /* CheckmarkButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B29F73927E98E1600C8772C /* CheckmarkButton.swift */; };
+		3B29F73C27E9909900C8772C /* ProgressionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B29F73B27E9909900C8772C /* ProgressionView.swift */; };
+		3B29F73E27E99CE000C8772C /* EditNotesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B29F73D27E99CE000C8772C /* EditNotesView.swift */; };
 		3B39DADB27ACFC9C00D39BB5 /* SubtitleCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B39DADA27ACFC9C00D39BB5 /* SubtitleCell.swift */; };
 		3B39DAE427AD06EA00D39BB5 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B39DAE327AD06EA00D39BB5 /* SettingsView.swift */; };
 		3B3EAAEE27E4F92800F5D8B4 /* MapCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3EAAED27E4F92800F5D8B4 /* MapCell.swift */; };
@@ -292,6 +296,10 @@
 		3B1C7DB327D2005E000B3A99 /* StatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusView.swift; sourceTree = "<group>"; };
 		3B1C7DB527D205EE000B3A99 /* ActionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionView.swift; sourceTree = "<group>"; };
 		3B29F73527E983F800C8772C /* ListOptionsMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListOptionsMenu.swift; sourceTree = "<group>"; };
+		3B29F73727E98AE100C8772C /* NotesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotesView.swift; sourceTree = "<group>"; };
+		3B29F73927E98E1600C8772C /* CheckmarkButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckmarkButton.swift; sourceTree = "<group>"; };
+		3B29F73B27E9909900C8772C /* ProgressionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressionView.swift; sourceTree = "<group>"; };
+		3B29F73D27E99CE000C8772C /* EditNotesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditNotesView.swift; sourceTree = "<group>"; };
 		3B39DADA27ACFC9C00D39BB5 /* SubtitleCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubtitleCell.swift; sourceTree = "<group>"; };
 		3B39DAE327AD06EA00D39BB5 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		3B3EAAED27E4F92800F5D8B4 /* MapCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapCell.swift; sourceTree = "<group>"; };
@@ -488,6 +496,7 @@
 				3BF5313827ACE18D00056673 /* ContentView.swift */,
 				3B051A4F27B0E9410017131D /* CurrentHeadacheView.swift */,
 				3BAAA69827CD5B0100C0DDC4 /* DebugSettingsView.swift */,
+				3B29F73D27E99CE000C8772C /* EditNotesView.swift */,
 				3B9332E927CF1E8400BACE93 /* FeedbackView.swift */,
 				3BAAA69227CC8A5800C0DDC4 /* GraphList.swift */,
 				3B051A4D27B0E9060017131D /* HeadachesView.swift */,
@@ -530,7 +539,9 @@
 				3B09191527BCD38300844F6C /* DurationView.swift */,
 				3BF7943827DFB6970094C531 /* EditableDateTimeView.swift */,
 				3B09191127BCCE1C00844F6C /* OnsetView.swift */,
+				3B29F73727E98AE100C8772C /* NotesView.swift */,
 				3B3FFF1027D8604600DFACC1 /* PredictionViews.swift */,
+				3B29F73B27E9909900C8772C /* ProgressionView.swift */,
 				3B1C7DB327D2005E000B3A99 /* StatusView.swift */,
 			);
 			path = "Headache Views";
@@ -543,6 +554,7 @@
 				3B051A9627B198CB0017131D /* Content Views */,
 				3B68BDFC27BE0FF0007AAAC6 /* Graphs */,
 				3B1C7DB227D2003C000B3A99 /* Headache Views */,
+				3B29F73927E98E1600C8772C /* CheckmarkButton.swift */,
 				3B29F73527E983F800C8772C /* ListOptionsMenu.swift */,
 				3B3EAAEF27E801BA00F5D8B4 /* MapView.swift */,
 				3B09192227BD91F400844F6C /* SectionTitleView.swift */,
@@ -1267,6 +1279,7 @@
 				3B86C6E327E40B5B00CCD7A0 /* MeasurementSystem.swift in Sources */,
 				3B1C7DB427D2005E000B3A99 /* StatusView.swift in Sources */,
 				3B93330227CF51C600BACE93 /* AppDelegate.swift in Sources */,
+				3B29F73827E98AE100C8772C /* NotesView.swift in Sources */,
 				3B3FFEAB27D592A000DFACC1 /* Predictor.swift in Sources */,
 				3B68BDFB27BE0F00007AAAC6 /* BarGraph.swift in Sources */,
 				3B3FFEAD27D592A000DFACC1 /* SeverityClassifierOutput.swift in Sources */,
@@ -1348,6 +1361,7 @@
 				3B3FFF2627DA8D2300DFACC1 /* TrainingInput.swift in Sources */,
 				3BF5314327ACE18F00056673 /* Headache_Tracker.xcdatamodeld in Sources */,
 				3B3FFE8D27D592A000DFACC1 /* Constants.swift in Sources */,
+				3B29F73C27E9909900C8772C /* ProgressionView.swift in Sources */,
 				3B051A9E27B3555E0017131D /* ConfirmationAlert.swift in Sources */,
 				3B68BDF927BDFCD3007AAAC6 /* AnalyzeView.swift in Sources */,
 				3B09191627BCD38300844F6C /* DurationView.swift in Sources */,
@@ -1357,6 +1371,7 @@
 				3B93330427CF51D500BACE93 /* SceneDelegate.swift in Sources */,
 				3B3EAAEE27E4F92800F5D8B4 /* MapCell.swift in Sources */,
 				3B3FFECB27D592A000DFACC1 /* DataController+Extensions.swift in Sources */,
+				3B29F73E27E99CE000C8772C /* EditNotesView.swift in Sources */,
 				3B3FFE9F27D592A000DFACC1 /* Outlook.swift in Sources */,
 				3B86C6E727E41C5B00CCD7A0 /* HealthData+Extensions.swift in Sources */,
 				3B3FFED327D592A000DFACC1 /* UUID+Extensions.swift in Sources */,
@@ -1365,6 +1380,7 @@
 				3B051A5027B0E9410017131D /* CurrentHeadacheView.swift in Sources */,
 				3BAAA68D27CC3D9300C0DDC4 /* TrainingDataView.swift in Sources */,
 				3B051A9827B1B4EC0017131D /* VerticalSeverityLevel.swift in Sources */,
+				3B29F73A27E98E1600C8772C /* CheckmarkButton.swift in Sources */,
 				3B39DAE427AD06EA00D39BB5 /* SettingsView.swift in Sources */,
 				3B3FFE9727D592A000DFACC1 /* RefreshTask.swift in Sources */,
 				3B3FFF0F27D858DF00DFACC1 /* AsyncButton.swift in Sources */,

@@ -23,6 +23,9 @@ struct CurrentHeadacheViews: View {
   /// Whether the progression view should be shown.
   @AppStorage(AppSettings.ListOptions.progression) private var showProgressionView = true
   
+  /// Whether the notes view should be shown.
+  @AppStorage(AppSettings.ListOptions.notes) private var showNotesView = true
+  
   /// The app's headache manager.
   @EnvironmentObject private var headacheManager: HeadacheManager
   
@@ -40,6 +43,9 @@ struct CurrentHeadacheViews: View {
   
   /// Whether the resolve confirmation alert is visible.
   @State private var showingResolveConfirmation = false
+  
+  /// Whether the edit notes view is visible.
+  @State private var showingEditNotesView = false
   
   var body: some View {
     Group {
@@ -67,10 +73,14 @@ struct CurrentHeadacheViews: View {
       // Progression
       if showProgressionView, headache.severitiesArray.count > 1 {
         Section {
-          TitleCaptionView(title: "Progression", systemImage: "chart.xyaxis.line", foregroundColor: .orange) {
-            LineGraph(series: headache.severitySignal, gradient: Gradient(colors: headache.severityColorRange))
-              .frame(height: 100)
-          }
+          ProgressionView(headache: headache)
+        }
+      }
+      
+      // Notes
+      if showNotesView {
+        Section {
+          NotesView(notes: headache.notes, editButtonAction: editNotesAction)
         }
       }
     }
@@ -78,10 +88,17 @@ struct CurrentHeadacheViews: View {
     .confirmationDialog("Resolve Headache? It will be available in the Headaches tab.", isPresented: $showingResolveConfirmation, titleVisibility: .visible) {
       AsyncButton("Resolve", role: .destructive, action: resolve)
     }
+    .sheet(isPresented: $showingEditNotesView) {
+      EditNotesView(notes: headache.notes, identifier: headache.identifier)
+    }
   }
 }
 
 extension CurrentHeadacheViews {
+  
+  private func editNotesAction() {
+    withAnimation { showingEditNotesView = true }
+  }
   
   /// Displays the reset confirmation alert to the user.
   private func resolveConfirmation() {

@@ -222,6 +222,20 @@ extension HeadacheManager {
     }
   }
   
+  /// Updates the headache's notes.
+  ///
+  /// - Parameters:
+  ///   - notes: The headache's notes.
+  ///   - identifier: The headache's identifier.
+  func updateHeadacheNotes(_ notes: String?, identifier: UUID) async throws {
+    logDebug("Set notes.")
+    
+    // Get the headache and update its notes
+    try await headacheWithIdentifier(identifier: identifier) { headache, _ in
+      headache?.notes = notes
+    }
+  }
+  
   /// Deletes the headache with the given identifier and it's associated health kit data.
   ///
   /// - Parameter identifier: The headache's identifier.
