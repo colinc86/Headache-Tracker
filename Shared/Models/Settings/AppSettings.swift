@@ -35,6 +35,7 @@ struct AppSettings {
     static let duration = ApplicationKey(from: "listoptions.duration")
     static let progression = ApplicationKey(from: "listoptions.progression")
     static let notes = ApplicationKey(from: "listoptions.notes")
+    static let tags = ApplicationKey(from: "listoptions.tags")
     static let outlook = ApplicationKey(from: "listoptions.outlook")
     static let severity = ApplicationKey(from: "listoptions.severity")
   }

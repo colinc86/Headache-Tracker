@@ -45,6 +45,9 @@ struct CurrentHeadacheView: View {
   /// Whether the notes view should be shown.
   @AppStorage(AppSettings.ListOptions.notes) private var showNotesView = true
   
+  /// Whether the tags view should be shown.
+  @AppStorage(AppSettings.ListOptions.tags) private var showTagsView = true
+  
   /// Whether the severity view should be shown.
   @AppStorage(AppSettings.ListOptions.severity) private var showSeverityView = true
   
@@ -115,6 +118,7 @@ struct CurrentHeadacheView: View {
         // Current Headache Information
         else if let currentHeadache = currentHeadache {
           CurrentHeadacheViews(headache: currentHeadache)
+            .id(currentHeadache)
         }
         
         // Predictions
@@ -129,6 +133,7 @@ struct CurrentHeadacheView: View {
       .animation(.default, value: showDurationView)
       .animation(.default, value: showProgressionView)
       .animation(.default, value: showNotesView)
+      .animation(.default, value: showTagsView)
       .animation(.default, value: showOutlookView)
       .animation(.default, value: showSeverityView)
       .refreshable {

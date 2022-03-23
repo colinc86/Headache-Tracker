@@ -21,6 +21,9 @@ struct ListOptionsMenu: View {
   /// Whether the notes view should be shown.
   @AppStorage(AppSettings.ListOptions.notes) private var notes = true
   
+  /// Whether the tags view should be shown.
+  @AppStorage(AppSettings.ListOptions.tags) private var tags = true
+  
   /// Whether the outlook view should be shown.
   @AppStorage(AppSettings.ListOptions.outlook) private var outlook = true
   
@@ -34,6 +37,7 @@ struct ListOptionsMenu: View {
         CheckmarkButton(title: "Duration", checked: $duration)
         CheckmarkButton(title: "Progression", checked: $progression)
         CheckmarkButton(title: "Notes", checked: $notes)
+        CheckmarkButton(title: "Tags", checked: $tags)
       }
       
       Section {

@@ -91,6 +91,15 @@ struct Previewing {
       headache.addSeverity(.severe, startTime: now.addingTimeInterval(-2400.0))
       headache.addSeverity(.moderate, startTime: now.addingTimeInterval(-1200.0))
       headache.addSeverity(.notPresent, startTime: now.addingTimeInterval(-600.0))
+      
+      let tagA = Tag(context: context)
+      tagA.value = "headache"
+      headache.addToTags(tagA)
+      
+      let tagB = Tag(context: context)
+      tagB.value = "right"
+      headache.addToTags(tagB)
+      
       headache.resolved = true
       
       for severity in headache.severitiesArray {
@@ -118,6 +127,12 @@ struct Previewing {
       for severity in headache.severitiesArray {
         severity.addToTrainingData(createTrainingData(in: context))
       }
+      
+      let tagA = Tag(context: context)
+      tagA.value = "another"
+      
+      let tagB = Tag(context: context)
+      tagB.value = "left"
       
       do {
         try context.save()

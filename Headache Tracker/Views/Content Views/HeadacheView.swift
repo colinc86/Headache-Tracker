@@ -44,6 +44,9 @@ struct HeadacheView: View {
   /// Whether the edit notes view is visible.
   @State private var showingEditNotesView = false
   
+  /// Whether the edit tags view is visible.
+  @State private var showingEditTagsView = false
+  
   /// The id of the duration view.
   @State private var durationID = UUID()
   
@@ -104,6 +107,10 @@ struct HeadacheView: View {
       }
       
       Section {
+        TagsCardView(tags: headache.tagValues, editAction: editTagsAction, tagAction: { _ in })
+      }
+      
+      Section {
         HStack {
           Spacer()
           Button("Delete Headache", action: deleteConfirmation)
@@ -134,7 +141,10 @@ struct HeadacheView: View {
       withAnimation { showingDeleteConfirmation = false }
     })
     .sheet(isPresented: $showingEditNotesView) {
-      EditNotesView(notes: headache.notes, identifier: headache.identifier)
+      EditNotesView(notes: headache.notes ?? "", identifier: headache.identifier ?? UUID())
+    }
+    .sheet(isPresented: $showingEditTagsView) {
+      EditTagsView(tags: headache.tagsArray.map({ $0.value ?? "" }), identifier: headache.identifier ?? UUID())
     }
   }
   
@@ -245,6 +255,10 @@ extension HeadacheView {
   
   private func editNotesAction() {
     withAnimation { showingEditNotesView = true }
+  }
+  
+  private func editTagsAction() {
+    withAnimation { showingEditTagsView = true }
   }
   
 }

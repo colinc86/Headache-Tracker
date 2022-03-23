@@ -144,33 +144,8 @@ extension HeadacheManager {
   func reset() async throws {
     logDebug("Reset headache.")
     
-    // The start and end times to delete from health kit
-    var startTime: Date?
-    var endTime: Date?
-    
-    // Get the current headache
-    try await currentHeadache { headache, context in
-      logDebug("Resetting headache.")
-      
-      // If we have a current headache, then delete it
-      if let headache = headache {
-        startTime = headache.startTime
-        endTime = headache.endTime ?? headache.pendingEndTime
-        context.delete(headache)
-      }
-    }
-    
-    // If there wasn't an error, then update the widget data and continue
-    SharedUserDefaults.standard.setCurrentSeverity(nil)
-    
-    // If there wasn't an error, then we should check and delete it from health kit
-    if let startTime = startTime, let endTime = endTime {
-      logDebug("Successfully reset headache. Deleting severity samples.")
-      try await healthKitManager.deleteSeveritySamples(in: DateInterval(start: startTime, end: endTime))
-    }
-    else {
-      logDebug("Successfully reset headache, but not deleting severity samples.")
-    }
+    let identifier = try await currentHeadacheIdentifier()
+    try await deleteHeadache(identifier: identifier)
   }
   
 }
@@ -236,6 +211,56 @@ extension HeadacheManager {
     }
   }
   
+  /// Updates the headache's tags.
+  ///
+  /// - Parameters:
+  ///   - tags: The headache's tags.
+  ///   - identifier: The headache's identifier.
+  func updateHeadacheTags(_ tags: [String], identifier: UUID) async throws {
+    logDebug("Set tags.")
+    
+    // Get the headache and update its tags
+    try await headacheWithIdentifier(identifier: identifier) { headache, context in
+      guard let headache = headache else {
+        return
+      }
+
+      // Remove the headache tags that don't need to be there
+      for tag in headache.tagsArray where !tags.contains(tag.value ?? "") {
+        // Remove the tag from the headache
+        headache.removeFromTags(tag)
+        
+        // Remove the headache from the tag
+        tag.removeFromHeadaches(headache)
+        
+        // If the tag isn't part of any other headache, delete it
+        if tag.headaches?.count == 0 {
+          context.delete(tag)
+        }
+      }
+      
+      // Add the new tags
+      for tag in tags where !headache.tagsArray.contains(where: { $0.value == tag }) {
+        // See if the tag already exists
+        let request = Tag.fetchRequest()
+        request.predicate = NSPredicate(format: "value = %@", tag)
+        
+        if let existingTag = (try context.fetch(request)).first {
+          // It already exists, so add it to the headache
+          headache.addToTags(existingTag)
+          existingTag.addToHeadaches(headache)
+        }
+        else {
+          // It doesn't already exist, so create a new tag
+          let newTag = Tag(context: context)
+          newTag.value = tag
+          headache.addToTags(newTag)
+          newTag.addToHeadaches(headache)
+        }
+      }
+    }
+  }
+  
   /// Deletes the headache with the given identifier and it's associated health kit data.
   ///
   /// - Parameter identifier: The headache's identifier.
@@ -254,6 +279,15 @@ extension HeadacheManager {
       
       // Get the headache
       if let headache = headache {
+        // Remove the headache from its tags
+        for tag in headache.tagsArray {
+          tag.removeFromHeadaches(headache)
+          if tag.headaches?.count == 0 {
+            context.delete(tag)
+          }
+        }
+        
+        // Delete the headache
         startTime = headache.startTime
         endTime = headache.endTime ?? headache.pendingEndTime
         context.delete(headache)

@@ -23,6 +23,11 @@
 		3B09192327BD91F400844F6C /* SectionTitleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B09192227BD91F400844F6C /* SectionTitleView.swift */; };
 		3B1C7DB427D2005E000B3A99 /* StatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1C7DB327D2005E000B3A99 /* StatusView.swift */; };
 		3B1C7DB627D205EE000B3A99 /* ActionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1C7DB527D205EE000B3A99 /* ActionView.swift */; };
+		3B20EA1327EA770700B9800F /* TagsCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B20EA1227EA770700B9800F /* TagsCardView.swift */; };
+		3B20EA1B27EA98B900B9800F /* EditTagsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B20EA1A27EA98B900B9800F /* EditTagsView.swift */; };
+		3B20EA2227EAA29F00B9800F /* TagsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B20EA2127EAA29F00B9800F /* TagsView.swift */; };
+		3B20EA2427EAA67C00B9800F /* FlexibleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B20EA2327EAA67C00B9800F /* FlexibleView.swift */; };
+		3B20EA2627EAD68500B9800F /* TagButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B20EA2527EAD68500B9800F /* TagButton.swift */; };
 		3B29F73627E983F800C8772C /* ListOptionsMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B29F73527E983F800C8772C /* ListOptionsMenu.swift */; };
 		3B29F73827E98AE100C8772C /* NotesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B29F73727E98AE100C8772C /* NotesView.swift */; };
 		3B29F73A27E98E1600C8772C /* CheckmarkButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B29F73927E98E1600C8772C /* CheckmarkButton.swift */; };
@@ -295,6 +300,11 @@
 		3B1C7DAE27D1EE32000B3A99 /* Headache_Tracker 1.6.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Headache_Tracker 1.6.xcdatamodel"; sourceTree = "<group>"; };
 		3B1C7DB327D2005E000B3A99 /* StatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusView.swift; sourceTree = "<group>"; };
 		3B1C7DB527D205EE000B3A99 /* ActionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionView.swift; sourceTree = "<group>"; };
+		3B20EA1227EA770700B9800F /* TagsCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagsCardView.swift; sourceTree = "<group>"; };
+		3B20EA1A27EA98B900B9800F /* EditTagsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditTagsView.swift; sourceTree = "<group>"; };
+		3B20EA2127EAA29F00B9800F /* TagsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagsView.swift; sourceTree = "<group>"; };
+		3B20EA2327EAA67C00B9800F /* FlexibleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlexibleView.swift; sourceTree = "<group>"; };
+		3B20EA2527EAD68500B9800F /* TagButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagButton.swift; sourceTree = "<group>"; };
 		3B29F73527E983F800C8772C /* ListOptionsMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListOptionsMenu.swift; sourceTree = "<group>"; };
 		3B29F73727E98AE100C8772C /* NotesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotesView.swift; sourceTree = "<group>"; };
 		3B29F73927E98E1600C8772C /* CheckmarkButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckmarkButton.swift; sourceTree = "<group>"; };
@@ -497,6 +507,7 @@
 				3B051A4F27B0E9410017131D /* CurrentHeadacheView.swift */,
 				3BAAA69827CD5B0100C0DDC4 /* DebugSettingsView.swift */,
 				3B29F73D27E99CE000C8772C /* EditNotesView.swift */,
+				3B20EA1A27EA98B900B9800F /* EditTagsView.swift */,
 				3B9332E927CF1E8400BACE93 /* FeedbackView.swift */,
 				3BAAA69227CC8A5800C0DDC4 /* GraphList.swift */,
 				3B051A4D27B0E9060017131D /* HeadachesView.swift */,
@@ -543,6 +554,7 @@
 				3B3FFF1027D8604600DFACC1 /* PredictionViews.swift */,
 				3B29F73B27E9909900C8772C /* ProgressionView.swift */,
 				3B1C7DB327D2005E000B3A99 /* StatusView.swift */,
+				3B20EA1227EA770700B9800F /* TagsCardView.swift */,
 			);
 			path = "Headache Views";
 			sourceTree = "<group>";
@@ -555,9 +567,12 @@
 				3B68BDFC27BE0FF0007AAAC6 /* Graphs */,
 				3B1C7DB227D2003C000B3A99 /* Headache Views */,
 				3B29F73927E98E1600C8772C /* CheckmarkButton.swift */,
+				3B20EA2327EAA67C00B9800F /* FlexibleView.swift */,
 				3B29F73527E983F800C8772C /* ListOptionsMenu.swift */,
 				3B3EAAEF27E801BA00F5D8B4 /* MapView.swift */,
 				3B09192227BD91F400844F6C /* SectionTitleView.swift */,
+				3B20EA2527EAD68500B9800F /* TagButton.swift */,
+				3B20EA2127EAA29F00B9800F /* TagsView.swift */,
 				3BAAA69627CCA7A200C0DDC4 /* TouchLocatingView.swift */,
 				3B051A9727B1B4EC0017131D /* VerticalSeverityLevel.swift */,
 			);
@@ -1283,6 +1298,7 @@
 				3B3FFEAB27D592A000DFACC1 /* Predictor.swift in Sources */,
 				3B68BDFB27BE0F00007AAAC6 /* BarGraph.swift in Sources */,
 				3B3FFEAD27D592A000DFACC1 /* SeverityClassifierOutput.swift in Sources */,
+				3B20EA2227EAA29F00B9800F /* TagsView.swift in Sources */,
 				3BA933B127DFA5D000BAD5A4 /* AddHeadacheView.swift in Sources */,
 				3B9332EA27CF1E8400BACE93 /* FeedbackView.swift in Sources */,
 				3B09191227BCCE1C00844F6C /* OnsetView.swift in Sources */,
@@ -1290,6 +1306,7 @@
 				3B09191427BCCF9500844F6C /* TitleCaptionView.swift in Sources */,
 				3B3FFEAF27D592A000DFACC1 /* OnsetRegressorOutput.swift in Sources */,
 				3B3FFEA127D592A000DFACC1 /* SeverityRange.swift in Sources */,
+				3B20EA1B27EA98B900B9800F /* EditTagsView.swift in Sources */,
 				3B051A4E27B0E9060017131D /* HeadachesView.swift in Sources */,
 				3B09192327BD91F400844F6C /* SectionTitleView.swift in Sources */,
 				3B051A9127B0FACA0017131D /* HeadacheView.swift in Sources */,
@@ -1315,6 +1332,7 @@
 				3B3FFEDF27D592A000DFACC1 /* AlertManager.swift in Sources */,
 				3B3FFEE927D592A000DFACC1 /* MotionManager.swift in Sources */,
 				3BE7321827DB2963007C013B /* Sequence+Extensions.swift in Sources */,
+				3B20EA1327EA770700B9800F /* TagsCardView.swift in Sources */,
 				3B3FFEF327D592A000DFACC1 /* DDBugfenderLogger.swift in Sources */,
 				3B3FFEED27D592A000DFACC1 /* HolisticOutlook.swift in Sources */,
 				3B29F73627E983F800C8772C /* ListOptionsMenu.swift in Sources */,
@@ -1341,6 +1359,7 @@
 				3B3FFEBD27D592A000DFACC1 /* EnvironmentalInput.swift in Sources */,
 				3B3FFED927D592A000DFACC1 /* Date+Extensions.swift in Sources */,
 				3B3FFEC927D592A000DFACC1 /* String+Extensions.swift in Sources */,
+				3B20EA2627EAD68500B9800F /* TagButton.swift in Sources */,
 				3B3FFEE327D592A000DFACC1 /* BackgroundTask.swift in Sources */,
 				3B3FFECD27D592A000DFACC1 /* UIColor+Extensions.swift in Sources */,
 				3BF7943927DFB6970094C531 /* EditableDateTimeView.swift in Sources */,
@@ -1383,6 +1402,7 @@
 				3B29F73A27E98E1600C8772C /* CheckmarkButton.swift in Sources */,
 				3B39DAE427AD06EA00D39BB5 /* SettingsView.swift in Sources */,
 				3B3FFE9727D592A000DFACC1 /* RefreshTask.swift in Sources */,
+				3B20EA2427EAA67C00B9800F /* FlexibleView.swift in Sources */,
 				3B3FFF0F27D858DF00DFACC1 /* AsyncButton.swift in Sources */,
 				3B051AA727B37D060017131D /* SeverityView.swift in Sources */,
 				3B3FFEDD27D592A000DFACC1 /* HeadacheAlertRequest.swift in Sources */,

@@ -9,8 +9,8 @@ import SwiftUI
 
 struct EditNotesView: View {
   
-  @State var notes: String?
-  @State var identifier: UUID?
+  @State var notes: String
+  @State var identifier: UUID
   
   // MARK: Private properties
   
@@ -20,25 +20,12 @@ struct EditNotesView: View {
   @Environment(\.presentationMode) private var presentationMode
   @State private var saving: Bool = false
   
-  var displayNotes: Binding<String> {
-    Binding<String> {
-      notes ?? ""
-    } set: { newValue in
-      if newValue.isEmpty {
-        notes = nil
-      }
-      else {
-        notes = newValue
-      }
-    }
-  }
-  
   var body: some View {
     NavigationView {
       ZStack(alignment: .topLeading) {
-        TextEditor(text: displayNotes)
+        TextEditor(text: $notes)
         
-        if notes == nil {
+        if notes.isEmpty {
           Text("Tap to add notes.")
             .foregroundColor(.secondary)
             .padding(.leading, 5)
@@ -75,9 +62,7 @@ extension EditNotesView {
       saving = true
     }
     
-    if let identifier = identifier {
-      try await headacheManager.updateHeadacheNotes(notes, identifier: identifier)
-    }
+    try await headacheManager.updateHeadacheNotes(notes.isEmpty ? nil : notes, identifier: identifier)
     
     dismiss()
   }
@@ -90,7 +75,7 @@ extension EditNotesView {
 
 struct EditNotesView_Previews: PreviewProvider {
   static var previews: some View {
-    EditNotesView(notes: Previewing.CoreData.resolvedHeadache.notes, identifier: Previewing.CoreData.resolvedHeadache.identifier)
+    EditNotesView(notes: Previewing.CoreData.resolvedHeadache.notes ?? "", identifier: Previewing.CoreData.resolvedHeadache.identifier ?? UUID())
       .environment(\.managedObjectContext, Previewing.CoreData.viewContext)
       .environmentObject(Previewing.headacheManager)
       .environmentObject(Previewing.alertManager)

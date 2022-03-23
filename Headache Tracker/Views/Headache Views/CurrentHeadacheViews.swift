@@ -26,6 +26,9 @@ struct CurrentHeadacheViews: View {
   /// Whether the notes view should be shown.
   @AppStorage(AppSettings.ListOptions.notes) private var showNotesView = true
   
+  /// Whether the tags view should be shown.
+  @AppStorage(AppSettings.ListOptions.tags) private var showTagsView = true
+  
   /// The app's headache manager.
   @EnvironmentObject private var headacheManager: HeadacheManager
   
@@ -46,6 +49,9 @@ struct CurrentHeadacheViews: View {
   
   /// Whether the edit notes view is visible.
   @State private var showingEditNotesView = false
+  
+  /// Whether the edit tags view is visible.
+  @State private var showingEditTagsView = false
   
   var body: some View {
     Group {
@@ -83,13 +89,23 @@ struct CurrentHeadacheViews: View {
           NotesView(notes: headache.notes, editButtonAction: editNotesAction)
         }
       }
+      
+      // Tags
+      if showTagsView {
+        Section {
+          TagsCardView(tags: headache.tagValues, editAction: editTagsAction, tagAction: { _ in })
+        }
+      }
     }
     .confirmationAlert(isPresented: $showingAlert, title: alertTitle, message: alertMessage)
     .confirmationDialog("Resolve Headache? It will be available in the Headaches tab.", isPresented: $showingResolveConfirmation, titleVisibility: .visible) {
       AsyncButton("Resolve", role: .destructive, action: resolve)
     }
     .sheet(isPresented: $showingEditNotesView) {
-      EditNotesView(notes: headache.notes, identifier: headache.identifier)
+      EditNotesView(notes: headache.notes ?? "", identifier: headache.identifier ?? UUID())
+    }
+    .sheet(isPresented: $showingEditTagsView) {
+      EditTagsView(tags: headache.tagsArray.map({ $0.value ?? "" }), identifier: headache.identifier ?? UUID())
     }
   }
 }
@@ -98,6 +114,10 @@ extension CurrentHeadacheViews {
   
   private func editNotesAction() {
     withAnimation { showingEditNotesView = true }
+  }
+  
+  private func editTagsAction() {
+    withAnimation { showingEditTagsView = true }
   }
   
   /// Displays the reset confirmation alert to the user.

@@ -36,6 +36,16 @@ extension Headache {
     return (severities?.sortedArray(using: [NSSortDescriptor(key: "startTime", ascending: true)]) as? [Severity]) ?? []
   }
   
+  /// Gets the headache's tags as a sorted array.
+  var tagsArray: [Tag] {
+    return (tags?.sortedArray(using: [NSSortDescriptor(key: "value", ascending: true)]) as? [Tag]) ?? []
+  }
+  
+  /// Gets the headache's tag values.
+  var tagValues: [String] {
+    return tagsArray.map({ $0.value ?? "" }).filter({ !$0.isEmpty })
+  }
+  
   /// The headache's current severity. If the headache is resolved, this property is nil.
   var currentSeverity: Severity? {
     return resolved ? nil : severitiesArray.last
