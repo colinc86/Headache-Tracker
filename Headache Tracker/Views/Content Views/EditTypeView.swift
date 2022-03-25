@@ -20,34 +20,14 @@ struct EditTypeView: View {
   
   @Environment(\.presentationMode) private var presentationMode
   @State private var saving: Bool = false
+  @State private var customTypeValue = ""
   
-  /// The headaches fetch request.
-  @FetchRequest(
-    sortDescriptors: [],
-    animation: .default)
-  private var headaches: FetchedResults<Headache>
-  
-  var customTypes: [Headache.Types] {
-    var customTypes: [Headache.Types] = []
-    for headache in headaches where !customTypes.contains(headache.headacheType) {
-      guard case .custom(_) = headache.headacheType else { continue }
-      customTypes.append(headache.headacheType)
+  let customTypes: [Headache.Types] = SharedUserDefaults.standard.customTypes
+  var saveDisabled: Bool {
+    if case .custom(_) = type, customTypeValue.isEmpty {
+      return true
     }
-    return customTypes
-  }
-  
-  var customTypeValue: Binding<String> {
-    Binding<String> {
-      if !customTypes.contains(type), case .custom(let rawValue) = type {
-        return rawValue
-      }
-      return ""
-    } set: { newValue in
-      if case .custom(_) = type {
-        type = .custom(type: newValue)
-      }
-    }
-
+    return false
   }
   
   var body: some View {
@@ -60,9 +40,9 @@ struct EditTypeView: View {
         .pickerStyle(InlinePickerStyle())
         
         Picker("Type", selection: $type) {
-          Text(Headache.Types.cluster.title).tag(Headache.Types.cluster)
-          Text(Headache.Types.migraine.title).tag(Headache.Types.migraine)
-          Text(Headache.Types.tension.title).tag(Headache.Types.tension)
+          ForEach(Headache.Types.definedCases) { type in
+            Text(type.title).tag(type)
+          }
         }
         .pickerStyle(InlinePickerStyle())
         
@@ -71,17 +51,16 @@ struct EditTypeView: View {
             ForEach(customTypes, id: \.self) { type in
               Text(type.title).tag(type)
             }
-            Text("Custom").tag(Headache.Types.custom(type: customTypeValue.wrappedValue))
           }
           .pickerStyle(InlinePickerStyle())
           .labelsHidden()
           
-          if !customTypes.contains(.custom(type: customTypeValue.wrappedValue)) {
-            TextField("Custom Type", text: customTypeValue, prompt: Text("Value"))
-          }
+          TextField("Custom Type", text: $customTypeValue, prompt: Text("Custom"))
         }
       }
       .navigationTitle("Type")
+      .onChange(of: type, perform: changedType)
+      .onChange(of: customTypeValue, perform: changedCustomTypeValue)
       .toolbar {
         ToolbarItem(placement: .cancellationAction) {
           Button("Cancel", role: .cancel, action: cancel)
@@ -90,6 +69,7 @@ struct EditTypeView: View {
         
         ToolbarItem(placement: .confirmationAction) {
           AsyncButton("Save", mode: .replacingContent, action: save)
+            .disabled(saveDisabled)
         }
       }
     }
@@ -110,13 +90,32 @@ extension EditTypeView {
       saving = true
     }
     
+    // Update the headache
     try await headacheManager.updateHeadacheType(type, classification: classification, identifier: identifier)
+    
+    // Update the custom types
+    try await headacheManager.updateCustomTypes()
     
     dismiss()
   }
   
   private func dismiss() {
     presentationMode.wrappedValue.dismiss()
+  }
+  
+  private func changedType(_ newValue: Headache.Types) {
+    if Headache.Types.definedCases.contains(newValue) || customTypes.contains(newValue) {
+      withAnimation {
+        customTypeValue = ""
+      }
+    }
+  }
+  
+  private func changedCustomTypeValue(_ newValue: String) {
+    let newValueType = Headache.Types(newValue)
+    if !Headache.Types.definedCases.contains(newValueType) && !customTypes.contains(newValueType) {
+      withAnimation { type = newValueType }
+    }
   }
   
 }

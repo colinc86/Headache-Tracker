@@ -19,22 +19,22 @@ struct DebugSettingsView: View {
   @EnvironmentObject private var predictor: Predictor
   
   /// A debug last outlook date setting.
-  @AppStorage(AppSettings.debugLastOutlookDate) private var debugLastOutlookDate: Date?
+  @AppStorage(AppSettings.Debug.debugLastOutlookDate) private var debugLastOutlookDate: Date?
   
   /// A debug next outlook date setting.
-  @AppStorage(AppSettings.debugNextOutlookDate) private var debugNextOutlookDate: Date?
+  @AppStorage(AppSettings.Debug.debugNextOutlookDate) private var debugNextOutlookDate: Date?
   
   /// A debug last outlook date setting.
-  @AppStorage(AppSettings.debugLastTrainingDate) private var debugLastTrainingDate: Date?
+  @AppStorage(AppSettings.Debug.debugLastTrainingDate) private var debugLastTrainingDate: Date?
   
   /// A debug next outlook date setting.
-  @AppStorage(AppSettings.debugNextTrainingDate) private var debugNextTrainingDate: Date?
+  @AppStorage(AppSettings.Debug.debugNextTrainingDate) private var debugNextTrainingDate: Date?
   
   /// A debug last outlook date setting.
-  @AppStorage(AppSettings.debugLastPredictionDate) private var debugLastPredictionDate: Date?
+  @AppStorage(AppSettings.Debug.debugLastPredictionDate) private var debugLastPredictionDate: Date?
   
   /// A debug next outlook date setting.
-  @AppStorage(AppSettings.debugNextPredictionDate) private var debugNextPredictionDate: Date?
+  @AppStorage(AppSettings.Debug.debugNextPredictionDate) private var debugNextPredictionDate: Date?
   
   /// The application's not present training data.
   @FetchRequest(

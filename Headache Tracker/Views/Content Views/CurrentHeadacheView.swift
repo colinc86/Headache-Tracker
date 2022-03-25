@@ -54,7 +54,7 @@ struct CurrentHeadacheView: View {
   @AppStorage(AppSettings.ListOptions.severity) private var showSeverityView = true
   
   /// The Apple Health integration setting.
-  @AppStorage(AppSettings.healthIntegration) private var healthIntegration = false
+  @AppStorage(AppSettings.Health.healthIntegration) private var healthIntegration = false
     
   /// The headaches fetch request.
   /// Should only return one headache.

@@ -40,11 +40,11 @@ extension SeverityState {
   ///   - initialSeverity: The severity.
   ///   - startTime: The severity's start time.
   ///   - endTime: The severity's end time.
-  convenience init(context: NSManagedObjectContext, severity: Headache.Severity, startTime: Date, endTime: Date?) {
+  convenience init(context: NSManagedObjectContext, severity: Headache.Severity, start: Date, end: Date?) {
     self.init(context: context)
     self.severity = severity
-    self.startTime = startTime
-    self.endTime = endTime
+    self.startTime = start
+    self.endTime = end
     self.identifier = UUID()
   }
   

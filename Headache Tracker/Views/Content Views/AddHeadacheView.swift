@@ -98,7 +98,7 @@ extension AddHeadacheView {
       withAnimation { isSaving = true }
     }
     
-    try await headacheManager.createHeadache(severity: severity, startTime: onset, endTime: resolved ? end : nil)
+    try await headacheManager.createHeadache(severity: severity, start: onset, end: resolved ? end : nil)
     
     await MainActor.run {
       withAnimation { isSaving = false }

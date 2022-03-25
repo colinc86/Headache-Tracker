@@ -27,7 +27,7 @@ struct HeadacheView: View {
   @EnvironmentObject private var alertManager: AlertManager
   
   /// The health integration setting.
-  @AppStorage(AppSettings.healthIntegration) private var healthIntegration = false
+  @AppStorage(AppSettings.Health.healthIntegration) private var healthIntegration = false
   
   /// The alert's title.
   @State private var alertTitle = ""

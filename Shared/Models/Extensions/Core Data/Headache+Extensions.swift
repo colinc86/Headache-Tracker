@@ -35,9 +35,11 @@ extension Headache {
   ///
   /// A headache type that is not explicity listed in the enumeration
   /// can be included as a custom type.
-  enum Types: Hashable, RawRepresentable {
+  enum Types: Comparable, Hashable, Identifiable, RawRepresentable {
     
     typealias RawValue = String
+    
+    typealias ObjectIdentifier = String
     
     static var definedCases: [Headache.Types] = [
       .cluster,
@@ -57,12 +59,22 @@ extension Headache {
       }
     }
     
+    var id: ObjectIdentifier {
+      return rawValue
+    }
+    
     init(_ rawValue: RawValue) {
       for type in Self.definedCases where type.rawValue == rawValue {
         self = type
         return
       }
-      self = .custom(type: rawValue)
+      
+      if rawValue.isEmpty {
+        self = .cluster
+      }
+      else {
+        self = .custom(type: rawValue)
+      }
     }
     
     init?(rawValue: RawValue) {
@@ -206,15 +218,19 @@ extension Headache {
   ///
   /// - Parameters:
   ///   - context: The context to create the headache in.
-  ///   - initialSeverity: The headache's initial severity. Must not be `not present`.
-  ///   - startTime: The headache's start time.
-  ///   - endTime: The headache's end time.
-  convenience init(context: NSManagedObjectContext, initialSeverity: Severity, startTime: Date, endTime: Date? = nil) {
+  ///   - severity: The headache's initial severity. Must not be `not present`.
+  ///   - classification: The headache's classification.
+  ///   - type: The headache's type.
+  ///   - start: The headache's start time.
+  ///   - end: The headache's end time.
+  convenience init(context: NSManagedObjectContext, severity: Severity, classification: Classification, type: Types, start: Date, end: Date? = nil) {
     self.init(context: context)
     identifier = UUID()
-    createdAt = startTime
+    createdAt = start
     resolved = false
-    addSeverity(initialSeverity, startTime: startTime, endTime: endTime)
+    headacheClassification = classification
+    headacheType = type
+    addSeverity(severity, start: start, end: end)
   }
   
 }
@@ -263,7 +279,7 @@ extension Headache {
   ///   - endTime: The severity's end time.
   /// - Returns: Information about the updated and added severities.
   @discardableResult
-  func addSeverity(_ severity: Severity, startTime: Date, endTime: Date? = nil) -> SeverityUpdates {
+  func addSeverity(_ severity: Severity, start: Date, end: Date? = nil) -> SeverityUpdates {
     logDebug("Adding severity \(severity.title) to the headache.")
     
     // Get the context
@@ -280,14 +296,14 @@ extension Headache {
       // This is a new severity
       if let previousSeverity = previousSeverity {
         // Set its end time to the new severity's start time
-        previousSeverity.endTime = startTime
+        previousSeverity.endTime = start
       }
       
       // Add a new (possibly open-ended) severity
-      let newSeverity = SeverityState(context: context, severity: severity, startTime: startTime, endTime: endTime)
+      let newSeverity = SeverityState(context: context, severity: severity, start: start, end: end)
       
       // If we were given an end time, then mark this headache as resolved
-      if endTime != nil {
+      if end != nil {
         resolved = true
       }
       
@@ -295,7 +311,7 @@ extension Headache {
       addToSeverities(newSeverity)
       
       // Return the updated severity
-      return SeverityUpdates(createdSeverityIdentifier: newSeverity.identifier, createdSeverityStartTime: startTime, updatedSeverityIdentifier: previousSeverity?.identifier, updatedSeverityInterval: previousSeverity?.severityInterval)
+      return SeverityUpdates(createdSeverityIdentifier: newSeverity.identifier, createdSeverityStartTime: start, updatedSeverityIdentifier: previousSeverity?.identifier, updatedSeverityInterval: previousSeverity?.severityInterval)
     }
     
     return .empty
@@ -322,7 +338,7 @@ extension Headache {
     // Get the previous severity
     if let previousSeverity = severities.last, let startTime = previousSeverity.endTime {
       // Add a new open-ended severity
-      let newSeverity = SeverityState(context: context, severity: severity, startTime: startTime, endTime: startTime.addingTimeInterval(duration))
+      let newSeverity = SeverityState(context: context, severity: severity, start: startTime, end: startTime.addingTimeInterval(duration))
       addToSeverities(newSeverity)
       return SeverityUpdates(createdSeverityIdentifier: newSeverity.identifier, createdSeverityStartTime: startTime, updatedSeverityIdentifier: previousSeverity.identifier, updatedSeverityInterval: previousSeverity.severityInterval)
     }
@@ -335,7 +351,7 @@ extension Headache {
   /// to true.
   ///
   /// - Parameter endTime: The headache's end time.
-  func resolve(endTime: Date) -> SeverityUpdates {
+  func resolve(end: Date) -> SeverityUpdates {
     logDebug("Adding severity \(severity.title) to the headache.")
     
     // Resolve the headache
@@ -346,7 +362,7 @@ extension Headache {
     
     // Get the previous severity and end it
     if let previousSeverity = severities.last {
-      previousSeverity.endTime = endTime
+      previousSeverity.endTime = end
       return SeverityUpdates(createdSeverityIdentifier: nil, createdSeverityStartTime: nil, updatedSeverityIdentifier: previousSeverity.identifier, updatedSeverityInterval: previousSeverity.severityInterval)
     }
     

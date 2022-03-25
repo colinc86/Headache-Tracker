@@ -28,7 +28,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, ObservableObject {
   @AppStorage(AppSettings.enableCrashReporting) var enableCrashReporting = true
   
   /// The Apple Health app integration setting.
-  @AppStorage(AppSettings.healthIntegration) var healthIntegration = false
+  @AppStorage(AppSettings.Health.healthIntegration) var healthIntegration = false
   
   /// The real-time alerts setting.
   @AppStorage(AppSettings.realTimeAlerts) var realTimeAlerts = false

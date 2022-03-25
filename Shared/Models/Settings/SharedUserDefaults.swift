@@ -16,6 +16,7 @@ class SharedUserDefaults {
     static let currentPrediction = "current.prediction"
     static let currentSeverity = "current.severity"
     static let measurementSystem = "measurement.system"
+    static let customTypes = "custom.types"
   }
   
   // MARK: Static properties
@@ -66,6 +67,21 @@ class SharedUserDefaults {
     
     set {
       defaults?.set(newValue?.rawValue, forKey: Keys.currentSeverity)
+      defaults?.synchronize()
+    }
+  }
+  
+  /// The application's custom headache types.
+  var customTypes: [Headache.Types] {
+    get {
+      if let values = defaults?.stringArray(forKey: Keys.customTypes) {
+        return values.map({ .custom(type: $0) })
+      }
+      return []
+    }
+    
+    set {
+      defaults?.set(newValue.map({ $0.rawValue }), forKey: Keys.customTypes)
       defaults?.synchronize()
     }
   }

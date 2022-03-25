@@ -33,6 +33,19 @@ class HeadacheManager: ObservableObject {
     }
   }
   
+  enum DeleteDisposition: String, CaseIterable, Identifiable {
+    
+    typealias ObjectIdentifier = RawValue
+    
+    var id: ObjectIdentifier {
+      rawValue
+    }
+    
+    case always
+    case never
+    case ask
+  }
+  
   // MARK: Public properties
   
   /// The manager's weather manager.
@@ -55,7 +68,16 @@ class HeadacheManager: ObservableObject {
   // MARK: Private properties
   
   /// The Apple Health app integration setting.
-  @AppStorage(AppSettings.healthIntegration) private var healthIntegration = false
+  @AppStorage(AppSettings.Health.healthIntegration) private var healthIntegration = false
+  
+  /// How the manager should handle health kit data.
+  @AppStorage(AppSettings.Health.deleteDisposition) private var deleteDisposition: DeleteDisposition = .ask
+  
+  /// The default headache type.
+  @AppStorage(AppSettings.defaultHeadacheType) private var defaultHeadacheType = Headache.Types.cluster
+  
+  /// The default headache classification.
+  @AppStorage(AppSettings.defaultHeadacheClassification) private var defaultHeadacheClassification = Headache.Classification.primary
   
   /// Whether or not the manager is in test mode. If in test mode, it will not
   /// write to or delete from the health kit store.
@@ -87,15 +109,17 @@ extension HeadacheManager {
     logDebug("Change severity to \(severity.title).")
     
     // The date interval of the severity to save to health kit
-    let severityUpdates: Headache.SeverityUpdates = try await currentHeadache { headache, context in
+    let severityUpdates: Headache.SeverityUpdates = try await currentHeadache { [weak self] headache, context in
       // Add to the current headache or create a new one
       if let headache = headache {
         logDebug("Adding severity to current headache.")
-        return headache.addSeverity(severity, startTime: Date())
+        return headache.addSeverity(severity, start: Date())
       }
       
       logDebug("Creating new headache.")
-      _ = Headache(context: context, initialSeverity: severity, startTime: Date())
+      if let self = self {
+        _ = Headache(context: context, severity: severity, classification: self.defaultHeadacheClassification, type: self.defaultHeadacheType, start: Date())
+      }
       return .empty
     }
     
@@ -119,7 +143,7 @@ extension HeadacheManager {
     let severityUpdates: Headache.SeverityUpdates = try await currentHeadache { headache, context in
       // Resolve the headache
       if let headache = headache {
-        return headache.resolve(endTime: Date())
+        return headache.resolve(end: Date())
       }
       else {
         logWarning("No current headache to resolve.")
@@ -159,14 +183,15 @@ extension HeadacheManager {
   ///   - severity: The headache's starting severity.
   ///   - startTime: The headache's start time.
   ///   - endTime: The headache's end time.
-  func createHeadache(severity: Headache.Severity, startTime: Date, endTime: Date?) async throws {
-    let severityIdentifier = try await DataController.shared.performInBackground(saveOnComplete: true) { (context) -> UUID? in
-      let headache = Headache(context: context, initialSeverity: severity, startTime: startTime, endTime: endTime)
+  func createHeadache(severity: Headache.Severity, start: Date, end: Date?) async throws {
+    let severityIdentifier = try await DataController.shared.performInBackground(saveOnComplete: true) { [weak self] (context) -> UUID? in
+      guard let self = self else { return nil }
+      let headache = Headache(context: context, severity: severity, classification: self.defaultHeadacheClassification, type: self.defaultHeadacheType, start: start, end: end)
       return headache.severitiesArray.first?.identifier
     }
     
     // Create the training data
-    let input = await predictorInput(atDate: startTime, inWidget: false)
+    let input = await predictorInput(atDate: start, inWidget: false)
     try await createTrainingData(from: input, severityIdentifier: severityIdentifier)
   }
   
@@ -271,7 +296,9 @@ extension HeadacheManager {
   
   /// Deletes the headache with the given identifier and it's associated health kit data.
   ///
-  /// - Parameter identifier: The headache's identifier.
+  /// - Parameters:
+  ///   - identifier: The headache's identifier.
+  ///   - deleteHealthKitData: Whether we should also delete the headache's health kit data.
   func deleteHeadache(identifier: UUID?) async throws {
     logDebug("Delete headache.")
     guard let identifier = identifier else {
@@ -394,6 +421,25 @@ extension HeadacheManager {
       try await healthKitManager.deleteSeveritySamples(in: originalHeadacheInterval)
       try await healthKitManager.saveSeveritySamples(intervals: newSeveritySamples)
     }
+  }
+  
+}
+
+// MARK: - Caching
+
+extension HeadacheManager {
+  
+  /// Updates the application's custom headache types.
+  func updateCustomTypes() async throws {
+    let types: [Headache.Types] = try await DataController.shared.performInBackground { context in
+      let request = Headache.fetchRequest()
+      let headaches = try context.fetch(request)
+      return headaches.map({ $0.headacheType }).sorted()
+    }
+    
+    let customTypes = types.filter({ !Headache.Types.definedCases.contains($0) })
+    let uniqueCustomTypes = customTypes.unique()
+    SharedUserDefaults.standard.customTypes = uniqueCustomTypes
   }
   
 }

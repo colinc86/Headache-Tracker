@@ -12,23 +12,33 @@ struct AppSettings {
   static let measurementSystem = ApplicationKey(from: "measurementSystem")
   
   static let enableCrashReporting = ApplicationKey(from: "enableCrashReporting")
+  static let defaultHeadacheType = ApplicationKey(from: "defaultHeadacheType")
+  static let defaultHeadacheClassification = ApplicationKey(from: "defaultHeadacheClassification")
   
-  static let healthIntegration = ApplicationKey(from: "healthIntegration")
+  struct Health {
+    static let healthIntegration = ApplicationKey(from: "healthIntegration")
+    static let deleteDisposition = ApplicationKey(from: "health.deletedisposition")
+  }
+  
   static let checkInAlerts = ApplicationKey(from: "checkInAlerts")
   static let checkInInterval = ApplicationKey(from: "checkInInterval")
   static let realTimeAlerts = ApplicationKey(from: "realTimeAlerts")
   static let dailyOutlookAlerts = ApplicationKey(from: "dailyOutlookAlerts")
   static let dailyOutlookTime = ApplicationKey(from: "dailyOutlookTime")
   
-  static let filterCount = ApplicationKey(from: "filterCount")
-  static let filterUnit = ApplicationKey(from: "filterUnit")
+  struct Persistence {
+    static let filterCount = ApplicationKey(from: "filterCount")
+    static let filterUnit = ApplicationKey(from: "filterUnit")
+  }
   
-  static let debugLastOutlookDate = ApplicationKey(from: "debugLastOutlookDate")
-  static let debugNextOutlookDate = ApplicationKey(from: "debugNextOutlookDate")
-  static let debugLastTrainingDate = ApplicationKey(from: "debugLastTrainingDate")
-  static let debugNextTrainingDate = ApplicationKey(from: "debugNextTrainingDate")
-  static let debugLastPredictionDate = ApplicationKey(from: "debugLastPredictionDate")
-  static let debugNextPredictionDate = ApplicationKey(from: "debugNextPredictionDate")
+  struct Debug {
+    static let debugLastOutlookDate = ApplicationKey(from: "debugLastOutlookDate")
+    static let debugNextOutlookDate = ApplicationKey(from: "debugNextOutlookDate")
+    static let debugLastTrainingDate = ApplicationKey(from: "debugLastTrainingDate")
+    static let debugNextTrainingDate = ApplicationKey(from: "debugNextTrainingDate")
+    static let debugLastPredictionDate = ApplicationKey(from: "debugLastPredictionDate")
+    static let debugNextPredictionDate = ApplicationKey(from: "debugNextPredictionDate")
+  }
   
   struct ListOptions {
     static let type = ApplicationKey(from: "listoptions.type")

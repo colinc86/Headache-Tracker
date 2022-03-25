@@ -47,10 +47,10 @@ struct AnalyzeView: View {
   // MARK: Private properties
   
   /// The health integration setting.
-  @AppStorage(AppSettings.filterCount) private var filterCount: Int = 1
+  @AppStorage(AppSettings.Persistence.filterCount) private var filterCount: Int = 1
   
   /// The health integration setting.
-  @AppStorage(AppSettings.filterUnit) private var filterUnit: FilterUnit = .month
+  @AppStorage(AppSettings.Persistence.filterUnit) private var filterUnit: FilterUnit = .month
   
   /// The main view context.
   @Environment(\.managedObjectContext) private var viewContext

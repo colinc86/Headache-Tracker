@@ -85,11 +85,11 @@ struct Previewing {
     private static var _resolvedHeadache: Headache? = nil
     private static func addResolvedHeadache(to context: NSManagedObjectContext) -> Headache {
       let now = Date()
-      let headache = Headache(context: context, initialSeverity: .mild, startTime: now.addingTimeInterval(-3600.0))
-      headache.addSeverity(.moderate, startTime: now.addingTimeInterval(-3000.0))
-      headache.addSeverity(.severe, startTime: now.addingTimeInterval(-2400.0))
-      headache.addSeverity(.moderate, startTime: now.addingTimeInterval(-1200.0))
-      headache.addSeverity(.notPresent, startTime: now.addingTimeInterval(-600.0))
+      let headache = Headache(context: context, severity: .mild, classification: .primary, type: .cluster, start: now.addingTimeInterval(-3600.0))
+      headache.addSeverity(.moderate, start: now.addingTimeInterval(-3000.0))
+      headache.addSeverity(.severe, start: now.addingTimeInterval(-2400.0))
+      headache.addSeverity(.moderate, start: now.addingTimeInterval(-1200.0))
+      headache.addSeverity(.notPresent, start: now.addingTimeInterval(-600.0))
       
       let tagA = Tag(context: context)
       tagA.value = "headache"
@@ -118,9 +118,9 @@ struct Previewing {
     private static var _unresolvedHeadache: Headache? = nil
     private static func addUnresolvedHeadache(to context: NSManagedObjectContext) -> Headache {
       let now = Date()
-      let headache = Headache(context: context, initialSeverity: .mild, startTime: now.addingTimeInterval(-3600.0))
-      headache.addSeverity(.moderate, startTime: now.addingTimeInterval(-3000.0))
-      headache.addSeverity(.severe, startTime: now.addingTimeInterval(-2400.0))
+      let headache = Headache(context: context, severity: .mild, classification: .primary, type: .cluster, start: now.addingTimeInterval(-3600.0))
+      headache.addSeverity(.moderate, start: now.addingTimeInterval(-3000.0))
+      headache.addSeverity(.severe, start: now.addingTimeInterval(-2400.0))
       headache.resolved = false
       
       for severity in headache.severitiesArray {

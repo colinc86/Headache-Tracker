@@ -44,7 +44,7 @@ class HealthKitManager: ObservableObject {
   // MARK: Private properties
   
   /// The Apple Health app integration setting.
-  @AppStorage(AppSettings.healthIntegration) private var healthIntegration = false
+  @AppStorage(AppSettings.Health.healthIntegration) private var healthIntegration = false
   
   /// The manager's health kit store.
   private let store = HKHealthStore()

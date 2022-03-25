@@ -29,7 +29,7 @@ struct SeverityView: View {
   @EnvironmentObject private var headacheManager: HeadacheManager
   
   /// The health integration setting.
-  @AppStorage(AppSettings.healthIntegration) private var healthIntegration = false
+  @AppStorage(AppSettings.Health.healthIntegration) private var healthIntegration = false
   
   /// The editing state of the view.
   @State private var editing = false

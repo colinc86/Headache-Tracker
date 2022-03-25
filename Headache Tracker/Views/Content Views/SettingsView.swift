@@ -33,7 +33,10 @@ struct SettingsView: View {
   @AppStorage(AppSettings.enableCrashReporting) var enableCrashReporting = true
   
   /// The health integration setting.
-  @AppStorage(AppSettings.healthIntegration) private var healthIntegration = false
+  @AppStorage(AppSettings.Health.healthIntegration) private var healthIntegration = false
+  
+  /// How the manager should handle health kit data.
+  @AppStorage(AppSettings.Health.deleteDisposition) private var deleteDisposition: HeadacheManager.DeleteDisposition = .ask
   
   /// The check-in alert setting.
   @AppStorage(AppSettings.checkInAlerts) private var checkInAlerts = false
@@ -49,6 +52,24 @@ struct SettingsView: View {
   
   /// The daily outlook alert time.
   @AppStorage(AppSettings.dailyOutlookTime) private var dailyOutlookTime = TimeInterval(28800.0)
+  
+  /// The default headache type.
+  @AppStorage(AppSettings.defaultHeadacheType) private var defaultHeadacheType = Headache.Types.cluster
+  
+  /// The default headache classification.
+  @AppStorage(AppSettings.defaultHeadacheClassification) private var defaultHeadacheClassification = Headache.Classification.primary
+  
+  /// Whether we are showing the bug report content view.
+  @State private var showingReportBug = false
+  
+  /// Whether we are showing the share feedback view.
+  @State private var showingShareFeedback = false
+  
+  /// The headaches fetch request.
+  @FetchRequest(
+    sortDescriptors: [],
+    animation: .default)
+  private var headaches: FetchedResults<Headache>
   
   @AppStorage(AppSettings.Predictors.secondsSinceMidnight) var predictorSecondsSinceMidnight = true
   @AppStorage(AppSettings.Predictors.weekday) var predictorWeekday = true
@@ -67,12 +88,6 @@ struct SettingsView: View {
   @AppStorage(AppSettings.Predictors.heartRateVariability) var predictorHeartRateVariability = true
   @AppStorage(AppSettings.Predictors.walkingHeartRateAverage) var predictorWalkingHeartRateAverage = true
   @AppStorage(AppSettings.Predictors.restingHeartRate) var predictorRestingHeartRate = true
-  
-  /// Whether we are showing the bug report content view.
-  @State private var showingReportBug = false
-  
-  /// Whether we are showing the share feedback view.
-  @State private var showingShareFeedback = false
   
   // MARK: Computed properties
     
@@ -119,38 +134,33 @@ struct SettingsView: View {
         Section("Integrations") {
           Toggle("Health App Integration", isOn: healthAppIntegration)
             .tint(.accentColor)
+          
+          Picker("Delete Health Data", selection: $deleteDisposition) {
+            ForEach(HeadacheManager.DeleteDisposition.allCases) { disposition in
+              Text(disposition.rawValue.capitalized).tag(disposition)
+            }
+          }
         }
         
-        // Predictions
-        Section {
-          NavigationLink {
-            PredictorsView()
-          } label: {
-            SubtitleCell(title: "My Predictors", subtitle: "\(settingsDictionary().reduce(0, { $0 + ($1.value ? 1 : 0) }))/\(settingsDictionary().keys.count)")
+        // Headaches
+        Section("Headaches") {
+          Picker("Default Class", selection: $defaultHeadacheClassification) {
+            Text(Headache.Classification.primary.title).tag(Headache.Classification.primary)
+            Text(Headache.Classification.secondary.title).tag(Headache.Classification.secondary)
           }
           
-          Toggle("Prediction Notifications", isOn: $realTimeAlerts)
-            .tint(.accentColor)
-        } header: {
-          Text("Predictions")
-        }
-        
-        // Outlook
-        Section {
-          Toggle("Daily Outlook", isOn: $dailyOutlookAlerts)
-            .onChange(of: dailyOutlookAlerts, perform: dailyOutlookAlertsChanged)
-            .tint(.accentColor)
+          Picker("Default Type", selection: $defaultHeadacheType) {
+            ForEach(Headache.Types.definedCases) { type in
+              Text(type.title).tag(type)
+            }
+            ForEach(SharedUserDefaults.standard.customTypes) { type in
+              Text(type.title).tag(type)
+            }
+          }
           
-          DatePicker("Daily Outlook Time", selection: dailyOutlookDate, displayedComponents: .hourAndMinute)
-            .disabled(!dailyOutlookAlerts)
-        } header: {
-          Text("Outlook")
-        }
-        
-        // Check-ins
-        Section {
-          Toggle("Headache Check-Ins", isOn: $checkInAlerts)
+          Toggle("Check-Ins", isOn: $checkInAlerts)
             .tint(.accentColor)
+            .disabled(alertsDenied)
           
           Picker(selection: $checkInInterval) {
             ForEach(1 ..< 25) { i in
@@ -160,13 +170,30 @@ struct SettingsView: View {
             Text("Check-In Interval")
           }
           .disabled(!checkInAlerts)
-        } header: {
-          Text("Check-Ins")
+          .disabled(alertsDenied)
         }
-        .disabled(alertsDenied)
+        
+        // Predictions
+        Section("Predictions") {
+          NavigationLink {
+            PredictorsView()
+          } label: {
+            SubtitleCell(title: "My Predictors", subtitle: "\(settingsDictionary().reduce(0, { $0 + ($1.value ? 1 : 0) }))/\(settingsDictionary().keys.count)")
+          }
+          
+          Toggle("Prediction Notifications", isOn: $realTimeAlerts)
+            .tint(.accentColor)
+          
+          Toggle("Daily Outlook", isOn: $dailyOutlookAlerts)
+            .onChange(of: dailyOutlookAlerts, perform: dailyOutlookAlertsChanged)
+            .tint(.accentColor)
+          
+          DatePicker("Daily Outlook Time", selection: dailyOutlookDate, displayedComponents: .hourAndMinute)
+            .disabled(!dailyOutlookAlerts)
+        }
         
         // Information
-        Section {
+        Section("General") {
           Picker(selection: $measurementSystem) {
             Text(MeasurementSystem.metric.title).tag(MeasurementSystem.metric)
             Text(MeasurementSystem.imperial.title).tag(MeasurementSystem.imperial)
@@ -183,20 +210,16 @@ struct SettingsView: View {
             .tint(.accentColor)
           
           SubtitleCell(title: "Version", subtitle: Bundle.main.humanReadableVersionString)
-        } header: {
-          Text("General")
         }
         
         // Debug
         #if DEBUG
-        Section {
+        Section("Debug") {
           NavigationLink {
             DebugSettingsView()
           } label: {
             Text("Debug Settings")
           }
-        } header: {
-          Text("Debug")
         }
         #endif
       }
