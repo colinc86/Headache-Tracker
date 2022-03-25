@@ -50,6 +50,9 @@ struct CurrentHeadacheViews: View {
   /// Whether the resolve confirmation alert is visible.
   @State private var showingResolveConfirmation = false
   
+  /// Whether the edit type view is visible.
+  @State private var showingEditTypeView = false
+  
   /// Whether the edit notes view is visible.
   @State private var showingEditNotesView = false
   
@@ -65,11 +68,11 @@ struct CurrentHeadacheViews: View {
         Text("Is your headache gone? Tap Resolve to let the app know.")
       }
       
-//      if showTypeView {
-//        Section {
-//          TypeCardView(type: <#T##HeadacheType#>, classification: <#T##HeadacheClassification#>, editButtonAction: <#T##(() -> Void)?##(() -> Void)?##() -> Void#>)
-//        }
-//      }
+      if showTypeView {
+        Section {
+          TypeCardView(type: headache.headacheType, classification: headache.headacheClassification, editButtonAction: editTypeAction)
+        }
+      }
       
       // Onset
       if showOnsetView, let onset = headache.startTime {
@@ -110,6 +113,9 @@ struct CurrentHeadacheViews: View {
     .confirmationDialog("Resolve Headache? It will be available in the Headaches tab.", isPresented: $showingResolveConfirmation, titleVisibility: .visible) {
       AsyncButton("Resolve", role: .destructive, action: resolve)
     }
+    .sheet(isPresented: $showingEditTypeView) {
+      EditTypeView(type: headache.headacheType, classification: headache.headacheClassification, identifier: headache.identifier ?? UUID())
+    }
     .sheet(isPresented: $showingEditNotesView) {
       EditNotesView(notes: headache.notes ?? "", identifier: headache.identifier ?? UUID())
     }
@@ -120,6 +126,10 @@ struct CurrentHeadacheViews: View {
 }
 
 extension CurrentHeadacheViews {
+  
+  private func editTypeAction() {
+    withAnimation { showingEditTypeView = true }
+  }
   
   private func editNotesAction() {
     withAnimation { showingEditNotesView = true }

@@ -29,6 +29,9 @@ struct CurrentHeadacheView: View {
   /// The app's alert manager.
   @EnvironmentObject private var alertManager: AlertManager
   
+  /// Whether the type view should be shown.
+  @AppStorage(AppSettings.ListOptions.type) private var showTypeView = true
+  
   /// Whether the onset view should be shown.
   @AppStorage(AppSettings.ListOptions.onset) private var showOnsetView = true
   
@@ -128,6 +131,7 @@ struct CurrentHeadacheView: View {
       .background(Color(UIColor.systemGroupedBackground))
       .navigationTitle("Track")
       .animation(.default, value: predictor.prediction)
+      .animation(.default, value: showTypeView)
       .animation(.default, value: showOnsetView)
       .animation(.default, value: showDurationView)
       .animation(.default, value: showProgressionView)

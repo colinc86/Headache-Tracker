@@ -18,6 +18,63 @@ extension Headache {
   /// A headache severity.
   typealias Severity = HKCategoryValueSeverity
   
+  /// A headache classification.
+  ///
+  /// Either primary or secondary.
+  enum Classification: String {
+    case primary
+    case secondary
+    
+    /// A title suitable for the user interface.
+    var title: String {
+      return rawValue.capitalized
+    }
+  }
+  
+  /// An enumeration of headache types.
+  ///
+  /// A headache type that is not explicity listed in the enumeration
+  /// can be included as a custom type.
+  enum Types: Hashable, RawRepresentable {
+    
+    typealias RawValue = String
+    
+    static var definedCases: [Headache.Types] = [
+      .cluster,
+      .migraine,
+      .tension
+    ]
+    
+    case cluster
+    case migraine
+    case tension
+    case custom(type: String)
+    
+    var rawValue: String {
+      switch self {
+      case .custom(let type): return type
+      default: return "\(self)"
+      }
+    }
+    
+    init(_ rawValue: RawValue) {
+      for type in Self.definedCases where type.rawValue == rawValue {
+        self = type
+        return
+      }
+      self = .custom(type: rawValue)
+    }
+    
+    init?(rawValue: RawValue) {
+      self.init(rawValue)
+    }
+    
+    /// A title suitable for the user interface.
+    var title: String {
+      return rawValue.capitalized
+    }
+  }
+  
   /// A structure to track severity updates to a headache.
   struct SeverityUpdates {
     
@@ -52,8 +109,8 @@ extension Headache {
     return tagsArray.map({ $0.value ?? "" }).filter({ !$0.isEmpty })
   }
   
-  /// The headache's current severity. If the headache is resolved, this property is nil.
-  var currentSeverity: SeverityState? {
+  /// The headache's current severity state. If the headache is resolved, this property is nil.
+  var currentState: SeverityState? {
     return resolved ? nil : severitiesArray.last
   }
   
@@ -113,12 +170,35 @@ extension Headache {
     return colors
   }
   
-  /// The headache's severity signal.
-  var severitySignal: [Severity] {
+  /// The headache's severity progression.
+  var progression: [Severity] {
     return severitiesArray.map({ $0.severity })
   }
   
-//  var headacheType: headache
+  /// The headache's classification.
+  var headacheClassification: Classification {
+    get {
+      return Classification(rawValue: classification ?? "") ?? .primary
+    }
+    
+    set {
+      classification = newValue.rawValue
+    }
+  }
+  
+  /// The headache's type.
+  var headacheType: Types {
+    get {
+      if let type = type {
+        return Types(type)
+      }
+      return .tension // choose the default type
+    }
+    
+    set {
+      type = newValue.rawValue
+    }
+  }
   
   // MARK: Initializers
   

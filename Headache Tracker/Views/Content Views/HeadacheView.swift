@@ -41,6 +41,9 @@ struct HeadacheView: View {
   /// Whether or not the delete confirmation alert is visible.
   @State private var showingDeleteConfirmation = false
   
+  /// Whether the edit type view is visible.
+  @State private var showingEditTypeView = false
+  
   /// Whether the edit notes view is visible.
   @State private var showingEditNotesView = false
   
@@ -68,6 +71,10 @@ struct HeadacheView: View {
       
       Section {
         StatusView(resolved: headache.resolved)
+      }
+      
+      Section {
+        TypeCardView(type: headache.headacheType, classification: headache.headacheClassification, editButtonAction: editTypeAction)
       }
       
       if let onset = headache.startTime {
@@ -140,6 +147,9 @@ struct HeadacheView: View {
       delete()
       withAnimation { showingDeleteConfirmation = false }
     })
+    .sheet(isPresented: $showingEditTypeView) {
+      EditTypeView(type: headache.headacheType, classification: headache.headacheClassification, identifier: headache.identifier ?? UUID())
+    }
     .sheet(isPresented: $showingEditNotesView) {
       EditNotesView(notes: headache.notes ?? "", identifier: headache.identifier ?? UUID())
     }
@@ -251,6 +261,10 @@ extension HeadacheView {
       updateDurationID()
       durationUpdateWaiter.wait(for: 60.0, repeats: true, completion: updateDurationID)
     }
+  }
+  
+  private func editTypeAction() {
+    withAnimation { showingEditTypeView = true }
   }
   
   private func editNotesAction() {

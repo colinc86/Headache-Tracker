@@ -13,7 +13,7 @@ struct ProgressionView: View {
   
   var body: some View {
     TitleCaptionView(title: "Progression", systemImage: "chart.xyaxis.line", foregroundColor: .orange) {
-      LineGraph(series: headache.severitySignal, gradient: Gradient(colors: headache.severityColorRange))
+      LineGraph(series: headache.progression, gradient: Gradient(colors: headache.severityColorRange))
         .frame(height: 100)
     }
   }

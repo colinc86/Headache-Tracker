@@ -196,6 +196,15 @@ extension HeadacheManager {
     }
   }
   
+  func updateHeadacheType(_ type: Headache.Types, classification: Headache.Classification, identifier: UUID) async throws {
+    logDebug("Set type.")
+    
+    try await headacheWithIdentifier(identifier: identifier) { headache, _ in
+      headache?.headacheType = type
+      headache?.headacheClassification = classification
+    }
+  }
+  
   /// Updates the headache's notes.
   ///
   /// - Parameters:

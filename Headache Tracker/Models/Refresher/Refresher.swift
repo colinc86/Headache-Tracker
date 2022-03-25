@@ -196,7 +196,7 @@ extension Refresher {
       let request = Headache.fetchRequest()
       request.predicate = NSPredicate(format: "resolved = %@", NSNumber(booleanLiteral: false))
       let headache = (try? context?.fetch(request))?.last
-      return headache?.currentSeverity?.identifier
+      return headache?.currentState?.identifier
     }
     
     // Get the input and either alert or finish

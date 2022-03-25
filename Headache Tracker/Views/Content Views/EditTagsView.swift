@@ -109,18 +109,6 @@ struct EditTagsView: View {
         }
       }
     }
-//    .searchable(text: $newTag, placement: SearchFieldPlacement.toolbar, prompt: "Add a tag...") {
-//      ForEach(availableTags, id: \.self) { tag in
-//        Button("#" + (tag.value ?? "")) {
-//          withAnimation {
-//            tags.append((tag.value ?? ""))
-//            newTag = ""
-//          }
-//        }
-//      }
-//    }
-//    .autocapitalization(.none)
-//    .onSubmit(addTagAction)
   }
   
 }
