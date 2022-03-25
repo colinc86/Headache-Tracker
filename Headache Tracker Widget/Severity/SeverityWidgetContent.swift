@@ -6,9 +6,8 @@
 //
 
 import WidgetKit
-import HealthKit
 
 struct SeverityWidgetContent: TimelineEntry {
   let date = Date()
-  let severity: HKCategoryValueSeverity?
+  let severity: Headache.Severity?
 }

@@ -9,10 +9,51 @@ import Foundation
 import HealthKit
 import SwiftUI
 
-extension HKCategoryValueSeverity: Codable {
+extension HKCategoryValueSeverity: Codable, Comparable {
+  
+  // MARK: Types
+  
+  /// A range of severities.
+  typealias Range = ClosedRange<HKCategoryValueSeverity>
+  
+  /// Pairs a severity range with a date.
+  struct DatedRange {
+    
+    /// An empty dated range.
+    static let empty = DatedRange(range: .empty, date: .distantPast)
+    
+    /// The severity range.
+    let range: Range
+    
+    /// The range's date.
+    let date: Date
+  }
+  
+  /// Pairs a severity value with a date interval.
+  struct Interval {
+    
+    /// The severity.
+    let severity: HKCategoryValueSeverity
+    
+    /// The severity's date interval.
+    let interval: DateInterval
+    
+    /// Creates a new severity interval.
+    ///
+    /// - Parameters:
+    ///   - severity: The severity.
+    ///   - start: The severity's start time.
+    ///   - end: The severity's end time.
+    init(_ severity: HKCategoryValueSeverity, start: Date, end: Date) {
+      self.severity = severity
+      self.interval = DateInterval(start: start, end: end)
+    }
+  }
+  
+  // MARK: Properties
   
   /// The severity's title suitable for a user.
-  public var title: String {
+  var title: String {
     switch self {
     case .notPresent: return "Not Present"
     case .mild: return "Mild"
@@ -20,29 +61,6 @@ extension HKCategoryValueSeverity: Codable {
     case .severe: return "Severe"
     case .unspecified: return "Present"
     default: return "Unknown"
-    }
-  }
-  
-  /// The image to use when displaying the severity.
-  var image: Image? {
-    switch self {
-    case .unspecified: return Image(Constants.AssetKeys.headacheSeverityPresent)
-    case .mild: return Image(Constants.AssetKeys.headacheSeverityMild)
-    case .moderate: return Image(Constants.AssetKeys.headacheSeverityModerate)
-    case .severe: return Image(Constants.AssetKeys.headacheSeveritySevere)
-    default: return nil
-    }
-  }
-  
-  /// The color to use when drawing the value in the user interface.
-  var uiColor: Color {
-    switch self {
-    case .notPresent: return Color.headacheSeverityNotPresent
-    case .unspecified: return Color.headacheSeverityPresent
-    case .mild: return Color.headacheSeverityMild
-    case .moderate: return Color.headacheSeverityModerate
-    case .severe: return Color.headacheSeveritySevere
-    default: return Color.headacheSeverityNotPresent
     }
   }
   
@@ -58,6 +76,24 @@ extension HKCategoryValueSeverity: Codable {
     }
   }
   
+  /// The color to use when drawing the value in the user interface.
+  var uiColor: Color {
+    switch self {
+    case .notPresent: return Color.headacheSeverityNotPresent
+    case .unspecified: return Color.headacheSeverityPresent
+    case .mild: return Color.headacheSeverityMild
+    case .moderate: return Color.headacheSeverityModerate
+    case .severe: return Color.headacheSeveritySevere
+    default: return Color.headacheSeverityNotPresent
+    }
+  }
+  
+  // MARK: Initializers
+  
+  /// Creates a severity from the value obtained from the
+  /// `orderingValue` property.
+  ///
+  /// - Parameter orderingValue: The severity's ordering value.
   init?(orderingValue: Int) {
     switch orderingValue {
     case 0: self = .notPresent
@@ -69,6 +105,10 @@ extension HKCategoryValueSeverity: Codable {
     }
   }
   
+  /// Creates a severity from the value obtained from the
+  /// `title` property.
+  ///
+  /// - Parameter title: The severity's title.
   init?(title: String) {
     switch title {
     case HKCategoryValueSeverity.notPresent.title: self = .notPresent
@@ -78,6 +118,43 @@ extension HKCategoryValueSeverity: Codable {
     case HKCategoryValueSeverity.severe.title: self = .severe
     default: return nil
     }
+  }
+  
+  // MARK: Comparable protocol methods
+  
+  public static func < (lhs: HKCategoryValueSeverity, rhs: HKCategoryValueSeverity) -> Bool {
+    return lhs.orderingValue < rhs.orderingValue
+  }
+  
+}
+
+extension HKCategoryValueSeverity.Range {
+  
+  /// An empty range.
+  static var empty: Self {
+    HKCategoryValueSeverity.Range(lowerBound: .notPresent, upperBound: .notPresent)
+  }
+  
+  /// The range's description built from titles.
+  var description: String {
+    if lowerBound == upperBound {
+      return lowerBound.title
+    }
+    return "\(lowerBound.title) - \(upperBound.title)"
+  }
+  
+  /// The range's average.
+  var average: Double {
+    return Double(lowerBound.orderingValue + upperBound.orderingValue) / 2.0
+  }
+  
+  /// Creates a severity range.
+  ///
+  /// - Parameters:
+  ///   - lowerBound: The range's lower bound.
+  ///   - upperBound: The range's upper bound.
+  init(lowerBound: HKCategoryValueSeverity, upperBound: HKCategoryValueSeverity) {
+    self.init(uncheckedBounds: (lowerBound, upperBound))
   }
   
 }

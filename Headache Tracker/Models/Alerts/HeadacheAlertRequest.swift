@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import HealthKit
 import UserNotifications
 
 enum HeadacheAlertRequest: AlertRequest {
@@ -14,7 +13,7 @@ enum HeadacheAlertRequest: AlertRequest {
   static let headacheIdentifierUserInfoKey = "headacheIdentifier"
   
   case checkIn(headacheIdentifier: UUID)
-  case prediction(severity: HKCategoryValueSeverity)
+  case prediction(severity: Headache.Severity)
   case outlook(outlook: Outlook, onset: Date?)
   
   public var title: String {

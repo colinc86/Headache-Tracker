@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import HealthKit
 import Surge
 
 /// A headache statistic.
@@ -191,11 +190,11 @@ class SeverityStatistic: Statistic {
     let roundedPeakSeverity = value.round(nearest: 0.5)
     let lowerBound = Int(floor(roundedPeakSeverity))
     let upperBound = Int(ceil(roundedPeakSeverity))
-    guard let lowerSeverity = HKCategoryValueSeverity(orderingValue: lowerBound),
-          let upperSeverity = HKCategoryValueSeverity(orderingValue: upperBound) else {
+    guard let lowerSeverity = Headache.Severity(orderingValue: lowerBound),
+          let upperSeverity = Headache.Severity(orderingValue: upperBound) else {
             return ""
           }
-    return SeverityRange(lowerBound: lowerSeverity, upperBound: upperSeverity).description
+    return Headache.Severity.Range(lowerBound: lowerSeverity, upperBound: upperSeverity).description
   }
 }
 

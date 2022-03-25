@@ -10,7 +10,6 @@ import CoreLocation
 import DataController
 import Foundation
 import SwiftUI
-import HealthKit
 
 struct Previewing {
   
@@ -76,7 +75,7 @@ struct Previewing {
     }
     
     /// A severity.
-    static var severity: Severity = {
+    static var severity: SeverityState = {
       return resolvedHeadache.severitiesArray.first!
     }()
     

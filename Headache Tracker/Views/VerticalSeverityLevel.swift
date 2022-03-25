@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import HealthKit
 
 /// Draws a vertical severity level indicator.
 struct VerticalSeverityLevel: View {
@@ -14,7 +13,7 @@ struct VerticalSeverityLevel: View {
   // MARK: Public properties
   
   /// The headache's level to display.
-  var range: SeverityRange
+  var range: Headache.Severity.Range
   
   // MARK: View body
   
@@ -55,7 +54,7 @@ extension VerticalSeverityLevel {
   /// - Parameter index: The index of the severity.
   /// - Returns: A color.
   private func color(for index: Int) -> Color {
-    return (HKCategoryValueSeverity(orderingValue: index) ?? .notPresent).uiColor
+    return (Headache.Severity(orderingValue: index) ?? .notPresent).uiColor
   }
   
 }

@@ -7,7 +7,6 @@
 
 import Surge
 import SwiftUI
-import HealthKit
 
 struct AnalyzeView: View {
   

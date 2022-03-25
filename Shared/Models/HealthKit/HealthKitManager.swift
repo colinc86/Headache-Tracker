@@ -123,7 +123,7 @@ extension HealthKitManager {
   /// Saves an array of severity sample.
   ///
   /// - Parameter intervals: The severity intervals to save.
-  func saveSeveritySamples(intervals: [SeverityInterval]) async throws {
+  func saveSeveritySamples(intervals: [Headache.Severity.Interval]) async throws {
     // Only continue if we have health integration turned on
     guard healthIntegration && !intervals.isEmpty else {
       return

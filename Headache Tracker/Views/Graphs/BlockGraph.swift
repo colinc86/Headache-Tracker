@@ -6,14 +6,13 @@
 //
 
 import SwiftUI
-import HealthKit
 
 struct BlockGraph: View {
   
   // MARK: Public properties
   
   /// The graph's series to plot.
-  let series: [(SeverityRange, Date)]
+  let series: [Headache.Severity.DatedRange]
   
   /// The earliest date to draw in the graph.
   let earliestDate: Date?
@@ -23,15 +22,15 @@ struct BlockGraph: View {
   var body: some View {
     HStack {
       VStack(alignment: .trailing) {
-        Text(HKCategoryValueSeverity.severe.title)
+        Text(Headache.Severity.severe.title)
         Spacer()
-        Text(HKCategoryValueSeverity.moderate.title)
+        Text(Headache.Severity.moderate.title)
         Spacer()
-        Text(HKCategoryValueSeverity.mild.title)
+        Text(Headache.Severity.mild.title)
         Spacer()
-        Text(HKCategoryValueSeverity.unspecified.title)
+        Text(Headache.Severity.unspecified.title)
         Spacer()
-        Text(HKCategoryValueSeverity.notPresent.title)
+        Text(Headache.Severity.notPresent.title)
       }
       .font(.caption)
       .foregroundColor(.secondary)
@@ -64,8 +63,8 @@ extension BlockGraph {
   /// The bar graph's rectangles.
   ///
   /// - Returns: An array of unit points.
-  private func ranges() -> [SeverityRange] {
-    guard let earliestDate = earliestDate ?? series.first?.1 else {
+  private func ranges() -> [Headache.Severity.Range] {
+    guard let earliestDate = earliestDate ?? series.first?.date else {
       return []
     }
     
@@ -75,17 +74,17 @@ extension BlockGraph {
       return []
     }
     
-    var ranges = [SeverityRange]()
+    var ranges = [Headache.Severity.Range]()
     
     for i in 0 ..< count {
       let date = earliestDate.addingTimeInterval(TimeInterval(i) * 86400.0)
       
       // Get the series value on this date
-      if let value = series.filter({ Calendar.current.numberOfDaysBetween(date, and: $0.1) == 0 }).first {
-        ranges.append(value.0)
+      if let value = series.filter({ Calendar.current.numberOfDaysBetween(date, and: $0.date) == 0 }).first {
+        ranges.append(value.range)
       }
       else {
-        ranges.append(SeverityRange.empty)
+        ranges.append(Headache.Severity.Range.empty)
       }
     }
     
@@ -97,7 +96,7 @@ extension BlockGraph {
   /// - Parameter index: The index of the severity.
   /// - Returns: A color.
   private func color(for index: Int) -> Color {
-    return (HKCategoryValueSeverity(orderingValue: index) ?? .notPresent).uiColor
+    return (Headache.Severity(orderingValue: index) ?? .notPresent).uiColor
   }
   
 }

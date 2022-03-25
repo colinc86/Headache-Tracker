@@ -14,6 +14,9 @@ struct CurrentHeadacheViews: View {
   
   // MARK: Private properties
   
+  /// Whether the type view should be shown.
+  @AppStorage(AppSettings.ListOptions.type) private var showTypeView = true
+  
   /// Whether the onset view should be shown.
   @AppStorage(AppSettings.ListOptions.onset) private var showOnsetView = true
   
@@ -61,6 +64,12 @@ struct CurrentHeadacheViews: View {
       } footer: {
         Text("Is your headache gone? Tap Resolve to let the app know.")
       }
+      
+//      if showTypeView {
+//        Section {
+//          TypeCardView(type: <#T##HeadacheType#>, classification: <#T##HeadacheClassification#>, editButtonAction: <#T##(() -> Void)?##(() -> Void)?##() -> Void#>)
+//        }
+//      }
       
       // Onset
       if showOnsetView, let onset = headache.startTime {

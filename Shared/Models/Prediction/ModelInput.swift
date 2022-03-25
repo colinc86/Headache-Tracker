@@ -7,7 +7,6 @@
 
 import CoreLocation
 import Foundation
-import HealthKit
 
 /// A prediction input.
 struct ModelInput: Codable {
@@ -44,12 +43,12 @@ struct ModelInput: Codable {
   var outlook: Outlook
   
   /// The input's severity.
-  var severity: HKCategoryValueSeverity
+  var severity: Headache.Severity
   
   // MARK: Initializers
   
   /// Initializes new model input.
-  init(date: Date, location: CLLocation?, weatherStatistics: WeatherStatistics?, healthKitData: [HealthKitData: Double]?, timeIntervalUntilNextHeadacheStart: TimeInterval? = 0.0, timeIntervalUntilNextHeadacheEnd: TimeInterval? = 0.0, outlook: Outlook = .noHeadache, severity: HKCategoryValueSeverity = .notPresent) {
+  init(date: Date, location: CLLocation?, weatherStatistics: WeatherStatistics?, healthKitData: [HealthKitData: Double]?, timeIntervalUntilNextHeadacheStart: TimeInterval? = 0.0, timeIntervalUntilNextHeadacheEnd: TimeInterval? = 0.0, outlook: Outlook = .noHeadache, severity: Headache.Severity = .notPresent) {
     self.date = date
     self.location = location
     self.weatherStatistics = weatherStatistics

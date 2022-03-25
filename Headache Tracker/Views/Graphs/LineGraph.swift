@@ -7,14 +7,13 @@
 
 import Shapes
 import SwiftUI
-import HealthKit
 
 struct LineGraph: View {
   
   // MARK: Public properties
   
   /// The graph's series to plot.
-  let series: [HKCategoryValueSeverity]
+  let series: [Headache.Severity]
   
   /// The line graph's gradient.
   let gradient: Gradient
@@ -29,15 +28,15 @@ struct LineGraph: View {
   var body: some View {
     HStack {
       VStack(alignment: .trailing) {
-        Text(HKCategoryValueSeverity.severe.title)
+        Text(Headache.Severity.severe.title)
         Spacer()
-        Text(HKCategoryValueSeverity.moderate.title)
+        Text(Headache.Severity.moderate.title)
         Spacer()
-        Text(HKCategoryValueSeverity.mild.title)
+        Text(Headache.Severity.mild.title)
         Spacer()
-        Text(HKCategoryValueSeverity.unspecified.title)
+        Text(Headache.Severity.unspecified.title)
         Spacer()
-        Text(HKCategoryValueSeverity.notPresent.title)
+        Text(Headache.Severity.notPresent.title)
       }
       .font(.caption)
       .foregroundColor(.secondary)

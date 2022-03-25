@@ -31,6 +31,7 @@ struct AppSettings {
   static let debugNextPredictionDate = ApplicationKey(from: "debugNextPredictionDate")
   
   struct ListOptions {
+    static let type = ApplicationKey(from: "listoptions.type")
     static let onset = ApplicationKey(from: "listoptions.onset")
     static let duration = ApplicationKey(from: "listoptions.duration")
     static let progression = ApplicationKey(from: "listoptions.progression")

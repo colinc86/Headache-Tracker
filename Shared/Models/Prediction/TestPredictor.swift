@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import HealthKit
 
 #if !NON_PREVIEW
 class Predictor: ObservableObject {
@@ -86,7 +85,7 @@ class Predictor: ObservableObject {
     let outlookClassifierOutput: PredictionStatistic<Outlook> = PredictionStatistic<Outlook>(prediction: .noHeadache, probability: 0)
     
     /// The severity classifier's output.
-    let severityClassifierOutput: PredictionStatistic<HKCategoryValueSeverity> = PredictionStatistic<HKCategoryValueSeverity>(prediction: .notPresent, probability: 0)
+    let severityClassifierOutput: PredictionStatistic<Headache.Severity> = PredictionStatistic<Headache.Severity>(prediction: .notPresent, probability: 0)
     
     /// The onset regressor's output.
     let onsetRegressorOutput: PredictionStatistic<Date> = PredictionStatistic<Date>(prediction: Date(timeIntervalSince1970: 0), probability: nil)

@@ -6,14 +6,13 @@
 //
 
 import SwiftUI
-import HealthKit
 
 struct SeverityView: View {
   
   // MARK: Public properties
   
   /// The severity to display in the view.
-  @StateObject var severity: Severity
+  @StateObject var severity: SeverityState
   
   /// Whether or not the end time can be edited.
   let canEditEndTime: Bool
@@ -48,7 +47,7 @@ struct SeverityView: View {
   @State private var showingDeleteConfirmation = false
   
   /// The current edit severity.
-  @State private var editSeverity = HKCategoryValueSeverity.notPresent
+  @State private var editSeverity = Headache.Severity.notPresent
   
   /// The current edit start time.
   @State private var editStartTime = Date()
@@ -67,11 +66,11 @@ struct SeverityView: View {
         
         if editing {
           Picker("Severity", selection: $editSeverity) {
-            Text("Not Present").tag(HKCategoryValueSeverity.notPresent)
-            Text("Present").tag(HKCategoryValueSeverity.unspecified)
-            Text("Mild").tag(HKCategoryValueSeverity.mild)
-            Text("Moderate").tag(HKCategoryValueSeverity.moderate)
-            Text("Severe").tag(HKCategoryValueSeverity.severe)
+            Text("Not Present").tag(Headache.Severity.notPresent)
+            Text("Present").tag(Headache.Severity.unspecified)
+            Text("Mild").tag(Headache.Severity.mild)
+            Text("Moderate").tag(Headache.Severity.moderate)
+            Text("Severe").tag(Headache.Severity.severe)
           }
           
           DatePicker("Start Time", selection: $editStartTime, displayedComponents: [.date, .hourAndMinute])

@@ -10,7 +10,13 @@ import HealthKit
 import CoreData
 import SwiftUI
 
+/// A headache.
 extension Headache {
+  
+  // MARK: Types
+  
+  /// A headache severity.
+  typealias Severity = HKCategoryValueSeverity
   
   /// A structure to track severity updates to a headache.
   struct SeverityUpdates {
@@ -28,12 +34,12 @@ extension Headache {
     let updatedSeverityIdentifier: UUID?
     
     /// The interval of the severity that was updated.
-    let updatedSeverityInterval: SeverityInterval?
+    let updatedSeverityInterval: Severity.Interval?
   }
   
   /// Gets the headache's severities as a sorted array.
-  var severitiesArray: [Severity] {
-    return (severities?.sortedArray(using: [NSSortDescriptor(key: "startTime", ascending: true)]) as? [Severity]) ?? []
+  var severitiesArray: [SeverityState] {
+    return (severities?.sortedArray(using: [NSSortDescriptor(key: "startTime", ascending: true)]) as? [SeverityState]) ?? []
   }
   
   /// Gets the headache's tags as a sorted array.
@@ -47,7 +53,7 @@ extension Headache {
   }
   
   /// The headache's current severity. If the headache is resolved, this property is nil.
-  var currentSeverity: Severity? {
+  var currentSeverity: SeverityState? {
     return resolved ? nil : severitiesArray.last
   }
   
@@ -84,17 +90,17 @@ extension Headache {
   }
   
   /// The value of the last severity.
-  var severity: HKCategoryValueSeverity {
+  var severity: Severity {
     return severitiesArray.last?.severity ?? .notPresent
   }
   
   /// The headache's severity range.
-  var severityRange: SeverityRange {
+  var severityRange: Severity.Range {
     guard let minSeverity = severitiesArray.map({ $0.severity }).min(by: { $0.orderingValue < $1.orderingValue }),
           let maxSeverity = severitiesArray.map({ $0.severity }).max(by: { $0.orderingValue < $1.orderingValue }) else {
-            return SeverityRange(lowerBound: .notPresent, upperBound: .notPresent)
+            return Severity.Range(lowerBound: .notPresent, upperBound: .notPresent)
           }
-    return SeverityRange(lowerBound: minSeverity, upperBound: maxSeverity)
+    return Severity.Range(lowerBound: minSeverity, upperBound: maxSeverity)
   }
   
   /// The range of colors to use with the headache's severity range.
@@ -102,15 +108,17 @@ extension Headache {
     let range = severityRange
     var colors = [Color]()
     for i in range.lowerBound.orderingValue ... range.upperBound.orderingValue {
-      colors.append((HKCategoryValueSeverity(orderingValue: i) ?? .notPresent).uiColor)
+      colors.append((Severity(orderingValue: i) ?? .notPresent).uiColor)
     }
     return colors
   }
   
   /// The headache's severity signal.
-  var severitySignal: [HKCategoryValueSeverity] {
+  var severitySignal: [Severity] {
     return severitiesArray.map({ $0.severity })
   }
+  
+//  var headacheType: headache
   
   // MARK: Initializers
   
@@ -121,7 +129,7 @@ extension Headache {
   ///   - initialSeverity: The headache's initial severity. Must not be `not present`.
   ///   - startTime: The headache's start time.
   ///   - endTime: The headache's end time.
-  convenience init(context: NSManagedObjectContext, initialSeverity: HKCategoryValueSeverity, startTime: Date, endTime: Date? = nil) {
+  convenience init(context: NSManagedObjectContext, initialSeverity: Severity, startTime: Date, endTime: Date? = nil) {
     self.init(context: context)
     identifier = UUID()
     createdAt = startTime
@@ -175,7 +183,7 @@ extension Headache {
   ///   - endTime: The severity's end time.
   /// - Returns: Information about the updated and added severities.
   @discardableResult
-  func addSeverity(_ severity: HKCategoryValueSeverity, startTime: Date, endTime: Date? = nil) -> SeverityUpdates {
+  func addSeverity(_ severity: Severity, startTime: Date, endTime: Date? = nil) -> SeverityUpdates {
     logDebug("Adding severity \(severity.title) to the headache.")
     
     // Get the context
@@ -196,7 +204,7 @@ extension Headache {
       }
       
       // Add a new (possibly open-ended) severity
-      let newSeverity = Severity(context: context, severity: severity, startTime: startTime, endTime: endTime)
+      let newSeverity = SeverityState(context: context, severity: severity, startTime: startTime, endTime: endTime)
       
       // If we were given an end time, then mark this headache as resolved
       if endTime != nil {
@@ -220,7 +228,7 @@ extension Headache {
   ///   - severity: The severity.
   ///   - duration: The severity's duration.
   @discardableResult
-  func addSeverity(_ severity: HKCategoryValueSeverity, duration: TimeInterval) -> SeverityUpdates {
+  func addSeverity(_ severity: Severity, duration: TimeInterval) -> SeverityUpdates {
     logDebug("Adding severity \(severity.title) with duration \(duration) seconds.")
     
     // Get the context
@@ -234,7 +242,7 @@ extension Headache {
     // Get the previous severity
     if let previousSeverity = severities.last, let startTime = previousSeverity.endTime {
       // Add a new open-ended severity
-      let newSeverity = Severity(context: context, severity: severity, startTime: startTime, endTime: startTime.addingTimeInterval(duration))
+      let newSeverity = SeverityState(context: context, severity: severity, startTime: startTime, endTime: startTime.addingTimeInterval(duration))
       addToSeverities(newSeverity)
       return SeverityUpdates(createdSeverityIdentifier: newSeverity.identifier, createdSeverityStartTime: startTime, updatedSeverityIdentifier: previousSeverity.identifier, updatedSeverityInterval: previousSeverity.severityInterval)
     }

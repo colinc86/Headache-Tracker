@@ -1,5 +1,5 @@
 //
-//  Severity+Extensions.swift
+//  SeverityState+Extensions.swift
 //  Headache Tracker
 //
 //  Created by Colin Campbell on 2/6/22.
@@ -7,24 +7,23 @@
 
 import CoreData
 import Foundation
-import HealthKit
 
-extension Severity {
+extension SeverityState {
   
   // MARK: Properties
   
   /// The severity's health kit severity value.
-  var severity: HKCategoryValueSeverity {
-    get { return HKCategoryValueSeverity(rawValue: Int(rawValue)) ?? .notPresent }
+  var severity: Headache.Severity {
+    get { return Headache.Severity(rawValue: Int(rawValue)) ?? .notPresent }
     set { rawValue = Int64(newValue.rawValue) }
   }
   
   /// The severity's severity interval.
-  var severityInterval: SeverityInterval? {
+  var severityInterval: Headache.Severity.Interval? {
     guard let startTime = startTime, let endTime = endTime else {
       return nil
     }
-    return SeverityInterval(severity: severity, interval: DateInterval(start: startTime, end: endTime))
+    return  Headache.Severity.Interval(severity, start: startTime, end: endTime)
   }
   
   /// The severity's training data as an array.
@@ -41,7 +40,7 @@ extension Severity {
   ///   - initialSeverity: The severity.
   ///   - startTime: The severity's start time.
   ///   - endTime: The severity's end time.
-  convenience init(context: NSManagedObjectContext, severity: HKCategoryValueSeverity, startTime: Date, endTime: Date?) {
+  convenience init(context: NSManagedObjectContext, severity: Headache.Severity, startTime: Date, endTime: Date?) {
     self.init(context: context)
     self.severity = severity
     self.startTime = startTime
@@ -53,14 +52,14 @@ extension Severity {
 
 // MARK: Static methods
 
-extension Severity {
+extension SeverityState {
   
   /// Creates a fetch request
   ///
   /// - Parameter identifier: The severity's identifier.
   /// - Returns: A fetch request.
-  static func fetchRequest(withIdentifier identifier: UUID?) -> NSFetchRequest<Severity> {
-    let request = Severity.fetchRequest()
+  static func fetchRequest(withIdentifier identifier: UUID?) -> NSFetchRequest<SeverityState> {
+    let request = SeverityState.fetchRequest()
     if let identifier = identifier {
       request.predicate = NSPredicate(format: "identifier = %@", identifier as NSUUID)
     }

@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import HealthKit
 
 enum HolisticOutlook {
   
@@ -14,7 +13,7 @@ enum HolisticOutlook {
   
   case possibleHeadache(onset: Date)
   
-  case headache(severity: HKCategoryValueSeverity, end: Date)
+  case headache(severity: Headache.Severity, end: Date)
   
   var title: String {
     switch self {
@@ -24,7 +23,7 @@ enum HolisticOutlook {
     }
   }
   
-  init(outlook: Outlook, onset: Date, duration: TimeInterval, severity: HKCategoryValueSeverity) {
+  init(outlook: Outlook, onset: Date, duration: TimeInterval, severity: Headache.Severity) {
     switch outlook {
     case .noHeadache:
       self = .noHeadache

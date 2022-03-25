@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import HealthKit
 
 struct AddHeadacheView: View {
   
@@ -18,7 +17,7 @@ struct AddHeadacheView: View {
   @EnvironmentObject private var headacheManager: HeadacheManager
   
   private let now: Date
-  @State private var severity: HKCategoryValueSeverity? = nil
+  @State private var severity: Headache.Severity? = nil
   @State private var onset = Date()
   @State private var resolved = false
   @State private var end = Date()
@@ -82,7 +81,7 @@ struct AddHeadacheView: View {
 
 extension AddHeadacheView {
   
-  private func changeSeverity(_ severity: HKCategoryValueSeverity) {
+  private func changeSeverity(_ severity: Headache.Severity) {
     withAnimation { self.severity = severity }
   }
   

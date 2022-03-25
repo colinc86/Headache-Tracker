@@ -8,7 +8,6 @@
 import ApplicationKey
 import CoreML
 import Foundation
-import HealthKit
 import WidgetKit
 
 #if NON_PREVIEW
@@ -236,7 +235,7 @@ extension Predictor {
               probability: outlookPrediction.OutlookProbability[outlookPrediction.Outlook]),
             
             severityClassifierOutput: PredictionOutput.PredictionStatistic(
-              prediction: HKCategoryValueSeverity(title: severityPrediction.Severity)!,
+              prediction: Headache.Severity(title: severityPrediction.Severity)!,
               probability: severityPrediction.SeverityProbability[severityPrediction.Severity]),
             
             onsetRegressorOutput: PredictionOutput.PredictionStatistic<Date>(

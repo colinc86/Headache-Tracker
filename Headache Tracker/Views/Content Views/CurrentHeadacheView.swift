@@ -8,7 +8,6 @@
 import SwiftUI
 import CoreData
 import DataController
-import HealthKit
 
 /// Shows and manages the current headache's UI.
 struct CurrentHeadacheView: View {
@@ -251,7 +250,7 @@ extension CurrentHeadacheView {
   /// doesn't exist.
   ///
   /// - Parameter severity: The new severity.
-  private func changeSeverity(to severity: HKCategoryValueSeverity) async throws {
+  private func changeSeverity(to severity: Headache.Severity) async throws {
     logDebug("Change severity to \(severity.title).")
         
     // Change the severity

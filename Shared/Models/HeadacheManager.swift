@@ -11,7 +11,6 @@ import CoreData
 import CoreLocation
 import DataController
 import Foundation
-import HealthKit
 import SwiftUI
 import WidgetKit
 
@@ -84,7 +83,7 @@ extension HeadacheManager {
   /// severity to the current headache.
   ///
   /// - Parameter severity: The headache's current severity.
-  func changeSeverity(to severity: HKCategoryValueSeverity) async throws {
+  func changeSeverity(to severity: Headache.Severity) async throws {
     logDebug("Change severity to \(severity.title).")
     
     // The date interval of the severity to save to health kit
@@ -160,7 +159,7 @@ extension HeadacheManager {
   ///   - severity: The headache's starting severity.
   ///   - startTime: The headache's start time.
   ///   - endTime: The headache's end time.
-  func createHeadache(severity: HKCategoryValueSeverity, startTime: Date, endTime: Date?) async throws {
+  func createHeadache(severity: Headache.Severity, startTime: Date, endTime: Date?) async throws {
     let severityIdentifier = try await DataController.shared.performInBackground(saveOnComplete: true) { (context) -> UUID? in
       let headache = Headache(context: context, initialSeverity: severity, startTime: startTime, endTime: endTime)
       return headache.severitiesArray.first?.identifier
@@ -320,7 +319,7 @@ extension HeadacheManager {
     }
     
     var originalHeadacheInterval: DateInterval?
-    var newSeveritySamples = [SeverityInterval]()
+    var newSeveritySamples = [Headache.Severity.Interval]()
     
     try await severityWithIdentifier(identifier: identifier) { severity, context in
       if let severity = severity {
@@ -347,11 +346,11 @@ extension HeadacheManager {
   /// Updates the severity with the given identifier.
   ///
   /// - Parameter identifier: The severity's identifier.
-  func updateSeverity(identifier: UUID, value: HKCategoryValueSeverity, startTime: Date, endTime: Date) async throws {
+  func updateSeverity(identifier: UUID, value: Headache.Severity, startTime: Date, endTime: Date) async throws {
     logDebug("Update severity.")
     
     var originalHeadacheInterval: DateInterval?
-    var newSeveritySamples = [SeverityInterval]()
+    var newSeveritySamples = [Headache.Severity.Interval]()
     
     let modified = try await severityWithIdentifier(identifier: identifier) { (severity, context) -> Bool in
       var modified = false
@@ -424,9 +423,9 @@ extension HeadacheManager {
   ///
   /// - Parameter update: Called with the severity to update it. Errors
   ///   thrown in this block will be received in completion.
-  private func severityWithIdentifier<T>(identifier: UUID, update: @escaping (Severity?, NSManagedObjectContext) throws -> T) async throws -> T {
+  private func severityWithIdentifier<T>(identifier: UUID, update: @escaping (SeverityState?, NSManagedObjectContext) throws -> T) async throws -> T {
     try await DataController.shared.performInBackground(saveOnComplete: true) { context in
-      let request = Severity.fetchRequest(withIdentifier: identifier)
+      let request = SeverityState.fetchRequest(withIdentifier: identifier)
       return try update((try context.fetch(request)).first, context)
     }
   }
@@ -598,7 +597,7 @@ extension HeadacheManager {
       logDebug("Created training data.")
       
       if let severityIdentifier = severityIdentifier {
-        let request = Severity.fetchRequest(withIdentifier: severityIdentifier)
+        let request = SeverityState.fetchRequest(withIdentifier: severityIdentifier)
         if let severity = ((try? context.fetch(request)) ?? []).first {
           if replacingExistingData {
             if let existingTrainingData = severity.trainingData {

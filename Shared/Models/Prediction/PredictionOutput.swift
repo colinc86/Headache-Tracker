@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import HealthKit
 
 /// A headache prediction.
 struct PredictionOutput: Equatable, Codable {
@@ -15,7 +14,7 @@ struct PredictionOutput: Equatable, Codable {
   static let empty = PredictionOutput(
     input: .empty,
     outlookClassifierOutput: PredictionStatistic<Outlook>(prediction: .noHeadache, probability: 0),
-    severityClassifierOutput: PredictionStatistic<HKCategoryValueSeverity>(prediction: .notPresent, probability: 0),
+    severityClassifierOutput: PredictionStatistic<Headache.Severity>(prediction: .notPresent, probability: 0),
     onsetRegressorOutput: PredictionStatistic<Date>(prediction: Date(timeIntervalSince1970: 0), probability: nil),
     durationRegressorOutput: PredictionStatistic<TimeInterval>(prediction: 0, probability: nil),
     date: Date(timeIntervalSinceNow: -600.0))
@@ -48,7 +47,7 @@ struct PredictionOutput: Equatable, Codable {
   var outlookClassifierOutput: PredictionStatistic<Outlook>
   
   /// The severity classifier's output.
-  var severityClassifierOutput: PredictionStatistic<HKCategoryValueSeverity>
+  var severityClassifierOutput: PredictionStatistic<Headache.Severity>
   
   /// The onset regressor's output.
   var onsetRegressorOutput: PredictionStatistic<Date>

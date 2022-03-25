@@ -7,7 +7,6 @@
 
 import Surge
 import SwiftUI
-import HealthKit
 
 struct BarGraph: View {
   
@@ -193,7 +192,7 @@ extension BarGraph {
   private func displayString(for value: Double) -> String? {
     switch graphUnit {
     case .severity:
-      return HKCategoryValueSeverity(orderingValue: Int(value))?.title
+      return Headache.Severity(orderingValue: Int(value))?.title
     case .time:
       return Calendar.current.startOfDay(for: Date()).addingTimeInterval(value).formattedTime()
     case .duration:

@@ -6,7 +6,6 @@
 //
 
 import DataController
-import HealthKit
 import SwiftUI
 
 struct DebugSettingsView: View {
@@ -40,35 +39,35 @@ struct DebugSettingsView: View {
   /// The application's not present training data.
   @FetchRequest(
     sortDescriptors: [NSSortDescriptor(keyPath: \TrainingData.timestamp, ascending: false)],
-    predicate: NSPredicate(format: "(severity.rawValue == %@) OR (severity == %@)", NSNumber(integerLiteral: HKCategoryValueSeverity.notPresent.rawValue), NSNull()),
+    predicate: NSPredicate(format: "(severity.rawValue == %@) OR (severity == %@)", NSNumber(integerLiteral: Headache.Severity.notPresent.rawValue), NSNull()),
     animation: .default)
   private var notPresentTrainingData: FetchedResults<TrainingData>
   
   /// The application's present training data.
   @FetchRequest(
     sortDescriptors: [NSSortDescriptor(keyPath: \TrainingData.timestamp, ascending: false)],
-    predicate: NSPredicate(format: "severity.rawValue == %@", NSNumber(integerLiteral: HKCategoryValueSeverity.unspecified.rawValue)),
+    predicate: NSPredicate(format: "severity.rawValue == %@", NSNumber(integerLiteral: Headache.Severity.unspecified.rawValue)),
     animation: .default)
   private var presentTrainingData: FetchedResults<TrainingData>
   
   /// The application's mild training data.
   @FetchRequest(
     sortDescriptors: [NSSortDescriptor(keyPath: \TrainingData.timestamp, ascending: false)],
-    predicate: NSPredicate(format: "severity.rawValue == %@", NSNumber(integerLiteral: HKCategoryValueSeverity.mild.rawValue)),
+    predicate: NSPredicate(format: "severity.rawValue == %@", NSNumber(integerLiteral: Headache.Severity.mild.rawValue)),
     animation: .default)
   private var mildTrainingData: FetchedResults<TrainingData>
   
   /// The application's moderate training data.
   @FetchRequest(
     sortDescriptors: [NSSortDescriptor(keyPath: \TrainingData.timestamp, ascending: false)],
-    predicate: NSPredicate(format: "severity.rawValue == %@", NSNumber(integerLiteral: HKCategoryValueSeverity.moderate.rawValue)),
+    predicate: NSPredicate(format: "severity.rawValue == %@", NSNumber(integerLiteral: Headache.Severity.moderate.rawValue)),
     animation: .default)
   private var moderateTrainingData: FetchedResults<TrainingData>
   
   /// The application's severe training data.
   @FetchRequest(
     sortDescriptors: [NSSortDescriptor(keyPath: \TrainingData.timestamp, ascending: false)],
-    predicate: NSPredicate(format: "severity.rawValue == %@", NSNumber(integerLiteral: HKCategoryValueSeverity.severe.rawValue)),
+    predicate: NSPredicate(format: "severity.rawValue == %@", NSNumber(integerLiteral: Headache.Severity.severe.rawValue)),
     animation: .default)
   private var severeTrainingData: FetchedResults<TrainingData>
   

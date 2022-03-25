@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import HealthKit
 import WidgetKit
 
 class SharedUserDefaults {
@@ -57,10 +56,10 @@ class SharedUserDefaults {
   
   /// The current severity. Don't set this value directly - use the `setCurrentSeverity`
   /// method instead.
-  var currentSeverity: HKCategoryValueSeverity? {
+  var currentSeverity: Headache.Severity? {
     get {
       if let rawValue = defaults?.value(forKey: Keys.currentSeverity) as? Int {
-        return HKCategoryValueSeverity(rawValue: rawValue)
+        return Headache.Severity(rawValue: rawValue)
       }
       return nil
     }
@@ -109,7 +108,7 @@ extension SharedUserDefaults {
   /// Sets the current severity and requests a widget reload.
   /// 
   /// - Parameter severity: The current severity.
-  func setCurrentSeverity(_ severity: HKCategoryValueSeverity?) {
+  func setCurrentSeverity(_ severity: Headache.Severity?) {
     currentSeverity = severity
     WidgetCenter.shared.reloadTimelines(ofKind: Constants.Widgets.severityWidgetKind)
     

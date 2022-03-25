@@ -7,12 +7,11 @@
 
 import Foundation
 import SwiftUI
-import HealthKit
 
 class SceneDelegate: NSObject, UIWindowSceneDelegate, ObservableObject {
   
   /// The desired severity from an external URL scheme call.
-  @Published var desiredSeverity: HKCategoryValueSeverity?
+  @Published var desiredSeverity: Headache.Severity?
   
   func scene(_ scene: UIScene, openURLContexts contexts: Set<UIOpenURLContext>) {
     guard let url = contexts.first?.url else {
@@ -50,7 +49,7 @@ class SceneDelegate: NSObject, UIWindowSceneDelegate, ObservableObject {
     }
     
     // Convert to a severity
-    guard let severity = HKCategoryValueSeverity(rawValue: severityRawValue) else {
+    guard let severity = Headache.Severity(rawValue: severityRawValue) else {
       logWarning("Unable to get severity from raw value \(severityRawValue).")
       return
     }

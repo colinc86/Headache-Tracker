@@ -6,7 +6,6 @@
 //
 
 import Contacts
-import HealthKit
 import MapKit
 import SwiftUI
 
@@ -14,7 +13,7 @@ import SwiftUI
 fileprivate class LocationAnnotation: NSObject, MKAnnotation {
   
   static let reuseIdentifier = "locationAnnotation"
-  let severity: HKCategoryValueSeverity
+  let severity: Headache.Severity
   let coordinate: CLLocationCoordinate2D
   
   /// The annotation's map item.
@@ -25,7 +24,7 @@ fileprivate class LocationAnnotation: NSObject, MKAnnotation {
     return mapItem
   }
   
-  init(severity: HKCategoryValueSeverity, coordinate: CLLocationCoordinate2D) {
+  init(severity: Headache.Severity, coordinate: CLLocationCoordinate2D) {
     self.severity = severity
     self.coordinate = coordinate
     super.init()

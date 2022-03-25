@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import HealthKit
 import Surge
 import SwiftUI
 
@@ -25,7 +24,7 @@ struct HeadacheStatistics {
   let durations: DurationStatistic
   
   /// The severity ranges of the headaches.
-  let severityRanges: [(SeverityRange, Date)]
+  let severityRanges: [Headache.Severity.DatedRange]
   
   /// The number of headaches per year.
   let headachesPerYear: Double
@@ -51,15 +50,15 @@ struct HeadacheStatistics {
     var averages = [Double](repeating: 0.0, count: headaches.count)
     var onsets = [Double](repeating: 0.0, count: headaches.count)
     var durations = [Double](repeating: 0.0, count: headaches.count)
-    var severities = [SeverityRange](repeating: .empty, count: headaches.count)
+    var severities = [Headache.Severity.DatedRange](repeating: .empty, count: headaches.count)
     
     // Do one loop through the headaches and convert
     for i in 0 ..< headaches.count {
-      dates[i] = headaches[i].createdAt ?? dates[i]
+      dates[i] = headaches[i].startTime ?? dates[i]
       peaks[i] = Double(headaches[i].severityRange.upperBound.orderingValue)
       averages[i] = Double(headaches[i].severityRange.average)
       durations[i] = headaches[i].duration
-      severities[i] = headaches[i].severityRange
+      severities[i] = Headache.Severity.DatedRange(range: headaches[i].severityRange, date: dates[i])
       if let startTime = headaches[i].startTime {
         onsets[i] = Calendar.current.timeIntervalSinceMidnight(startTime)
       }
@@ -70,7 +69,7 @@ struct HeadacheStatistics {
     self.averages = SeverityStatistic(earliestDate: earliestDate, signal: averages, dates: dates)
     self.onsets = OnsetStatistic(earliestDate: earliestDate, signal: onsets, dates: dates)
     self.durations = DurationStatistic(earliestDate: earliestDate, signal: durations, dates: dates)
-    self.severityRanges = [(SeverityRange, Date)](zip(severities, dates))
+    self.severityRanges = severities
     
     // Rates and trends
     if let earliestDate = earliestDate {

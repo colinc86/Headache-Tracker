@@ -27,7 +27,7 @@ struct HeadacheCell: View {
   @State private var durationUpdateTimer: Timer?
   
   /// The previous severity range.
-  @State private var previousSeverityRange: SeverityRange?
+  @State private var previousSeverityRange: Headache.Severity.Range?
   
   private let durationUpdateWaiter = Waiter()
   

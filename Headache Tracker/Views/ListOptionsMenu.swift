@@ -9,6 +9,9 @@ import SwiftUI
 
 struct ListOptionsMenu: View {
   
+  /// Whether the type view should be shown.
+  @AppStorage(AppSettings.ListOptions.type) private var type = true
+  
   /// Whether the onset view should be shown.
   @AppStorage(AppSettings.ListOptions.onset) private var onset = true
   
@@ -33,6 +36,7 @@ struct ListOptionsMenu: View {
   var body: some View {
     Menu {
       Section {
+        CheckmarkButton(title: "Type", checked: $type)
         CheckmarkButton(title: "Onset", checked: $onset)
         CheckmarkButton(title: "Duration", checked: $duration)
         CheckmarkButton(title: "Progression", checked: $progression)

@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import HealthKit
 
 /// Draws a horizontal severity level indicator.
 struct SeveritySelectionView: View {
@@ -14,10 +13,10 @@ struct SeveritySelectionView: View {
   // MARK: Public properties
   
   /// The headache's level to display.
-  let currentSeverity: HKCategoryValueSeverity?
+  let currentSeverity: Headache.Severity?
   
   /// The headache's severity range to display.
-  var severityRange: SeverityRange? = nil
+  var severityRange: Headache.Severity.Range? = nil
   
   /// The collapsed state of the view.
   var collapsed: Bool = false
@@ -26,7 +25,7 @@ struct SeveritySelectionView: View {
   var link: Bool = false
   
   /// The action for each button.
-  var action: ((HKCategoryValueSeverity) async throws -> Void)? = nil
+  var action: ((Headache.Severity) async throws -> Void)? = nil
   
   // MARK: View body
   
@@ -63,8 +62,8 @@ extension SeveritySelectionView {
   ///
   /// - Parameter index: The severity's index.
   /// - Returns: A severity.
-  private func severity(for index: Int) -> HKCategoryValueSeverity {
-    return HKCategoryValueSeverity(orderingValue: index) ?? .notPresent
+  private func severity(for index: Int) -> Headache.Severity {
+    return Headache.Severity(orderingValue: index) ?? .notPresent
   }
   
 }
@@ -74,7 +73,6 @@ struct SeveritySelectionView_Previews: PreviewProvider {
     SeveritySelectionView(currentSeverity: nil, severityRange: nil, collapsed: false, action: nil)
       .environment(\.managedObjectContext, Previewing.CoreData.viewContext)
       .environmentObject(Previewing.headacheManager)
-//      .environmentObject(Previewing.alertManager)
       .environmentObject(Previewing.Prediction.predictor)
       .environmentObject(Previewing.healthKitManager)
       .previewLayout(PreviewLayout.fixed(width: 428, height: 130))
@@ -82,15 +80,13 @@ struct SeveritySelectionView_Previews: PreviewProvider {
     SeveritySelectionView(currentSeverity: .mild, severityRange: nil, collapsed: false, action: nil)
       .environment(\.managedObjectContext, Previewing.CoreData.viewContext)
       .environmentObject(Previewing.headacheManager)
-//      .environmentObject(Previewing.alertManager)
       .environmentObject(Previewing.Prediction.predictor)
       .environmentObject(Previewing.healthKitManager)
       .previewLayout(PreviewLayout.fixed(width: 428, height: 130))
     
-    SeveritySelectionView(currentSeverity: nil, severityRange: SeverityRange(lowerBound: .notPresent, upperBound: .severe), collapsed: false, action: nil)
+    SeveritySelectionView(currentSeverity: nil, severityRange: Headache.Severity.Range(uncheckedBounds: (.notPresent, .severe)), collapsed: false, action: nil)
       .environment(\.managedObjectContext, Previewing.CoreData.viewContext)
       .environmentObject(Previewing.headacheManager)
-//      .environmentObject(Previewing.alertManager)
       .environmentObject(Previewing.Prediction.predictor)
       .environmentObject(Previewing.healthKitManager)
       .previewLayout(PreviewLayout.fixed(width: 428, height: 130))
@@ -98,7 +94,6 @@ struct SeveritySelectionView_Previews: PreviewProvider {
     SeveritySelectionView(currentSeverity: nil, severityRange: nil, collapsed: true, action: nil)
       .environment(\.managedObjectContext, Previewing.CoreData.viewContext)
       .environmentObject(Previewing.headacheManager)
-//      .environmentObject(Previewing.alertManager)
       .environmentObject(Previewing.Prediction.predictor)
       .environmentObject(Previewing.healthKitManager)
       .previewLayout(PreviewLayout.fixed(width: 428, height: 70))
@@ -110,13 +105,13 @@ struct SeverityButton: View {
   // MARK: Public properties
   
   /// The button's severity.
-  let severity: HKCategoryValueSeverity
+  let severity: Headache.Severity
   
   /// The selected severity in the button's parent view.
-  var selectedSeverity: HKCategoryValueSeverity? = nil
+  var selectedSeverity: Headache.Severity? = nil
   
   /// The selected severity range in the button's parent view.
-  var selectedSeverityRange: SeverityRange? = nil
+  var selectedSeverityRange: Headache.Severity.Range? = nil
   
   /// Whether or not the button should be drawn collapsed.
   var collapsed: Bool = false
@@ -126,7 +121,7 @@ struct SeverityButton: View {
   
   /// The button's action. If nil, then the button is drawn
   /// as a rectantle instead.
-  var action: ((HKCategoryValueSeverity) async throws -> Void)? = nil
+  var action: ((Headache.Severity) async throws -> Void)? = nil
   
   // MARK: Private properties
   

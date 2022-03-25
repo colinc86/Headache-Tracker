@@ -8,7 +8,6 @@
 import SwiftUI
 import CoreData
 import DataController
-import HealthKit
 
 /// The main content view that contains the tab view.
 struct ContentView: View {
