@@ -875,8 +875,8 @@
 		3BD1D34D27E195F50072A576 /* Settings */ = {
 			isa = PBXGroup;
 			children = (
-				3B3FFE5427D592A000DFACC1 /* AppSettings.swift */,
 				3B5817C727EEDFC400F9E49B /* AppColorScheme.swift */,
+				3B3FFE5427D592A000DFACC1 /* AppSettings.swift */,
 				3B3FFE4D27D592A000DFACC1 /* Constants.swift */,
 				3B3FFE5527D592A000DFACC1 /* SharedUserDefaults.swift */,
 			);

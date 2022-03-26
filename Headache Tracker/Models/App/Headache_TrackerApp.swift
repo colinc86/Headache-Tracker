@@ -20,6 +20,12 @@ struct Headache_TrackerApp: App {
   /// The application delegate.
   @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
   
+  /// The application's dim screen setting.
+  @AppStorage(AppSettings.shouldDimScreen) var shouldDimScreen: Bool = false
+  
+  /// The amount of screen dimming.
+  @AppStorage(AppSettings.screenDimPercent) var screenDimPercent = 0.5
+  
   /// The application did become active publisher.
   private let didBecomeActiveNotificationPublisher = NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)
   
@@ -39,6 +45,8 @@ struct Headache_TrackerApp: App {
         .environmentObject(appDelegate.refresher)
         .onReceive(didBecomeActiveNotificationPublisher, perform: didBecomeActive)
         .onReceive(willResignActiveNotificationPublisher, perform: willResignActive)
+        .onChange(of: shouldDimScreen, perform: appDelegate.dimScreenChanged)
+        .onChange(of: screenDimPercent, perform: appDelegate.dimmingPercentChanged)
     }
   }
   
@@ -49,6 +57,10 @@ extension Headache_TrackerApp {
   /// Called when the application becomes active.
   private func didBecomeActive(_ output: NotificationCenter.Publisher.Output) {
     logDebug("Application did become active.")
+    if shouldDimScreen {
+      appDelegate.dimScreen(preservingBrightness: true)
+    }
+    
     appDelegate.refresher.cancelTrainingProcessingTask()
     appDelegate.refresher.cancelPredictionRefreshTask()
     appDelegate.refresher.cancelOutlookRefreshTask()
@@ -67,6 +79,9 @@ extension Headache_TrackerApp {
   /// Called when the application resigns active.
   private func willResignActive(_ output: NotificationCenter.Publisher.Output) {
     logDebug("Application will resign active.")
+    if shouldDimScreen {
+      appDelegate.restoreScreenBrightness()
+    }
     
     // Schedule our training and prediction tasks
     Task {
@@ -84,5 +99,7 @@ extension Headache_TrackerApp {
       }
     }
   }
+  
+  
   
 }

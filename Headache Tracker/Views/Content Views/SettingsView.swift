@@ -29,6 +29,12 @@ struct SettingsView: View {
   /// The application's custom color scheme.
   @AppStorage(AppSettings.colorScheme) var colorScheme: AppColorScheme = .multicolor
   
+  /// The application's dim screen setting.
+  @AppStorage(AppSettings.shouldDimScreen) var shouldDimScreen: Bool = false
+  
+  /// The amount of screen dimming.
+  @AppStorage(AppSettings.screenDimPercent) var screenDimPercent = 0.5
+  
   /// The application's measurement system.
   @AppStorage(AppSettings.measurementSystem) var measurementSystem: MeasurementSystem = NSLocale.system.usesMetricSystem ? .metric : .imperial
   
@@ -209,6 +215,16 @@ struct SettingsView: View {
                 .foregroundColor(.secondary)
                 .id(colorScheme)
             }
+          }
+          
+          Toggle("Dim Screen", isOn: $shouldDimScreen)
+            .tint(colorScheme.themeColor(for: .brandColor))
+          
+          Picker("Dimming Percent", selection: $screenDimPercent) {
+            Text("25%").tag(0.25)
+            Text("50%").tag(0.5)
+            Text("75%").tag(0.75)
+            Text("100%").tag(1.0)
           }
         }
          

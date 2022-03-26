@@ -11,6 +11,8 @@ import ApplicationKey
 struct AppSettings {
   static let measurementSystem = ApplicationKey(from: "measurementSystem")
   static let colorScheme = ApplicationKey(from: "colorScheme")
+  static let shouldDimScreen = ApplicationKey(from: "shouldDimScreen")
+  static let screenDimPercent = ApplicationKey(from: "screenDimPercent")
   
   static let enableCrashReporting = ApplicationKey(from: "enableCrashReporting")
   static let defaultHeadacheType = ApplicationKey(from: "defaultHeadacheType")

@@ -36,6 +36,12 @@ class AppDelegate: NSObject, UIApplicationDelegate, ObservableObject {
   /// The daily outlook alerts setting.
   @AppStorage(AppSettings.dailyOutlookAlerts) var dailyOutlookAlerts = false
   
+  /// The amount of screen dimming.
+  @AppStorage(AppSettings.screenDimPercent) var screenDimPercent = 0.5
+  
+  /// The app's previous brightness setting.
+  private var previousBrightness: CGFloat = 0.0
+  
   // MARK: Override methods
   
   func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
@@ -92,6 +98,44 @@ class AppDelegate: NSObject, UIApplicationDelegate, ObservableObject {
     let sceneConfiguration = UISceneConfiguration(name: nil, sessionRole: connectingSceneSession.role)
     sceneConfiguration.delegateClass = SceneDelegate.self
     return sceneConfiguration
+  }
+  
+}
+
+// MARK: Public methods
+
+extension AppDelegate {
+  
+  /// Dims the screen given the new screen dimming value.
+  ///
+  /// - Parameter newValue: The new dimming value.
+  func dimScreenChanged(_ newValue: Bool) {
+    if newValue {
+      dimScreen(preservingBrightness: true)
+    }
+    else {
+      restoreScreenBrightness()
+    }
+  }
+  
+  func dimmingPercentChanged(_ newValue: Double) {
+    dimScreen(preservingBrightness: false)
+  }
+  
+  /// Dims the screen.
+  func dimScreen(preservingBrightness: Bool) {
+    if preservingBrightness {
+      previousBrightness = UIScreen.main.brightness
+    }
+    
+    UIScreen.main.wantsSoftwareDimming = true
+    UIScreen.main.brightness = previousBrightness * (1.0 - CGFloat(screenDimPercent))
+  }
+  
+  /// Restores the screen to the previous brightness.
+  func restoreScreenBrightness() {
+    UIScreen.main.brightness = previousBrightness
+    UIScreen.main.wantsSoftwareDimming = false
   }
   
 }
