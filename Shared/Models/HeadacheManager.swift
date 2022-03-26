@@ -163,14 +163,6 @@ extension HeadacheManager {
     try await createPredict(inWidget: false)
   }
   
-  /// Deletes the current headache.
-  func reset() async throws {
-    logDebug("Reset headache.")
-    
-    let identifier = try await currentHeadacheIdentifier()
-    try await deleteHeadache(identifier: identifier)
-  }
-  
 }
 
 // MARK: - Object management methods
@@ -299,7 +291,7 @@ extension HeadacheManager {
   /// - Parameters:
   ///   - identifier: The headache's identifier.
   ///   - deleteHealthKitData: Whether we should also delete the headache's health kit data.
-  func deleteHeadache(identifier: UUID?) async throws {
+  func deleteHeadache(identifier: UUID?, deleteHealthKitData: Bool) async throws {
     logDebug("Delete headache.")
     guard let identifier = identifier else {
       return
@@ -336,7 +328,7 @@ extension HeadacheManager {
     }
     
     // If there wasn't an error, then we should check and delete it from health kit
-    if let startTime = startTime, let endTime = endTime {
+    if deleteHealthKitData, let startTime = startTime, let endTime = endTime {
       logDebug("Successfully reset headache. Deleting severity samples.")
       try await healthKitManager.deleteSeveritySamples(in: DateInterval(start: startTime, end: endTime))
     }

@@ -29,6 +29,9 @@ struct HeadacheView: View {
   /// The health integration setting.
   @AppStorage(AppSettings.Health.healthIntegration) private var healthIntegration = false
   
+  /// How the manager should handle health kit data.
+  @AppStorage(AppSettings.Health.deleteDisposition) private var deleteDisposition: HeadacheManager.DeleteDisposition = .ask
+  
   /// The alert's title.
   @State private var alertTitle = ""
   
@@ -40,6 +43,9 @@ struct HeadacheView: View {
   
   /// Whether or not the delete confirmation alert is visible.
   @State private var showingDeleteConfirmation = false
+  
+  /// Whether or not the delete health data confirmation alert is visible.
+  @State private var showingDeleteHealthDataConfirmation = false
   
   /// Whether the edit type view is visible.
   @State private var showingEditTypeView = false
@@ -143,9 +149,57 @@ struct HeadacheView: View {
     .onDisappear(perform: durationUpdateWaiter.stop)
     .navigationBarTitleDisplayMode(.inline)
     .confirmationAlert(isPresented: $showingAlert, title: alertTitle, message: alertMessage)
-    .destructiveConfirmationDialog(title: alertTitle, isPresented: $showingDeleteConfirmation, destructiveActionTitle: "Delete", destructiveAction: {
-      delete()
-      withAnimation { showingDeleteConfirmation = false }
+    .confirmationDialog("Delete Headache", isPresented: $showingDeleteConfirmation, actions: {
+      switch deleteDisposition {
+      case .always:
+        Button("Delete", role: .destructive) {
+          delete(deleteHealthKitData: true)
+        }
+      case .never:
+        Button("Delete", role: .destructive) {
+          delete(deleteHealthKitData: false)
+        }
+      case .ask:
+        if healthIntegration {
+          Button("Delete", role: .destructive) {
+            showingDeleteHealthDataConfirmation = true
+          }
+        }
+        else {
+          Button("Delete", role: .destructive) {
+            delete(deleteHealthKitData: true)
+          }
+        }
+      }
+    }, message: {
+      switch deleteDisposition {
+      case .always:
+        if healthIntegration {
+          Text("Delete the headache and its associated Health data?")
+        }
+        else {
+          Text("Delete the headache?")
+        }
+      case .never:
+        if healthIntegration {
+          Text("Delete the headache without deleting its associated Health data?")
+        }
+        else {
+          Text("Delete the headache?")
+        }
+      case .ask:
+        Text("Delete the headache?")
+      }
+    })
+    .confirmationDialog("Delete Headache", isPresented: $showingDeleteHealthDataConfirmation, actions: {
+      Button("Yes", role: .destructive) {
+        delete(deleteHealthKitData: true)
+      }
+      Button("No") {
+        delete(deleteHealthKitData: false)
+      }
+    }, message: {
+      Text("Delete the headache's associated Health data?")
     })
     .sheet(isPresented: $showingEditTypeView) {
       EditTypeView(type: headache.headacheType, classification: headache.headacheClassification, identifier: headache.identifier ?? UUID())
@@ -216,12 +270,15 @@ extension HeadacheView {
   }
   
   /// Deletes the view's headache.
-  private func delete() {
+  ///
+  /// - Parameter deleteHealthKitData: Whether the headache's associated health kit
+  ///   data should be deleted.
+  private func delete(deleteHealthKitData: Bool) {
     if let identifier = headache.identifier {
       Task {
         do {
           // Delete the headache
-          try await headacheManager.deleteHeadache(identifier: identifier)
+          try await headacheManager.deleteHeadache(identifier: identifier, deleteHealthKitData: deleteHealthKitData)
           
           // Remove any alerts
           if !headache.resolved {

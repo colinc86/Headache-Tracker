@@ -50,31 +50,27 @@ struct HeadachesView: View {
                 HeadacheCell(headache: headache)
               }
             }
-            .onDelete(perform: deleteUnresolvedHeadaches)
           } header: {
             SectionTitleView(title: "Unresolved")
           }
         }
         
-        Section {
-          ForEach(resolvedHeadaches) { headache in
-            NavigationLink {
-              HeadacheView(headache: headache)
-            } label: {
-              HeadacheCell(headache: headache)
+        if resolvedHeadaches.count > 0 {
+          Section {
+            ForEach(resolvedHeadaches) { headache in
+              NavigationLink {
+                HeadacheView(headache: headache)
+              } label: {
+                HeadacheCell(headache: headache)
+              }
             }
+          } header: {
+            SectionTitleView(title: "Resolved")
           }
-          .onDelete(perform: deleteResolvedHeadaches)
-        } header: {
-          SectionTitleView(title: "Resolved")
         }
       }
       .navigationTitle("Headaches")
       .toolbar {
-        ToolbarItem(placement: .navigationBarTrailing) {
-          EditButton()
-        }
-        
         ToolbarItem(placement: .automatic) {
           Button(action: addHeadache) {
             Label("Add", systemImage: "plus")
@@ -98,49 +94,6 @@ extension HeadachesView {
   
   private func addHeadache() {
     withAnimation { showingAddHeadache = true }
-  }
-  
-  /// Deletes the items at the given offsets.
-  ///
-  /// - Parameter offsets: The item offsets.
-  private func deleteUnresolvedHeadaches(offsets: IndexSet) {
-    withAnimation {
-      offsets.map { unresolvedHeadaches[$0] }.forEach({ headache in
-        Task {
-          do {
-            // Delete the headache
-            try await headacheManager.deleteHeadache(identifier: headache.identifier)
-            
-            // Remove any alerts
-            if !headache.resolved {
-              alertManager.removeRequests(pending: true, delivered: false)
-            }
-          }
-          catch {
-            logError("Error deleting headache: \(error)")
-          }
-        }
-      })
-    }
-  }
-  
-  /// Deletes the items at the given offsets.
-  ///
-  /// - Parameter offsets: The item offsets.
-  private func deleteResolvedHeadaches(offsets: IndexSet) {
-    withAnimation {
-      offsets.map { resolvedHeadaches[$0] }.forEach({ headache in
-        Task {
-          do {
-            // Delete the headache
-            try await headacheManager.deleteHeadache(identifier: headache.identifier)
-          }
-          catch {
-            logError("Error deleting headache: \(error)")
-          }
-        }
-      })
-    }
   }
   
 }
