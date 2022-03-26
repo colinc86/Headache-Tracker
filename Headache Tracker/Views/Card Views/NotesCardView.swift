@@ -1,5 +1,5 @@
 //
-//  NotesView.swift
+//  NotesCardView.swift
 //  Headache Tracker
 //
 //  Created by Colin Campbell on 3/21/22.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct NotesView: View {
+struct NotesCardView: View {
   let notes: String?
   var editButtonAction: (() -> Void)? = nil
   
@@ -22,9 +22,9 @@ struct NotesView: View {
   }
 }
 
-struct NotesView_Previews: PreviewProvider {
+struct NotesCardView_Previews: PreviewProvider {
   static var previews: some View {
-    NotesView(notes: """
+    NotesCardView(notes: """
 This is a long string of test notes yeah let's see what happens
 notes to see how the view will behave when
 the user is allowed to enter whatever they
@@ -34,5 +34,6 @@ want.
 """) {
       
     }
+.previewLayout(.fixed(width: 428, height: 70))
   }
 }

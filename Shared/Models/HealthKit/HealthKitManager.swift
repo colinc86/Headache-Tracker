@@ -75,6 +75,10 @@ extension HealthKitManager {
     return (readTypes.union(shareTypes)).contains(where: { store.authorizationStatus(for: $0) == .notDetermined })
   }
   
+  /// Gets the authorization status for the specific health kit data.
+  ///
+  /// - Parameter data: The health kit data.
+  /// - Returns: An authorization status.
   func authorizationStatus(for data: HealthKitData) -> HKAuthorizationStatus {
     // Is health kit data available?
     guard HKHealthStore.isHealthDataAvailable() else {
@@ -87,6 +91,9 @@ extension HealthKitManager {
     return .notDetermined
   }
   
+  /// Attempts to authorize the given health kit data.
+  ///
+  /// - Parameter data: The health kit data to authorize.
   func authorize(for data: HealthKitData) async throws {
     guard authorizationStatus(for: data) == .notDetermined else {
       return

@@ -17,20 +17,8 @@ struct HeadacheView: View {
   
   // MARK: Private properties
   
-  /// The view's presentation mode.
-  @Environment(\.presentationMode) private var presentationMode
-  
   /// The app's headache manager.
   @EnvironmentObject private var headacheManager: HeadacheManager
-  
-  /// The app's alert manager.
-  @EnvironmentObject private var alertManager: AlertManager
-  
-  /// The health integration setting.
-  @AppStorage(AppSettings.Health.healthIntegration) private var healthIntegration = false
-  
-  /// How the manager should handle health kit data.
-  @AppStorage(AppSettings.Health.deleteDisposition) private var deleteDisposition: HeadacheManager.DeleteDisposition = .ask
   
   /// The alert's title.
   @State private var alertTitle = ""
@@ -40,12 +28,6 @@ struct HeadacheView: View {
   
   /// Whether or not the alert is visible.
   @State private var showingAlert = false
-  
-  /// Whether or not the delete confirmation alert is visible.
-  @State private var showingDeleteConfirmation = false
-  
-  /// Whether or not the delete health data confirmation alert is visible.
-  @State private var showingDeleteHealthDataConfirmation = false
   
   /// Whether the edit type view is visible.
   @State private var showingEditTypeView = false
@@ -59,6 +41,7 @@ struct HeadacheView: View {
   /// The id of the duration view.
   @State private var durationID = UUID()
   
+  /// Updates the duration view.
   private let durationUpdateWaiter = Waiter()
   
   // MARK: View body
@@ -75,62 +58,7 @@ struct HeadacheView: View {
         }
       }
       
-      Section {
-        StatusView(resolved: headache.resolved)
-      }
-      
-      Section {
-        TypeCardView(type: headache.headacheType, classification: headache.headacheClassification, editButtonAction: editTypeAction)
-      }
-      
-      if let onset = headache.startTime {
-        Section {
-          OnsetView(onset: onset, relativeDate: !headache.resolved)
-        }
-      }
-      
-      Section {
-        DurationView(headache: headache)
-      }
-      
-      Section {
-        if headache.severities?.count ?? 0 > 1 {
-          ProgressionView(headache: headache)
-          
-          ForEach(headache.severitiesArray, id: \.self) { severity in
-            NavigationLink {
-              SeverityView(severity: severity, canEditEndTime: severity == headache.severitiesArray.last, canDelete: true)
-            } label: {
-              SubtitleCell(title: severity.severity.title, subtitle: severity.startTime?.formattedNonRelative() ?? "N/A")
-            }
-          }
-          .onDelete(perform: deleteSeverities)
-        }
-        else if let severity = headache.severitiesArray.first {
-          NavigationLink {
-            SeverityView(severity: severity, canEditEndTime: severity == headache.severitiesArray.last, canDelete: false)
-          } label: {
-            SubtitleCell(title: severity.severity.title, subtitle: severity.startTime?.formattedNonRelative() ?? "N/A")
-          }
-        }
-      }
-      
-      Section {
-        NotesView(notes: headache.notes, editButtonAction: editNotesAction)
-      }
-      
-      Section {
-        TagsCardView(tags: headache.tagValues, editAction: editTagsAction, tagAction: { _ in })
-      }
-      
-      Section {
-        HStack {
-          Spacer()
-          Button("Delete Headache", action: deleteConfirmation)
-            .foregroundColor(.red)
-          Spacer()
-        }
-      }
+      HeadacheViews(headache: headache, allowsResolution: false, allowsEditing: true, allowsDeletion: true, showsAllCards: true)
     }
     .toolbar {
       ToolbarItem(placement: .navigationBarTrailing) {
@@ -149,58 +77,6 @@ struct HeadacheView: View {
     .onDisappear(perform: durationUpdateWaiter.stop)
     .navigationBarTitleDisplayMode(.inline)
     .confirmationAlert(isPresented: $showingAlert, title: alertTitle, message: alertMessage)
-    .confirmationDialog("Delete Headache", isPresented: $showingDeleteConfirmation, actions: {
-      switch deleteDisposition {
-      case .always:
-        Button("Delete", role: .destructive) {
-          delete(deleteHealthKitData: true)
-        }
-      case .never:
-        Button("Delete", role: .destructive) {
-          delete(deleteHealthKitData: false)
-        }
-      case .ask:
-        if healthIntegration {
-          Button("Delete", role: .destructive) {
-            showingDeleteHealthDataConfirmation = true
-          }
-        }
-        else {
-          Button("Delete", role: .destructive) {
-            delete(deleteHealthKitData: true)
-          }
-        }
-      }
-    }, message: {
-      switch deleteDisposition {
-      case .always:
-        if healthIntegration {
-          Text("Delete the headache and its associated Health data?")
-        }
-        else {
-          Text("Delete the headache?")
-        }
-      case .never:
-        if healthIntegration {
-          Text("Delete the headache without deleting its associated Health data?")
-        }
-        else {
-          Text("Delete the headache?")
-        }
-      case .ask:
-        Text("Delete the headache?")
-      }
-    })
-    .confirmationDialog("Delete Headache", isPresented: $showingDeleteHealthDataConfirmation, actions: {
-      Button("Yes", role: .destructive) {
-        delete(deleteHealthKitData: true)
-      }
-      Button("No") {
-        delete(deleteHealthKitData: false)
-      }
-    }, message: {
-      Text("Delete the headache's associated Health data?")
-    })
     .sheet(isPresented: $showingEditTypeView) {
       EditTypeView(type: headache.headacheType, classification: headache.headacheClassification, identifier: headache.identifier ?? UUID())
     }
@@ -229,14 +105,6 @@ extension HeadacheView {
     withAnimation { showingAlert = true }
   }
   
-  /// Shows a reset confirmation dialog to the user.
-  ///
-  /// - Parameter title: The dialog's title.
-  private func showResetConfirmation(_ title: String) {
-    alertTitle = title
-    withAnimation { showingDeleteConfirmation = true }
-  }
-  
   /// Adds a severity to the headache.
   private func addSeverity() {
     if let identifier = headache.identifier {
@@ -248,60 +116,6 @@ extension HeadacheView {
           showAlert("Unable to Add Severity", error.localizedDescription)
         }
       }
-    }
-  }
-  
-  /// Deletes the severities at the given offsets.
-  ///
-  /// - Parameter offsets: The item offsets.
-  private func deleteSeverities(offsets: IndexSet) {
-    withAnimation {
-      offsets.map { headache.severitiesArray[$0] }.forEach({ headache in
-        Task {
-          do {
-            try await headacheManager.deleteSeverity(identifier: headache.identifier)
-          }
-          catch {
-            showAlert("Unable to Delete Severity", error.localizedDescription)
-          }
-        }
-      })
-    }
-  }
-  
-  /// Deletes the view's headache.
-  ///
-  /// - Parameter deleteHealthKitData: Whether the headache's associated health kit
-  ///   data should be deleted.
-  private func delete(deleteHealthKitData: Bool) {
-    if let identifier = headache.identifier {
-      Task {
-        do {
-          // Delete the headache
-          try await headacheManager.deleteHeadache(identifier: identifier, deleteHealthKitData: deleteHealthKitData)
-          
-          // Remove any alerts
-          if !headache.resolved {
-            alertManager.removeRequests(pending: true, delivered: false)
-          }
-          
-          // Dismiss the view
-          presentationMode.wrappedValue.dismiss()
-        }
-        catch {
-          showAlert("Unable to Delete Headache", error.localizedDescription)
-        }
-      }
-    }
-  }
-  
-  /// Displays a delete confirmation to the user.
-  private func deleteConfirmation() {
-    if healthIntegration {
-      showResetConfirmation("Are you sure you want to delete the headache and its associated Health app data?")
-    }
-    else {
-      showResetConfirmation("Are you sure you want to delete the headache?")
     }
   }
   
@@ -339,15 +153,9 @@ struct HeadacheView_Previews: PreviewProvider {
     HeadacheView(headache: Previewing.CoreData.resolvedHeadache)
       .environment(\.managedObjectContext, Previewing.CoreData.viewContext)
       .environmentObject(Previewing.headacheManager)
-      .environmentObject(Previewing.alertManager)
-      .environmentObject(Previewing.Prediction.predictor)
-      .environmentObject(Previewing.healthKitManager)
     
     HeadacheView(headache: Previewing.CoreData.unresolvedHeadache)
       .environment(\.managedObjectContext, Previewing.CoreData.viewContext)
       .environmentObject(Previewing.headacheManager)
-      .environmentObject(Previewing.alertManager)
-      .environmentObject(Previewing.Prediction.predictor)
-      .environmentObject(Previewing.healthKitManager)
   }
 }

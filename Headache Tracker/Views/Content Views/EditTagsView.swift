@@ -9,17 +9,25 @@ import SwiftUI
 
 struct EditTagsView: View {
   
+  /// The tags to edit.
   @State var tags: [String]
+  
+  /// The identifier of the headache to edit.
   @State var identifier: UUID
-  @State var newTag = ""
   
   // MARK: Private properties
+  
+  /// The view's presentation mode.
+  @Environment(\.presentationMode) private var presentationMode
   
   /// The app's headache manager.
   @EnvironmentObject private var headacheManager: HeadacheManager
   
-  @Environment(\.presentationMode) private var presentationMode
+  /// Whether the view is being saved.
   @State private var saving: Bool = false
+  
+  /// The new tag, if any.
+  @State private var newTag = ""
   
   /// The tags fetch request.
   @FetchRequest(
@@ -44,6 +52,7 @@ struct EditTagsView: View {
     return nonEmptyTags.filter{( $0.contains(sanitizedTag) )}
   }
   
+  /// The suggested tags.
   private var suggestedTags: [String] {
     let filteredTags = storedTags
       .filter({ !tags.contains($0.value ?? "") })
@@ -59,6 +68,8 @@ struct EditTagsView: View {
       return [String](nonEmptyTags[0 ..< 5])
     }
   }
+  
+  // MARK: View body
   
   var body: some View {
     NavigationView {
@@ -117,6 +128,10 @@ struct EditTagsView: View {
 
 extension EditTagsView {
   
+  /// Sanitizes the tag by removing whitespace, pound-signs, and spaces.
+  ///
+  /// - Parameter tag: The tag to sanitize.
+  /// - Returns: A string.
   private func sanitizedTag(_ tag: String) -> String {
     tag
       .trimmingCharacters(in: .whitespacesAndNewlines)
@@ -125,10 +140,14 @@ extension EditTagsView {
       .lowercased()
   }
   
+  /// Adds the tag.
   private func submitAction() {
     addTagAction(newTag)
   }
   
+  /// Adds the given tag.
+  ///
+  /// - Parameter tag: The tag to add.
   private func addTagAction(_ tag: String) {
     let sanitizedTag = sanitizedTag(tag)
     
@@ -146,14 +165,19 @@ extension EditTagsView {
     }
   }
   
+  /// Deletes the given tag.
+  ///
+  /// - Parameter tag: The tag to delete.
   private func deleteTagAction(_ tag: String) {
     withAnimation { tags.removeAll(where: { $0 == tag }) }
   }
   
+  /// The cancel action.
   private func cancel() {
     dismiss()
   }
   
+  /// Saves the headache.
   private func save() async throws {
     withAnimation {
       saving = true
@@ -164,6 +188,7 @@ extension EditTagsView {
     dismiss()
   }
   
+  /// Dismisses the view.
   private func dismiss() {
     presentationMode.wrappedValue.dismiss()
   }

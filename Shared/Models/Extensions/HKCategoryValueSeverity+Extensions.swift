@@ -108,6 +108,10 @@ extension HKCategoryValueSeverity: Codable, Comparable {
     }
   }
   
+  /// Gets the severity's color the for the current color scheme.
+  /// 
+  /// - Parameter scheme: The color scheme.
+  /// - Returns: The severity's color.
   func color(for scheme: AppColorScheme) -> Color {
     return scheme.severityColor(for: self)
   }

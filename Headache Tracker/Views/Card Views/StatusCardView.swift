@@ -1,5 +1,5 @@
 //
-//  StatusView.swift
+//  StatusCardView.swift
 //  Headache Tracker
 //
 //  Created by Colin Campbell on 3/4/22.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct StatusView: View {
+struct StatusCardView: View {
   
   /// The headache's resolution status.
   let resolved: Bool
@@ -25,12 +25,12 @@ struct StatusView: View {
   
 }
 
-struct StatusView_Previews: PreviewProvider {
+struct StatusCardView_Previews: PreviewProvider {
   static var previews: some View {
-    StatusView(resolved: true)
+    StatusCardView(resolved: true)
       .previewLayout(.fixed(width: 428, height: 70))
     
-    StatusView(resolved: false)
+    StatusCardView(resolved: false)
       .previewLayout(.fixed(width: 428, height: 70))
   }
 }

@@ -15,9 +15,9 @@
 		3B051A9E27B3555E0017131D /* ConfirmationAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B051A9D27B3555E0017131D /* ConfirmationAlert.swift */; };
 		3B051AA027B3577B0017131D /* DestructiveConfirmationDialog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B051A9F27B3577B0017131D /* DestructiveConfirmationDialog.swift */; };
 		3B051AA727B37D060017131D /* SeverityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B051AA627B37D060017131D /* SeverityView.swift */; };
-		3B09191227BCCE1C00844F6C /* OnsetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B09191127BCCE1C00844F6C /* OnsetView.swift */; };
+		3B09191227BCCE1C00844F6C /* OnsetCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B09191127BCCE1C00844F6C /* OnsetCardView.swift */; };
 		3B09191427BCCF9500844F6C /* TitleCaptionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B09191327BCCF9500844F6C /* TitleCaptionView.swift */; };
-		3B09191627BCD38300844F6C /* DurationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B09191527BCD38300844F6C /* DurationView.swift */; };
+		3B09191627BCD38300844F6C /* DurationCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B09191527BCD38300844F6C /* DurationCardView.swift */; };
 		3B09191A27BD58A100844F6C /* SeveritySelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B09191927BD58A100844F6C /* SeveritySelectionView.swift */; };
 		3B09192127BD851700844F6C /* LineGraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B09192027BD851700844F6C /* LineGraph.swift */; };
 		3B09192327BD91F400844F6C /* SectionTitleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B09192227BD91F400844F6C /* SectionTitleView.swift */; };
@@ -26,17 +26,17 @@
 		3B10D45627ED825F004B68AA /* Headache+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B10D45527ED825F004B68AA /* Headache+CoreDataClass.swift */; };
 		3B10D45727ED825F004B68AA /* Headache+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B10D45527ED825F004B68AA /* Headache+CoreDataClass.swift */; };
 		3B10D45927ED8FD3004B68AA /* EditTypeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B10D45827ED8FD3004B68AA /* EditTypeView.swift */; };
-		3B1C7DB427D2005E000B3A99 /* StatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1C7DB327D2005E000B3A99 /* StatusView.swift */; };
-		3B1C7DB627D205EE000B3A99 /* ActionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1C7DB527D205EE000B3A99 /* ActionView.swift */; };
+		3B1C7DB427D2005E000B3A99 /* StatusCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1C7DB327D2005E000B3A99 /* StatusCardView.swift */; };
+		3B1C7DB627D205EE000B3A99 /* ActionCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1C7DB527D205EE000B3A99 /* ActionCardView.swift */; };
 		3B20EA1327EA770700B9800F /* TagsCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B20EA1227EA770700B9800F /* TagsCardView.swift */; };
 		3B20EA1B27EA98B900B9800F /* EditTagsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B20EA1A27EA98B900B9800F /* EditTagsView.swift */; };
 		3B20EA2227EAA29F00B9800F /* TagsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B20EA2127EAA29F00B9800F /* TagsView.swift */; };
 		3B20EA2427EAA67C00B9800F /* FlexibleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B20EA2327EAA67C00B9800F /* FlexibleView.swift */; };
 		3B20EA2627EAD68500B9800F /* TagButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B20EA2527EAD68500B9800F /* TagButton.swift */; };
 		3B29F73627E983F800C8772C /* ListOptionsMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B29F73527E983F800C8772C /* ListOptionsMenu.swift */; };
-		3B29F73827E98AE100C8772C /* NotesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B29F73727E98AE100C8772C /* NotesView.swift */; };
+		3B29F73827E98AE100C8772C /* NotesCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B29F73727E98AE100C8772C /* NotesCardView.swift */; };
 		3B29F73A27E98E1600C8772C /* CheckmarkButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B29F73927E98E1600C8772C /* CheckmarkButton.swift */; };
-		3B29F73C27E9909900C8772C /* ProgressionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B29F73B27E9909900C8772C /* ProgressionView.swift */; };
+		3B29F73C27E9909900C8772C /* ProgressionCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B29F73B27E9909900C8772C /* ProgressionCardView.swift */; };
 		3B29F73E27E99CE000C8772C /* EditNotesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B29F73D27E99CE000C8772C /* EditNotesView.swift */; };
 		3B39DADB27ACFC9C00D39BB5 /* SubtitleCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B39DADA27ACFC9C00D39BB5 /* SubtitleCell.swift */; };
 		3B39DAE427AD06EA00D39BB5 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B39DAE327AD06EA00D39BB5 /* SettingsView.swift */; };
@@ -147,7 +147,7 @@
 		3B3FFF0D27D5CFC500DFACC1 /* OutlookWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFF0C27D5CFC500DFACC1 /* OutlookWidgetView.swift */; };
 		3B3FFF0F27D858DF00DFACC1 /* AsyncButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFF0E27D858DF00DFACC1 /* AsyncButton.swift */; };
 		3B3FFF1127D8604600DFACC1 /* PredictionViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFF1027D8604600DFACC1 /* PredictionViews.swift */; };
-		3B3FFF1327D868F300DFACC1 /* CurrentHeadacheViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFF1227D868F300DFACC1 /* CurrentHeadacheViews.swift */; };
+		3B3FFF1327D868F300DFACC1 /* HeadacheViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFF1227D868F300DFACC1 /* HeadacheViews.swift */; };
 		3B3FFF1527D87EAE00DFACC1 /* ErrorButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFF1427D87EAE00DFACC1 /* ErrorButton.swift */; };
 		3B3FFF1627D88A7C00DFACC1 /* AsyncButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFF0E27D858DF00DFACC1 /* AsyncButton.swift */; };
 		3B3FFF1727D88AD800DFACC1 /* ConfirmationAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B051A9D27B3555E0017131D /* ConfirmationAlert.swift */; };
@@ -244,7 +244,7 @@
 		3BF5315727ACE18F00056673 /* Headache_TrackerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF5315627ACE18F00056673 /* Headache_TrackerUITests.swift */; };
 		3BF5315927ACE18F00056673 /* Headache_TrackerUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF5315827ACE18F00056673 /* Headache_TrackerUITestsLaunchTests.swift */; };
 		3BF5316827ACE1DA00056673 /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3BF5316727ACE1DA00056673 /* HealthKit.framework */; };
-		3BF7943927DFB6970094C531 /* EditableDateTimeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF7943827DFB6970094C531 /* EditableDateTimeView.swift */; };
+		3BF7943927DFB6970094C531 /* EditableDateTimeCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF7943827DFB6970094C531 /* EditableDateTimeCardView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -297,9 +297,9 @@
 		3B051AA327B3751B0017131D /* Headache-Tracker-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Headache-Tracker-Info.plist"; sourceTree = SOURCE_ROOT; };
 		3B051AA627B37D060017131D /* SeverityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeverityView.swift; sourceTree = "<group>"; };
 		3B051AA827B4DC4C0017131D /* Headache_Tracker 1.1.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Headache_Tracker 1.1.xcdatamodel"; sourceTree = "<group>"; };
-		3B09191127BCCE1C00844F6C /* OnsetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnsetView.swift; sourceTree = "<group>"; };
+		3B09191127BCCE1C00844F6C /* OnsetCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnsetCardView.swift; sourceTree = "<group>"; };
 		3B09191327BCCF9500844F6C /* TitleCaptionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TitleCaptionView.swift; sourceTree = "<group>"; };
-		3B09191527BCD38300844F6C /* DurationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DurationView.swift; sourceTree = "<group>"; };
+		3B09191527BCD38300844F6C /* DurationCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DurationCardView.swift; sourceTree = "<group>"; };
 		3B09191927BD58A100844F6C /* SeveritySelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeveritySelectionView.swift; sourceTree = "<group>"; };
 		3B09192027BD851700844F6C /* LineGraph.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineGraph.swift; sourceTree = "<group>"; };
 		3B09192227BD91F400844F6C /* SectionTitleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SectionTitleView.swift; sourceTree = "<group>"; };
@@ -308,17 +308,17 @@
 		3B10D45527ED825F004B68AA /* Headache+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Headache+CoreDataClass.swift"; sourceTree = "<group>"; };
 		3B10D45827ED8FD3004B68AA /* EditTypeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditTypeView.swift; sourceTree = "<group>"; };
 		3B1C7DAE27D1EE32000B3A99 /* Headache_Tracker 1.6.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Headache_Tracker 1.6.xcdatamodel"; sourceTree = "<group>"; };
-		3B1C7DB327D2005E000B3A99 /* StatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusView.swift; sourceTree = "<group>"; };
-		3B1C7DB527D205EE000B3A99 /* ActionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionView.swift; sourceTree = "<group>"; };
+		3B1C7DB327D2005E000B3A99 /* StatusCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusCardView.swift; sourceTree = "<group>"; };
+		3B1C7DB527D205EE000B3A99 /* ActionCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionCardView.swift; sourceTree = "<group>"; };
 		3B20EA1227EA770700B9800F /* TagsCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagsCardView.swift; sourceTree = "<group>"; };
 		3B20EA1A27EA98B900B9800F /* EditTagsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditTagsView.swift; sourceTree = "<group>"; };
 		3B20EA2127EAA29F00B9800F /* TagsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagsView.swift; sourceTree = "<group>"; };
 		3B20EA2327EAA67C00B9800F /* FlexibleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlexibleView.swift; sourceTree = "<group>"; };
 		3B20EA2527EAD68500B9800F /* TagButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagButton.swift; sourceTree = "<group>"; };
 		3B29F73527E983F800C8772C /* ListOptionsMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListOptionsMenu.swift; sourceTree = "<group>"; };
-		3B29F73727E98AE100C8772C /* NotesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotesView.swift; sourceTree = "<group>"; };
+		3B29F73727E98AE100C8772C /* NotesCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotesCardView.swift; sourceTree = "<group>"; };
 		3B29F73927E98E1600C8772C /* CheckmarkButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckmarkButton.swift; sourceTree = "<group>"; };
-		3B29F73B27E9909900C8772C /* ProgressionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressionView.swift; sourceTree = "<group>"; };
+		3B29F73B27E9909900C8772C /* ProgressionCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressionCardView.swift; sourceTree = "<group>"; };
 		3B29F73D27E99CE000C8772C /* EditNotesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditNotesView.swift; sourceTree = "<group>"; };
 		3B39DADA27ACFC9C00D39BB5 /* SubtitleCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubtitleCell.swift; sourceTree = "<group>"; };
 		3B39DAE327AD06EA00D39BB5 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -380,7 +380,7 @@
 		3B3FFF0C27D5CFC500DFACC1 /* OutlookWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutlookWidgetView.swift; sourceTree = "<group>"; };
 		3B3FFF0E27D858DF00DFACC1 /* AsyncButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncButton.swift; sourceTree = "<group>"; };
 		3B3FFF1027D8604600DFACC1 /* PredictionViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PredictionViews.swift; sourceTree = "<group>"; };
-		3B3FFF1227D868F300DFACC1 /* CurrentHeadacheViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentHeadacheViews.swift; sourceTree = "<group>"; };
+		3B3FFF1227D868F300DFACC1 /* HeadacheViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeadacheViews.swift; sourceTree = "<group>"; };
 		3B3FFF1427D87EAE00DFACC1 /* ErrorButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorButton.swift; sourceTree = "<group>"; };
 		3B3FFF1A27D897B700DFACC1 /* Waiter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Waiter.swift; sourceTree = "<group>"; };
 		3B3FFF1D27DA84DB00DFACC1 /* TestPredictor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestPredictor.swift; sourceTree = "<group>"; };
@@ -451,7 +451,7 @@
 		3BF5315827ACE18F00056673 /* Headache_TrackerUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Headache_TrackerUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		3BF5316527ACE1D900056673 /* Headache Tracker.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Headache Tracker.entitlements"; sourceTree = "<group>"; };
 		3BF5316727ACE1DA00056673 /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = SDKROOT; };
-		3BF7943827DFB6970094C531 /* EditableDateTimeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditableDateTimeView.swift; sourceTree = "<group>"; };
+		3BF7943827DFB6970094C531 /* EditableDateTimeCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditableDateTimeCardView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -556,22 +556,22 @@
 			path = Cells;
 			sourceTree = "<group>";
 		};
-		3B1C7DB227D2003C000B3A99 /* Headache Views */ = {
+		3B1C7DB227D2003C000B3A99 /* Card Views */ = {
 			isa = PBXGroup;
 			children = (
-				3B1C7DB527D205EE000B3A99 /* ActionView.swift */,
-				3B3FFF1227D868F300DFACC1 /* CurrentHeadacheViews.swift */,
-				3B09191527BCD38300844F6C /* DurationView.swift */,
-				3BF7943827DFB6970094C531 /* EditableDateTimeView.swift */,
-				3B09191127BCCE1C00844F6C /* OnsetView.swift */,
-				3B29F73727E98AE100C8772C /* NotesView.swift */,
+				3B1C7DB527D205EE000B3A99 /* ActionCardView.swift */,
+				3B09191527BCD38300844F6C /* DurationCardView.swift */,
+				3BF7943827DFB6970094C531 /* EditableDateTimeCardView.swift */,
+				3B3FFF1227D868F300DFACC1 /* HeadacheViews.swift */,
+				3B29F73727E98AE100C8772C /* NotesCardView.swift */,
+				3B09191127BCCE1C00844F6C /* OnsetCardView.swift */,
 				3B3FFF1027D8604600DFACC1 /* PredictionViews.swift */,
-				3B29F73B27E9909900C8772C /* ProgressionView.swift */,
-				3B1C7DB327D2005E000B3A99 /* StatusView.swift */,
+				3B29F73B27E9909900C8772C /* ProgressionCardView.swift */,
+				3B1C7DB327D2005E000B3A99 /* StatusCardView.swift */,
 				3B20EA1227EA770700B9800F /* TagsCardView.swift */,
 				3B10D45127ED5A77004B68AA /* TypeCardView.swift */,
 			);
-			path = "Headache Views";
+			path = "Card Views";
 			sourceTree = "<group>";
 		};
 		3B39DAE027AD00B700D39BB5 /* Views */ = {
@@ -580,7 +580,7 @@
 				3B09191027BCC9B200844F6C /* Cells */,
 				3B051A9627B198CB0017131D /* Content Views */,
 				3B68BDFC27BE0FF0007AAAC6 /* Graphs */,
-				3B1C7DB227D2003C000B3A99 /* Headache Views */,
+				3B1C7DB227D2003C000B3A99 /* Card Views */,
 				3B29F73927E98E1600C8772C /* CheckmarkButton.swift */,
 				3B5817CA27EEDFED00F9E49B /* ColorWell.swift */,
 				3B5817C227EEB3D600F9E49B /* ColorSchemeView.swift */,
@@ -1313,9 +1313,9 @@
 				3BAAA69727CCA7A200C0DDC4 /* TouchLocatingView.swift in Sources */,
 				3B3FFF2427DA8C5E00DFACC1 /* PredictionOutput.swift in Sources */,
 				3B86C6E327E40B5B00CCD7A0 /* MeasurementSystem.swift in Sources */,
-				3B1C7DB427D2005E000B3A99 /* StatusView.swift in Sources */,
+				3B1C7DB427D2005E000B3A99 /* StatusCardView.swift in Sources */,
 				3B93330227CF51C600BACE93 /* AppDelegate.swift in Sources */,
-				3B29F73827E98AE100C8772C /* NotesView.swift in Sources */,
+				3B29F73827E98AE100C8772C /* NotesCardView.swift in Sources */,
 				3B3FFEAB27D592A000DFACC1 /* Predictor.swift in Sources */,
 				3B68BDFB27BE0F00007AAAC6 /* BarGraph.swift in Sources */,
 				3B3FFEAD27D592A000DFACC1 /* SeverityClassifierOutput.swift in Sources */,
@@ -1323,7 +1323,7 @@
 				3BA933B127DFA5D000BAD5A4 /* AddHeadacheView.swift in Sources */,
 				3B9332EA27CF1E8400BACE93 /* FeedbackView.swift in Sources */,
 				3B5817CB27EEDFED00F9E49B /* ColorWell.swift in Sources */,
-				3B09191227BCCE1C00844F6C /* OnsetView.swift in Sources */,
+				3B09191227BCCE1C00844F6C /* OnsetCardView.swift in Sources */,
 				3B3FFE9327D592A000DFACC1 /* HeadacheStatistics.swift in Sources */,
 				3B09191427BCCF9500844F6C /* TitleCaptionView.swift in Sources */,
 				3B3FFEAF27D592A000DFACC1 /* OnsetRegressorOutput.swift in Sources */,
@@ -1345,7 +1345,7 @@
 				3BD1D35227E1CF820072A576 /* ModelInputView.swift in Sources */,
 				3B3FFEE727D592A000DFACC1 /* Weather.swift in Sources */,
 				3B051AA027B3577B0017131D /* DestructiveConfirmationDialog.swift in Sources */,
-				3B1C7DB627D205EE000B3A99 /* ActionView.swift in Sources */,
+				3B1C7DB627D205EE000B3A99 /* ActionCardView.swift in Sources */,
 				3BAAA69327CC8A5800C0DDC4 /* GraphList.swift in Sources */,
 				3B3FFECF27D592A000DFACC1 /* Calendar+Extensions.swift in Sources */,
 				3BD1D34B27E192D30072A576 /* ToggleCell.swift in Sources */,
@@ -1385,13 +1385,13 @@
 				3B20EA2627EAD68500B9800F /* TagButton.swift in Sources */,
 				3B3FFEE327D592A000DFACC1 /* BackgroundTask.swift in Sources */,
 				3B3FFECD27D592A000DFACC1 /* UIColor+Extensions.swift in Sources */,
-				3BF7943927DFB6970094C531 /* EditableDateTimeView.swift in Sources */,
+				3BF7943927DFB6970094C531 /* EditableDateTimeCardView.swift in Sources */,
 				3B09191A27BD58A100844F6C /* SeveritySelectionView.swift in Sources */,
 				3B5817C327EEB3D600F9E49B /* ColorSchemeView.swift in Sources */,
 				3B09192127BD851700844F6C /* LineGraph.swift in Sources */,
 				3B3FFEEF27D592A000DFACC1 /* Previewing.swift in Sources */,
 				3B3FFE9D27D592A000DFACC1 /* TrainingData+CoreDataClass.swift in Sources */,
-				3B3FFF1327D868F300DFACC1 /* CurrentHeadacheViews.swift in Sources */,
+				3B3FFF1327D868F300DFACC1 /* HeadacheViews.swift in Sources */,
 				3B3FFEA527D592A000DFACC1 /* HealthKitData.swift in Sources */,
 				3B3FFEC127D592A000DFACC1 /* HKCategoryValueSeverity+Extensions.swift in Sources */,
 				3B3FFED527D592A000DFACC1 /* Color+Extensions.swift in Sources */,
@@ -1404,10 +1404,10 @@
 				3B3FFF2627DA8D2300DFACC1 /* TrainingInput.swift in Sources */,
 				3BF5314327ACE18F00056673 /* Headache_Tracker.xcdatamodeld in Sources */,
 				3B3FFE8D27D592A000DFACC1 /* Constants.swift in Sources */,
-				3B29F73C27E9909900C8772C /* ProgressionView.swift in Sources */,
+				3B29F73C27E9909900C8772C /* ProgressionCardView.swift in Sources */,
 				3B051A9E27B3555E0017131D /* ConfirmationAlert.swift in Sources */,
 				3B68BDF927BDFCD3007AAAC6 /* AnalyzeView.swift in Sources */,
-				3B09191627BCD38300844F6C /* DurationView.swift in Sources */,
+				3B09191627BCD38300844F6C /* DurationCardView.swift in Sources */,
 				3B3FFEEB27D592A000DFACC1 /* LocationManager.swift in Sources */,
 				3B3FFF1B27D897B700DFACC1 /* Waiter.swift in Sources */,
 				3B3FFEE527D592A000DFACC1 /* WeatherManager.swift in Sources */,

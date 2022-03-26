@@ -101,6 +101,9 @@ struct AnalyzeView: View {
 
 extension AnalyzeView {
   
+  /// Changes the filter count.
+  /// 
+  /// - Parameter newValue: The new filter count value.
   func changedFilterCount(_ newValue: Int) {
     withAnimation {
       viewIdentifier = UUID()

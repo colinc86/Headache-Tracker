@@ -111,7 +111,7 @@ struct CurrentHeadacheView: View {
         // No Headache
         if currentHeadache == nil && needsInput {
           Section {
-            ActionView(title: "No Headache?", buttonTitle: "No Headache", systemImage: "checkmark.circle.fill", foregroundColor: .teal, action: noHeadacheAction)
+            ActionCardView(title: "No Headache?", buttonTitle: "No Headache", systemImage: "checkmark.circle.fill", foregroundColor: .teal, action: noHeadacheAction)
           } footer: {
             Text("No Headache? Tap above to let the app know.")
           }
@@ -119,7 +119,7 @@ struct CurrentHeadacheView: View {
         
         // Current Headache Information
         else if let currentHeadache = currentHeadache {
-          CurrentHeadacheViews(headache: currentHeadache)
+          HeadacheViews(headache: currentHeadache, allowsResolution: true, allowsEditing: false, allowsDeletion: false, showsAllCards: false)
             .id(currentHeadache)
         }
         

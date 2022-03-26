@@ -9,15 +9,21 @@ import SwiftUI
 
 struct EditNotesView: View {
   
+  /// The notes to edit.
   @State var notes: String
+  
+  /// The identifier of the headache to edit.
   @State var identifier: UUID
   
   // MARK: Private properties
   
+  /// The view's presentation mode.
+  @Environment(\.presentationMode) private var presentationMode
+  
   /// The app's headache manager.
   @EnvironmentObject private var headacheManager: HeadacheManager
   
-  @Environment(\.presentationMode) private var presentationMode
+  /// Whether the view is being saved.
   @State private var saving: Bool = false
   
   var body: some View {
@@ -53,10 +59,12 @@ struct EditNotesView: View {
 
 extension EditNotesView {
   
+  /// The cancel action.
   private func cancel() {
     dismiss()
   }
   
+  /// Saves the headache.
   private func save() async throws {
     withAnimation {
       saving = true
@@ -67,6 +75,7 @@ extension EditNotesView {
     dismiss()
   }
   
+  /// Dismisses the view.
   private func dismiss() {
     presentationMode.wrappedValue.dismiss()
   }

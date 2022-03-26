@@ -71,6 +71,7 @@ struct DebugSettingsView: View {
     animation: .default)
   private var severeTrainingData: FetchedResults<TrainingData>
   
+  /// The apps current model evaluation calculated on appear.
   @State var evaluation: (Double, Double, Int) = (0.0, 0.0, 0)
   
   var body: some View {

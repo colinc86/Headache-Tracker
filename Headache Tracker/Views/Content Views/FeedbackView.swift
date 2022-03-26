@@ -29,13 +29,24 @@ struct FeedbackView: View {
     }
   }
   
-  @Environment(\.presentationMode) private var presentationMode
-  
+  /// The type of feedback view to display.
   let type: ViewType
   
+  // MARK: Private properties
+  
+  /// The view's presentation mode.
+  @Environment(\.presentationMode) private var presentationMode
+  
+  /// The view's title.
   @State private var title: String = ""
+  
+  /// The view's message.
   @State private var message: String = ""
+  
+  /// Whether the view is submitting the feedback.
   @State private var submitting: Bool = false
+  
+  // MARK: View body
   
   var body: some View {
     NavigationView {

@@ -7,25 +7,15 @@
 
 import SwiftUI
 
+/// An application color scheme.
 enum AppColorScheme: String, Equatable, Identifiable {
   
   typealias ObjectIdentifier = RawValue
   
+  /// The amount of light/dark tint to apply to the main color.
   static let spread = 0.5
   
-  case multicolor
-  case grayscale
-  case accentColor
-  case pink
-  case mint
-  case indigo
-  case teal
-  case orange
-  case yellow
-  case green
-  case brown
-  case purple
-  
+  /// All of the colors in the order they should be presented.
   static let allCases: [AppColorScheme] = [
     .multicolor,
     .grayscale,
@@ -41,10 +31,24 @@ enum AppColorScheme: String, Equatable, Identifiable {
     .purple
   ]
   
+  case multicolor
+  case grayscale
+  case accentColor
+  case pink
+  case mint
+  case indigo
+  case teal
+  case orange
+  case yellow
+  case green
+  case brown
+  case purple
+  
   var id: ObjectIdentifier {
     rawValue
   }
   
+  /// The color's title.
   var title: String {
     switch self {
     case .multicolor: return "Multicolor"
@@ -62,6 +66,7 @@ enum AppColorScheme: String, Equatable, Identifiable {
     }
   }
   
+  /// The colors to use in a color well.
   var wellColors: [Color] {
     switch self {
     case .multicolor: return [.pink, .yellow, .green, .teal, .purple]
@@ -69,6 +74,7 @@ enum AppColorScheme: String, Equatable, Identifiable {
     }
   }
   
+  /// The background color to use in a color well.
   var backgroundColor: Color {
     switch self {
     case .multicolor: return Color(uiColor: .systemBackground)
@@ -76,6 +82,7 @@ enum AppColorScheme: String, Equatable, Identifiable {
     }
   }
   
+  /// The theme's main color.
   var color: Color {
     switch self {
     case .multicolor: return .white
@@ -93,10 +100,12 @@ enum AppColorScheme: String, Equatable, Identifiable {
     }
   }
   
+  /// The theme color to use for the given scheme.
   func themeColor(for color: Color) -> Color {
     return self == .multicolor ? color : self.color
   }
   
+  /// The severity color to use for the given scheme.
   func severityColor(for severity: Headache.Severity) -> Color {
     switch severity {
     case .notPresent: return self == .multicolor ? Color.headacheSeverityNotPresent : color.darker(by: 0.5)

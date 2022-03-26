@@ -9,26 +9,41 @@ import SwiftUI
 
 struct EditTypeView: View {
   
+  /// The type to edit.
   @State var type: Headache.Types = .cluster
+  
+  /// The classification to edit.
   @State var classification: Headache.Classification = .primary
+  
+  /// The identifier of the headache to edit.
   @State var identifier: UUID = UUID()
   
   // MARK: Private properties
   
+  /// The view's presentation mode.
+  @Environment(\.presentationMode) private var presentationMode
+  
   /// The app's headache manager.
   @EnvironmentObject private var headacheManager: HeadacheManager
   
-  @Environment(\.presentationMode) private var presentationMode
+  /// Whether the view is being saved.
   @State private var saving: Bool = false
+  
+  /// The custom type value, if any.
   @State private var customTypeValue = ""
   
-  let customTypes: [Headache.Types] = SharedUserDefaults.standard.customTypes
-  var saveDisabled: Bool {
+  /// The custom types to display to the user.
+  private let customTypes: [Headache.Types] = SharedUserDefaults.standard.customTypes
+  
+  /// Whether saving is currently disabled.
+  private var saveDisabled: Bool {
     if case .custom(_) = type, customTypeValue.isEmpty {
       return true
     }
     return false
   }
+  
+  // MARK: View body
   
   var body: some View {
     NavigationView {
@@ -81,10 +96,12 @@ struct EditTypeView: View {
 
 extension EditTypeView {
   
+  /// The cancel action.
   private func cancel() {
     dismiss()
   }
   
+  /// Saves the headache.
   private func save() async throws {
     withAnimation {
       saving = true
@@ -99,10 +116,14 @@ extension EditTypeView {
     dismiss()
   }
   
+  /// Dismisses the view.
   private func dismiss() {
     presentationMode.wrappedValue.dismiss()
   }
   
+  /// Called when the type changes.
+  ///
+  /// - Parameter newValue: The new type.
   private func changedType(_ newValue: Headache.Types) {
     if Headache.Types.definedCases.contains(newValue) || customTypes.contains(newValue) {
       withAnimation {
@@ -111,6 +132,9 @@ extension EditTypeView {
     }
   }
   
+  /// Called when the type value changes.
+  ///
+  /// - Parameter newValue: The new type value.
   private func changedCustomTypeValue(_ newValue: String) {
     let newValueType = Headache.Types(newValue)
     if !Headache.Types.definedCases.contains(newValueType) && !customTypes.contains(newValueType) {

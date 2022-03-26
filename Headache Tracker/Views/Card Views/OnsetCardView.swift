@@ -1,5 +1,5 @@
 //
-//  OnsetView.swift
+//  OnsetCardView.swift
 //  Headache Tracker
 //
 //  Created by Colin Campbell on 2/16/22.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct OnsetView: View {
+struct OnsetCardView: View {
   
   /// The application's custom color scheme.
   @AppStorage(AppSettings.colorScheme) private var colorScheme: AppColorScheme = .multicolor
@@ -26,12 +26,12 @@ struct OnsetView: View {
   }
 }
 
-struct OnsetCell_Previews: PreviewProvider {
+struct OnsetCardView_Previews: PreviewProvider {
   static var previews: some View {
-    OnsetView(onset: Date(timeIntervalSinceNow: -3600.0), relativeDate: true)
+    OnsetCardView(onset: Date(timeIntervalSinceNow: -3600.0), relativeDate: true)
       .previewLayout(.fixed(width: 428, height: 70))
     
-    OnsetView(onset: Date(timeIntervalSinceNow: -3600.0), relativeDate: false)
+    OnsetCardView(onset: Date(timeIntervalSinceNow: -3600.0), relativeDate: false)
       .previewLayout(.fixed(width: 428, height: 70))
   }
 }

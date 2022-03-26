@@ -10,6 +10,7 @@ import SwiftUI
 /// Shows a list of all unresolved and resolved headaches.
 struct TrainingDataView: View {
   
+  /// The training data to display.
   @StateObject var trainingData: TrainingData
   
   // MARK: Private properties

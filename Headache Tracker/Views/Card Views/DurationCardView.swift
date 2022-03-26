@@ -1,5 +1,5 @@
 //
-//  DurationiView.swift
+//  DurationCardView.swift
 //  Headache Tracker
 //
 //  Created by Colin Campbell on 2/16/22.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct DurationView: View {
+struct DurationCardView: View {
   
   /// The headache to display.
   @StateObject var headache: Headache
@@ -43,7 +43,7 @@ struct DurationView: View {
   
 }
 
-extension DurationView {
+extension DurationCardView {
   
   /// Updates the duration view's identifier.
   func updateDurationID() {
@@ -63,9 +63,9 @@ extension DurationView {
   
 }
 
-struct DurationView_Previews: PreviewProvider {
+struct DurationCardView_Previews: PreviewProvider {
   static var previews: some View {
-    DurationView(headache: Previewing.CoreData.resolvedHeadache)
+    DurationCardView(headache: Previewing.CoreData.resolvedHeadache)
       .environment(\.managedObjectContext, Previewing.CoreData.viewContext)
       .environmentObject(Previewing.headacheManager)
       .environmentObject(Previewing.alertManager)

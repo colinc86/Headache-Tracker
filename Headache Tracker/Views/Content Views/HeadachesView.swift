@@ -34,6 +34,7 @@ struct HeadachesView: View {
     animation: .default)
   private var resolvedHeadaches: FetchedResults<Headache>
   
+  /// Whether the view is showing the add headache modal.
   @State private var showingAddHeadache: Bool = false
   
   // MARK: View body

@@ -35,8 +35,11 @@ struct PredictorsView: View {
   @AppStorage(AppSettings.Predictors.walkingHeartRateAverage) var predictorWalkingHeartRateAverage = true
   @AppStorage(AppSettings.Predictors.restingHeartRate) var predictorRestingHeartRate = true
   
-  @State var initialSettings = [String: Bool]()
-  @State var showingAlert = false
+  /// The view's initial settings.
+  @State private var initialSettings = [String: Bool]()
+  
+  /// Whether the view is showing an alert.
+  @State private var showingAlert = false
   
   var body: some View {
     Form {
@@ -101,10 +104,12 @@ struct PredictorsView: View {
 
 extension PredictorsView {
   
+  /// Called when the view appears.
   func appeared() {
     initialSettings = settingsDictionary()
   }
   
+  /// Called when the view disappears.
   func disappeared() {
     if initialSettings != settingsDictionary() {
       Task {
@@ -118,6 +123,7 @@ extension PredictorsView {
     }
   }
   
+  /// Gets the current settings dictionary.
   func settingsDictionary() -> [String: Bool] {
     return [
       AppSettings.Predictors.secondsSinceMidnight: predictorSecondsSinceMidnight,
@@ -140,6 +146,11 @@ extension PredictorsView {
     ]
   }
   
+  /// Updates the setting with the given health kit data.
+  ///
+  /// - Parameters:
+  ///   - data: The health kit data.
+  ///   - newValue: The new value.
   func updateSetting(_ data: HealthKitData?, newValue: Bool) {
     guard let data = data else {
       return
@@ -160,10 +171,6 @@ extension PredictorsView {
         break
       }
     }
-  }
-  
-  func authorizationButtonAction() {
-    withAnimation { showingAlert = true }
   }
   
 }

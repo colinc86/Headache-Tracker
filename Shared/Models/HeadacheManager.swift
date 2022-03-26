@@ -213,6 +213,12 @@ extension HeadacheManager {
     }
   }
   
+  /// Updates the headache's type.
+  ///
+  /// - Parameters:
+  ///   - type: The new type.
+  ///   - classification: The new classification.
+  ///   - identifier: The headache's identifier.
   func updateHeadacheType(_ type: Headache.Types, classification: Headache.Classification, identifier: UUID) async throws {
     logDebug("Set type.")
     
