@@ -14,6 +14,9 @@ struct CurrentHeadacheViews: View {
   
   // MARK: Private properties
   
+  /// The application's custom color scheme.
+  @AppStorage(AppSettings.colorScheme) private var colorScheme: AppColorScheme = .multicolor
+  
   /// Whether the type view should be shown.
   @AppStorage(AppSettings.ListOptions.type) private var showTypeView = true
   
@@ -63,7 +66,7 @@ struct CurrentHeadacheViews: View {
     Group {
       // Resolve the Headache
       Section {
-        ActionView(title: "Resolve Headache", buttonTitle: "Resolve", systemImage: "face.smiling.fill", foregroundColor: .teal, action: resolveConfirmation)
+        ActionView(title: "Resolve Headache", buttonTitle: "Resolve", systemImage: "face.smiling.fill", foregroundColor: colorScheme.themeColor(for: .teal), action: resolveConfirmation)
       } footer: {
         Text("Is your headache gone? Tap Resolve to let the app know.")
       }
@@ -115,12 +118,15 @@ struct CurrentHeadacheViews: View {
     }
     .sheet(isPresented: $showingEditTypeView) {
       EditTypeView(type: headache.headacheType, classification: headache.headacheClassification, identifier: headache.identifier ?? UUID())
+        .accentColor(colorScheme.themeColor(for: .brandColor))
     }
     .sheet(isPresented: $showingEditNotesView) {
       EditNotesView(notes: headache.notes ?? "", identifier: headache.identifier ?? UUID())
+        .accentColor(colorScheme.themeColor(for: .brandColor))
     }
     .sheet(isPresented: $showingEditTagsView) {
       EditTagsView(tags: headache.tagsArray.map({ $0.value ?? "" }), identifier: headache.identifier ?? UUID())
+        .accentColor(colorScheme.themeColor(for: .brandColor))
     }
   }
 }

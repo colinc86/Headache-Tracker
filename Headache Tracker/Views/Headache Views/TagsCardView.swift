@@ -18,10 +18,13 @@ struct TagsCardView: View {
   /// Called when a tag is tapped.
   let tagAction: (String) -> Void
   
+  /// The application's custom color scheme.
+  @AppStorage(AppSettings.colorScheme) private var colorScheme: AppColorScheme = .multicolor
+  
   // MARK: View body
   
   var body: some View {
-    TitleCaptionView(title: "Tags", systemImage: "tag", foregroundColor: .indigo, editButtonAction: editAction) {
+    TitleCaptionView(title: "Tags", systemImage: "tag", foregroundColor: colorScheme.themeColor(for: .indigo), editButtonAction: editAction) {
       ZStack(alignment: .leading) {
         TagsView(tags: tags, action: { _ in })
           .buttonStyle(TagButtonStyle())

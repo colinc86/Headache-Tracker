@@ -26,6 +26,9 @@ struct SettingsView: View {
   /// The app's data refresher.
   @EnvironmentObject private var refresher: Refresher
   
+  /// The application's custom color scheme.
+  @AppStorage(AppSettings.colorScheme) var colorScheme: AppColorScheme = .multicolor
+  
   /// The application's measurement system.
   @AppStorage(AppSettings.measurementSystem) var measurementSystem: MeasurementSystem = NSLocale.system.usesMetricSystem ? .metric : .imperial
   
@@ -133,7 +136,7 @@ struct SettingsView: View {
         // Integrations
         Section("Integrations") {
           Toggle("Health App Integration", isOn: healthAppIntegration)
-            .tint(.accentColor)
+            .tint(colorScheme.themeColor(for: .brandColor))
           
           Picker("Delete Health Data", selection: $deleteDisposition) {
             ForEach(HeadacheManager.DeleteDisposition.allCases) { disposition in
@@ -159,15 +162,13 @@ struct SettingsView: View {
           }
           
           Toggle("Check-Ins", isOn: $checkInAlerts)
-            .tint(.accentColor)
+            .tint(colorScheme.themeColor(for: .brandColor))
             .disabled(alertsDenied)
           
-          Picker(selection: $checkInInterval) {
+          Picker("Check-In Interval", selection: $checkInInterval) {
             ForEach(1 ..< 25) { i in
               Text("\(i) Hour\(i > 1 ? "s" : "")").tag(TimeInterval(i) * 3600.0)
             }
-          } label: {
-            Text("Check-In Interval")
           }
           .disabled(!checkInAlerts)
           .disabled(alertsDenied)
@@ -182,11 +183,11 @@ struct SettingsView: View {
           }
           
           Toggle("Prediction Notifications", isOn: $realTimeAlerts)
-            .tint(.accentColor)
+            .tint(colorScheme.themeColor(for: .brandColor))
           
           Toggle("Daily Outlook", isOn: $dailyOutlookAlerts)
             .onChange(of: dailyOutlookAlerts, perform: dailyOutlookAlertsChanged)
-            .tint(.accentColor)
+            .tint(colorScheme.themeColor(for: .brandColor))
           
           DatePicker("Daily Outlook Time", selection: dailyOutlookDate, displayedComponents: .hourAndMinute)
             .disabled(!dailyOutlookAlerts)
@@ -194,20 +195,31 @@ struct SettingsView: View {
         
         // Information
         Section("General") {
-          Picker(selection: $measurementSystem) {
+          Picker("Measurement System", selection: $measurementSystem) {
             Text(MeasurementSystem.metric.title).tag(MeasurementSystem.metric)
             Text(MeasurementSystem.imperial.title).tag(MeasurementSystem.imperial)
-          } label: {
-            Text("Measurement System")
           }
           
+          NavigationLink {
+            ColorSchemePicker()
+          } label: {
+            HStack {
+              Text("Theme")
+              ColorSchemeView(scheme: colorScheme, titleAlignment: .trailing)
+                .foregroundColor(.secondary)
+                .id(colorScheme)
+            }
+          }
+        }
+         
+        Section {
           Button("Report Bug", action: reportBug)
           
           Button("Share Feedback", action: shareFeedback)
           
           Toggle("Submit Crash Data", isOn: $enableCrashReporting)
             .onChange(of: enableCrashReporting, perform: enableCrashReportingValueChanged)
-            .tint(.accentColor)
+            .tint(colorScheme.themeColor(for: .brandColor))
           
           SubtitleCell(title: "Version", subtitle: Bundle.main.humanReadableVersionString)
         }

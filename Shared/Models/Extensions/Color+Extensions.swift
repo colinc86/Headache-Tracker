@@ -15,6 +15,8 @@ extension Color {
   static let headacheSeverityModerate = Color(Constants.AssetKeys.headacheSeverityModerate)
   static let headacheSeveritySevere = Color(Constants.AssetKeys.headacheSeveritySevere)
   
+  static let brandColor = Color(red: 0.129, green: 0.675, blue: 0.808)
+  
   public func lighter(by percent: CGFloat) -> Self {
     Self(UIColor(self).adjust(by: percent))
   }

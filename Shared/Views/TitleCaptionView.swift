@@ -18,7 +18,7 @@ struct TitleCaptionView<Content: View>: View {
   let systemImage: String
   
   /// The cell's foreground color.
-  var foregroundColor: Color = .accentColor
+  var foregroundColor: Color
   
   /// The cell's optional caption.
   var caption: String? = nil

@@ -27,10 +27,13 @@ struct SeveritySelectionView: View {
   /// The action for each button.
   var action: ((Headache.Severity) async throws -> Void)? = nil
   
+  /// The application's custom color scheme.
+  @AppStorage(AppSettings.colorScheme) private var colorScheme: AppColorScheme = .multicolor
+  
   // MARK: View body
   
   var body: some View {
-    TitleCaptionView(title: "Severity", systemImage: "dial.max.fill", foregroundColor: .cyan) {
+    TitleCaptionView(title: "Severity", systemImage: "dial.max.fill", foregroundColor: colorScheme.themeColor(for: .cyan)) {
       HStack {
         Spacer(minLength: 0.0)
         HStack(spacing: 0.0) {
@@ -125,6 +128,9 @@ struct SeverityButton: View {
   
   // MARK: Private properties
   
+  /// The application's custom color scheme.
+  @AppStorage(AppSettings.colorScheme) private var colorScheme: AppColorScheme = .multicolor
+  
   /// The dimensions of the button's rectangle.
   private let dimension: CGFloat = 60.0
   
@@ -141,10 +147,10 @@ struct SeverityButton: View {
       let content = ZStack {
         RoundedRectangle(cornerRadius: 12)
           .frame(width: dimension, height: dimension)
-          .foregroundColor(selected ? severity.uiColor : Color.secondary.opacity(0.25))
+          .foregroundColor(selected ? severity.color(for: colorScheme) : Color.secondary.opacity(0.25))
           .overlay(
             RoundedRectangle(cornerRadius: 12)
-              .stroke(severity.uiColor.opacity(0.25), lineWidth: 4.0)
+              .stroke(severity.color(for: colorScheme).opacity(0.25), lineWidth: 4.0)
           )
       }
       
@@ -153,7 +159,7 @@ struct SeverityButton: View {
           content
         }
         .buttonStyle(BorderlessButtonStyle())
-        .foregroundColor(selected ? severity.uiColor : Color.secondary.opacity(0.25))
+        .foregroundColor(selected ? severity.color(for: colorScheme) : Color.secondary.opacity(0.25))
         .cornerRadius(12)
       }
       else {
@@ -164,13 +170,13 @@ struct SeverityButton: View {
             content
           }
           .buttonStyle(BorderlessButtonStyle())
-          .foregroundColor(selected ? severity.uiColor : Color.secondary.opacity(0.25))
+          .foregroundColor(selected ? severity.color(for: colorScheme) : Color.secondary.opacity(0.25))
           .cornerRadius(12)
         }
         else {
           RoundedRectangle(cornerRadius: 12)
             .frame(width: dimension, height: collapsed ? 8.0 : dimension)
-            .foregroundColor(selected ? severity.uiColor : Color.secondary.opacity(0.25))
+            .foregroundColor(selected ? severity.color(for: colorScheme) : Color.secondary.opacity(0.25))
         }
       }
       

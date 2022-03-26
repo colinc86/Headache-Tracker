@@ -12,11 +12,14 @@ struct StatusView: View {
   /// The headache's resolution status.
   let resolved: Bool
   
+  /// The application's custom color scheme.
+  @AppStorage(AppSettings.colorScheme) private var colorScheme: AppColorScheme = .multicolor
+  
   var body: some View {
-    TitleCaptionView(title: "Status", systemImage: "face.smiling.fill", foregroundColor: .teal) {
+    TitleCaptionView(title: "Status", systemImage: "face.smiling.fill", foregroundColor: colorScheme.themeColor(for: .teal)) {
       Text(resolved ? "Resolved" : "Unresolved")
         .font(.title)
-        .foregroundColor(.teal)
+        .foregroundColor(colorScheme.themeColor(for: .teal))
     }
   }
   

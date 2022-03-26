@@ -9,6 +9,9 @@ import SwiftUI
 
 struct ModelInputView: View {
   
+  /// The application's custom color scheme.
+  @AppStorage(AppSettings.colorScheme) private var colorScheme: AppColorScheme = .multicolor
+  
   /// The application's measurement system.
   @AppStorage(AppSettings.measurementSystem) var measurementSystem: MeasurementSystem = NSLocale.system.usesMetricSystem ? .metric : .imperial
   
@@ -19,7 +22,7 @@ struct ModelInputView: View {
       if let weather = input.weatherStatistics {
         if let pressure = weather.pressureMeasurement {
           Section {
-            TitleCaptionView(title: "Barometric Pressure", systemImage: "barometer", foregroundColor: .accentColor) {
+            TitleCaptionView(title: "Barometric Pressure", systemImage: "barometer", foregroundColor: colorScheme.themeColor(for: .brandColor)) {
               Text(Formatters.formatMeasurement(pressure))
                 .font(.title)
             }
@@ -30,7 +33,7 @@ struct ModelInputView: View {
         
         if let temperature = weather.temperatureMeasurement {
           Section {
-            TitleCaptionView(title: "Temperature", systemImage: "thermometer", foregroundColor: .accentColor) {
+            TitleCaptionView(title: "Temperature", systemImage: "thermometer", foregroundColor: colorScheme.themeColor(for: .brandColor)) {
               Text(Formatters.formatMeasurement(temperature))
                 .font(.title)
             }
@@ -39,7 +42,7 @@ struct ModelInputView: View {
         
         if let humidity = weather.humidityMeasurement {
           Section {
-            TitleCaptionView(title: "Humidity", systemImage: "humidity", foregroundColor: .accentColor) {
+            TitleCaptionView(title: "Humidity", systemImage: "humidity", foregroundColor: colorScheme.themeColor(for: .brandColor)) {
               Text(Formatters.formatMeasurement(humidity))
                 .font(.title)
             }

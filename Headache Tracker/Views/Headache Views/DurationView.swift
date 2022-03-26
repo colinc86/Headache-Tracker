@@ -14,6 +14,9 @@ struct DurationView: View {
   
   // MARK: Private properties
   
+  /// The application's custom color scheme.
+  @AppStorage(AppSettings.colorScheme) private var colorScheme: AppColorScheme = .multicolor
+  
   /// The id of the duration view.
   @State private var durationID = UUID()
   
@@ -27,7 +30,7 @@ struct DurationView: View {
   }
   
   var body: some View {
-    TitleCaptionView(title: "Duration", systemImage: "timer", foregroundColor: .green, caption: caption) {
+    TitleCaptionView(title: "Duration", systemImage: "timer", foregroundColor: colorScheme.themeColor(for: .green), caption: caption) {
       VStack(alignment: .leading) {
         Text(Formatters.formatInterval(headache.duration))
           .font(.title)

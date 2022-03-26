@@ -15,7 +15,7 @@ struct ActionView: View {
   
   let systemImage: String
   
-  var foregroundColor: Color = .accentColor
+  var foregroundColor: Color
   
   /// The action to perform when the user taps the no headache button.
   let action: () async throws -> Void

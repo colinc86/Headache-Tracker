@@ -165,6 +165,12 @@
 		3B3FFF2A27DA8E8B00DFACC1 /* TestPredictor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFF1D27DA84DB00DFACC1 /* TestPredictor.swift */; };
 		3B3FFF2C27DAA89500DFACC1 /* WeatherStatistics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFF2B27DAA89500DFACC1 /* WeatherStatistics.swift */; };
 		3B3FFF2D27DAA89500DFACC1 /* WeatherStatistics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFF2B27DAA89500DFACC1 /* WeatherStatistics.swift */; };
+		3B5817C327EEB3D600F9E49B /* ColorSchemeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B5817C227EEB3D600F9E49B /* ColorSchemeView.swift */; };
+		3B5817C627EECDC300F9E49B /* IrregularGradient in Frameworks */ = {isa = PBXBuildFile; productRef = 3B5817C527EECDC300F9E49B /* IrregularGradient */; };
+		3B5817C827EEDFC400F9E49B /* AppColorScheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B5817C727EEDFC400F9E49B /* AppColorScheme.swift */; };
+		3B5817C927EEDFC400F9E49B /* AppColorScheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B5817C727EEDFC400F9E49B /* AppColorScheme.swift */; };
+		3B5817CB27EEDFED00F9E49B /* ColorWell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B5817CA27EEDFED00F9E49B /* ColorWell.swift */; };
+		3B5817CE27EEE00100F9E49B /* ColorSchemePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B5817CD27EEE00100F9E49B /* ColorSchemePicker.swift */; };
 		3B68BDF927BDFCD3007AAAC6 /* AnalyzeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BDF827BDFCD3007AAAC6 /* AnalyzeView.swift */; };
 		3B68BDFB27BE0F00007AAAC6 /* BarGraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BDFA27BE0F00007AAAC6 /* BarGraph.swift */; };
 		3B68BE0C27BF5899007AAAC6 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B68BE0B27BF5899007AAAC6 /* GoogleService-Info.plist */; };
@@ -383,6 +389,10 @@
 		3B3FFF2527DA8D2300DFACC1 /* TrainingInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingInput.swift; sourceTree = "<group>"; };
 		3B3FFF2B27DAA89500DFACC1 /* WeatherStatistics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherStatistics.swift; sourceTree = "<group>"; };
 		3B4BA6F327B6289C00F38851 /* Headache_Tracker 1.2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Headache_Tracker 1.2.xcdatamodel"; sourceTree = "<group>"; };
+		3B5817C227EEB3D600F9E49B /* ColorSchemeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorSchemeView.swift; sourceTree = "<group>"; };
+		3B5817C727EEDFC400F9E49B /* AppColorScheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppColorScheme.swift; sourceTree = "<group>"; };
+		3B5817CA27EEDFED00F9E49B /* ColorWell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorWell.swift; sourceTree = "<group>"; };
+		3B5817CD27EEE00100F9E49B /* ColorSchemePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorSchemePicker.swift; sourceTree = "<group>"; };
 		3B68BDF827BDFCD3007AAAC6 /* AnalyzeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyzeView.swift; sourceTree = "<group>"; };
 		3B68BDFA27BE0F00007AAAC6 /* BarGraph.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarGraph.swift; sourceTree = "<group>"; };
 		3B68BE0B27BF5899007AAAC6 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
@@ -469,6 +479,7 @@
 				3B9332C927CDFFAD00BACE93 /* BugfenderLibrary in Frameworks */,
 				3B9332CD27CE003D00BACE93 /* Security.framework in Frameworks */,
 				3B9332BC27CDC1B300BACE93 /* FirebaseAnalyticsSwift-Beta in Frameworks */,
+				3B5817C627EECDC300F9E49B /* IrregularGradient in Frameworks */,
 				3B68BE1327BF599F007AAAC6 /* FirebaseCrashlytics in Frameworks */,
 				3B9332D327CE006800BACE93 /* libc++.tbd in Frameworks */,
 				3B9332CF27CE004400BACE93 /* CoreServices.framework in Frameworks */,
@@ -571,6 +582,9 @@
 				3B68BDFC27BE0FF0007AAAC6 /* Graphs */,
 				3B1C7DB227D2003C000B3A99 /* Headache Views */,
 				3B29F73927E98E1600C8772C /* CheckmarkButton.swift */,
+				3B5817CA27EEDFED00F9E49B /* ColorWell.swift */,
+				3B5817C227EEB3D600F9E49B /* ColorSchemeView.swift */,
+				3B5817CD27EEE00100F9E49B /* ColorSchemePicker.swift */,
 				3B20EA2327EAA67C00B9800F /* FlexibleView.swift */,
 				3B29F73527E983F800C8772C /* ListOptionsMenu.swift */,
 				3B3EAAEF27E801BA00F5D8B4 /* MapView.swift */,
@@ -862,6 +876,7 @@
 			isa = PBXGroup;
 			children = (
 				3B3FFE5427D592A000DFACC1 /* AppSettings.swift */,
+				3B5817C727EEDFC400F9E49B /* AppColorScheme.swift */,
 				3B3FFE4D27D592A000DFACC1 /* Constants.swift */,
 				3B3FFE5527D592A000DFACC1 /* SharedUserDefaults.swift */,
 			);
@@ -1004,6 +1019,7 @@
 				3BA933AC27DF23E100BAD5A4 /* Alamofire */,
 				3BD1D33F27E12DBC0072A576 /* ApplicationKey */,
 				3BD1D34227E12DEA0072A576 /* DataController */,
+				3B5817C527EECDC300F9E49B /* IrregularGradient */,
 			);
 			productName = "Headache Tracker";
 			productReference = 3BF5313327ACE18D00056673 /* Headache Tracker.app */;
@@ -1089,6 +1105,7 @@
 				3BA933AB27DF23E100BAD5A4 /* XCRemoteSwiftPackageReference "Alamofire" */,
 				3BD1D33E27E12DBC0072A576 /* XCRemoteSwiftPackageReference "ApplicationKey" */,
 				3BD1D34127E12DEA0072A576 /* XCRemoteSwiftPackageReference "DataController" */,
+				3B5817C427EECDC300F9E49B /* XCRemoteSwiftPackageReference "IrregularGradient" */,
 			);
 			productRefGroup = 3BF5313427ACE18D00056673 /* Products */;
 			projectDirPath = "";
@@ -1262,6 +1279,7 @@
 				3B68BE6127C34B8E007AAAC6 /* OutlookWidgetContent.swift in Sources */,
 				3B3FFED627D592A000DFACC1 /* Color+Extensions.swift in Sources */,
 				3B3FFEF027D592A000DFACC1 /* Previewing.swift in Sources */,
+				3B5817C927EEDFC400F9E49B /* AppColorScheme.swift in Sources */,
 				3B3FFECA27D592A000DFACC1 /* String+Extensions.swift in Sources */,
 				3B3FFEA027D592A000DFACC1 /* Outlook.swift in Sources */,
 				3B86C6E427E40B5B00CCD7A0 /* MeasurementSystem.swift in Sources */,
@@ -1304,6 +1322,7 @@
 				3B20EA2227EAA29F00B9800F /* TagsView.swift in Sources */,
 				3BA933B127DFA5D000BAD5A4 /* AddHeadacheView.swift in Sources */,
 				3B9332EA27CF1E8400BACE93 /* FeedbackView.swift in Sources */,
+				3B5817CB27EEDFED00F9E49B /* ColorWell.swift in Sources */,
 				3B09191227BCCE1C00844F6C /* OnsetView.swift in Sources */,
 				3B3FFE9327D592A000DFACC1 /* HeadacheStatistics.swift in Sources */,
 				3B09191427BCCF9500844F6C /* TitleCaptionView.swift in Sources */,
@@ -1315,6 +1334,7 @@
 				3B3FFEC327D592A000DFACC1 /* TrainingData+Extensions.swift in Sources */,
 				3B3FFEE127D592A000DFACC1 /* UnitRate.swift in Sources */,
 				3B3FFEC727D592A000DFACC1 /* Headache+Extensions.swift in Sources */,
+				3B5817CE27EEE00100F9E49B /* ColorSchemePicker.swift in Sources */,
 				3B93A6E027D5591F00BCBDE1 /* BlockGraph.swift in Sources */,
 				3B3FFEA927D592A000DFACC1 /* Model.swift in Sources */,
 				3B3FFEDB27D592A000DFACC1 /* Numeric+Extensions.swift in Sources */,
@@ -1348,6 +1368,7 @@
 				3B68BE6A27C35778007AAAC6 /* OutlookView.swift in Sources */,
 				3BD1D34927E190EE0072A576 /* PredictorsView.swift in Sources */,
 				3B3FFE9127D592A000DFACC1 /* Trend.swift in Sources */,
+				3B5817C827EEDFC400F9E49B /* AppColorScheme.swift in Sources */,
 				3B3FFE8F27D592A000DFACC1 /* Statistic.swift in Sources */,
 				3B3FFE9927D592A000DFACC1 /* AppSettings.swift in Sources */,
 				3BF5313927ACE18D00056673 /* ContentView.swift in Sources */,
@@ -1366,6 +1387,7 @@
 				3B3FFECD27D592A000DFACC1 /* UIColor+Extensions.swift in Sources */,
 				3BF7943927DFB6970094C531 /* EditableDateTimeView.swift in Sources */,
 				3B09191A27BD58A100844F6C /* SeveritySelectionView.swift in Sources */,
+				3B5817C327EEB3D600F9E49B /* ColorSchemeView.swift in Sources */,
 				3B09192127BD851700844F6C /* LineGraph.swift in Sources */,
 				3B3FFEEF27D592A000DFACC1 /* Previewing.swift in Sources */,
 				3B3FFE9D27D592A000DFACC1 /* TrainingData+CoreDataClass.swift in Sources */,
@@ -2001,6 +2023,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		3B5817C427EECDC300F9E49B /* XCRemoteSwiftPackageReference "IrregularGradient" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "git@github.com:joogps/IrregularGradient.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.1.0;
+			};
+		};
 		3B68BE0F27BF599F007AAAC6 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
@@ -2068,6 +2098,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		3B5817C527EECDC300F9E49B /* IrregularGradient */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3B5817C427EECDC300F9E49B /* XCRemoteSwiftPackageReference "IrregularGradient" */;
+			productName = IrregularGradient;
+		};
 		3B68BE1227BF599F007AAAC6 /* FirebaseCrashlytics */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 3B68BE0F27BF599F007AAAC6 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;

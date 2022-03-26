@@ -76,18 +76,6 @@ extension HKCategoryValueSeverity: Codable, Comparable {
     }
   }
   
-  /// The color to use when drawing the value in the user interface.
-  var uiColor: Color {
-    switch self {
-    case .notPresent: return Color.headacheSeverityNotPresent
-    case .unspecified: return Color.headacheSeverityPresent
-    case .mild: return Color.headacheSeverityMild
-    case .moderate: return Color.headacheSeverityModerate
-    case .severe: return Color.headacheSeveritySevere
-    default: return Color.headacheSeverityNotPresent
-    }
-  }
-  
   // MARK: Initializers
   
   /// Creates a severity from the value obtained from the
@@ -120,6 +108,10 @@ extension HKCategoryValueSeverity: Codable, Comparable {
     }
   }
   
+  func color(for scheme: AppColorScheme) -> Color {
+    return scheme.severityColor(for: self)
+  }
+  
   // MARK: Comparable protocol methods
   
   public static func < (lhs: HKCategoryValueSeverity, rhs: HKCategoryValueSeverity) -> Bool {
@@ -127,6 +119,8 @@ extension HKCategoryValueSeverity: Codable, Comparable {
   }
   
 }
+
+// MARK: Range methods
 
 extension HKCategoryValueSeverity.Range {
   

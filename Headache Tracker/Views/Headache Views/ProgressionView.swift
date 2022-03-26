@@ -11,9 +11,12 @@ struct ProgressionView: View {
   
   @StateObject var headache: Headache
   
+  /// The application's custom color scheme.
+  @AppStorage(AppSettings.colorScheme) private var colorScheme: AppColorScheme = .multicolor
+  
   var body: some View {
-    TitleCaptionView(title: "Progression", systemImage: "chart.xyaxis.line", foregroundColor: .orange) {
-      LineGraph(series: headache.progression, gradient: Gradient(colors: headache.severityColorRange))
+    TitleCaptionView(title: "Progression", systemImage: "chart.xyaxis.line", foregroundColor: colorScheme.themeColor(for: .orange)) {
+      LineGraph(series: headache.progression, gradient: Gradient(colors: headache.severityColors(for: colorScheme)))
         .frame(height: 100)
     }
   }

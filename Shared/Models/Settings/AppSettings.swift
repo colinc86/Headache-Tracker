@@ -10,6 +10,7 @@ import ApplicationKey
 
 struct AppSettings {
   static let measurementSystem = ApplicationKey(from: "measurementSystem")
+  static let colorScheme = ApplicationKey(from: "colorScheme")
   
   static let enableCrashReporting = ApplicationKey(from: "enableCrashReporting")
   static let defaultHeadacheType = ApplicationKey(from: "defaultHeadacheType")

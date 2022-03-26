@@ -172,16 +172,6 @@ extension Headache {
     return Severity.Range(lowerBound: minSeverity, upperBound: maxSeverity)
   }
   
-  /// The range of colors to use with the headache's severity range.
-  var severityColorRange: [Color] {
-    let range = severityRange
-    var colors = [Color]()
-    for i in range.lowerBound.orderingValue ... range.upperBound.orderingValue {
-      colors.append((Severity(orderingValue: i) ?? .notPresent).uiColor)
-    }
-    return colors
-  }
-  
   /// The headache's severity progression.
   var progression: [Severity] {
     return severitiesArray.map({ $0.severity })
@@ -256,6 +246,19 @@ extension Headache {
 // MARK: Public methods
 
 extension Headache {
+  
+  /// The array of colors to use with the headache's severity range.
+  ///
+  /// - Parameter scheme: The color scheme.
+  /// - Returns: An array of colors.
+  func severityColors(for scheme: AppColorScheme) -> [Color] {
+    let range = severityRange
+    var colors = [Color]()
+    for i in range.lowerBound.orderingValue ... range.upperBound.orderingValue {
+      colors.append((Severity(orderingValue: i) ?? .notPresent).color(for: scheme))
+    }
+    return colors
+  }
   
   /// Reorganizes the headache's severities by start time.
   func reorganize() {

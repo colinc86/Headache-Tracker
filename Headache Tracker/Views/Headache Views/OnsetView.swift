@@ -9,6 +9,9 @@ import SwiftUI
 
 struct OnsetView: View {
   
+  /// The application's custom color scheme.
+  @AppStorage(AppSettings.colorScheme) private var colorScheme: AppColorScheme = .multicolor
+  
   /// The view's onset.
   let onset: Date
   
@@ -16,7 +19,7 @@ struct OnsetView: View {
   var relativeDate: Bool = true
   
   var body: some View {
-    TitleCaptionView(title: "Onset", systemImage: "clock.fill", foregroundColor: .purple) {
+    TitleCaptionView(title: "Onset", systemImage: "clock.fill", foregroundColor: colorScheme.themeColor(for: .purple)) {
       Text(relativeDate ? onset.formattedRelative() : onset.formattedNonRelative())
         .font(.title)
     }

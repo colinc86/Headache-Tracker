@@ -11,8 +11,11 @@ struct NotesView: View {
   let notes: String?
   var editButtonAction: (() -> Void)? = nil
   
+  /// The application's custom color scheme.
+  @AppStorage(AppSettings.colorScheme) private var colorScheme: AppColorScheme = .multicolor
+  
   var body: some View {
-    TitleCaptionView(title: "Notes", systemImage: "note.text", foregroundColor: .pink, editButtonAction: editButtonAction) {
+    TitleCaptionView(title: "Notes", systemImage: "note.text", foregroundColor: colorScheme.themeColor(for: .pink), editButtonAction: editButtonAction) {
       Text(notes ?? "Tap Edit to add notes.")
         .foregroundColor(notes == nil ? .secondary : .primary)
     }
