@@ -11,8 +11,8 @@ struct GraphList: View {
   
   // MARK: Private properties
   
-  /// The application's custom color scheme.
-  @AppStorage(AppSettings.colorScheme) private var colorScheme: AppColorScheme = .multicolor
+  /// The application's custom color theme.
+  @Environment(\.colorTheme) private var colorTheme
   
   /// The resolved headaches fetch request.
   /// Returns a list of all resolved headaches.
@@ -37,21 +37,21 @@ struct GraphList: View {
                 title: "Heaches Per Year",
                 subtitle: String(format: "%0.1f", statistics.headachesPerYear),
                 systemImage: statistics.headachesPerYearTrend.systemImage,
-                imageForegroundColor: colorScheme.themeColor(for: statistics.headachesPerYearTrend.foregroundColor))
+                imageForegroundColor: statistics.headachesPerYearTrend.foregroundColor(for: colorTheme))
             }
             else if filterUnit == .month {
               SubtitleCell(
                 title: "Heaches Per Month",
                 subtitle: String(format: "%0.1f", statistics.headachesPerMonth),
                 systemImage: statistics.headachesPerMonthTrend.systemImage,
-                imageForegroundColor: colorScheme.themeColor(for: statistics.headachesPerMonthTrend.foregroundColor))
+                imageForegroundColor: statistics.headachesPerMonthTrend.foregroundColor(for: colorTheme))
             }
             else {
               SubtitleCell(
                 title: "Heaches Per Week",
                 subtitle: String(format: "%0.1f", statistics.headachesPerWeek),
                 systemImage: statistics.headachesPerWeekTrend.systemImage,
-                imageForegroundColor: colorScheme.themeColor(for: statistics.headachesPerWeekTrend.foregroundColor))
+                imageForegroundColor: statistics.headachesPerWeekTrend.foregroundColor(for: colorTheme))
             }
           } header: {
             SectionTitleView(title: "Headaches")
@@ -59,7 +59,7 @@ struct GraphList: View {
         }
         
         Section {
-          TitleCaptionView(title: "Severity", systemImage: "dial.max.fill", foregroundColor: colorScheme.themeColor(for: .cyan)) {
+          Card(title: "Severity", systemImage: "dial.max.fill", foregroundColor: colorTheme.cyan) {
             BlockGraph(series: statistics.severityRanges, earliestDate: earliestDate)
           }
         } header: {
@@ -67,12 +67,12 @@ struct GraphList: View {
         }
         
         Section {
-          TitleCaptionView(title: "Peak Severity", systemImage: "dial.max.fill", foregroundColor: colorScheme.themeColor(for: .cyan)) {
+          Card(title: "Peak Severity", systemImage: "dial.max.fill", foregroundColor: colorTheme.cyan) {
             BarGraph(
               graphUnit: .severity,
               statistic: statistics.peaks,
               yAxis: ["Not Present", "Present", "Mild", "Moderate", "Severe"],
-              gradient: Gradient(colors: [colorScheme.themeColor(for: .cyan).darker(by: 0.1), colorScheme.themeColor(for: .cyan).lighter(by: 0.1)]),
+              gradient: Gradient(colors: [colorTheme.cyan.darker(by: 0.1), colorTheme.cyan.lighter(by: 0.1)]),
               earliestDate: earliestDate,
               staticMax: 4)
               .frame(height: 100)
@@ -82,16 +82,16 @@ struct GraphList: View {
             title: "Mean",
             subtitle: statistics.peaks.meanDescription,
             systemImage: statistics.peaks.meanTrend.systemImage,
-            imageForegroundColor: colorScheme.themeColor(for: statistics.peaks.meanTrend.foregroundColor))
+            imageForegroundColor: statistics.peaks.meanTrend.foregroundColor(for: colorTheme))
         }
         
         Section {
-          TitleCaptionView(title: "Average Severity", systemImage: "dial.max.fill", foregroundColor: colorScheme.themeColor(for: .cyan)) {
+          Card(title: "Average Severity", systemImage: "dial.max.fill", foregroundColor: colorTheme.cyan) {
             BarGraph(
               graphUnit: .severity,
               statistic: statistics.averages,
               yAxis: ["Not Present", "Present", "Mild", "Moderate", "Severe"],
-              gradient: Gradient(colors: [colorScheme.themeColor(for: .cyan).darker(by: 0.1), colorScheme.themeColor(for: .cyan).lighter(by: 0.1)]),
+              gradient: Gradient(colors: [colorTheme.cyan.darker(by: 0.1), colorTheme.cyan.lighter(by: 0.1)]),
               earliestDate: earliestDate,
               staticMax: 4)
               .frame(height: 100)
@@ -101,16 +101,16 @@ struct GraphList: View {
             title: "Mean",
             subtitle: statistics.averages.meanDescription,
             systemImage: statistics.averages.meanTrend.systemImage,
-            imageForegroundColor: colorScheme.themeColor(for: statistics.averages.meanTrend.foregroundColor))
+            imageForegroundColor: statistics.averages.meanTrend.foregroundColor(for: colorTheme))
         }
         
         Section {
-          TitleCaptionView(title: "Onset", systemImage: "clock.fill", foregroundColor: colorScheme.themeColor(for: .purple)) {
+          Card(title: "Onset", systemImage: "clock.fill", foregroundColor: colorTheme.purple) {
             BarGraph(
               graphUnit: .time,
               statistic: statistics.onsets,
               yAxis: ["12 AM", "6 AM", "12 PM", "6 PM", "12 AM"],
-              gradient: Gradient(colors: [colorScheme.themeColor(for: .purple).darker(by: 0.1), colorScheme.themeColor(for: .purple).lighter(by: 0.1)]),
+              gradient: Gradient(colors: [colorTheme.purple.darker(by: 0.1), colorTheme.purple.lighter(by: 0.1)]),
               earliestDate: earliestDate,
               staticMax: 86400)
               .frame(height: 100)
@@ -120,18 +120,18 @@ struct GraphList: View {
             title: "Mean",
             subtitle: statistics.onsets.meanDescription,
             systemImage: statistics.onsets.meanTrend.systemImage,
-            imageForegroundColor: colorScheme.themeColor(for: statistics.onsets.meanTrend.foregroundColor))
+            imageForegroundColor: statistics.onsets.meanTrend.foregroundColor(for: colorTheme))
         } header: {
           SectionTitleView(title: "Onset")
         }
         
         Section {
-          TitleCaptionView(title: "Duration", systemImage: "timer", foregroundColor: colorScheme.themeColor(for: .green)) {
+          Card(title: "Duration", systemImage: "timer", foregroundColor: colorTheme.green) {
             BarGraph(
               graphUnit: .duration,
               statistic: statistics.durations,
               yAxis: ["0m", Formatters.formatInterval(statistics.durations.max)],
-              gradient: Gradient(colors: [colorScheme.themeColor(for: .green).darker(by: 0.1), colorScheme.themeColor(for: .green).lighter(by: 0.1)]),
+              gradient: Gradient(colors: [colorTheme.green.darker(by: 0.1), colorTheme.green.lighter(by: 0.1)]),
               earliestDate: earliestDate)
               .frame(height: 100)
           }
@@ -140,17 +140,17 @@ struct GraphList: View {
             title: "Mean",
             subtitle: statistics.durations.meanDescription,
             systemImage: statistics.durations.meanTrend.systemImage,
-            imageForegroundColor: colorScheme.themeColor(for: statistics.durations.meanTrend.foregroundColor))
+            imageForegroundColor: statistics.durations.meanTrend.foregroundColor(for: colorTheme))
           SubtitleCell(
             title: "Min",
             subtitle: statistics.durations.minDescription,
             systemImage: statistics.durations.minTrend.systemImage,
-            imageForegroundColor: colorScheme.themeColor(for: statistics.durations.minTrend.foregroundColor))
+            imageForegroundColor: statistics.durations.minTrend.foregroundColor(for: colorTheme))
           SubtitleCell(
             title: "Max",
             subtitle: statistics.durations.maxDescription,
             systemImage: statistics.durations.maxTrend.systemImage,
-            imageForegroundColor: colorScheme.themeColor(for: statistics.durations.maxTrend.foregroundColor))
+            imageForegroundColor: statistics.durations.maxTrend.foregroundColor(for: colorTheme))
         } header: {
           SectionTitleView(title: "Duration")
         }

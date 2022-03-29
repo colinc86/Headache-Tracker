@@ -12,6 +12,12 @@ struct OutlookView: View {
   /// The view's outlook.
   let outlook: HolisticOutlook
   
+  // MARK: Private properties
+  
+  /// The application's custom color theme.
+  @Environment(\.colorTheme) private var colorTheme
+  
+  /// The caption to display.
   private var caption: String? {
     switch outlook {
     case .noHeadache: return nil
@@ -19,11 +25,20 @@ struct OutlookView: View {
     case .headache(_, let end): return "until " + end.formattedTime()
     }
   }
+  
+  // MARK: View body
     
   var body: some View {
-    TitleCaptionView(title: "Outlook", systemImage: "sun.and.horizon", foregroundColor: .mint, caption: caption) {
+    Card(
+      title: "Outlook",
+      systemImage: "sun.and.horizon",
+      foregroundColor: colorTheme.mint) {
       Text(outlook.title)
         .font(.title)
+    } caption: {
+      if let caption = caption {
+        Text(caption)
+      }
     }
   }
   

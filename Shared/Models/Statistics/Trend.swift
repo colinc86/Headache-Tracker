@@ -47,15 +47,6 @@ enum Trend {
     }
   }
   
-  /// The foreground color to use with the trend.
-  var foregroundColor: Color {
-    switch self {
-    case .steady: return .cyan
-    case .rising: return .orange
-    case .falling: return .mint
-    }
-  }
-  
   /// Whether the trend represents a steady state.
   var isSteady: Bool {
     switch self {
@@ -81,6 +72,20 @@ enum Trend {
          .rising(_, let valueB),
          .falling(_, let valueB):
       return valueB
+    }
+  }
+  
+  // MARK: Methods
+  
+  /// The foreground color to use with the trend.
+  ///
+  /// - Parameter theme: The current color theme.
+  /// - Returns: A color.
+  func foregroundColor(for theme: ColorTheme) -> Color {
+    switch self {
+    case .steady: return theme.cyan
+    case .rising: return theme.orange
+    case .falling: return theme.mint
     }
   }
 }

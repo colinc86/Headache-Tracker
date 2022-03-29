@@ -22,4 +22,12 @@ extension View {
       .mask(self)
   }
   
+  /// Sets the view's color theme.
+  ///
+  /// - Parameter theme: The color theme.
+  /// - Returns: A view with the given color theme.
+  func colorTheme(_ theme: ColorTheme) -> some View {
+    environment(\.colorTheme, theme)
+  }
+  
 }

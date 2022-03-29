@@ -1,5 +1,5 @@
 //
-//  ActionCardView.swift
+//  ActionCard.swift
 //  Headache Tracker
 //
 //  Created by Colin Campbell on 3/4/22.
@@ -8,7 +8,7 @@
 import SwiftUI
 
 /// A card that displays a button and performs an action.
-struct ActionCardView: View {
+struct ActionCard: View {
   
   /// The card's title.
   let title: String
@@ -19,27 +19,32 @@ struct ActionCardView: View {
   /// The card's image.
   let systemImage: String
   
-  /// The card's color.
-  let foregroundColor: Color
-  
   /// The action to perform when the user taps the no headache button.
   let action: () async throws -> Void
+  
+  // MARK: Private properties
+  
+  /// The application's custom color theme.
+  @Environment(\.colorTheme) private var colorTheme
   
   // MARK: View body
   
   var body: some View {
-    TitleCaptionView(title: title, systemImage: systemImage, foregroundColor: foregroundColor) {
+    Card(
+      title: title,
+      systemImage: systemImage,
+      foregroundColor: colorTheme.teal
+    ) {
       AsyncButton(buttonTitle, action: action)
         .buttonStyle(BorderlessButtonStyle())
         .font(.title)
-        .foregroundColor(foregroundColor)
     }
   }
 }
 
-struct ActionView_Previews: PreviewProvider {
+struct ActionCard_Previews: PreviewProvider {
   static var previews: some View {
-    ActionCardView(title: "Test", buttonTitle: "Test", systemImage: "checkmark", foregroundColor: .teal, action: {})
+    ActionCard(title: "Test", buttonTitle: "Test", systemImage: "checkmark", action: {})
       .previewLayout(.fixed(width: 428, height: 70))
   }
 }

@@ -17,8 +17,8 @@ struct BlockGraph: View {
   /// The earliest date to draw in the graph.
   let earliestDate: Date?
   
-  /// The application's custom color scheme.
-  @AppStorage(AppSettings.colorScheme) private var colorScheme: AppColorScheme = .multicolor
+  /// The application's custom color theme.
+  @Environment(\.colorTheme) private var colorTheme
   
   // MARK: View body
   
@@ -99,7 +99,7 @@ extension BlockGraph {
   /// - Parameter index: The index of the severity.
   /// - Returns: A color.
   private func color(for index: Int) -> Color {
-    return (Headache.Severity(orderingValue: index) ?? .notPresent).color(for: colorScheme)
+    return colorTheme.color(for: Headache.Severity(orderingValue: index) ?? .notPresent)
   }
   
 }

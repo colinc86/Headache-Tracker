@@ -38,12 +38,12 @@ struct TagButton: View {
 /// A button style used with hashtags.
 struct TagButtonStyle: ButtonStyle {
   
-  /// The application's custom color scheme.
-  @AppStorage(AppSettings.colorScheme) var colorScheme: AppColorScheme = .multicolor
+  /// The application's custom color theme.
+  @Environment(\.colorTheme) private var colorTheme
   
   func makeBody(configuration: Configuration) -> some View {
     configuration.label
-      .foregroundColor(colorScheme.themeColor(for: .brandColor).opacity(configuration.isPressed ? 0.5 : 1.0))
+      .foregroundColor(colorTheme.baseColor.opacity(configuration.isPressed ? 0.5 : 1.0))
       .padding([.leading, .trailing], 4)
   }
 }
@@ -51,8 +51,8 @@ struct TagButtonStyle: ButtonStyle {
 /// A button style used with hashtags that should be deleted when tapped.
 struct DeletableTagButtonStyle: ButtonStyle {
   
-  /// The application's custom color scheme.
-  @AppStorage(AppSettings.colorScheme) var colorScheme: AppColorScheme = .multicolor
+  /// The application's custom color theme.
+  @Environment(\.colorTheme) private var colorTheme
   
   func makeBody(configuration: Configuration) -> some View {
     HStack {
@@ -63,7 +63,7 @@ struct DeletableTagButtonStyle: ButtonStyle {
     .padding(4)
     .padding(.trailing, 4)
     .foregroundColor(Color(uiColor: .systemBackground))
-    .background(colorScheme.themeColor(for: .brandColor).opacity(configuration.isPressed ? 0.5 : 1.0))
+    .background(colorTheme.baseColor.opacity(configuration.isPressed ? 0.5 : 1.0))
     .clipShape(Capsule())
   }
 }

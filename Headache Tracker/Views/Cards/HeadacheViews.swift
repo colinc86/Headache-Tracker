@@ -29,8 +29,8 @@ struct HeadacheViews: View {
   /// The view's presentation mode.
   @Environment(\.presentationMode) private var presentationMode
   
-  /// The application's custom color scheme.
-  @AppStorage(AppSettings.colorScheme) private var colorScheme: AppColorScheme = .multicolor
+  /// The application's custom color theme.
+  @Environment(\.colorTheme) private var colorTheme
   
   /// The health integration setting.
   @AppStorage(AppSettings.Health.healthIntegration) private var healthIntegration = false
@@ -94,34 +94,34 @@ struct HeadacheViews: View {
       if allowsResolution {
         // Resolve the Headache
         Section {
-          ActionCardView(title: "Resolve Headache", buttonTitle: "Resolve", systemImage: "face.smiling.fill", foregroundColor: colorScheme.themeColor(for: .teal), action: resolveConfirmation)
+          ActionCard(title: "Resolve Headache", buttonTitle: "Resolve", systemImage: "face.smiling.fill", action: resolveConfirmation)
         } footer: {
           Text("Is your headache gone? Tap Resolve to let the app know.")
         }
       }
       else {
         Section {
-          StatusCardView(resolved: headache.resolved)
+          StatusCard(resolved: headache.resolved)
         }
       }
       
       if showsAllCards || showTypeView {
         Section {
-          TypeCardView(type: headache.headacheType, classification: headache.headacheClassification, editButtonAction: editTypeAction)
+          TypeCard(type: headache.headacheType, classification: headache.headacheClassification, editAction: editTypeAction)
         }
       }
       
       // Onset
       if showsAllCards || showOnsetView, let onset = headache.startTime {
         Section {
-          OnsetCardView(onset: onset)
+          OnsetCard(onset: onset)
         }
       }
       
       // Duration
       if showsAllCards || showDurationView {
         Section {
-          DurationCardView(headache: headache)
+          DurationCard(headache: headache)
         }
       }
       
@@ -129,7 +129,7 @@ struct HeadacheViews: View {
       if showsAllCards || showProgressionView {
         if allowsEditing {
           if headache.progression.count > 1 {
-            ProgressionCardView(headache: headache)
+            ProgressionCard(headache: headache)
             
             ForEach(headache.severitiesArray, id: \.self) { severity in
               NavigationLink {
@@ -150,7 +150,7 @@ struct HeadacheViews: View {
         }
         else if headache.progression.count > 1 {
           Section {
-            ProgressionCardView(headache: headache)
+            ProgressionCard(headache: headache)
           }
         }
       }
@@ -158,14 +158,14 @@ struct HeadacheViews: View {
       // Notes
       if showsAllCards || showNotesView {
         Section {
-          NotesCardView(notes: headache.notes, editButtonAction: editNotesAction)
+          NotesCard(notes: headache.notes ?? "", editAction: editNotesAction)
         }
       }
       
       // Tags
       if showsAllCards || showTagsView {
         Section {
-          TagsCardView(tags: headache.tagValues, editAction: editTagsAction, tagAction: { _ in })
+          TagsCard(tags: headache.tagValues, editAction: editTagsAction, tagAction: { _ in })
         }
       }
       
@@ -238,15 +238,15 @@ struct HeadacheViews: View {
     })
     .sheet(isPresented: $showingEditTypeView) {
       EditTypeView(type: headache.headacheType, classification: headache.headacheClassification, identifier: headache.identifier ?? UUID())
-        .accentColor(colorScheme.themeColor(for: .brandColor))
+        .accentColor(colorTheme.baseColor)
     }
     .sheet(isPresented: $showingEditNotesView) {
       EditNotesView(notes: headache.notes ?? "", identifier: headache.identifier ?? UUID())
-        .accentColor(colorScheme.themeColor(for: .brandColor))
+        .accentColor(colorTheme.baseColor)
     }
     .sheet(isPresented: $showingEditTagsView) {
       EditTagsView(tags: headache.tagsArray.map({ $0.value ?? "" }), identifier: headache.identifier ?? UUID())
-        .accentColor(colorScheme.themeColor(for: .brandColor))
+        .accentColor(colorTheme.baseColor)
     }
   }
 }

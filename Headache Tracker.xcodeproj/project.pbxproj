@@ -15,35 +15,35 @@
 		3B051A9E27B3555E0017131D /* ConfirmationAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B051A9D27B3555E0017131D /* ConfirmationAlert.swift */; };
 		3B051AA027B3577B0017131D /* DestructiveConfirmationDialog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B051A9F27B3577B0017131D /* DestructiveConfirmationDialog.swift */; };
 		3B051AA727B37D060017131D /* SeverityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B051AA627B37D060017131D /* SeverityView.swift */; };
-		3B09191227BCCE1C00844F6C /* OnsetCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B09191127BCCE1C00844F6C /* OnsetCardView.swift */; };
-		3B09191427BCCF9500844F6C /* TitleCaptionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B09191327BCCF9500844F6C /* TitleCaptionView.swift */; };
-		3B09191627BCD38300844F6C /* DurationCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B09191527BCD38300844F6C /* DurationCardView.swift */; };
+		3B09191227BCCE1C00844F6C /* OnsetCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B09191127BCCE1C00844F6C /* OnsetCard.swift */; };
+		3B09191427BCCF9500844F6C /* Card.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B09191327BCCF9500844F6C /* Card.swift */; };
+		3B09191627BCD38300844F6C /* DurationCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B09191527BCD38300844F6C /* DurationCard.swift */; };
 		3B09191A27BD58A100844F6C /* SeveritySelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B09191927BD58A100844F6C /* SeveritySelectionView.swift */; };
 		3B09192127BD851700844F6C /* LineGraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B09192027BD851700844F6C /* LineGraph.swift */; };
 		3B09192327BD91F400844F6C /* SectionTitleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B09192227BD91F400844F6C /* SectionTitleView.swift */; };
-		3B10D45227ED5A77004B68AA /* TypeCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B10D45127ED5A77004B68AA /* TypeCardView.swift */; };
+		3B10D45227ED5A77004B68AA /* TypeCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B10D45127ED5A77004B68AA /* TypeCard.swift */; };
 		3B10D45327ED7A00004B68AA /* Headache+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFE7227D592A000DFACC1 /* Headache+Extensions.swift */; };
 		3B10D45627ED825F004B68AA /* Headache+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B10D45527ED825F004B68AA /* Headache+CoreDataClass.swift */; };
 		3B10D45727ED825F004B68AA /* Headache+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B10D45527ED825F004B68AA /* Headache+CoreDataClass.swift */; };
 		3B10D45927ED8FD3004B68AA /* EditTypeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B10D45827ED8FD3004B68AA /* EditTypeView.swift */; };
-		3B1C7DB427D2005E000B3A99 /* StatusCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1C7DB327D2005E000B3A99 /* StatusCardView.swift */; };
-		3B1C7DB627D205EE000B3A99 /* ActionCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1C7DB527D205EE000B3A99 /* ActionCardView.swift */; };
-		3B20EA1327EA770700B9800F /* TagsCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B20EA1227EA770700B9800F /* TagsCardView.swift */; };
+		3B1C7DB427D2005E000B3A99 /* StatusCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1C7DB327D2005E000B3A99 /* StatusCard.swift */; };
+		3B1C7DB627D205EE000B3A99 /* ActionCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1C7DB527D205EE000B3A99 /* ActionCard.swift */; };
+		3B20EA1327EA770700B9800F /* TagsCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B20EA1227EA770700B9800F /* TagsCard.swift */; };
 		3B20EA1B27EA98B900B9800F /* EditTagsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B20EA1A27EA98B900B9800F /* EditTagsView.swift */; };
 		3B20EA2227EAA29F00B9800F /* TagsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B20EA2127EAA29F00B9800F /* TagsView.swift */; };
 		3B20EA2427EAA67C00B9800F /* FlexibleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B20EA2327EAA67C00B9800F /* FlexibleView.swift */; };
 		3B20EA2627EAD68500B9800F /* TagButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B20EA2527EAD68500B9800F /* TagButton.swift */; };
 		3B29F73627E983F800C8772C /* ListOptionsMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B29F73527E983F800C8772C /* ListOptionsMenu.swift */; };
-		3B29F73827E98AE100C8772C /* NotesCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B29F73727E98AE100C8772C /* NotesCardView.swift */; };
+		3B29F73827E98AE100C8772C /* NotesCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B29F73727E98AE100C8772C /* NotesCard.swift */; };
 		3B29F73A27E98E1600C8772C /* CheckmarkButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B29F73927E98E1600C8772C /* CheckmarkButton.swift */; };
-		3B29F73C27E9909900C8772C /* ProgressionCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B29F73B27E9909900C8772C /* ProgressionCardView.swift */; };
+		3B29F73C27E9909900C8772C /* ProgressionCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B29F73B27E9909900C8772C /* ProgressionCard.swift */; };
 		3B29F73E27E99CE000C8772C /* EditNotesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B29F73D27E99CE000C8772C /* EditNotesView.swift */; };
 		3B39DADB27ACFC9C00D39BB5 /* SubtitleCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B39DADA27ACFC9C00D39BB5 /* SubtitleCell.swift */; };
 		3B39DAE427AD06EA00D39BB5 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B39DAE327AD06EA00D39BB5 /* SettingsView.swift */; };
 		3B3EAAEE27E4F92800F5D8B4 /* MapCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3EAAED27E4F92800F5D8B4 /* MapCell.swift */; };
 		3B3EAAF027E801BA00F5D8B4 /* MapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3EAAEF27E801BA00F5D8B4 /* MapView.swift */; };
 		3B3FFD6E27D58CED00DFACC1 /* Headache_Tracker.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 3BF5314127ACE18F00056673 /* Headache_Tracker.xcdatamodeld */; };
-		3B3FFD6F27D58D4A00DFACC1 /* TitleCaptionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B09191327BCCF9500844F6C /* TitleCaptionView.swift */; };
+		3B3FFD6F27D58D4A00DFACC1 /* Card.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B09191327BCCF9500844F6C /* Card.swift */; };
 		3B3FFD7527D58D5400DFACC1 /* SeveritySelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B09191927BD58A100844F6C /* SeveritySelectionView.swift */; };
 		3B3FFD7727D58D5400DFACC1 /* OutlookView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BE6627C35644007AAAC6 /* OutlookView.swift */; };
 		3B3FFE8D27D592A000DFACC1 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFE4D27D592A000DFACC1 /* Constants.swift */; };
@@ -104,8 +104,6 @@
 		3B3FFECA27D592A000DFACC1 /* String+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFE7327D592A000DFACC1 /* String+Extensions.swift */; };
 		3B3FFECB27D592A000DFACC1 /* DataController+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFE7427D592A000DFACC1 /* DataController+Extensions.swift */; };
 		3B3FFECC27D592A000DFACC1 /* DataController+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFE7427D592A000DFACC1 /* DataController+Extensions.swift */; };
-		3B3FFECD27D592A000DFACC1 /* UIColor+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFE7527D592A000DFACC1 /* UIColor+Extensions.swift */; };
-		3B3FFECE27D592A000DFACC1 /* UIColor+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFE7527D592A000DFACC1 /* UIColor+Extensions.swift */; };
 		3B3FFECF27D592A000DFACC1 /* Calendar+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFE7627D592A000DFACC1 /* Calendar+Extensions.swift */; };
 		3B3FFED027D592A000DFACC1 /* Calendar+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFE7627D592A000DFACC1 /* Calendar+Extensions.swift */; };
 		3B3FFED127D592A000DFACC1 /* View+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFE7727D592A000DFACC1 /* View+Extensions.swift */; };
@@ -165,12 +163,14 @@
 		3B3FFF2A27DA8E8B00DFACC1 /* TestPredictor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFF1D27DA84DB00DFACC1 /* TestPredictor.swift */; };
 		3B3FFF2C27DAA89500DFACC1 /* WeatherStatistics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFF2B27DAA89500DFACC1 /* WeatherStatistics.swift */; };
 		3B3FFF2D27DAA89500DFACC1 /* WeatherStatistics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFF2B27DAA89500DFACC1 /* WeatherStatistics.swift */; };
-		3B5817C327EEB3D600F9E49B /* ColorSchemeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B5817C227EEB3D600F9E49B /* ColorSchemeView.swift */; };
+		3B5817C327EEB3D600F9E49B /* ColorThemeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B5817C227EEB3D600F9E49B /* ColorThemeView.swift */; };
 		3B5817C627EECDC300F9E49B /* IrregularGradient in Frameworks */ = {isa = PBXBuildFile; productRef = 3B5817C527EECDC300F9E49B /* IrregularGradient */; };
-		3B5817C827EEDFC400F9E49B /* AppColorScheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B5817C727EEDFC400F9E49B /* AppColorScheme.swift */; };
-		3B5817C927EEDFC400F9E49B /* AppColorScheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B5817C727EEDFC400F9E49B /* AppColorScheme.swift */; };
+		3B5817C827EEDFC400F9E49B /* ColorTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B5817C727EEDFC400F9E49B /* ColorTheme.swift */; };
+		3B5817C927EEDFC400F9E49B /* ColorTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B5817C727EEDFC400F9E49B /* ColorTheme.swift */; };
 		3B5817CB27EEDFED00F9E49B /* ColorWell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B5817CA27EEDFED00F9E49B /* ColorWell.swift */; };
-		3B5817CE27EEE00100F9E49B /* ColorSchemePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B5817CD27EEE00100F9E49B /* ColorSchemePicker.swift */; };
+		3B5817CE27EEE00100F9E49B /* ColorThemePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B5817CD27EEE00100F9E49B /* ColorThemePicker.swift */; };
+		3B5817D127F3A47000F9E49B /* EnvironmentValues+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B5817D027F3A47000F9E49B /* EnvironmentValues+Extensions.swift */; };
+		3B5817D227F3A47000F9E49B /* EnvironmentValues+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B5817D027F3A47000F9E49B /* EnvironmentValues+Extensions.swift */; };
 		3B68BDF927BDFCD3007AAAC6 /* AnalyzeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BDF827BDFCD3007AAAC6 /* AnalyzeView.swift */; };
 		3B68BDFB27BE0F00007AAAC6 /* BarGraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BDFA27BE0F00007AAAC6 /* BarGraph.swift */; };
 		3B68BE0C27BF5899007AAAC6 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B68BE0B27BF5899007AAAC6 /* GoogleService-Info.plist */; };
@@ -244,7 +244,7 @@
 		3BF5315727ACE18F00056673 /* Headache_TrackerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF5315627ACE18F00056673 /* Headache_TrackerUITests.swift */; };
 		3BF5315927ACE18F00056673 /* Headache_TrackerUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF5315827ACE18F00056673 /* Headache_TrackerUITestsLaunchTests.swift */; };
 		3BF5316827ACE1DA00056673 /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3BF5316727ACE1DA00056673 /* HealthKit.framework */; };
-		3BF7943927DFB6970094C531 /* EditableDateTimeCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF7943827DFB6970094C531 /* EditableDateTimeCardView.swift */; };
+		3BF7943927DFB6970094C531 /* EditableDateTimeCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF7943827DFB6970094C531 /* EditableDateTimeCard.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -297,28 +297,28 @@
 		3B051AA327B3751B0017131D /* Headache-Tracker-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Headache-Tracker-Info.plist"; sourceTree = SOURCE_ROOT; };
 		3B051AA627B37D060017131D /* SeverityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeverityView.swift; sourceTree = "<group>"; };
 		3B051AA827B4DC4C0017131D /* Headache_Tracker 1.1.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Headache_Tracker 1.1.xcdatamodel"; sourceTree = "<group>"; };
-		3B09191127BCCE1C00844F6C /* OnsetCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnsetCardView.swift; sourceTree = "<group>"; };
-		3B09191327BCCF9500844F6C /* TitleCaptionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TitleCaptionView.swift; sourceTree = "<group>"; };
-		3B09191527BCD38300844F6C /* DurationCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DurationCardView.swift; sourceTree = "<group>"; };
+		3B09191127BCCE1C00844F6C /* OnsetCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnsetCard.swift; sourceTree = "<group>"; };
+		3B09191327BCCF9500844F6C /* Card.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Card.swift; sourceTree = "<group>"; };
+		3B09191527BCD38300844F6C /* DurationCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DurationCard.swift; sourceTree = "<group>"; };
 		3B09191927BD58A100844F6C /* SeveritySelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeveritySelectionView.swift; sourceTree = "<group>"; };
 		3B09192027BD851700844F6C /* LineGraph.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineGraph.swift; sourceTree = "<group>"; };
 		3B09192227BD91F400844F6C /* SectionTitleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SectionTitleView.swift; sourceTree = "<group>"; };
-		3B10D45127ED5A77004B68AA /* TypeCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeCardView.swift; sourceTree = "<group>"; };
+		3B10D45127ED5A77004B68AA /* TypeCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeCard.swift; sourceTree = "<group>"; };
 		3B10D45427ED7D78004B68AA /* Headache_Tracker 1.8.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Headache_Tracker 1.8.xcdatamodel"; sourceTree = "<group>"; };
 		3B10D45527ED825F004B68AA /* Headache+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Headache+CoreDataClass.swift"; sourceTree = "<group>"; };
 		3B10D45827ED8FD3004B68AA /* EditTypeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditTypeView.swift; sourceTree = "<group>"; };
 		3B1C7DAE27D1EE32000B3A99 /* Headache_Tracker 1.6.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Headache_Tracker 1.6.xcdatamodel"; sourceTree = "<group>"; };
-		3B1C7DB327D2005E000B3A99 /* StatusCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusCardView.swift; sourceTree = "<group>"; };
-		3B1C7DB527D205EE000B3A99 /* ActionCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionCardView.swift; sourceTree = "<group>"; };
-		3B20EA1227EA770700B9800F /* TagsCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagsCardView.swift; sourceTree = "<group>"; };
+		3B1C7DB327D2005E000B3A99 /* StatusCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusCard.swift; sourceTree = "<group>"; };
+		3B1C7DB527D205EE000B3A99 /* ActionCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionCard.swift; sourceTree = "<group>"; };
+		3B20EA1227EA770700B9800F /* TagsCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagsCard.swift; sourceTree = "<group>"; };
 		3B20EA1A27EA98B900B9800F /* EditTagsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditTagsView.swift; sourceTree = "<group>"; };
 		3B20EA2127EAA29F00B9800F /* TagsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagsView.swift; sourceTree = "<group>"; };
 		3B20EA2327EAA67C00B9800F /* FlexibleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlexibleView.swift; sourceTree = "<group>"; };
 		3B20EA2527EAD68500B9800F /* TagButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagButton.swift; sourceTree = "<group>"; };
 		3B29F73527E983F800C8772C /* ListOptionsMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListOptionsMenu.swift; sourceTree = "<group>"; };
-		3B29F73727E98AE100C8772C /* NotesCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotesCardView.swift; sourceTree = "<group>"; };
+		3B29F73727E98AE100C8772C /* NotesCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotesCard.swift; sourceTree = "<group>"; };
 		3B29F73927E98E1600C8772C /* CheckmarkButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckmarkButton.swift; sourceTree = "<group>"; };
-		3B29F73B27E9909900C8772C /* ProgressionCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressionCardView.swift; sourceTree = "<group>"; };
+		3B29F73B27E9909900C8772C /* ProgressionCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressionCard.swift; sourceTree = "<group>"; };
 		3B29F73D27E99CE000C8772C /* EditNotesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditNotesView.swift; sourceTree = "<group>"; };
 		3B39DADA27ACFC9C00D39BB5 /* SubtitleCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubtitleCell.swift; sourceTree = "<group>"; };
 		3B39DAE327AD06EA00D39BB5 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -354,7 +354,6 @@
 		3B3FFE7227D592A000DFACC1 /* Headache+Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Headache+Extensions.swift"; sourceTree = "<group>"; };
 		3B3FFE7327D592A000DFACC1 /* String+Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+Extensions.swift"; sourceTree = "<group>"; };
 		3B3FFE7427D592A000DFACC1 /* DataController+Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "DataController+Extensions.swift"; sourceTree = "<group>"; };
-		3B3FFE7527D592A000DFACC1 /* UIColor+Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIColor+Extensions.swift"; sourceTree = "<group>"; };
 		3B3FFE7627D592A000DFACC1 /* Calendar+Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Calendar+Extensions.swift"; sourceTree = "<group>"; };
 		3B3FFE7727D592A000DFACC1 /* View+Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "View+Extensions.swift"; sourceTree = "<group>"; };
 		3B3FFE7827D592A000DFACC1 /* UUID+Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UUID+Extensions.swift"; sourceTree = "<group>"; };
@@ -389,10 +388,11 @@
 		3B3FFF2527DA8D2300DFACC1 /* TrainingInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingInput.swift; sourceTree = "<group>"; };
 		3B3FFF2B27DAA89500DFACC1 /* WeatherStatistics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherStatistics.swift; sourceTree = "<group>"; };
 		3B4BA6F327B6289C00F38851 /* Headache_Tracker 1.2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Headache_Tracker 1.2.xcdatamodel"; sourceTree = "<group>"; };
-		3B5817C227EEB3D600F9E49B /* ColorSchemeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorSchemeView.swift; sourceTree = "<group>"; };
-		3B5817C727EEDFC400F9E49B /* AppColorScheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppColorScheme.swift; sourceTree = "<group>"; };
+		3B5817C227EEB3D600F9E49B /* ColorThemeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorThemeView.swift; sourceTree = "<group>"; };
+		3B5817C727EEDFC400F9E49B /* ColorTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorTheme.swift; sourceTree = "<group>"; };
 		3B5817CA27EEDFED00F9E49B /* ColorWell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorWell.swift; sourceTree = "<group>"; };
-		3B5817CD27EEE00100F9E49B /* ColorSchemePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorSchemePicker.swift; sourceTree = "<group>"; };
+		3B5817CD27EEE00100F9E49B /* ColorThemePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorThemePicker.swift; sourceTree = "<group>"; };
+		3B5817D027F3A47000F9E49B /* EnvironmentValues+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EnvironmentValues+Extensions.swift"; sourceTree = "<group>"; };
 		3B68BDF827BDFCD3007AAAC6 /* AnalyzeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyzeView.swift; sourceTree = "<group>"; };
 		3B68BDFA27BE0F00007AAAC6 /* BarGraph.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarGraph.swift; sourceTree = "<group>"; };
 		3B68BE0B27BF5899007AAAC6 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
@@ -451,7 +451,7 @@
 		3BF5315827ACE18F00056673 /* Headache_TrackerUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Headache_TrackerUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		3BF5316527ACE1D900056673 /* Headache Tracker.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Headache Tracker.entitlements"; sourceTree = "<group>"; };
 		3BF5316727ACE1DA00056673 /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = SDKROOT; };
-		3BF7943827DFB6970094C531 /* EditableDateTimeCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditableDateTimeCardView.swift; sourceTree = "<group>"; };
+		3BF7943827DFB6970094C531 /* EditableDateTimeCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditableDateTimeCard.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -556,35 +556,35 @@
 			path = Cells;
 			sourceTree = "<group>";
 		};
-		3B1C7DB227D2003C000B3A99 /* Card Views */ = {
+		3B1C7DB227D2003C000B3A99 /* Cards */ = {
 			isa = PBXGroup;
 			children = (
-				3B1C7DB527D205EE000B3A99 /* ActionCardView.swift */,
-				3B09191527BCD38300844F6C /* DurationCardView.swift */,
-				3BF7943827DFB6970094C531 /* EditableDateTimeCardView.swift */,
+				3B1C7DB527D205EE000B3A99 /* ActionCard.swift */,
+				3B09191527BCD38300844F6C /* DurationCard.swift */,
+				3BF7943827DFB6970094C531 /* EditableDateTimeCard.swift */,
 				3B3FFF1227D868F300DFACC1 /* HeadacheViews.swift */,
-				3B29F73727E98AE100C8772C /* NotesCardView.swift */,
-				3B09191127BCCE1C00844F6C /* OnsetCardView.swift */,
+				3B29F73727E98AE100C8772C /* NotesCard.swift */,
+				3B09191127BCCE1C00844F6C /* OnsetCard.swift */,
 				3B3FFF1027D8604600DFACC1 /* PredictionViews.swift */,
-				3B29F73B27E9909900C8772C /* ProgressionCardView.swift */,
-				3B1C7DB327D2005E000B3A99 /* StatusCardView.swift */,
-				3B20EA1227EA770700B9800F /* TagsCardView.swift */,
-				3B10D45127ED5A77004B68AA /* TypeCardView.swift */,
+				3B29F73B27E9909900C8772C /* ProgressionCard.swift */,
+				3B1C7DB327D2005E000B3A99 /* StatusCard.swift */,
+				3B20EA1227EA770700B9800F /* TagsCard.swift */,
+				3B10D45127ED5A77004B68AA /* TypeCard.swift */,
 			);
-			path = "Card Views";
+			path = Cards;
 			sourceTree = "<group>";
 		};
 		3B39DAE027AD00B700D39BB5 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				3B1C7DB227D2003C000B3A99 /* Cards */,
 				3B09191027BCC9B200844F6C /* Cells */,
 				3B051A9627B198CB0017131D /* Content Views */,
 				3B68BDFC27BE0FF0007AAAC6 /* Graphs */,
-				3B1C7DB227D2003C000B3A99 /* Card Views */,
 				3B29F73927E98E1600C8772C /* CheckmarkButton.swift */,
 				3B5817CA27EEDFED00F9E49B /* ColorWell.swift */,
-				3B5817C227EEB3D600F9E49B /* ColorSchemeView.swift */,
-				3B5817CD27EEE00100F9E49B /* ColorSchemePicker.swift */,
+				3B5817CD27EEE00100F9E49B /* ColorThemePicker.swift */,
+				3B5817C227EEB3D600F9E49B /* ColorThemeView.swift */,
 				3B20EA2327EAA67C00B9800F /* FlexibleView.swift */,
 				3B29F73527E983F800C8772C /* ListOptionsMenu.swift */,
 				3B3EAAEF27E801BA00F5D8B4 /* MapView.swift */,
@@ -605,7 +605,7 @@
 				3B3FFF1427D87EAE00DFACC1 /* ErrorButton.swift */,
 				3B68BE6627C35644007AAAC6 /* OutlookView.swift */,
 				3B09191927BD58A100844F6C /* SeveritySelectionView.swift */,
-				3B09191327BCCF9500844F6C /* TitleCaptionView.swift */,
+				3B09191327BCCF9500844F6C /* Card.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -720,12 +720,12 @@
 				3B3FFE7927D592A000DFACC1 /* Color+Extensions.swift */,
 				3B3FFE7427D592A000DFACC1 /* DataController+Extensions.swift */,
 				3B3FFE7B27D592A000DFACC1 /* Date+Extensions.swift */,
+				3B5817D027F3A47000F9E49B /* EnvironmentValues+Extensions.swift */,
 				3B3FFE6E27D592A000DFACC1 /* HKCategoryValueSeverity+Extensions.swift */,
 				3BE7321327DB1FC5007C013B /* MLDataTable+Extensions.swift */,
 				3B3FFE7C27D592A000DFACC1 /* Numeric+Extensions.swift */,
 				3BE7321727DB2963007C013B /* Sequence+Extensions.swift */,
 				3B3FFE7327D592A000DFACC1 /* String+Extensions.swift */,
-				3B3FFE7527D592A000DFACC1 /* UIColor+Extensions.swift */,
 				3B3FFE7827D592A000DFACC1 /* UUID+Extensions.swift */,
 				3B3FFE7727D592A000DFACC1 /* View+Extensions.swift */,
 			);
@@ -875,8 +875,8 @@
 		3BD1D34D27E195F50072A576 /* Settings */ = {
 			isa = PBXGroup;
 			children = (
-				3B5817C727EEDFC400F9E49B /* AppColorScheme.swift */,
 				3B3FFE5427D592A000DFACC1 /* AppSettings.swift */,
+				3B5817C727EEDFC400F9E49B /* ColorTheme.swift */,
 				3B3FFE4D27D592A000DFACC1 /* Constants.swift */,
 				3B3FFE5527D592A000DFACC1 /* SharedUserDefaults.swift */,
 			);
@@ -1229,7 +1229,6 @@
 				3B3FFF0D27D5CFC500DFACC1 /* OutlookWidgetView.swift in Sources */,
 				3B10D45327ED7A00004B68AA /* Headache+Extensions.swift in Sources */,
 				3B3FFED827D592A000DFACC1 /* Bundle+Extensions.swift in Sources */,
-				3B3FFECE27D592A000DFACC1 /* UIColor+Extensions.swift in Sources */,
 				3B3FFEBC27D592A000DFACC1 /* InputUnion.swift in Sources */,
 				3B3FFEBA27D592A000DFACC1 /* ControlledUserInput.swift in Sources */,
 				3B9332FC27CF401F00BACE93 /* SeverityWidgetContent.swift in Sources */,
@@ -1268,6 +1267,7 @@
 				3B3FFEBE27D592A000DFACC1 /* EnvironmentalInput.swift in Sources */,
 				3B3FFE8E27D592A000DFACC1 /* Constants.swift in Sources */,
 				3B3FFECC27D592A000DFACC1 /* DataController+Extensions.swift in Sources */,
+				3B5817D227F3A47000F9E49B /* EnvironmentValues+Extensions.swift in Sources */,
 				3B3FFEDC27D592A000DFACC1 /* Numeric+Extensions.swift in Sources */,
 				3B3FFF2727DA8D2300DFACC1 /* TrainingInput.swift in Sources */,
 				3B3FFD7527D58D5400DFACC1 /* SeveritySelectionView.swift in Sources */,
@@ -1279,7 +1279,7 @@
 				3B68BE6127C34B8E007AAAC6 /* OutlookWidgetContent.swift in Sources */,
 				3B3FFED627D592A000DFACC1 /* Color+Extensions.swift in Sources */,
 				3B3FFEF027D592A000DFACC1 /* Previewing.swift in Sources */,
-				3B5817C927EEDFC400F9E49B /* AppColorScheme.swift in Sources */,
+				3B5817C927EEDFC400F9E49B /* ColorTheme.swift in Sources */,
 				3B3FFECA27D592A000DFACC1 /* String+Extensions.swift in Sources */,
 				3B3FFEA027D592A000DFACC1 /* Outlook.swift in Sources */,
 				3B86C6E427E40B5B00CCD7A0 /* MeasurementSystem.swift in Sources */,
@@ -1287,7 +1287,7 @@
 				3B3FFEAC27D592A000DFACC1 /* Predictor.swift in Sources */,
 				3B9332FE27CF40A300BACE93 /* SeverityWidgetProvider.swift in Sources */,
 				3B9332F427CF3BB200BACE93 /* SeverityWidget.swift in Sources */,
-				3B3FFD6F27D58D4A00DFACC1 /* TitleCaptionView.swift in Sources */,
+				3B3FFD6F27D58D4A00DFACC1 /* Card.swift in Sources */,
 				3B3FFED427D592A000DFACC1 /* UUID+Extensions.swift in Sources */,
 				3B3FFE9A27D592A000DFACC1 /* AppSettings.swift in Sources */,
 				3B86C6EE27E4310700CCD7A0 /* Location+Extensions.swift in Sources */,
@@ -1308,14 +1308,14 @@
 			files = (
 				3B3FFF1527D87EAE00DFACC1 /* ErrorButton.swift in Sources */,
 				3B051A8F27B0FA9B0017131D /* HeadacheCell.swift in Sources */,
-				3B10D45227ED5A77004B68AA /* TypeCardView.swift in Sources */,
+				3B10D45227ED5A77004B68AA /* TypeCard.swift in Sources */,
 				3B3FFEB727D592A000DFACC1 /* ChronologicalInput.swift in Sources */,
 				3BAAA69727CCA7A200C0DDC4 /* TouchLocatingView.swift in Sources */,
 				3B3FFF2427DA8C5E00DFACC1 /* PredictionOutput.swift in Sources */,
 				3B86C6E327E40B5B00CCD7A0 /* MeasurementSystem.swift in Sources */,
-				3B1C7DB427D2005E000B3A99 /* StatusCardView.swift in Sources */,
+				3B1C7DB427D2005E000B3A99 /* StatusCard.swift in Sources */,
 				3B93330227CF51C600BACE93 /* AppDelegate.swift in Sources */,
-				3B29F73827E98AE100C8772C /* NotesCardView.swift in Sources */,
+				3B29F73827E98AE100C8772C /* NotesCard.swift in Sources */,
 				3B3FFEAB27D592A000DFACC1 /* Predictor.swift in Sources */,
 				3B68BDFB27BE0F00007AAAC6 /* BarGraph.swift in Sources */,
 				3B3FFEAD27D592A000DFACC1 /* SeverityClassifierOutput.swift in Sources */,
@@ -1323,9 +1323,9 @@
 				3BA933B127DFA5D000BAD5A4 /* AddHeadacheView.swift in Sources */,
 				3B9332EA27CF1E8400BACE93 /* FeedbackView.swift in Sources */,
 				3B5817CB27EEDFED00F9E49B /* ColorWell.swift in Sources */,
-				3B09191227BCCE1C00844F6C /* OnsetCardView.swift in Sources */,
+				3B09191227BCCE1C00844F6C /* OnsetCard.swift in Sources */,
 				3B3FFE9327D592A000DFACC1 /* HeadacheStatistics.swift in Sources */,
-				3B09191427BCCF9500844F6C /* TitleCaptionView.swift in Sources */,
+				3B09191427BCCF9500844F6C /* Card.swift in Sources */,
 				3B3FFEAF27D592A000DFACC1 /* OnsetRegressorOutput.swift in Sources */,
 				3B20EA1B27EA98B900B9800F /* EditTagsView.swift in Sources */,
 				3B051A4E27B0E9060017131D /* HeadachesView.swift in Sources */,
@@ -1334,7 +1334,7 @@
 				3B3FFEC327D592A000DFACC1 /* TrainingData+Extensions.swift in Sources */,
 				3B3FFEE127D592A000DFACC1 /* UnitRate.swift in Sources */,
 				3B3FFEC727D592A000DFACC1 /* Headache+Extensions.swift in Sources */,
-				3B5817CE27EEE00100F9E49B /* ColorSchemePicker.swift in Sources */,
+				3B5817CE27EEE00100F9E49B /* ColorThemePicker.swift in Sources */,
 				3B93A6E027D5591F00BCBDE1 /* BlockGraph.swift in Sources */,
 				3B3FFEA927D592A000DFACC1 /* Model.swift in Sources */,
 				3B3FFEDB27D592A000DFACC1 /* Numeric+Extensions.swift in Sources */,
@@ -1345,7 +1345,7 @@
 				3BD1D35227E1CF820072A576 /* ModelInputView.swift in Sources */,
 				3B3FFEE727D592A000DFACC1 /* Weather.swift in Sources */,
 				3B051AA027B3577B0017131D /* DestructiveConfirmationDialog.swift in Sources */,
-				3B1C7DB627D205EE000B3A99 /* ActionCardView.swift in Sources */,
+				3B1C7DB627D205EE000B3A99 /* ActionCard.swift in Sources */,
 				3BAAA69327CC8A5800C0DDC4 /* GraphList.swift in Sources */,
 				3B3FFECF27D592A000DFACC1 /* Calendar+Extensions.swift in Sources */,
 				3BD1D34B27E192D30072A576 /* ToggleCell.swift in Sources */,
@@ -1354,7 +1354,7 @@
 				3B3FFEDF27D592A000DFACC1 /* AlertManager.swift in Sources */,
 				3B3FFEE927D592A000DFACC1 /* MotionManager.swift in Sources */,
 				3BE7321827DB2963007C013B /* Sequence+Extensions.swift in Sources */,
-				3B20EA1327EA770700B9800F /* TagsCardView.swift in Sources */,
+				3B20EA1327EA770700B9800F /* TagsCard.swift in Sources */,
 				3B3FFEF327D592A000DFACC1 /* DDBugfenderLogger.swift in Sources */,
 				3B3FFEED27D592A000DFACC1 /* HolisticOutlook.swift in Sources */,
 				3B29F73627E983F800C8772C /* ListOptionsMenu.swift in Sources */,
@@ -1368,7 +1368,7 @@
 				3B68BE6A27C35778007AAAC6 /* OutlookView.swift in Sources */,
 				3BD1D34927E190EE0072A576 /* PredictorsView.swift in Sources */,
 				3B3FFE9127D592A000DFACC1 /* Trend.swift in Sources */,
-				3B5817C827EEDFC400F9E49B /* AppColorScheme.swift in Sources */,
+				3B5817C827EEDFC400F9E49B /* ColorTheme.swift in Sources */,
 				3B3FFE8F27D592A000DFACC1 /* Statistic.swift in Sources */,
 				3B3FFE9927D592A000DFACC1 /* AppSettings.swift in Sources */,
 				3BF5313927ACE18D00056673 /* ContentView.swift in Sources */,
@@ -1379,15 +1379,15 @@
 				3B3FFF1127D8604600DFACC1 /* PredictionViews.swift in Sources */,
 				3BF5313727ACE18D00056673 /* Headache_TrackerApp.swift in Sources */,
 				3B3FFEBD27D592A000DFACC1 /* EnvironmentalInput.swift in Sources */,
+				3B5817D127F3A47000F9E49B /* EnvironmentValues+Extensions.swift in Sources */,
 				3B3FFED927D592A000DFACC1 /* Date+Extensions.swift in Sources */,
 				3B3FFEC927D592A000DFACC1 /* String+Extensions.swift in Sources */,
 				3B10D45927ED8FD3004B68AA /* EditTypeView.swift in Sources */,
 				3B20EA2627EAD68500B9800F /* TagButton.swift in Sources */,
 				3B3FFEE327D592A000DFACC1 /* BackgroundTask.swift in Sources */,
-				3B3FFECD27D592A000DFACC1 /* UIColor+Extensions.swift in Sources */,
-				3BF7943927DFB6970094C531 /* EditableDateTimeCardView.swift in Sources */,
+				3BF7943927DFB6970094C531 /* EditableDateTimeCard.swift in Sources */,
 				3B09191A27BD58A100844F6C /* SeveritySelectionView.swift in Sources */,
-				3B5817C327EEB3D600F9E49B /* ColorSchemeView.swift in Sources */,
+				3B5817C327EEB3D600F9E49B /* ColorThemeView.swift in Sources */,
 				3B09192127BD851700844F6C /* LineGraph.swift in Sources */,
 				3B3FFEEF27D592A000DFACC1 /* Previewing.swift in Sources */,
 				3B3FFE9D27D592A000DFACC1 /* TrainingData+CoreDataClass.swift in Sources */,
@@ -1404,10 +1404,10 @@
 				3B3FFF2627DA8D2300DFACC1 /* TrainingInput.swift in Sources */,
 				3BF5314327ACE18F00056673 /* Headache_Tracker.xcdatamodeld in Sources */,
 				3B3FFE8D27D592A000DFACC1 /* Constants.swift in Sources */,
-				3B29F73C27E9909900C8772C /* ProgressionCardView.swift in Sources */,
+				3B29F73C27E9909900C8772C /* ProgressionCard.swift in Sources */,
 				3B051A9E27B3555E0017131D /* ConfirmationAlert.swift in Sources */,
 				3B68BDF927BDFCD3007AAAC6 /* AnalyzeView.swift in Sources */,
-				3B09191627BCD38300844F6C /* DurationCardView.swift in Sources */,
+				3B09191627BCD38300844F6C /* DurationCard.swift in Sources */,
 				3B3FFEEB27D592A000DFACC1 /* LocationManager.swift in Sources */,
 				3B3FFF1B27D897B700DFACC1 /* Waiter.swift in Sources */,
 				3B3FFEE527D592A000DFACC1 /* WeatherManager.swift in Sources */,

@@ -37,7 +37,7 @@ struct AddHeadacheView: View {
       }
       
       Section {
-        EditableDateTimeCardView(onset: $onset, title: "Onset", systemImage: "clock.fill", foregroundColor: .purple)
+        EditableDateTimeCard(title: "Onset", foregroundColor: .purple, date: $onset)
       } header: {
         SectionTitleView(title: "When did it start?")
       }
@@ -51,7 +51,7 @@ struct AddHeadacheView: View {
       
       if resolved {
         Section {
-          EditableDateTimeCardView(onset: $end, title: "End", systemImage: "clock.fill", foregroundColor: .teal)
+          EditableDateTimeCard(title: "End", foregroundColor: .teal, date: $end)
         } header: {
           SectionTitleView(title: "When did it end?")
         }

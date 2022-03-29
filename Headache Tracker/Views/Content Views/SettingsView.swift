@@ -26,8 +26,8 @@ struct SettingsView: View {
   /// The app's data refresher.
   @EnvironmentObject private var refresher: Refresher
   
-  /// The application's custom color scheme.
-  @AppStorage(AppSettings.colorScheme) var colorScheme: AppColorScheme = .multicolor
+  /// The application's custom color theme.
+  @AppStorage(AppSettings.colorTheme) var colorTheme: ColorTheme = .system
   
   /// The application's dim screen setting.
   @AppStorage(AppSettings.shouldDimScreen) var shouldDimScreen: Bool = false
@@ -142,7 +142,7 @@ struct SettingsView: View {
         // Integrations
         Section("Integrations") {
           Toggle("Health App Integration", isOn: healthAppIntegration)
-            .tint(colorScheme.themeColor(for: .brandColor))
+            .tint(colorTheme.baseColor)
           
           Picker("Delete Health Data", selection: $deleteDisposition) {
             ForEach(HeadacheManager.DeleteDisposition.allCases) { disposition in
@@ -168,7 +168,7 @@ struct SettingsView: View {
           }
           
           Toggle("Check-Ins", isOn: $checkInAlerts)
-            .tint(colorScheme.themeColor(for: .brandColor))
+            .tint(colorTheme.baseColor)
             .disabled(alertsDenied)
           
           Picker("Check-In Interval", selection: $checkInInterval) {
@@ -189,11 +189,11 @@ struct SettingsView: View {
           }
           
           Toggle("Prediction Notifications", isOn: $realTimeAlerts)
-            .tint(colorScheme.themeColor(for: .brandColor))
+            .tint(colorTheme.baseColor)
           
           Toggle("Daily Outlook", isOn: $dailyOutlookAlerts)
             .onChange(of: dailyOutlookAlerts, perform: dailyOutlookAlertsChanged)
-            .tint(colorScheme.themeColor(for: .brandColor))
+            .tint(colorTheme.baseColor)
           
           DatePicker("Daily Outlook Time", selection: dailyOutlookDate, displayedComponents: .hourAndMinute)
             .disabled(!dailyOutlookAlerts)
@@ -207,18 +207,18 @@ struct SettingsView: View {
           }
           
           NavigationLink {
-            ColorSchemePicker()
+            ColorThemePicker(theme: $colorTheme)
           } label: {
             HStack {
               Text("Theme")
-              ColorSchemeView(scheme: colorScheme, titleAlignment: .trailing)
+              ColorThemeView(theme: colorTheme, titleAlignment: .trailing)
                 .foregroundColor(.secondary)
-                .id(colorScheme)
+                .id(colorTheme)
             }
           }
           
           Toggle("Dim Screen", isOn: $shouldDimScreen)
-            .tint(colorScheme.themeColor(for: .brandColor))
+            .tint(colorTheme.baseColor)
           
           Picker("Dimming Percent", selection: $screenDimPercent) {
             Text("25%").tag(0.25)
@@ -235,7 +235,7 @@ struct SettingsView: View {
           
           Toggle("Submit Crash Data", isOn: $enableCrashReporting)
             .onChange(of: enableCrashReporting, perform: enableCrashReportingValueChanged)
-            .tint(colorScheme.themeColor(for: .brandColor))
+            .tint(colorTheme.baseColor)
           
           SubtitleCell(title: "Version", subtitle: Bundle.main.humanReadableVersionString)
         }

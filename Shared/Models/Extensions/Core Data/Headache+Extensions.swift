@@ -251,11 +251,12 @@ extension Headache {
   ///
   /// - Parameter scheme: The color scheme.
   /// - Returns: An array of colors.
-  func severityColors(for scheme: AppColorScheme) -> [Color] {
+  func severityColors(for theme: ColorTheme) -> [Color] {
     let range = severityRange
     var colors = [Color]()
     for i in range.lowerBound.orderingValue ... range.upperBound.orderingValue {
-      colors.append((Severity(orderingValue: i) ?? .notPresent).color(for: scheme))
+      let severity = Severity(orderingValue: i) ?? .notPresent
+      colors.append(theme.color(for: severity))
     }
     return colors
   }

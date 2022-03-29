@@ -1,5 +1,5 @@
 //
-//  DurationCardView.swift
+//  DurationCard.swift
 //  Headache Tracker
 //
 //  Created by Colin Campbell on 2/16/22.
@@ -7,21 +7,23 @@
 
 import SwiftUI
 
-struct DurationCardView: View {
+struct DurationCard: View {
   
   /// The headache to display.
   @StateObject var headache: Headache
   
   // MARK: Private properties
   
-  /// The application's custom color scheme.
-  @AppStorage(AppSettings.colorScheme) private var colorScheme: AppColorScheme = .multicolor
+  /// The application's custom color theme.
+  @Environment(\.colorTheme) private var colorTheme
   
   /// The id of the duration view.
   @State private var durationID = UUID()
   
+  /// The waiter to periodically update the view.
   private let durationUpdateWaiter = Waiter()
   
+  /// The caption to display.
   private var caption: String? {
     if headache.resolved, let endTime = headache.endTime {
       return "until " + endTime.formattedNonRelative()
@@ -29,12 +31,20 @@ struct DurationCardView: View {
     return nil
   }
   
+  // MARK: View body
+  
   var body: some View {
-    TitleCaptionView(title: "Duration", systemImage: "timer", foregroundColor: colorScheme.themeColor(for: .green), caption: caption) {
-      VStack(alignment: .leading) {
-        Text(Formatters.formatInterval(headache.duration))
-          .font(.title)
-          .id(durationID)
+    Card(
+      title: "Duration",
+      systemImage: "timer",
+      foregroundColor: colorTheme.green
+    ) {
+      Text(Formatters.formatInterval(headache.duration))
+        .font(.title)
+        .id(durationID)
+    } caption: {
+      if let caption = caption {
+        Text(caption)
       }
     }
     .onAppear(perform: appeared)
@@ -43,7 +53,7 @@ struct DurationCardView: View {
   
 }
 
-extension DurationCardView {
+extension DurationCard {
   
   /// Updates the duration view's identifier.
   func updateDurationID() {
@@ -63,14 +73,9 @@ extension DurationCardView {
   
 }
 
-struct DurationCardView_Previews: PreviewProvider {
+struct DurationCard_Previews: PreviewProvider {
   static var previews: some View {
-    DurationCardView(headache: Previewing.CoreData.resolvedHeadache)
-      .environment(\.managedObjectContext, Previewing.CoreData.viewContext)
-      .environmentObject(Previewing.headacheManager)
-      .environmentObject(Previewing.alertManager)
-      .environmentObject(Previewing.Prediction.predictor)
-      .environmentObject(Previewing.healthKitManager)
+    DurationCard(headache: Previewing.CoreData.resolvedHeadache)
       .previewLayout(.fixed(width: 428, height: 70))
   }
 }

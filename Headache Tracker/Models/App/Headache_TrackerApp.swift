@@ -20,11 +20,14 @@ struct Headache_TrackerApp: App {
   /// The application delegate.
   @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
   
+  /// The application's custom color theme.
+  @AppStorage(AppSettings.colorTheme) private var colorTheme: ColorTheme = .system
+  
   /// The application's dim screen setting.
-  @AppStorage(AppSettings.shouldDimScreen) var shouldDimScreen: Bool = false
+  @AppStorage(AppSettings.shouldDimScreen) private var shouldDimScreen: Bool = false
   
   /// The amount of screen dimming.
-  @AppStorage(AppSettings.screenDimPercent) var screenDimPercent = 0.5
+  @AppStorage(AppSettings.screenDimPercent) private var screenDimPercent = 0.5
   
   /// The application did become active publisher.
   private let didBecomeActiveNotificationPublisher = NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)
@@ -37,6 +40,8 @@ struct Headache_TrackerApp: App {
   var body: some Scene {
     WindowGroup {
       ContentView()
+        .colorTheme(colorTheme)
+        .accentColor(colorTheme.baseColor)
         .environment(\.managedObjectContext, DataController.shared.container.viewContext)
         .environmentObject(appDelegate.headacheManager)
         .environmentObject(appDelegate.headacheManager.predictor)

@@ -12,11 +12,6 @@ import DataController
 /// The main content view that contains the tab view.
 struct ContentView: View {
   
-  /// The application's custom color scheme.
-  @AppStorage(AppSettings.colorScheme) private var colorScheme: AppColorScheme = .multicolor
-  
-  // MARK: View body
-  
   var body: some View {
     TabView {
       CurrentHeadacheView()
@@ -39,7 +34,6 @@ struct ContentView: View {
           Label("Settings", systemImage: "gear")
         }
     }
-    .accentColor(colorScheme.themeColor(for: .brandColor))
   }
   
 }

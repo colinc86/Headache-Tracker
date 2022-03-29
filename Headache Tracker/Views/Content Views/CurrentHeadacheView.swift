@@ -111,7 +111,7 @@ struct CurrentHeadacheView: View {
         // No Headache
         if currentHeadache == nil && needsInput {
           Section {
-            ActionCardView(title: "No Headache?", buttonTitle: "No Headache", systemImage: "checkmark.circle.fill", foregroundColor: .teal, action: noHeadacheAction)
+            ActionCard(title: "No Headache?", buttonTitle: "No Headache", systemImage: "checkmark.circle.fill", action: noHeadacheAction)
           } footer: {
             Text("No Headache? Tap above to let the app know.")
           }
