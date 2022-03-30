@@ -22,14 +22,14 @@ struct SeverityView: View {
   
   // MARK: Private properties
   
+  /// The view's health settings.
+  @Environment(\.healthSettings) private var healthSettings
+  
   /// The view's presentation mode.
   @Environment(\.presentationMode) private var presentationMode
   
   /// The app's headache manager.
   @EnvironmentObject private var headacheManager: HeadacheManager
-  
-  /// The health integration setting.
-  @AppStorage(AppSettings.Health.healthIntegration) private var healthIntegration = false
   
   /// The editing state of the view.
   @State private var editing = false
@@ -205,7 +205,7 @@ extension SeverityView {
   
   /// Displays a delete confirmation to the user.
   private func deleteConfirmation() {
-    if healthIntegration {
+    if healthSettings.enabled {
       showResetConfirmation("Are you sure you want to delete the severity and its associated Health app data?")
     }
     else {

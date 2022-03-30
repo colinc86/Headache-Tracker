@@ -13,6 +13,12 @@ struct ColorTheme: Codable, Equatable, Hashable, Identifiable, RawRepresentable 
   typealias ObjectIdentifier = String
   typealias RawValue = String
   
+  /// An environment key to set a color theme.
+  struct EnvKey: EnvironmentKey {
+    static let defaultValue = ColorTheme.system
+  }
+  
+  /// Codable coding keys.
   private enum CodingKeys: CodingKey {
     case name
     case multicolor

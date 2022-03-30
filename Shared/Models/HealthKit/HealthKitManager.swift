@@ -43,9 +43,6 @@ class HealthKitManager: ObservableObject {
   
   // MARK: Private properties
   
-  /// The Apple Health app integration setting.
-  @AppStorage(AppSettings.Health.healthIntegration) private var healthIntegration = false
-  
   /// The manager's health kit store.
   private let store = HKHealthStore()
   
@@ -132,7 +129,7 @@ extension HealthKitManager {
   /// - Parameter intervals: The severity intervals to save.
   func saveSeveritySamples(intervals: [Headache.Severity.Interval]) async throws {
     // Only continue if we have health integration turned on
-    guard healthIntegration && !intervals.isEmpty else {
+    guard (await AppSettings.shared.health.enabled) && !intervals.isEmpty else {
       return
     }
     
@@ -161,8 +158,9 @@ extension HealthKitManager {
     logDebug("Delete severity samples in \(interval).")
     
     // Only continue if we have health integration turned on
-    guard healthIntegration else {
-      logWarning("Health integration is \(healthIntegration). Not deleting severity samples.")
+    let enabled = await AppSettings.shared.health.enabled
+    guard enabled else {
+      logWarning("Health integration is \(enabled). Not deleting severity samples.")
       return
     }
     
@@ -189,8 +187,8 @@ extension HealthKitManager {
     logDebug("Read HealthKit data in \(interval).")
     
     // Only continue if we have health integration turned on
-    guard healthIntegration || inWidget else {
-      logWarning("Health integration is \(healthIntegration). Not reading HealthKit data.")
+    guard AppSettings.shared.health.enabled || inWidget else {
+      logWarning("Health integration is \(AppSettings.shared.health.enabled). Not reading HealthKit data.")
       return nil
     }
     

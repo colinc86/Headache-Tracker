@@ -29,32 +29,8 @@ struct CurrentHeadacheView: View {
   /// The app's alert manager.
   @EnvironmentObject private var alertManager: AlertManager
   
-  /// Whether the type view should be shown.
-  @AppStorage(AppSettings.ListOptions.type) private var showTypeView = true
-  
-  /// Whether the onset view should be shown.
-  @AppStorage(AppSettings.ListOptions.onset) private var showOnsetView = true
-  
-  /// Whether the duration view should be shown.
-  @AppStorage(AppSettings.ListOptions.duration) private var showDurationView = true
-  
-  /// Whether the progression view should be shown.
-  @AppStorage(AppSettings.ListOptions.progression) private var showProgressionView = true
-  
-  /// Whether the outlook view should be shown.
-  @AppStorage(AppSettings.ListOptions.outlook) private var showOutlookView = true
-  
-  /// Whether the notes view should be shown.
-  @AppStorage(AppSettings.ListOptions.notes) private var showNotesView = true
-  
-  /// Whether the tags view should be shown.
-  @AppStorage(AppSettings.ListOptions.tags) private var showTagsView = true
-  
-  /// Whether the severity view should be shown.
-  @AppStorage(AppSettings.ListOptions.severity) private var showSeverityView = true
-  
-  /// The Apple Health integration setting.
-  @AppStorage(AppSettings.Health.healthIntegration) private var healthIntegration = false
+  /// The view's list settings.
+  @Environment(\.listSettings) private var listSettings
     
   /// The headaches fetch request.
   /// Should only return one headache.
@@ -131,14 +107,14 @@ struct CurrentHeadacheView: View {
       .background(Color(UIColor.systemGroupedBackground))
       .navigationTitle("Track")
       .animation(.default, value: predictor.prediction)
-      .animation(.default, value: showTypeView)
-      .animation(.default, value: showOnsetView)
-      .animation(.default, value: showDurationView)
-      .animation(.default, value: showProgressionView)
-      .animation(.default, value: showNotesView)
-      .animation(.default, value: showTagsView)
-      .animation(.default, value: showOutlookView)
-      .animation(.default, value: showSeverityView)
+      .animation(.default, value: listSettings.showTypeView)
+      .animation(.default, value: listSettings.showOnsetView)
+      .animation(.default, value: listSettings.showDurationView)
+      .animation(.default, value: listSettings.showProgressionView)
+      .animation(.default, value: listSettings.showNotesView)
+      .animation(.default, value: listSettings.showTagsView)
+      .animation(.default, value: listSettings.showOutlookView)
+      .animation(.default, value: listSettings.showSeverityView)
       .refreshable {
         do {
           try await predict(forced: true)
@@ -289,7 +265,6 @@ struct CurrentHeadacheView_Previews: PreviewProvider {
       .environmentObject(Previewing.headacheManager)
       .environmentObject(Previewing.alertManager)
       .environmentObject(Previewing.Prediction.predictor)
-      .environmentObject(Previewing.healthKitManager)
       .onAppear {
         Previewing.Prediction.predictor.prediction = .empty
       }

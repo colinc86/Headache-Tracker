@@ -171,6 +171,8 @@
 		3B5817CE27EEE00100F9E49B /* ColorThemePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B5817CD27EEE00100F9E49B /* ColorThemePicker.swift */; };
 		3B5817D127F3A47000F9E49B /* EnvironmentValues+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B5817D027F3A47000F9E49B /* EnvironmentValues+Extensions.swift */; };
 		3B5817D227F3A47000F9E49B /* EnvironmentValues+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B5817D027F3A47000F9E49B /* EnvironmentValues+Extensions.swift */; };
+		3B5817D727F4225000F9E49B /* FilterUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B5817D627F4225000F9E49B /* FilterUnit.swift */; };
+		3B5817D827F4225000F9E49B /* FilterUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B5817D627F4225000F9E49B /* FilterUnit.swift */; };
 		3B68BDF927BDFCD3007AAAC6 /* AnalyzeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BDF827BDFCD3007AAAC6 /* AnalyzeView.swift */; };
 		3B68BDFB27BE0F00007AAAC6 /* BarGraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B68BDFA27BE0F00007AAAC6 /* BarGraph.swift */; };
 		3B68BE0C27BF5899007AAAC6 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B68BE0B27BF5899007AAAC6 /* GoogleService-Info.plist */; };
@@ -393,6 +395,7 @@
 		3B5817CA27EEDFED00F9E49B /* ColorWell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorWell.swift; sourceTree = "<group>"; };
 		3B5817CD27EEE00100F9E49B /* ColorThemePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorThemePicker.swift; sourceTree = "<group>"; };
 		3B5817D027F3A47000F9E49B /* EnvironmentValues+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EnvironmentValues+Extensions.swift"; sourceTree = "<group>"; };
+		3B5817D627F4225000F9E49B /* FilterUnit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterUnit.swift; sourceTree = "<group>"; };
 		3B68BDF827BDFCD3007AAAC6 /* AnalyzeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyzeView.swift; sourceTree = "<group>"; };
 		3B68BDFA27BE0F00007AAAC6 /* BarGraph.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarGraph.swift; sourceTree = "<group>"; };
 		3B68BE0B27BF5899007AAAC6 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
@@ -523,7 +526,6 @@
 				3B20EA1A27EA98B900B9800F /* EditTagsView.swift */,
 				3B10D45827ED8FD3004B68AA /* EditTypeView.swift */,
 				3B9332E927CF1E8400BACE93 /* FeedbackView.swift */,
-				3BAAA69227CC8A5800C0DDC4 /* GraphList.swift */,
 				3B051A4D27B0E9060017131D /* HeadachesView.swift */,
 				3B051A9027B0FACA0017131D /* HeadacheView.swift */,
 				3BD1D35127E1CF820072A576 /* ModelInputView.swift */,
@@ -562,10 +564,8 @@
 				3B1C7DB527D205EE000B3A99 /* ActionCard.swift */,
 				3B09191527BCD38300844F6C /* DurationCard.swift */,
 				3BF7943827DFB6970094C531 /* EditableDateTimeCard.swift */,
-				3B3FFF1227D868F300DFACC1 /* HeadacheViews.swift */,
 				3B29F73727E98AE100C8772C /* NotesCard.swift */,
 				3B09191127BCCE1C00844F6C /* OnsetCard.swift */,
-				3B3FFF1027D8604600DFACC1 /* PredictionViews.swift */,
 				3B29F73B27E9909900C8772C /* ProgressionCard.swift */,
 				3B1C7DB327D2005E000B3A99 /* StatusCard.swift */,
 				3B20EA1227EA770700B9800F /* TagsCard.swift */,
@@ -586,8 +586,11 @@
 				3B5817CD27EEE00100F9E49B /* ColorThemePicker.swift */,
 				3B5817C227EEB3D600F9E49B /* ColorThemeView.swift */,
 				3B20EA2327EAA67C00B9800F /* FlexibleView.swift */,
+				3BAAA69227CC8A5800C0DDC4 /* GraphList.swift */,
+				3B3FFF1227D868F300DFACC1 /* HeadacheViews.swift */,
 				3B29F73527E983F800C8772C /* ListOptionsMenu.swift */,
 				3B3EAAEF27E801BA00F5D8B4 /* MapView.swift */,
+				3B3FFF1027D8604600DFACC1 /* PredictionViews.swift */,
 				3B09192227BD91F400844F6C /* SectionTitleView.swift */,
 				3B20EA2527EAD68500B9800F /* TagButton.swift */,
 				3B20EA2127EAA29F00B9800F /* TagsView.swift */,
@@ -635,6 +638,7 @@
 				3B3FFE4E27D592A000DFACC1 /* Statistics */,
 				3B3FFE8227D592A000DFACC1 /* Weather */,
 				3B3FFE6C27D592A000DFACC1 /* DescribableError.swift */,
+				3B5817D627F4225000F9E49B /* FilterUnit.swift */,
 				3B3FFE8927D592A000DFACC1 /* Formatters.swift */,
 				3B3FFE5A27D592A000DFACC1 /* HeadacheManager.swift */,
 				3B3FFE8727D592A000DFACC1 /* HolisticOutlook.swift */,
@@ -1293,6 +1297,7 @@
 				3B86C6EE27E4310700CCD7A0 /* Location+Extensions.swift in Sources */,
 				3B3FFEB227D592A000DFACC1 /* OutlookClassifierOutput.swift in Sources */,
 				3B3FFEAE27D592A000DFACC1 /* SeverityClassifierOutput.swift in Sources */,
+				3B5817D827F4225000F9E49B /* FilterUnit.swift in Sources */,
 				3B86C6E827E41C5B00CCD7A0 /* HealthData+Extensions.swift in Sources */,
 				3B3FFF2D27DAA89500DFACC1 /* WeatherStatistics.swift in Sources */,
 				3B3FFEE227D592A000DFACC1 /* UnitRate.swift in Sources */,
@@ -1364,6 +1369,7 @@
 				3B86C6ED27E4310700CCD7A0 /* Location+Extensions.swift in Sources */,
 				3B3FFEBB27D592A000DFACC1 /* InputUnion.swift in Sources */,
 				3B68BE7827C41FDE007AAAC6 /* TrainingDataListView.swift in Sources */,
+				3B5817D727F4225000F9E49B /* FilterUnit.swift in Sources */,
 				3B3FFED127D592A000DFACC1 /* View+Extensions.swift in Sources */,
 				3B68BE6A27C35778007AAAC6 /* OutlookView.swift in Sources */,
 				3BD1D34927E190EE0072A576 /* PredictorsView.swift in Sources */,

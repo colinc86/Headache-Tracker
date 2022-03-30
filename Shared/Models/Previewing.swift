@@ -14,7 +14,7 @@ import SwiftUI
 struct Previewing {
   
   /// The preview headache manager.
-  static let headacheManager = HeadacheManager(testing: true)
+  static let headacheManager = HeadacheManager()
   
   /// The preview health kit manager.
   static let healthKitManager = HealthKitManager()

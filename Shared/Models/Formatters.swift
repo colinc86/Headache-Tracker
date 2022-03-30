@@ -48,7 +48,7 @@ struct Formatters {
   
   /// Formats the given measurement.
   static func formatMeasurement<T: Dimension>(_ measurement: Measurement<T>) -> String {
-    let system = MeasurementSystem.current
+    let system = AppSettings.shared.general.measurementSystem
     let convertedUnit: Measurement<T>
     if measurement.unit is UnitPressure {
       convertedUnit = measurement.converted(to: system.pressureUnit as! T)

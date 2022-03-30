@@ -67,33 +67,8 @@ class HeadacheManager: ObservableObject {
   
   // MARK: Private properties
   
-  /// The Apple Health app integration setting.
-  @AppStorage(AppSettings.Health.healthIntegration) private var healthIntegration = false
-  
-  /// How the manager should handle health kit data.
-  @AppStorage(AppSettings.Health.deleteDisposition) private var deleteDisposition: DeleteDisposition = .ask
-  
-  /// The default headache type.
-  @AppStorage(AppSettings.defaultHeadacheType) private var defaultHeadacheType = Headache.Types.cluster
-  
-  /// The default headache classification.
-  @AppStorage(AppSettings.defaultHeadacheClassification) private var defaultHeadacheClassification = Headache.Classification.primary
-  
-  /// Whether or not the manager is in test mode. If in test mode, it will not
-  /// write to or delete from the health kit store.
-  private let testing: Bool
-  
   /// The queue to train on.
   private var trainingQueue = DispatchQueue(label: ApplicationKey(from: "trainingQueue"))
-  
-  // MARK: Initializers
-  
-  /// Initializes a headache manager.
-  ///
-  /// - Parameter testing: Set to true for previews.
-  init(testing: Bool = false) {
-    self.testing = testing
-  }
   
 }
 
@@ -108,8 +83,11 @@ extension HeadacheManager {
   func changeSeverity(to severity: Headache.Severity) async throws {
     logDebug("Change severity to \(severity.title).")
     
+    let classification = await AppSettings.shared.headaches.defaultHeadacheClassification
+    let type = await AppSettings.shared.headaches.defaultHeadacheType
+    
     // The date interval of the severity to save to health kit
-    let severityUpdates: Headache.SeverityUpdates = try await currentHeadache { [weak self] headache, context in
+    let severityUpdates: Headache.SeverityUpdates = try await currentHeadache { headache, context in
       // Add to the current headache or create a new one
       if let headache = headache {
         logDebug("Adding severity to current headache.")
@@ -117,9 +95,7 @@ extension HeadacheManager {
       }
       
       logDebug("Creating new headache.")
-      if let self = self {
-        _ = Headache(context: context, severity: severity, classification: self.defaultHeadacheClassification, type: self.defaultHeadacheType, start: Date())
-      }
+      _ = Headache(context: context, severity: severity, classification: classification, type: type, start: Date())
       return .empty
     }
     
@@ -176,9 +152,11 @@ extension HeadacheManager {
   ///   - startTime: The headache's start time.
   ///   - endTime: The headache's end time.
   func createHeadache(severity: Headache.Severity, start: Date, end: Date?) async throws {
-    let severityIdentifier = try await DataController.shared.performInBackground(saveOnComplete: true) { [weak self] (context) -> UUID? in
-      guard let self = self else { return nil }
-      let headache = Headache(context: context, severity: severity, classification: self.defaultHeadacheClassification, type: self.defaultHeadacheType, start: start, end: end)
+    let classification = await AppSettings.shared.headaches.defaultHeadacheClassification
+    let type = await AppSettings.shared.headaches.defaultHeadacheType
+    
+    let severityIdentifier = try await DataController.shared.performInBackground(saveOnComplete: true) { (context) -> UUID? in
+      let headache = Headache(context: context, severity: severity, classification: classification, type: type, start: start, end: end)
       return headache.severitiesArray.first?.identifier
     }
     
@@ -641,8 +619,6 @@ extension HeadacheManager {
   ///   - severityIdentifier: The identifier of the training data's parent severity, if any.
   ///   - replacingExistingData: Whether the severity's existing training data should be replaced with the new data.
   func createTrainingData(from input: ModelInput, severityIdentifier: UUID? = nil, replacingExistingData: Bool = false) async throws {
-    guard !testing else { throw HeadacheError.testing }
-    
     logInfo("Creating training data...")
     try await DataController.shared.performInBackground(saveOnComplete: true) { context in
       // Create the training data
@@ -729,7 +705,6 @@ extension HeadacheManager {
   ///
   /// - Parameter completion: Called when training is complete.
   func trainClassifiers() async throws {
-    guard !testing else { throw HeadacheError.testing }
     try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
       Task {
         do {

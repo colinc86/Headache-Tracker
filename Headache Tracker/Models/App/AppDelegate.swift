@@ -24,20 +24,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, ObservableObject {
   /// The application's headache manager.
   var headacheManager = HeadacheManager()
   
-  /// Whether or not to enable crash reporting.
-  @AppStorage(AppSettings.enableCrashReporting) var enableCrashReporting = true
-  
-  /// The Apple Health app integration setting.
-  @AppStorage(AppSettings.Health.healthIntegration) var healthIntegration = false
-  
-  /// The real-time alerts setting.
-  @AppStorage(AppSettings.realTimeAlerts) var realTimeAlerts = false
-  
-  /// The daily outlook alerts setting.
-  @AppStorage(AppSettings.dailyOutlookAlerts) var dailyOutlookAlerts = false
-  
-  /// The amount of screen dimming.
-  @AppStorage(AppSettings.screenDimPercent) var screenDimPercent = 0.5
+  // MARK: Private properties
   
   /// The app's previous brightness setting.
   private var previousBrightness: CGFloat = 0.0
@@ -129,7 +116,7 @@ extension AppDelegate {
     }
     
     UIScreen.main.wantsSoftwareDimming = true
-    UIScreen.main.brightness = previousBrightness * (1.0 - CGFloat(screenDimPercent))
+    UIScreen.main.brightness = previousBrightness * (1.0 - CGFloat(AppSettings.shared.general.screenDimPercent))
   }
   
   /// Restores the screen to the previous brightness.
@@ -160,7 +147,7 @@ extension AppDelegate {
   /// Setup health kit (only if it hasn't been done before) and the setting
   /// is on.
   private func checkHealthKitAuthorizationStatus() async throws {
-    if healthIntegration && headacheManager.healthKitManager.needsAuthorization() {
+    if AppSettings.shared.health.enabled && headacheManager.healthKitManager.needsAuthorization() {
       try await headacheManager.healthKitManager.authorize()
     }
   }

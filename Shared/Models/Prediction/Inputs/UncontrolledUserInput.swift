@@ -19,13 +19,6 @@ class UncontrolledUserInput: MLFeatureProvider {
     static let restingHeartRate = "Resting Heart Rate"
   }
   
-  @AppStorage(AppSettings.Predictors.heartRate) var predictorHeartRate = true
-  @AppStorage(AppSettings.Predictors.respiratoryRate) var predictorRespiratoryRate = true
-  @AppStorage(AppSettings.Predictors.oxygenSaturation) var predictorOxygenSaturation = true
-  @AppStorage(AppSettings.Predictors.heartRateVariability) var predictorHeartRateVariability = true
-  @AppStorage(AppSettings.Predictors.walkingHeartRateAverage) var predictorWalkingHeartRateAverage = true
-  @AppStorage(AppSettings.Predictors.restingHeartRate) var predictorRestingHeartRate = true
-  
   /// Heart Rate as double value
   var Heart_Rate: Double
   
@@ -47,22 +40,22 @@ class UncontrolledUserInput: MLFeatureProvider {
   var featureNames: Set<String> {
     get {
       var names = Set<String>()
-      if predictorHeartRate {
+      if AppSettings.shared.predictions.heartRate == true {
         names.insert(FeatureName.heartRate)
       }
-      if predictorRespiratoryRate {
+      if AppSettings.shared.predictions.respiratoryRate == true {
         names.insert(FeatureName.respiratoryRate)
       }
-      if predictorOxygenSaturation {
+      if AppSettings.shared.predictions.oxygenSaturation == true {
         names.insert(FeatureName.oxygenSaturation)
       }
-      if predictorHeartRateVariability {
+      if AppSettings.shared.predictions.heartRateVariability == true {
         names.insert(FeatureName.heartRateVariability)
       }
-      if predictorWalkingHeartRateAverage {
+      if AppSettings.shared.predictions.walkingHeartRateAverage == true {
         names.insert(FeatureName.walkingHeartRateAverage)
       }
-      if predictorRestingHeartRate {
+      if AppSettings.shared.predictions.restingHeartRate == true {
         names.insert(FeatureName.restingHeartRate)
       }
       return names

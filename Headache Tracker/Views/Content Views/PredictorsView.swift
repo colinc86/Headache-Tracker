@@ -17,23 +17,8 @@ struct PredictorsView: View {
   /// The health kit manager.
   @EnvironmentObject private var healthKitManager: HealthKitManager
   
-  @AppStorage(AppSettings.Predictors.secondsSinceMidnight) var predictorSecondsSinceMidnight = true
-  @AppStorage(AppSettings.Predictors.weekday) var predictorWeekday = true
-  @AppStorage(AppSettings.Predictors.mindfulSession) var predictorMindfulSession = true
-  @AppStorage(AppSettings.Predictors.sleepSeconds) var predictorSleepSeconds = true
-  @AppStorage(AppSettings.Predictors.sleepOnset) var predictorSleepOnset = true
-  @AppStorage(AppSettings.Predictors.headphoneAudioExposure) var predictorHeadphoneAudioExposure = true
-  @AppStorage(AppSettings.Predictors.stepCount) var predictorStepCount = true
-  @AppStorage(AppSettings.Predictors.barometricPressure) var predictorBarometricPressure = true
-  @AppStorage(AppSettings.Predictors.humidity) var predictorHumidity = true
-  @AppStorage(AppSettings.Predictors.temperature) var predictorTemperature = true
-  @AppStorage(AppSettings.Predictors.environmentalAudioExposure) var predictorEnvironmentalAudioExposure = true
-  @AppStorage(AppSettings.Predictors.heartRate) var predictorHeartRate = true
-  @AppStorage(AppSettings.Predictors.respiratoryRate) var predictorRespiratoryRate = true
-  @AppStorage(AppSettings.Predictors.oxygenSaturation) var predictorOxygenSaturation = true
-  @AppStorage(AppSettings.Predictors.heartRateVariability) var predictorHeartRateVariability = true
-  @AppStorage(AppSettings.Predictors.walkingHeartRateAverage) var predictorWalkingHeartRateAverage = true
-  @AppStorage(AppSettings.Predictors.restingHeartRate) var predictorRestingHeartRate = true
+  /// The view's prediction settings.
+  @Environment(\.predictionSettings) private var predictionSettings
   
   /// The view's initial settings.
   @State private var initialSettings = [String: Bool]()
@@ -44,53 +29,53 @@ struct PredictorsView: View {
   var body: some View {
     Form {
       Section {
-        ToggleCell(title: "Steps", data: .stepCount, state: $predictorStepCount, systemName: "figure.walk", valueChanged: updateSetting)
+        ToggleCell(title: "Steps", data: .stepCount, state: predictionSettings.$stepCount, systemName: "figure.walk", valueChanged: updateSetting)
       } header: {
         SectionTitleView(title: "Activity")
       }
       
       Section {
-        ToggleCell(title: "Heart Rate", data: .heartRate, state: $predictorHeartRate, systemName: "heart", valueChanged: updateSetting)
-        ToggleCell(title: "Heart Rate Variability", data: .heartRateVariabilitySDNN, state: $predictorHeartRateVariability, systemName: "heart", valueChanged: updateSetting)
-        ToggleCell(title: "Oxygen Saturation", data: .oxygenSaturation, state: $predictorOxygenSaturation, systemName: "lungs", valueChanged: updateSetting)
-        ToggleCell(title: "Resting Heart Rate", data: .restingHeartRate, state: $predictorRestingHeartRate, systemName: "heart", valueChanged: updateSetting)
-        ToggleCell(title: "Respiratory Rate", data: .respiratoryRate, state: $predictorRespiratoryRate, systemName: "lungs", valueChanged: updateSetting)
-        ToggleCell(title: "Walking Heart Rate", data: .walkingHeartRateAverage, state: $predictorWalkingHeartRateAverage, systemName: "heart", valueChanged: updateSetting)
+        ToggleCell(title: "Heart Rate", data: .heartRate, state: predictionSettings.$heartRate, systemName: "heart", valueChanged: updateSetting)
+        ToggleCell(title: "Heart Rate Variability", data: .heartRateVariabilitySDNN, state: predictionSettings.$heartRateVariability, systemName: "heart", valueChanged: updateSetting)
+        ToggleCell(title: "Oxygen Saturation", data: .oxygenSaturation, state: predictionSettings.$oxygenSaturation, systemName: "lungs", valueChanged: updateSetting)
+        ToggleCell(title: "Resting Heart Rate", data: .restingHeartRate, state: predictionSettings.$restingHeartRate, systemName: "heart", valueChanged: updateSetting)
+        ToggleCell(title: "Respiratory Rate", data: .respiratoryRate, state: predictionSettings.$respiratoryRate, systemName: "lungs", valueChanged: updateSetting)
+        ToggleCell(title: "Walking Heart Rate", data: .walkingHeartRateAverage, state: predictionSettings.$walkingHeartRateAverage, systemName: "heart", valueChanged: updateSetting)
       } header: {
         SectionTitleView(title: "Body")
       }
       
       Section {
-        ToggleCell(title: "Mindful Duration", data: .mindfulSession, state: $predictorMindfulSession, systemName: "brain", valueChanged: updateSetting)
+        ToggleCell(title: "Mindful Duration", data: .mindfulSession, state: predictionSettings.$mindfulSession, systemName: "brain", valueChanged: updateSetting)
       } header: {
         SectionTitleView(title: "Mind")
       }
       
       Section {
-        ToggleCell(title: "Sleep Duration", data: .sleepSeconds, state: $predictorSleepSeconds, systemName: "timer", valueChanged: updateSetting)
-        ToggleCell(title: "Onset", data: .sleepOnset, state: $predictorSleepOnset, systemName: "clock", valueChanged: updateSetting)
+        ToggleCell(title: "Sleep Duration", data: .sleepSeconds, state: predictionSettings.$sleepSeconds, systemName: "timer", valueChanged: updateSetting)
+        ToggleCell(title: "Onset", data: .sleepOnset, state: predictionSettings.$sleepOnset, systemName: "clock", valueChanged: updateSetting)
       } header: {
         SectionTitleView(title: "Sleep")
       }
       
       Section {
-        ToggleCell(title: "Environmental Audio Level", data: .environmentalAudioExposure, state: $predictorEnvironmentalAudioExposure, systemName: "speaker", valueChanged: updateSetting)
-        ToggleCell(title: "Headphone Audio Level", data: .headphoneAudioExposure, state: $predictorHeadphoneAudioExposure, systemName: "headphones", valueChanged: updateSetting)
+        ToggleCell(title: "Environmental Audio Level", data: .environmentalAudioExposure, state: predictionSettings.$environmentalAudioExposure, systemName: "speaker", valueChanged: updateSetting)
+        ToggleCell(title: "Headphone Audio Level", data: .headphoneAudioExposure, state: predictionSettings.$headphoneAudioExposure, systemName: "headphones", valueChanged: updateSetting)
       } header: {
         SectionTitleView(title: "Sound")
       }
       
       Section {
-        ToggleCell(title: "Day of Week", state: $predictorWeekday, systemName: "calendar")
-        ToggleCell(title: "Time of Day", state: $predictorSecondsSinceMidnight, systemName: "clock")
+        ToggleCell(title: "Day of Week", state: predictionSettings.$weekday, systemName: "calendar")
+        ToggleCell(title: "Time of Day", state: predictionSettings.$secondsSinceMidnight, systemName: "clock")
       } header: {
         SectionTitleView(title: "Time")
       }
       
       Section {
-        ToggleCell(title: "Barometric Pressure", state: $predictorBarometricPressure, systemName: "barometer")
-        ToggleCell(title: "Humidity", state: $predictorHumidity, systemName: "humidity")
-        ToggleCell(title: "Temperature", state: $predictorTemperature, systemName: "thermometer")
+        ToggleCell(title: "Barometric Pressure", state: predictionSettings.$barometricPressure, systemName: "barometer")
+        ToggleCell(title: "Humidity", state: predictionSettings.$humidity, systemName: "humidity")
+        ToggleCell(title: "Temperature", state: predictionSettings.$temperature, systemName: "thermometer")
       } header: {
         SectionTitleView(title: "Weather")
       }
@@ -106,12 +91,12 @@ extension PredictorsView {
   
   /// Called when the view appears.
   func appeared() {
-    initialSettings = settingsDictionary()
+    initialSettings = predictionSettings.settingsDictionary()
   }
   
   /// Called when the view disappears.
   func disappeared() {
-    if initialSettings != settingsDictionary() {
+    if initialSettings != predictionSettings.settingsDictionary() {
       Task {
         do {
           try await headacheManager.trainClassifiers()
@@ -121,29 +106,6 @@ extension PredictorsView {
         }
       }
     }
-  }
-  
-  /// Gets the current settings dictionary.
-  func settingsDictionary() -> [String: Bool] {
-    return [
-      AppSettings.Predictors.secondsSinceMidnight: predictorSecondsSinceMidnight,
-      AppSettings.Predictors.weekday: predictorWeekday,
-      AppSettings.Predictors.mindfulSession: predictorMindfulSession,
-      AppSettings.Predictors.sleepSeconds: predictorSleepSeconds,
-      AppSettings.Predictors.sleepOnset: predictorSleepOnset,
-      AppSettings.Predictors.headphoneAudioExposure: predictorHeadphoneAudioExposure,
-      AppSettings.Predictors.stepCount: predictorStepCount,
-      AppSettings.Predictors.barometricPressure: predictorBarometricPressure,
-      AppSettings.Predictors.humidity: predictorHumidity,
-      AppSettings.Predictors.temperature: predictorTemperature,
-      AppSettings.Predictors.environmentalAudioExposure: predictorEnvironmentalAudioExposure,
-      AppSettings.Predictors.heartRate: predictorHeartRate,
-      AppSettings.Predictors.respiratoryRate: predictorRespiratoryRate,
-      AppSettings.Predictors.oxygenSaturation: predictorOxygenSaturation,
-      AppSettings.Predictors.heartRateVariability: predictorHeartRateVariability,
-      AppSettings.Predictors.walkingHeartRateAverage: predictorWalkingHeartRateAverage,
-      AppSettings.Predictors.restingHeartRate: predictorRestingHeartRate
-    ]
   }
   
   /// Updates the setting with the given health kit data.

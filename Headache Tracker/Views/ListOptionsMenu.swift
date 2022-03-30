@@ -9,44 +9,25 @@ import SwiftUI
 
 struct ListOptionsMenu: View {
   
-  /// Whether the type view should be shown.
-  @AppStorage(AppSettings.ListOptions.type) private var type = true
+  /// The view's list settings.
+  @Environment(\.listSettings) private var listSettings
   
-  /// Whether the onset view should be shown.
-  @AppStorage(AppSettings.ListOptions.onset) private var onset = true
-  
-  /// Whether the duration view should be shown.
-  @AppStorage(AppSettings.ListOptions.duration) private var duration = true
-  
-  /// Whether the progression view should be shown.
-  @AppStorage(AppSettings.ListOptions.progression) private var progression = true
-  
-  /// Whether the notes view should be shown.
-  @AppStorage(AppSettings.ListOptions.notes) private var notes = true
-  
-  /// Whether the tags view should be shown.
-  @AppStorage(AppSettings.ListOptions.tags) private var tags = true
-  
-  /// Whether the outlook view should be shown.
-  @AppStorage(AppSettings.ListOptions.outlook) private var outlook = true
-  
-  /// Whether the severity view should be shown.
-  @AppStorage(AppSettings.ListOptions.severity) private var severity = true
+  // MARK: View body
   
   var body: some View {
     Menu {
       Section {
-        CheckmarkButton(title: "Type", checked: $type)
-        CheckmarkButton(title: "Onset", checked: $onset)
-        CheckmarkButton(title: "Duration", checked: $duration)
-        CheckmarkButton(title: "Progression", checked: $progression)
-        CheckmarkButton(title: "Notes", checked: $notes)
-        CheckmarkButton(title: "Tags", checked: $tags)
+        CheckmarkButton(title: "Type", checked: listSettings.$showTypeView)
+        CheckmarkButton(title: "Onset", checked: listSettings.$showOnsetView)
+        CheckmarkButton(title: "Duration", checked: listSettings.$showDurationView)
+        CheckmarkButton(title: "Progression", checked: listSettings.$showProgressionView)
+        CheckmarkButton(title: "Notes", checked: listSettings.$showNotesView)
+        CheckmarkButton(title: "Tags", checked: listSettings.$showTagsView)
       }
       
       Section {
-        CheckmarkButton(title: "Outlook", checked: $outlook)
-        CheckmarkButton(title: "Severity", checked: $severity)
+        CheckmarkButton(title: "Outlook", checked: listSettings.$showOutlookView)
+        CheckmarkButton(title: "Severity", checked: listSettings.$showSeverityView)
       }
     } label: {
       Label("View Options", systemImage: "list.bullet.below.rectangle")

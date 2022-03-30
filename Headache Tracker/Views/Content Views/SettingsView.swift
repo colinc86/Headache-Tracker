@@ -14,6 +14,21 @@ struct SettingsView: View {
   
   // MARK: Private properties
   
+  /// The view's general settings.
+  @Environment(\.generalSettings) private var generalSettings
+  
+  /// The view's health settings.
+  @Environment(\.healthSettings) private var healthSettings
+  
+  /// The view's notification settings.
+  @Environment(\.notificationSettings) private var notificationSettings
+  
+  /// The view's headache settings.
+  @Environment(\.headacheSettings) private var headacheSettings
+  
+  /// The view's prediction settings.
+  @Environment(\.predictionSettings) private var predictionSettings
+  
   /// The app's headache manager.
   @EnvironmentObject private var headacheManager: HeadacheManager
   
@@ -25,48 +40,6 @@ struct SettingsView: View {
   
   /// The app's data refresher.
   @EnvironmentObject private var refresher: Refresher
-  
-  /// The application's custom color theme.
-  @AppStorage(AppSettings.colorTheme) var colorTheme: ColorTheme = .system
-  
-  /// The application's dim screen setting.
-  @AppStorage(AppSettings.shouldDimScreen) var shouldDimScreen: Bool = false
-  
-  /// The amount of screen dimming.
-  @AppStorage(AppSettings.screenDimPercent) var screenDimPercent = 0.5
-  
-  /// The application's measurement system.
-  @AppStorage(AppSettings.measurementSystem) var measurementSystem: MeasurementSystem = NSLocale.system.usesMetricSystem ? .metric : .imperial
-  
-  /// Whether or not to enable crash reporting.
-  @AppStorage(AppSettings.enableCrashReporting) var enableCrashReporting = true
-  
-  /// The health integration setting.
-  @AppStorage(AppSettings.Health.healthIntegration) private var healthIntegration = false
-  
-  /// How the manager should handle health kit data.
-  @AppStorage(AppSettings.Health.deleteDisposition) private var deleteDisposition: HeadacheManager.DeleteDisposition = .ask
-  
-  /// The check-in alert setting.
-  @AppStorage(AppSettings.checkInAlerts) private var checkInAlerts = false
-  
-  /// The check-in interval setting to use when `checkInAlerts` is true.
-  @AppStorage(AppSettings.checkInInterval) private var checkInInterval = TimeInterval(3600.0)
-  
-  /// The real-time alerts setting.
-  @AppStorage(AppSettings.realTimeAlerts) private var realTimeAlerts = false
-  
-  /// The daily outlook alerts setting.
-  @AppStorage(AppSettings.dailyOutlookAlerts) private var dailyOutlookAlerts = false
-  
-  /// The daily outlook alert time.
-  @AppStorage(AppSettings.dailyOutlookTime) private var dailyOutlookTime = TimeInterval(28800.0)
-  
-  /// The default headache type.
-  @AppStorage(AppSettings.defaultHeadacheType) private var defaultHeadacheType = Headache.Types.cluster
-  
-  /// The default headache classification.
-  @AppStorage(AppSettings.defaultHeadacheClassification) private var defaultHeadacheClassification = Headache.Classification.primary
   
   /// Whether we are showing the bug report content view.
   @State private var showingReportBug = false
@@ -80,34 +53,16 @@ struct SettingsView: View {
     animation: .default)
   private var headaches: FetchedResults<Headache>
   
-  @AppStorage(AppSettings.Predictors.secondsSinceMidnight) var predictorSecondsSinceMidnight = true
-  @AppStorage(AppSettings.Predictors.weekday) var predictorWeekday = true
-  @AppStorage(AppSettings.Predictors.mindfulSession) var predictorMindfulSession = true
-  @AppStorage(AppSettings.Predictors.sleepSeconds) var predictorSleepSeconds = true
-  @AppStorage(AppSettings.Predictors.sleepOnset) var predictorSleepOnset = true
-  @AppStorage(AppSettings.Predictors.headphoneAudioExposure) var predictorHeadphoneAudioExposure = true
-  @AppStorage(AppSettings.Predictors.stepCount) var predictorStepCount = true
-  @AppStorage(AppSettings.Predictors.barometricPressure) var predictorBarometricPressure = true
-  @AppStorage(AppSettings.Predictors.humidity) var predictorHumidity = true
-  @AppStorage(AppSettings.Predictors.temperature) var predictorTemperature = true
-  @AppStorage(AppSettings.Predictors.environmentalAudioExposure) var predictorEnvironmentalAudioExposure = true
-  @AppStorage(AppSettings.Predictors.heartRate) var predictorHeartRate = true
-  @AppStorage(AppSettings.Predictors.respiratoryRate) var predictorRespiratoryRate = true
-  @AppStorage(AppSettings.Predictors.oxygenSaturation) var predictorOxygenSaturation = true
-  @AppStorage(AppSettings.Predictors.heartRateVariability) var predictorHeartRateVariability = true
-  @AppStorage(AppSettings.Predictors.walkingHeartRateAverage) var predictorWalkingHeartRateAverage = true
-  @AppStorage(AppSettings.Predictors.restingHeartRate) var predictorRestingHeartRate = true
-  
   // MARK: Computed properties
     
   /// The health app integration binding.
   /// Will authorize health kit if set to true.
   private var healthAppIntegration: Binding<Bool> {
     Binding<Bool> {
-      return !healthKitManager.needsAuthorization() && healthIntegration
+      return !healthKitManager.needsAuthorization() && healthSettings.enabled
     } set: { newValue in
-      healthIntegration = newValue
-      if healthIntegration {
+      healthSettings.enabled = newValue
+      if  healthSettings.enabled {
         Task {
           do {
             try await healthKitManager.authorize()
@@ -123,9 +78,9 @@ struct SettingsView: View {
   /// The binding to modify the daily outlook time.
   private var dailyOutlookDate: Binding<Date> {
     Binding<Date> {
-      return Calendar.current.startOfDay(for: Date()).addingTimeInterval(dailyOutlookTime)
+      return Calendar.current.startOfDay(for: Date()).addingTimeInterval(notificationSettings.dailyOutlookTime)
     } set: { newValue in
-      dailyOutlookTime = Calendar.current.timeIntervalSinceMidnight(newValue)
+      notificationSettings.dailyOutlookTime = Calendar.current.timeIntervalSinceMidnight(newValue)
     }
   }
   
@@ -141,10 +96,10 @@ struct SettingsView: View {
       Form {
         // Integrations
         Section("Integrations") {
-          Toggle("Health App Integration", isOn: healthAppIntegration)
-            .tint(colorTheme.baseColor)
+          Toggle("Health App Integration", isOn: healthSettings.$enabled)
+            .tint(generalSettings.colorTheme.baseColor)
           
-          Picker("Delete Health Data", selection: $deleteDisposition) {
+          Picker("Delete Health Data", selection: healthSettings.$deleteDisposition) {
             ForEach(HeadacheManager.DeleteDisposition.allCases) { disposition in
               Text(disposition.rawValue.capitalized).tag(disposition)
             }
@@ -153,12 +108,12 @@ struct SettingsView: View {
         
         // Headaches
         Section("Headaches") {
-          Picker("Default Class", selection: $defaultHeadacheClassification) {
+          Picker("Default Class", selection: headacheSettings.$defaultHeadacheClassification) {
             Text(Headache.Classification.primary.title).tag(Headache.Classification.primary)
             Text(Headache.Classification.secondary.title).tag(Headache.Classification.secondary)
           }
           
-          Picker("Default Type", selection: $defaultHeadacheType) {
+          Picker("Default Type", selection: headacheSettings.$defaultHeadacheType) {
             ForEach(Headache.Types.definedCases) { type in
               Text(type.title).tag(type)
             }
@@ -167,16 +122,16 @@ struct SettingsView: View {
             }
           }
           
-          Toggle("Check-Ins", isOn: $checkInAlerts)
-            .tint(colorTheme.baseColor)
+          Toggle("Check-Ins", isOn: notificationSettings.$checkInAlerts)
+            .tint(generalSettings.colorTheme.baseColor)
             .disabled(alertsDenied)
           
-          Picker("Check-In Interval", selection: $checkInInterval) {
+          Picker("Check-In Interval", selection: notificationSettings.$checkInInterval) {
             ForEach(1 ..< 25) { i in
               Text("\(i) Hour\(i > 1 ? "s" : "")").tag(TimeInterval(i) * 3600.0)
             }
           }
-          .disabled(!checkInAlerts)
+          .disabled(!notificationSettings.checkInAlerts)
           .disabled(alertsDenied)
         }
         
@@ -185,42 +140,42 @@ struct SettingsView: View {
           NavigationLink {
             PredictorsView()
           } label: {
-            SubtitleCell(title: "My Predictors", subtitle: "\(settingsDictionary().reduce(0, { $0 + ($1.value ? 1 : 0) }))/\(settingsDictionary().keys.count)")
+            SubtitleCell(title: "My Predictors", subtitle: "\(predictionSettings.settingsDictionary().reduce(0, { $0 + ($1.value ? 1 : 0) }))/\(predictionSettings.settingsDictionary().keys.count)")
           }
           
-          Toggle("Prediction Notifications", isOn: $realTimeAlerts)
-            .tint(colorTheme.baseColor)
+          Toggle("Prediction Notifications", isOn: notificationSettings.$realTimeAlerts)
+            .tint(generalSettings.colorTheme.baseColor)
           
-          Toggle("Daily Outlook", isOn: $dailyOutlookAlerts)
-            .onChange(of: dailyOutlookAlerts, perform: dailyOutlookAlertsChanged)
-            .tint(colorTheme.baseColor)
+          Toggle("Daily Outlook", isOn: notificationSettings.$dailyOutlookAlerts)
+            .onChange(of: notificationSettings.dailyOutlookAlerts, perform: dailyOutlookAlertsChanged)
+            .tint(generalSettings.colorTheme.baseColor)
           
           DatePicker("Daily Outlook Time", selection: dailyOutlookDate, displayedComponents: .hourAndMinute)
-            .disabled(!dailyOutlookAlerts)
+            .disabled(!notificationSettings.dailyOutlookAlerts)
         }
         
         // Information
         Section("General") {
-          Picker("Measurement System", selection: $measurementSystem) {
+          Picker("Measurement System", selection: generalSettings.$measurementSystem) {
             Text(MeasurementSystem.metric.title).tag(MeasurementSystem.metric)
             Text(MeasurementSystem.imperial.title).tag(MeasurementSystem.imperial)
           }
           
           NavigationLink {
-            ColorThemePicker(theme: $colorTheme)
+            ColorThemePicker(theme: generalSettings.$colorTheme)
           } label: {
             HStack {
               Text("Theme")
-              ColorThemeView(theme: colorTheme, titleAlignment: .trailing)
+              ColorThemeView(theme: generalSettings.colorTheme, titleAlignment: .trailing)
                 .foregroundColor(.secondary)
-                .id(colorTheme)
+                .id(generalSettings.colorTheme)
             }
           }
           
-          Toggle("Dim Screen", isOn: $shouldDimScreen)
-            .tint(colorTheme.baseColor)
+          Toggle("Dim Screen", isOn: generalSettings.$shouldDimScreen)
+            .tint(generalSettings.colorTheme.baseColor)
           
-          Picker("Dimming Percent", selection: $screenDimPercent) {
+          Picker("Dimming Percent", selection: generalSettings.$screenDimPercent) {
             Text("25%").tag(0.25)
             Text("50%").tag(0.5)
             Text("75%").tag(0.75)
@@ -233,9 +188,9 @@ struct SettingsView: View {
           
           Button("Share Feedback", action: shareFeedback)
           
-          Toggle("Submit Crash Data", isOn: $enableCrashReporting)
-            .onChange(of: enableCrashReporting, perform: enableCrashReportingValueChanged)
-            .tint(colorTheme.baseColor)
+          Toggle("Submit Crash Data", isOn: generalSettings.$crashReportingEnabled)
+            .onChange(of: generalSettings.crashReportingEnabled, perform: enableCrashReportingValueChanged)
+            .tint(generalSettings.colorTheme.baseColor)
           
           SubtitleCell(title: "Version", subtitle: Bundle.main.humanReadableVersionString)
         }
@@ -300,28 +255,6 @@ extension SettingsView {
   /// Turns crash reporting on or off.
   private func enableCrashReportingValueChanged(_ newValue: Bool) {
     Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(newValue)
-  }
-  
-  private func settingsDictionary() -> [String: Bool] {
-    return [
-      AppSettings.Predictors.secondsSinceMidnight: predictorSecondsSinceMidnight,
-      AppSettings.Predictors.weekday: predictorWeekday,
-      AppSettings.Predictors.mindfulSession: predictorMindfulSession,
-      AppSettings.Predictors.sleepSeconds: predictorSleepSeconds,
-      AppSettings.Predictors.sleepOnset: predictorSleepOnset,
-      AppSettings.Predictors.headphoneAudioExposure: predictorHeadphoneAudioExposure,
-      AppSettings.Predictors.stepCount: predictorStepCount,
-      AppSettings.Predictors.barometricPressure: predictorBarometricPressure,
-      AppSettings.Predictors.humidity: predictorHumidity,
-      AppSettings.Predictors.temperature: predictorTemperature,
-      AppSettings.Predictors.environmentalAudioExposure: predictorEnvironmentalAudioExposure,
-      AppSettings.Predictors.heartRate: predictorHeartRate,
-      AppSettings.Predictors.respiratoryRate: predictorRespiratoryRate,
-      AppSettings.Predictors.oxygenSaturation: predictorOxygenSaturation,
-      AppSettings.Predictors.heartRateVariability: predictorHeartRateVariability,
-      AppSettings.Predictors.walkingHeartRateAverage: predictorWalkingHeartRateAverage,
-      AppSettings.Predictors.restingHeartRate: predictorRestingHeartRate
-    ]
   }
   
 }

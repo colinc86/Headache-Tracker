@@ -32,9 +32,4 @@ enum MeasurementSystem: String {
   var humidityUnit: UnitRate {
     .percent
   }
-  
-  static var current: MeasurementSystem {
-    let measurementSystemString = UserDefaults.standard.string(forKey: AppSettings.measurementSystem) ?? (Locale.current.usesMetricSystem ? MeasurementSystem.metric.rawValue : MeasurementSystem.imperial.rawValue)
-    return MeasurementSystem(rawValue: measurementSystemString) ?? .metric
-  }
 }

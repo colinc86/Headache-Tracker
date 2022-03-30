@@ -12,29 +12,14 @@ struct DebugSettingsView: View {
   
   // MARK: Private properties
   
+  /// The view's list settings.
+  @Environment(\.debugSettings) private var debugSettings
+  
   /// The app's headache manager.
   @EnvironmentObject private var headacheManager: HeadacheManager
   
   /// The app's headache predictor.
   @EnvironmentObject private var predictor: Predictor
-  
-  /// A debug last outlook date setting.
-  @AppStorage(AppSettings.Debug.debugLastOutlookDate) private var debugLastOutlookDate: Date?
-  
-  /// A debug next outlook date setting.
-  @AppStorage(AppSettings.Debug.debugNextOutlookDate) private var debugNextOutlookDate: Date?
-  
-  /// A debug last outlook date setting.
-  @AppStorage(AppSettings.Debug.debugLastTrainingDate) private var debugLastTrainingDate: Date?
-  
-  /// A debug next outlook date setting.
-  @AppStorage(AppSettings.Debug.debugNextTrainingDate) private var debugNextTrainingDate: Date?
-  
-  /// A debug last outlook date setting.
-  @AppStorage(AppSettings.Debug.debugLastPredictionDate) private var debugLastPredictionDate: Date?
-  
-  /// A debug next outlook date setting.
-  @AppStorage(AppSettings.Debug.debugNextPredictionDate) private var debugNextPredictionDate: Date?
   
   /// The application's not present training data.
   @FetchRequest(
@@ -119,12 +104,12 @@ struct DebugSettingsView: View {
       }
       
       Section {
-        SubtitleCell(title: "Last Outlook", subtitle: "\(debugLastOutlookDate?.formattedNonRelative() ?? "N/A")")
-        SubtitleCell(title: "Next Outlook", subtitle: "\(debugNextOutlookDate?.formattedNonRelative() ?? "N/A")")
-        SubtitleCell(title: "Last Training", subtitle: "\(debugLastTrainingDate?.formattedNonRelative() ?? "N/A")")
-        SubtitleCell(title: "Next Training", subtitle: "\(debugNextTrainingDate?.formattedNonRelative() ?? "N/A")")
-        SubtitleCell(title: "Last Prediction", subtitle: "\(debugLastPredictionDate?.formattedNonRelative() ?? "N/A")")
-        SubtitleCell(title: "Next Prediction", subtitle: "\(debugNextPredictionDate?.formattedNonRelative() ?? "N/A")")
+        SubtitleCell(title: "Last Outlook", subtitle: "\(debugSettings.lastOutlookDate?.formattedNonRelative() ?? "N/A")")
+        SubtitleCell(title: "Next Outlook", subtitle: "\(debugSettings.nextOutlookDate?.formattedNonRelative() ?? "N/A")")
+        SubtitleCell(title: "Last Training", subtitle: "\(debugSettings.lastTrainingDate?.formattedNonRelative() ?? "N/A")")
+        SubtitleCell(title: "Next Training", subtitle: "\(debugSettings.nextTrainingDate?.formattedNonRelative() ?? "N/A")")
+        SubtitleCell(title: "Last Prediction", subtitle: "\(debugSettings.lastPredictionDate?.formattedNonRelative() ?? "N/A")")
+        SubtitleCell(title: "Next Prediction", subtitle: "\(debugSettings.nextPredictionDate?.formattedNonRelative() ?? "N/A")")
       }
       
       Section {

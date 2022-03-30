@@ -18,6 +18,9 @@ struct LineGraph: View {
   /// The line graph's gradient.
   let gradient: Gradient
   
+  /// Whether or not the view should be drawn in its collapsed state.
+  var collapsed: Bool = false
+  
   // MARK: Private properties
   
   /// The view's trim for animating its appearance.
@@ -30,12 +33,14 @@ struct LineGraph: View {
       VStack(alignment: .trailing) {
         Text(Headache.Severity.severe.title)
         Spacer()
-        Text(Headache.Severity.moderate.title)
-        Spacer()
-        Text(Headache.Severity.mild.title)
-        Spacer()
-        Text(Headache.Severity.unspecified.title)
-        Spacer()
+        if !collapsed {
+          Text(Headache.Severity.moderate.title)
+          Spacer()
+          Text(Headache.Severity.mild.title)
+          Spacer()
+          Text(Headache.Severity.unspecified.title)
+          Spacer()
+        }
         Text(Headache.Severity.notPresent.title)
       }
       .font(.caption)
@@ -45,7 +50,7 @@ struct LineGraph: View {
       
       QuadCurve(unitPoints: pathPoints())
         .trim(from: 0.0, to: trim)
-        .stroke(LinearGradient(gradient: gradient, startPoint: .bottom, endPoint: .top), lineWidth: 4.0)
+        .stroke(LinearGradient(gradient: gradient, startPoint: .bottom, endPoint: .top), lineWidth: collapsed ? 2.0 : 4.0)
         .animation(.easeInOut(duration: 0.5), value: trim)
         .onAppear(perform: { trim = 1.0 })
     }
@@ -82,7 +87,12 @@ struct LineGraph_Previews: PreviewProvider {
   static var previews: some View {
     LineGraph(series: [
       .mild, .notPresent, .unspecified
-    ], gradient: Gradient(colors: [.cyan, .purple]))
-      .previewLayout(.fixed(width: 428, height: 200))
+    ], gradient: Gradient(colors: [.cyan, .purple]), collapsed: true)
+      .previewLayout(.fixed(width: 428, height: 40))
+    
+    LineGraph(series: [
+      .mild, .notPresent, .unspecified
+    ], gradient: Gradient(colors: [.cyan, .purple]), collapsed: false)
+    .previewLayout(.fixed(width: 428, height: 100))
   }
 }

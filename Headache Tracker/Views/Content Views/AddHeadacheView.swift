@@ -9,6 +9,32 @@ import SwiftUI
 
 struct AddHeadacheView: View {
   
+  // MARK: Types
+  
+  class ViewModel: ObservableObject {
+    
+    /// The selected severity.
+    @Published var severity: Headache.Severity? = nil
+    
+    /// The onset date.
+    @Published var onset = Date()
+    
+    /// The end date.
+    @Published var end = Date()
+    
+    /// Whether or not the headache was resolved.
+    @Published var resolved = false
+    
+    /// Whether or not the view is saving its data.
+    @Published var isSaving = false
+    
+    /// Whether or not the view's data is valid.
+    var validData: Bool {
+      return severity != nil && onset < Date()
+    }
+    
+  }
+  
   // MARK: Private properties
   
   @Environment(\.presentationMode) private var presentationMode
@@ -16,20 +42,15 @@ struct AddHeadacheView: View {
   /// The app's headache manager.
   @EnvironmentObject private var headacheManager: HeadacheManager
   
-  private let now: Date
-  @State private var severity: Headache.Severity? = nil
-  @State private var onset = Date()
-  @State private var resolved = false
-  @State private var end = Date()
-  @State private var isSaving = false
-  var valid: Bool {
-    return severity != nil && onset < now
-  }
+  /// The view's model.
+  @ObservedObject private var viewModel = ViewModel()
+  
+  // MARK: View body
   
   var body: some View {
     List {
       Section {
-        SeveritySelectionView(currentSeverity: severity, action: changeSeverity)
+        SeveritySelectionView(currentSeverity: viewModel.severity, action: changeSeverity)
       } header: {
         SectionTitleView(title: "How severe was the headache?")
       } footer: {
@@ -37,52 +58,47 @@ struct AddHeadacheView: View {
       }
       
       Section {
-        EditableDateTimeCard(title: "Onset", foregroundColor: .purple, date: $onset)
+        EditableDateTimeCard(title: "Onset", foregroundColor: .purple, date: $viewModel.onset)
       } header: {
         SectionTitleView(title: "When did it start?")
       }
       
       Section {
-        Toggle("Resolved", isOn: $resolved)
+        Toggle("Resolved", isOn: $viewModel.resolved)
           .tint(.accentColor)
       } header: {
         SectionTitleView(title: "Has it resolved?")
       }
       
-      if resolved {
+      if viewModel.resolved {
         Section {
-          EditableDateTimeCard(title: "End", foregroundColor: .teal, date: $end)
+          EditableDateTimeCard(title: "End", foregroundColor: .teal, date: $viewModel.end)
         } header: {
           SectionTitleView(title: "When did it end?")
         }
       }
     }
-    .animation(.default, value: resolved)
+    .animation(.default, value: viewModel.resolved)
     .navigationTitle("New Headache")
     .toolbar {
       ToolbarItem(placement: .cancellationAction) {
         Button("Cancel", action: dismiss)
-          .disabled(isSaving)
+          .disabled(viewModel.isSaving)
       }
       
       ToolbarItem(placement: .confirmationAction) {
         AsyncButton("Save", mode: .replacingContent, action: save)
-          .disabled(!valid)
+          .disabled(!viewModel.validData)
       }
     }
   }
   
-  init() {
-    now = Date()
-    onset = now
-    end = now
-  }
 }
 
 extension AddHeadacheView {
   
   private func changeSeverity(_ severity: Headache.Severity) {
-    withAnimation { self.severity = severity }
+    withAnimation { viewModel.severity = severity }
   }
   
   private func dismiss() {
@@ -90,18 +106,18 @@ extension AddHeadacheView {
   }
   
   private func save() async throws {
-    guard let severity = severity else {
+    guard let severity = viewModel.severity else {
       return
     }
     
     await MainActor.run {
-      withAnimation { isSaving = true }
+      withAnimation { viewModel.isSaving = true }
     }
     
-    try await headacheManager.createHeadache(severity: severity, start: onset, end: resolved ? end : nil)
+    try await headacheManager.createHeadache(severity: severity, start: viewModel.onset, end: viewModel.resolved ? viewModel.end : nil)
     
     await MainActor.run {
-      withAnimation { isSaving = false }
+      withAnimation { viewModel.isSaving = false }
     }
     
     dismiss()

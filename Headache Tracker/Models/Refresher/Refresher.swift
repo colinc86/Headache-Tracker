@@ -21,39 +21,39 @@ class Refresher: ObservableObject {
   weak var headacheManager: HeadacheManager!
   
   // MARK: Private properties
-  
-  /// The check-in alerts setting.
-  @AppStorage(AppSettings.checkInAlerts) private var checkInAlerts = false
-  
-  /// The check-in interval setting if `checkInAlerts` is true.
-  @AppStorage(AppSettings.checkInInterval) private var checkInInterval = TimeInterval(3600.0)
-  
-  /// The real-time alerts setting.
-  @AppStorage(AppSettings.realTimeAlerts) private var realTimeAlerts = false
-  
-  /// The daily outlook alerts setting.
-  @AppStorage(AppSettings.dailyOutlookAlerts) private var dailyOutlookAlerts = false
-  
-  /// The daily outlook alert time.
-  @AppStorage(AppSettings.dailyOutlookTime) private var dailyOutlookTime = TimeInterval(28800.0)
-  
-  /// A debug last outlook date setting.
-  @AppStorage(AppSettings.Debug.debugLastOutlookDate) private var debugLastOutlookDate: Date?
-  
-  /// A debug next outlook date setting.
-  @AppStorage(AppSettings.Debug.debugNextOutlookDate) private var debugNextOutlookDate: Date?
-  
-  /// A debug last outlook date setting.
-  @AppStorage(AppSettings.Debug.debugLastTrainingDate) private var debugLastTrainingDate: Date?
-  
-  /// A debug next outlook date setting.
-  @AppStorage(AppSettings.Debug.debugNextTrainingDate) private var debugNextTrainingDate: Date?
-  
-  /// A debug last outlook date setting.
-  @AppStorage(AppSettings.Debug.debugLastPredictionDate) private var debugLastPredictionDate: Date?
-  
-  /// A debug next outlook date setting.
-  @AppStorage(AppSettings.Debug.debugNextPredictionDate) private var debugNextPredictionDate: Date?
+//  
+//  /// The check-in alerts setting.
+//  @AppStorage(AppSettings.GeneralSettings.Keys.checkInAlerts) private var checkInAlerts = false
+//  
+//  /// The check-in interval setting if `checkInAlerts` is true.
+//  @AppStorage(AppSettings.checkInInterval) private var checkInInterval = TimeInterval(3600.0)
+//  
+//  /// The real-time alerts setting.
+//  @AppStorage(AppSettings.realTimeAlerts) private var realTimeAlerts = false
+//  
+//  /// The daily outlook alerts setting.
+//  @AppStorage(AppSettings.dailyOutlookAlerts) private var dailyOutlookAlerts = false
+//  
+//  /// The daily outlook alert time.
+//  @AppStorage(AppSettings.dailyOutlookTime) private var dailyOutlookTime = TimeInterval(28800.0)
+//  
+//  /// A debug last outlook date setting.
+//  @AppStorage(AppSettings.Debug.debugLastOutlookDate) private var debugLastOutlookDate: Date?
+//  
+//  /// A debug next outlook date setting.
+//  @AppStorage(AppSettings.Debug.debugNextOutlookDate) private var debugNextOutlookDate: Date?
+//  
+//  /// A debug last outlook date setting.
+//  @AppStorage(AppSettings.Debug.debugLastTrainingDate) private var debugLastTrainingDate: Date?
+//  
+//  /// A debug next outlook date setting.
+//  @AppStorage(AppSettings.Debug.debugNextTrainingDate) private var debugNextTrainingDate: Date?
+//  
+//  /// A debug last outlook date setting.
+//  @AppStorage(AppSettings.Debug.debugLastPredictionDate) private var debugLastPredictionDate: Date?
+//  
+//  /// A debug next outlook date setting.
+//  @AppStorage(AppSettings.Debug.debugNextPredictionDate) private var debugNextPredictionDate: Date?
   
   /// The refresh task responsible for creating background samples.
   private let predictionRefreshTask = RefreshTask(identifier: Constants.Tasks.backgroundPredictionTaskIdentifier, type: .appRefresh)
@@ -81,7 +81,7 @@ extension Refresher {
   /// - Parameter headacheIdentifier: The headache identifier.
   func presentCheckInAlert(with headacheIdentifier: UUID?) async throws {
     // Only continue if we have an identifier and check-in alerts are turned on
-    guard checkInAlerts, let headacheIdentifier = headacheIdentifier else {
+    guard await AppSettings.shared.notifications.checkInAlerts, let headacheIdentifier = headacheIdentifier else {
       return
     }
     
@@ -89,7 +89,7 @@ extension Refresher {
     alertManager.removeRequests(pending: true, delivered: false)
     
     // Get our date components
-    let futureDate = Date(timeIntervalSinceNow: checkInInterval)
+    let futureDate = Date(timeIntervalSinceNow: await AppSettings.shared.notifications.checkInInterval)
     let components = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: futureDate)
     
     // Present the alert
@@ -105,7 +105,7 @@ extension Refresher {
   /// - Parameter prediction: The prediction.
   func presentPredictionAlert(with prediction: PredictionOutput?) async throws {
     // Only continue if we have a prediction and prediction alerts are turned on
-    guard realTimeAlerts, let prediction = prediction,
+    guard await AppSettings.shared.notifications.realTimeAlerts, let prediction = prediction,
           prediction.severityClassifierOutput.prediction != .notPresent &&
             prediction.outlookClassifierOutput.prediction == .headache else {
               return
@@ -123,7 +123,7 @@ extension Refresher {
   /// - Parameter prediction: The prediction.
   func presentOutlookAlert(with prediction: PredictionOutput?) async throws {
     // Only continue if we have a prediction and prediction alerts are turned on
-    guard dailyOutlookAlerts, let prediction = prediction else {
+    guard await AppSettings.shared.notifications.dailyOutlookAlerts, let prediction = prediction else {
       return
     }
     
@@ -164,13 +164,13 @@ extension Refresher {
     try await predictionRefreshTask.schedule(date: futureDate)
     
     logDebug("Successfully scheduled prediction refresh task.")
-    debugNextPredictionDate = futureDate
+    AppSettings.shared.debug.nextPredictionDate = futureDate
   }
   
   /// Handles the refresh task.
   private func handlePredictionRefreshTask(_ task: BGTask) {
     logDebug("Handle prediction refresh task.")
-    debugLastPredictionDate = Date()
+    AppSettings.shared.debug.lastPredictionDate = Date()
     
     // Schedule the next task
     Task { [weak self] in
@@ -256,13 +256,13 @@ extension Refresher {
     var secondsUntilOutlook: TimeInterval = 0.0
     
     // Are we past the daily outlook time?
-    if secondsPastMidnight < dailyOutlookTime {
+    if secondsPastMidnight < AppSettings.shared.notifications.dailyOutlookTime {
       // We haven't passed the outlook time yet.
-      secondsUntilOutlook = dailyOutlookTime - secondsPastMidnight
+      secondsUntilOutlook = AppSettings.shared.notifications.dailyOutlookTime - secondsPastMidnight
     }
     else {
       // We've already passed the outlook time.
-      let futureOutlookDate = Calendar.current.midnightAfter(now).addingTimeInterval(dailyOutlookTime)
+      let futureOutlookDate = Calendar.current.midnightAfter(now).addingTimeInterval(AppSettings.shared.notifications.dailyOutlookTime)
       secondsUntilOutlook = futureOutlookDate.timeIntervalSince(now)
     }
     
@@ -271,16 +271,16 @@ extension Refresher {
     try await outlookRefreshTask.schedule(interval: secondsUntilOutlook)
     
     logDebug("Successfully scheduled outlook refresh task.")
-    debugNextOutlookDate = Date(timeIntervalSinceNow: secondsUntilOutlook)
+    AppSettings.shared.debug.nextOutlookDate = Date(timeIntervalSinceNow: secondsUntilOutlook)
   }
   
   /// Handles the refresh task.
   private func handleOutlookRefreshTask(_ task: BGTask) {
     logDebug("Handle outlook refresh task.")
-    debugLastOutlookDate = Date()
+    AppSettings.shared.debug.lastOutlookDate = Date()
     
     // Schedule the next task
-    if dailyOutlookAlerts {
+    if AppSettings.shared.notifications.dailyOutlookAlerts {
       Task {
         do {
           try await scheduleOutlookRefreshTask()
@@ -361,13 +361,13 @@ extension Refresher {
     try await trainingProcessingTask.schedule(interval: secondsUntilTraining)
     
     logDebug("Successfully scheduled training procecssing task.")
-    debugNextTrainingDate = Date(timeIntervalSinceNow: secondsUntilTraining)
+    AppSettings.shared.debug.nextTrainingDate = Date(timeIntervalSinceNow: secondsUntilTraining)
   }
   
   /// Handles the processing task.
   private func handleTrainingProcessingTask(_ task: BGTask) {
     logDebug("Handle training processing task.")
-    debugLastTrainingDate = Date()
+    AppSettings.shared.debug.lastTrainingDate = Date()
     
     // Schedule the next task
     Task {
