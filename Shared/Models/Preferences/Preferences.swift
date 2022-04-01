@@ -10,7 +10,33 @@ import SwiftUI
 import WidgetKit
 
 struct Preferences {
+  
+  // MARK: Types
+  
+  /// A key.
   typealias Key = String
+  
+  // MARK: Static properties
+  
+  /// The notification to signify that the prediction value changed.
+  static let predictionDidChangeNotification = Notification.Name(rawValue: "predictionDidChangeNotification")
+  
+  // MARK: Static methods
+  
+  /// Adds a prediction observer.
+  ///
+  /// - Parameter block: The block to execute.
+  /// - Returns: An observer.
+  static func addPredictionObserver(using block: @escaping (Notification) -> Void) -> NSObjectProtocol {
+    return NotificationCenter.default.addObserver(forName: predictionDidChangeNotification, object: nil, queue: nil, using: block)
+  }
+  
+  /// Removes a prediction observer.
+  ///
+  /// - Parameter observer: The observer to remove.
+  static func removePredictionObserver(_ observer: Any) {
+    NotificationCenter.default.removeObserver(observer, name: predictionDidChangeNotification, object: nil)
+  }
   
   // MARK: - Public properties
   
@@ -377,7 +403,10 @@ struct Preferences {
     mutating func setCurrentPrediction(_ prediction: PredictionOutput, inWidget: Bool) {
       currentPrediction = prediction
 
-      if !inWidget {
+      if inWidget {
+        NotificationCenter.default.post(name: Preferences.predictionDidChangeNotification, object: nil)
+      }
+      else {
         WidgetCenter.shared.reloadTimelines(ofKind: Constants.Widgets.outlookWidgetKind)
       }
     }

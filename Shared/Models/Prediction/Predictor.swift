@@ -72,6 +72,9 @@ class Predictor: ObservableObject {
   /// The queue to do anything with models on.
   private var modelQueue = DispatchQueue(label: ApplicationKey(from: "modelQueue"))
   
+  /// The app's current preferences.
+  private var preferences = Preferences()
+  
   /// Whether or not training was cancelled.
   private var cancelledTraining = false
   
@@ -87,7 +90,7 @@ class Predictor: ObservableObject {
   // MARK: Initializers
   
   init() {
-    predictionObserver = SharedUserDefaults.preferences.addPredictionObserver(using: predictionNotification)
+    predictionObserver = Preferences.addPredictionObserver(using: predictionNotification)
     updateCurrentPredictionFromDefaults()
     
     do {
@@ -104,7 +107,7 @@ class Predictor: ObservableObject {
   
   deinit {
     if let predictionObserver = predictionObserver {
-      SharedUserDefaults.preferences.removePredictionObserver(predictionObserver)
+      Preferences.removePredictionObserver(predictionObserver)
     }
   }
   
@@ -253,7 +256,7 @@ extension Predictor {
           }
           
           // Save this prediction for the widget
-          SharedUserDefaults.preferences.setCurrentPrediction(prediction, inWidget: inWidget)
+          self.preferences.shared.setCurrentPrediction(prediction, inWidget: inWidget)
           
           continuation.resume(returning: prediction)
         }
@@ -276,8 +279,8 @@ extension Predictor {
   
   /// Updates the current prediction from the shared user defaults.
   private func updateCurrentPredictionFromDefaults() {
-    DispatchQueue.main.async {
-      self.prediction = SharedUserDefaults.preferences.currentPrediction
+    DispatchQueue.main.async { [weak self] in
+      self?.prediction = self?.preferences.shared.currentPrediction
     }
   }
   

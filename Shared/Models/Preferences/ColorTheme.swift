@@ -286,6 +286,7 @@ extension ColorTheme: CaseIterable {
     .system,
     .grayscale,
     .monokai,
+    .github,
     .green,
     .indigo,
     .orange,
@@ -327,6 +328,19 @@ extension ColorTheme: CaseIterable {
                                   indigo: Color(#colorLiteral(red: 0.7396259904, green: 0.5995926857, blue: 1, alpha: 1)),
                                   purple: Color(#colorLiteral(red: 0.7302459478, green: 0.1746567488, blue: 0.6364159584, alpha: 1)),
                                   teal: Color(#colorLiteral(red: 0.3069736958, green: 0.6911749244, blue: 0.7984278798, alpha: 1)))
+  
+  static let github = ColorTheme(name: "GitHub",
+                                 baseColor: Color(#colorLiteral(red: 0.09415204078, green: 0.5254810452, blue: 0.6980336308, alpha: 1)),
+                                 cyan: Color(#colorLiteral(red: 0.3069736958, green: 0.6911749244, blue: 0.7984278798, alpha: 1)),
+                                 mint: Color(#colorLiteral(red: 0.384322226, green: 0.6431264877, blue: 0.3764688969, alpha: 1)),
+                                 yellow: Color(#colorLiteral(red: 0.9686300159, green: 0.9333148599, blue: 0.7882300019, alpha: 1)),
+                                 orange: Color(#colorLiteral(red: 0.866663754, green: 0.2980241776, blue: 0.03138029948, alpha: 1)),
+                                 red: Color(#colorLiteral(red: 0.964681685, green: 0.1712987423, blue: 0.02800435945, alpha: 1)),
+                                 pink: Color(#colorLiteral(red: 0.6508886218, green: 0.1038496867, blue: 0.3568501472, alpha: 1)),
+                                 green: Color(#colorLiteral(red: 0.384322226, green: 0.6431264877, blue: 0.3764688969, alpha: 1)),
+                                 indigo: Color(#colorLiteral(red: 0.4784320593, green: 0.3607748151, blue: 0.631367445, alpha: 1)),
+                                 purple: Color(#colorLiteral(red: 0.7302459478, green: 0.1746567488, blue: 0.6364159584, alpha: 1)),
+                                 teal: Color(#colorLiteral(red: 0.09415204078, green: 0.5254810452, blue: 0.6980336308, alpha: 1)))
   
   static let green = ColorTheme(name: "Green", baseColor: .green, variation: .green)
   static let indigo = ColorTheme(name: "Indigo", baseColor: .indigo, variation: .indigo)

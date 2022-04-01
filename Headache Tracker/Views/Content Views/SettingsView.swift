@@ -54,9 +54,6 @@ struct SettingsView: View {
     animation: .default)
   private var headaches: FetchedResults<Headache>
   
-  /// The app preferences.
-  private let preferences = Preferences()
-  
   // MARK: Computed properties
     
   /// The health app integration binding.
@@ -121,7 +118,7 @@ struct SettingsView: View {
             ForEach(Headache.Types.definedCases) { type in
               Text(type.title).tag(type)
             }
-            ForEach(preferences.shared.customTypes) { type in
+            ForEach(Preferences().shared.customTypes) { type in
               Text(type.title).tag(type)
             }
           }
@@ -144,7 +141,7 @@ struct SettingsView: View {
           NavigationLink {
             PredictorsView()
           } label: {
-            SubtitleCell(title: "My Predictors", subtitle: "\(preferences.predictors.settingsDictionary().reduce(0, { $0 + ($1.value ? 1 : 0) }))/\(preferences.predictors.settingsDictionary().keys.count)")
+            SubtitleCell(title: "My Predictors", subtitle: "\(Preferences().predictors.settingsDictionary().reduce(0, { $0 + ($1.value ? 1 : 0) }))/\(Preferences().predictors.settingsDictionary().keys.count)")
           }
           
           Toggle("Prediction Notifications", isOn: $realTimeAlerts)
@@ -166,7 +163,7 @@ struct SettingsView: View {
           }
           
           NavigationLink {
-            ColorThemePicker(theme: $colorTheme)
+            ColorThemePicker()
           } label: {
             HStack {
               Text("Theme")
