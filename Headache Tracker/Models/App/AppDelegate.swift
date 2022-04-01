@@ -29,6 +29,10 @@ class AppDelegate: NSObject, UIApplicationDelegate, ObservableObject {
   /// The app's previous brightness setting.
   private var previousBrightness: CGFloat = 0.0
   
+  // Preferences
+  let generalPreferences = Preferences.General()
+  let healthPreferences = Preferences.Health()
+  
   // MARK: Override methods
   
   func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
@@ -116,7 +120,7 @@ extension AppDelegate {
     }
     
     UIScreen.main.wantsSoftwareDimming = true
-    UIScreen.main.brightness = previousBrightness * (1.0 - CGFloat(AppSettings.shared.general.screenDimPercent))
+    UIScreen.main.brightness = previousBrightness * (1.0 - CGFloat(generalPreferences.screenDimPercent))
   }
   
   /// Restores the screen to the previous brightness.
@@ -147,7 +151,7 @@ extension AppDelegate {
   /// Setup health kit (only if it hasn't been done before) and the setting
   /// is on.
   private func checkHealthKitAuthorizationStatus() async throws {
-    if AppSettings.shared.health.enabled && headacheManager.healthKitManager.needsAuthorization() {
+    if healthPreferences.enabled && headacheManager.healthKitManager.needsAuthorization() {
       try await headacheManager.healthKitManager.authorize()
     }
   }

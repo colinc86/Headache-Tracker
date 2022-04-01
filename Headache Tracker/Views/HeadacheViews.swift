@@ -29,15 +29,6 @@ struct HeadacheViews: View {
   /// The view's presentation mode.
   @Environment(\.presentationMode) private var presentationMode
   
-  /// The application's custom color theme.
-  @Environment(\.colorTheme) private var colorTheme
-  
-  /// The view's health settings.
-  @Environment(\.healthSettings) private var healthSettings
-  
-  /// The view's list settings.
-  @Environment(\.listSettings) private var listSettings
-  
   /// The app's headache manager.
   @EnvironmentObject private var headacheManager: HeadacheManager
   
@@ -73,6 +64,17 @@ struct HeadacheViews: View {
   
   @State private var expandedProgressionView = false
   
+  // Preferences
+  @AppStorage(Preferences.General.Keys.colorTheme) private var colorTheme = Preferences.General.Defaults.colorTheme
+  @AppStorage(Preferences.Lists.Keys.type) private var showTypeView = Preferences.Lists.Defaults.shown
+  @AppStorage(Preferences.Lists.Keys.onset) private var showOnsetView = Preferences.Lists.Defaults.shown
+  @AppStorage(Preferences.Lists.Keys.duration) private var showDurationView = Preferences.Lists.Defaults.shown
+  @AppStorage(Preferences.Lists.Keys.progression) private var showProgressionView = Preferences.Lists.Defaults.shown
+  @AppStorage(Preferences.Lists.Keys.notes) private var showNotesView = Preferences.Lists.Defaults.shown
+  @AppStorage(Preferences.Lists.Keys.tags) private var showTagsView = Preferences.Lists.Defaults.shown
+  @AppStorage(Preferences.Health.Keys.enabled) private var healthEnabled = Preferences.Health.Defaults.enabled
+  @AppStorage(Preferences.Health.Keys.deleteDisposition) private var deleteDisposition = Preferences.Health.Defaults.deleteDisposition
+  
   var body: some View {
     Group {
       if allowsResolution {
@@ -89,28 +91,28 @@ struct HeadacheViews: View {
         }
       }
       
-      if showsAllCards || listSettings.showTypeView {
+      if showsAllCards || showTypeView {
         Section {
           TypeCard(type: headache.headacheType, classification: headache.headacheClassification, editAction: editTypeAction)
         }
       }
       
       // Onset
-      if showsAllCards || listSettings.showOnsetView, let onset = headache.startTime {
+      if showsAllCards || showOnsetView, let onset = headache.startTime {
         Section {
           OnsetCard(onset: onset)
         }
       }
       
       // Duration
-      if showsAllCards || listSettings.showDurationView {
+      if showsAllCards || showDurationView {
         Section {
           DurationCard(headache: headache)
         }
       }
       
       // Progression
-      if showsAllCards || listSettings.showProgressionView {
+      if showsAllCards || showProgressionView {
         Section {
           ProgressionCard(headache: headache, expanded: $expandedProgressionView)
         }
@@ -143,14 +145,14 @@ struct HeadacheViews: View {
       }
       
       // Notes
-      if showsAllCards || listSettings.showNotesView {
+      if showsAllCards || showNotesView {
         Section {
           NotesCard(notes: headache.notes ?? "", editAction: editNotesAction)
         }
       }
       
       // Tags
-      if showsAllCards || listSettings.showTagsView {
+      if showsAllCards || showTagsView {
         Section {
           TagsCard(tags: headache.tagValues, editAction: editTagsAction, tagAction: { _ in })
         }
@@ -172,7 +174,7 @@ struct HeadacheViews: View {
       AsyncButton("Resolve", role: .destructive, action: resolve)
     }
     .confirmationDialog("Delete Headache", isPresented: $showingDeleteConfirmation, actions: {
-      switch healthSettings.deleteDisposition {
+      switch deleteDisposition {
       case .always:
         Button("Delete", role: .destructive) {
           delete(deleteHealthKitData: true)
@@ -182,7 +184,7 @@ struct HeadacheViews: View {
           delete(deleteHealthKitData: false)
         }
       case .ask:
-        if healthSettings.enabled {
+        if healthEnabled {
           Button("Delete", role: .destructive) {
             showingDeleteHealthDataConfirmation = true
           }
@@ -194,16 +196,16 @@ struct HeadacheViews: View {
         }
       }
     }, message: {
-      switch healthSettings.deleteDisposition {
+      switch deleteDisposition {
       case .always:
-        if healthSettings.enabled {
+        if healthEnabled {
           Text("Delete the headache and its associated Health data?")
         }
         else {
           Text("Delete the headache?")
         }
       case .never:
-        if healthSettings.enabled {
+        if healthEnabled {
           Text("Delete the headache without deleting its associated Health data?")
         }
         else {

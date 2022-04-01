@@ -67,6 +67,9 @@ class HeadacheManager: ObservableObject {
   
   // MARK: Private properties
   
+  /// The app's preferences.
+  private var preferences = Preferences()
+  
   /// The queue to train on.
   private var trainingQueue = DispatchQueue(label: ApplicationKey(from: "trainingQueue"))
   
@@ -83,8 +86,8 @@ extension HeadacheManager {
   func changeSeverity(to severity: Headache.Severity) async throws {
     logDebug("Change severity to \(severity.title).")
     
-    let classification = await AppSettings.shared.headaches.defaultHeadacheClassification
-    let type = await AppSettings.shared.headaches.defaultHeadacheType
+    let classification = preferences.headaches.defaultHeadacheClassification
+    let type = preferences.headaches.defaultHeadacheType
     
     // The date interval of the severity to save to health kit
     let severityUpdates: Headache.SeverityUpdates = try await currentHeadache { headache, context in
@@ -100,7 +103,7 @@ extension HeadacheManager {
     }
     
     // If there wasn't an error, then update the widget data and continue
-    SharedUserDefaults.standard.setCurrentSeverity(severity)
+    preferences.shared.setCurrentSeverity(severity)
     
     // Write the data to health kit and set our check-in alert
     if let interval = severityUpdates.updatedSeverityInterval {
@@ -128,7 +131,7 @@ extension HeadacheManager {
     }
     
     // If there wasn't an error, then update the widget data and continue
-    SharedUserDefaults.standard.setCurrentSeverity(nil)
+    preferences.shared.setCurrentSeverity(nil)
     
     // Write the data to health kit
     if let interval = severityUpdates.updatedSeverityInterval {
@@ -152,8 +155,8 @@ extension HeadacheManager {
   ///   - startTime: The headache's start time.
   ///   - endTime: The headache's end time.
   func createHeadache(severity: Headache.Severity, start: Date, end: Date?) async throws {
-    let classification = await AppSettings.shared.headaches.defaultHeadacheClassification
-    let type = await AppSettings.shared.headaches.defaultHeadacheType
+    let classification = preferences.headaches.defaultHeadacheClassification
+    let type = preferences.headaches.defaultHeadacheType
     
     let severityIdentifier = try await DataController.shared.performInBackground(saveOnComplete: true) { (context) -> UUID? in
       let headache = Headache(context: context, severity: severity, classification: classification, type: type, start: start, end: end)
@@ -285,7 +288,7 @@ extension HeadacheManager {
     var startTime: Date?
     var endTime: Date?
     
-    try await headacheWithIdentifier(identifier: identifier) { headache, context in
+    try await headacheWithIdentifier(identifier: identifier) { [weak self] headache, context in
       logDebug("Deleting headache.")
       
       // Get the headache
@@ -306,7 +309,7 @@ extension HeadacheManager {
         // If this headache was the current headache, then cancel any pending check-in notifications
         // and reset the current severity.
         if !headache.resolved {
-          SharedUserDefaults.standard.setCurrentSeverity(nil)
+          self?.preferences.shared.setCurrentSeverity(nil)
         }
       }
     }
@@ -415,7 +418,7 @@ extension HeadacheManager {
     
     let customTypes = types.filter({ !Headache.Types.definedCases.contains($0) })
     let uniqueCustomTypes = customTypes.unique()
-    SharedUserDefaults.standard.customTypes = uniqueCustomTypes
+    preferences.shared.customTypes = uniqueCustomTypes
   }
   
 }

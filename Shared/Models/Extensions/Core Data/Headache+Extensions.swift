@@ -35,7 +35,7 @@ extension Headache {
   ///
   /// A headache type that is not explicity listed in the enumeration
   /// can be included as a custom type.
-  enum Types: Comparable, Hashable, Identifiable, RawRepresentable {
+  enum Types: Codable, Comparable, Hashable, Identifiable, RawRepresentable {
     
     typealias RawValue = String
     

@@ -87,7 +87,7 @@ class Predictor: ObservableObject {
   // MARK: Initializers
   
   init() {
-    predictionObserver = SharedUserDefaults.standard.addPredictionObserver(using: predictionNotification)
+    predictionObserver = SharedUserDefaults.preferences.addPredictionObserver(using: predictionNotification)
     updateCurrentPredictionFromDefaults()
     
     do {
@@ -104,7 +104,7 @@ class Predictor: ObservableObject {
   
   deinit {
     if let predictionObserver = predictionObserver {
-      SharedUserDefaults.standard.removePredictionObserver(predictionObserver)
+      SharedUserDefaults.preferences.removePredictionObserver(predictionObserver)
     }
   }
   
@@ -253,7 +253,7 @@ extension Predictor {
           }
           
           // Save this prediction for the widget
-          SharedUserDefaults.standard.setCurrentPrediction(prediction, inWidget: inWidget)
+          SharedUserDefaults.preferences.setCurrentPrediction(prediction, inWidget: inWidget)
           
           continuation.resume(returning: prediction)
         }
@@ -277,7 +277,7 @@ extension Predictor {
   /// Updates the current prediction from the shared user defaults.
   private func updateCurrentPredictionFromDefaults() {
     DispatchQueue.main.async {
-      self.prediction = SharedUserDefaults.standard.currentPrediction
+      self.prediction = SharedUserDefaults.preferences.currentPrediction
     }
   }
   

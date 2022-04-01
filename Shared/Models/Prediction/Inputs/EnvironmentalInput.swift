@@ -20,6 +20,8 @@ class EnvironmentalInput: MLFeatureProvider {
     static let environmentAudioExposure = "Environment Audio Exposure"
   }
   
+  let preferences = Preferences.Predictors()
+  
   /// Current Pressure as double value
   var Current_Pressure: Double
   
@@ -44,19 +46,19 @@ class EnvironmentalInput: MLFeatureProvider {
   var featureNames: Set<String> {
     get {
       var names = Set<String>()
-      if AppSettings.shared.predictions.barometricPressure == true {
+      if preferences.barometricPressure == true {
         names.insert(FeatureName.currentPressure)
         names.insert(FeatureName.sigmaPressure)
       }
-      if AppSettings.shared.predictions.humidity == true {
+      if preferences.humidity == true {
         names.insert(FeatureName.currentHumidity)
         names.insert(FeatureName.sigmaHumidity)
       }
-      if AppSettings.shared.predictions.temperature == true {
+      if preferences.temperature == true {
         names.insert(FeatureName.currentTemperature)
         names.insert(FeatureName.sigmaTemperature)
       }
-      if AppSettings.shared.predictions.environmentalAudioExposure == true {
+      if preferences.environmentalAudioExposure == true {
         names.insert(FeatureName.environmentAudioExposure)
       }
       return names

@@ -20,6 +20,12 @@ struct Headache_TrackerApp: App {
   /// The application delegate.
   @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
   
+  // Preferences
+  @AppStorage(Preferences.General.Keys.colorTheme) private var colorTheme = Preferences.General.Defaults.colorTheme
+  @AppStorage(Preferences.General.Keys.shouldDimScreen) var shouldDimScreen = false
+  @AppStorage(Preferences.General.Keys.screenDimPercent) var screenDimPercent = 0.5
+  @AppStorage(Preferences.Notifications.Keys.dailyOutlookAlerts) var dailyOutlookAlerts = true
+  
   /// The application did become active publisher.
   private let didBecomeActiveNotificationPublisher = NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)
   
@@ -32,17 +38,9 @@ struct Headache_TrackerApp: App {
     WindowGroup {
       ContentView()
         // Configure the view
-        .accentColor(AppSettings.shared.general.colorTheme.baseColor)
+        .accentColor(colorTheme.baseColor)
       
         // Set the environment values
-        .environment(\.debugSettings, AppSettings.shared.debug)
-        .environment(\.generalSettings, AppSettings.shared.general)
-        .environment(\.headacheSettings, AppSettings.shared.headaches)
-        .environment(\.healthSettings, AppSettings.shared.health)
-        .environment(\.listSettings, AppSettings.shared.lists)
-        .environment(\.notificationSettings, AppSettings.shared.notifications)
-        .environment(\.filterSettings, AppSettings.shared.filters)
-        .environment(\.predictionSettings, AppSettings.shared.predictions)
         .environment(\.managedObjectContext, DataController.shared.container.viewContext)
       
         // Set the environment objects
@@ -55,8 +53,8 @@ struct Headache_TrackerApp: App {
         // Subscribe to notifications
         .onReceive(didBecomeActiveNotificationPublisher, perform: didBecomeActive)
         .onReceive(willResignActiveNotificationPublisher, perform: willResignActive)
-        .onChange(of: AppSettings.shared.general.shouldDimScreen, perform: appDelegate.dimScreenChanged)
-        .onChange(of: AppSettings.shared.general.screenDimPercent, perform: appDelegate.dimmingPercentChanged)
+        .onChange(of: shouldDimScreen, perform: appDelegate.dimScreenChanged)
+        .onChange(of: screenDimPercent, perform: appDelegate.dimmingPercentChanged)
     }
   }
   
@@ -67,7 +65,7 @@ extension Headache_TrackerApp {
   /// Called when the application becomes active.
   private func didBecomeActive(_ output: NotificationCenter.Publisher.Output) {
     logDebug("Application did become active.")
-    if AppSettings.shared.general.shouldDimScreen {
+    if shouldDimScreen {
       appDelegate.dimScreen(preservingBrightness: true)
     }
     
@@ -89,7 +87,7 @@ extension Headache_TrackerApp {
   /// Called when the application resigns active.
   private func willResignActive(_ output: NotificationCenter.Publisher.Output) {
     logDebug("Application will resign active.")
-    if AppSettings.shared.general.shouldDimScreen {
+    if shouldDimScreen {
       appDelegate.restoreScreenBrightness()
     }
     
@@ -100,7 +98,7 @@ extension Headache_TrackerApp {
         try await appDelegate.refresher.schedulePredictionRefreshTask()
         
         // Schedule our outlook task
-        if AppSettings.shared.notifications.dailyOutlookAlerts {
+        if dailyOutlookAlerts {
           try await appDelegate.refresher.scheduleOutlookRefreshTask()
         }
       }

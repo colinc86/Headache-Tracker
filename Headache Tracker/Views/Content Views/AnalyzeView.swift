@@ -12,11 +12,12 @@ struct AnalyzeView: View {
   
   // MARK: Private properties
   
-  /// The view's list settings.
-  @Environment(\.filterSettings) private var filterSettings
-  
   /// The main view context.
   @Environment(\.managedObjectContext) private var viewContext
+  
+  // Preferences
+  @AppStorage(Preferences.Filters.Keys.count) private var filterCount = Preferences.Filters.Defaults.count
+  @AppStorage(Preferences.Filters.Keys.unit) private var filterUnit = Preferences.Filters.Defaults.unit
   
   /// The view's state identifier.
   @State private var viewIdentifier = UUID()
@@ -25,7 +26,7 @@ struct AnalyzeView: View {
   
   var body: some View {
     NavigationView {
-      GraphList(filterUnit: filterSettings.unit, earliestDate: filterSettings.unit.dateBeforeNow(withCount: filterSettings.count))
+      GraphList(filterUnit: filterUnit, earliestDate: filterUnit.dateBeforeNow(withCount: filterCount))
       .id(viewIdentifier)
       .navigationTitle("Analyze")
       .toolbar {
@@ -33,26 +34,26 @@ struct AnalyzeView: View {
           HStack {
             Text("Analyze the last")
             
-            Picker("\(filterSettings.count)", selection: filterSettings.$count) {
-              ForEach(filterSettings.unit.filterCountRange, id: \.self) { i in
+            Picker("\(filterCount)", selection: $filterCount) {
+              ForEach(filterUnit.filterCountRange, id: \.self) { i in
                 Text("\(i)").tag(i)
               }
             }
             .padding([.leading, .trailing])
             .background(RoundedRectangle(cornerRadius: 8)
                           .fill(Color.secondary.opacity(0.25)))
-            .onChange(of: filterSettings.count, perform: changedFilterCount)
+            .onChange(of: filterCount, perform: changedFilterCount)
             
-            Picker("\(filterSettings.unit.rawValue)\(filterSettings.count == 1 ? "." : "s.")", selection: filterSettings.$unit) {
-              Text(FilterUnit.day.rawValue + (filterSettings.count == 1 ? "." : "s.")).tag(FilterUnit.day)
-              Text(FilterUnit.week.rawValue + (filterSettings.count == 1 ? "." : "s.")).tag(FilterUnit.week)
-              Text(FilterUnit.month.rawValue + (filterSettings.count == 1 ? "." : "s.")).tag(FilterUnit.month)
-              Text(FilterUnit.year.rawValue + (filterSettings.count == 1 ? "." : "s.")).tag(FilterUnit.year)
+            Picker("\(filterUnit.rawValue)\(filterCount == 1 ? "." : "s.")", selection: $filterUnit) {
+              Text(FilterUnit.day.rawValue + (filterCount == 1 ? "." : "s.")).tag(FilterUnit.day)
+              Text(FilterUnit.week.rawValue + (filterCount == 1 ? "." : "s.")).tag(FilterUnit.week)
+              Text(FilterUnit.month.rawValue + (filterCount == 1 ? "." : "s.")).tag(FilterUnit.month)
+              Text(FilterUnit.year.rawValue + (filterCount == 1 ? "." : "s.")).tag(FilterUnit.year)
             }
             .padding([.leading, .trailing])
             .background(RoundedRectangle(cornerRadius: 8)
                           .fill(Color.secondary.opacity(0.25)))
-            .onChange(of: filterSettings.unit, perform: changedFilterUnit)
+            .onChange(of: filterUnit, perform: changedFilterUnit)
           }
         }
       }
@@ -76,11 +77,11 @@ extension AnalyzeView {
   /// Called when the filter unit changes.
   func changedFilterUnit(_ newValue: FilterUnit) {
     withAnimation {
-      if filterSettings.count < newValue.filterCountRange.lowerBound {
-        filterSettings.count = newValue.filterCountRange.lowerBound
+      if filterCount < newValue.filterCountRange.lowerBound {
+        filterCount = newValue.filterCountRange.lowerBound
       }
-      else if filterSettings.count > newValue.filterCountRange.upperBound - 1 {
-        filterSettings.count = newValue.filterCountRange.upperBound - 1
+      else if filterCount > newValue.filterCountRange.upperBound - 1 {
+        filterCount = newValue.filterCountRange.upperBound - 1
       }
       else {
         viewIdentifier = UUID()

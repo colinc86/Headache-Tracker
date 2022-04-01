@@ -19,6 +19,8 @@ class UncontrolledUserInput: MLFeatureProvider {
     static let restingHeartRate = "Resting Heart Rate"
   }
   
+  let preferences = Preferences.Predictors()
+  
   /// Heart Rate as double value
   var Heart_Rate: Double
   
@@ -40,22 +42,22 @@ class UncontrolledUserInput: MLFeatureProvider {
   var featureNames: Set<String> {
     get {
       var names = Set<String>()
-      if AppSettings.shared.predictions.heartRate == true {
+      if preferences.heartRate == true {
         names.insert(FeatureName.heartRate)
       }
-      if AppSettings.shared.predictions.respiratoryRate == true {
+      if preferences.respiratoryRate == true {
         names.insert(FeatureName.respiratoryRate)
       }
-      if AppSettings.shared.predictions.oxygenSaturation == true {
+      if preferences.oxygenSaturation == true {
         names.insert(FeatureName.oxygenSaturation)
       }
-      if AppSettings.shared.predictions.heartRateVariability == true {
+      if preferences.heartRateVariability == true {
         names.insert(FeatureName.heartRateVariability)
       }
-      if AppSettings.shared.predictions.walkingHeartRateAverage == true {
+      if preferences.walkingHeartRateAverage == true {
         names.insert(FeatureName.walkingHeartRateAverage)
       }
-      if AppSettings.shared.predictions.restingHeartRate == true {
+      if preferences.restingHeartRate == true {
         names.insert(FeatureName.restingHeartRate)
       }
       return names

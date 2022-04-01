@@ -21,7 +21,7 @@ struct TypeCard: View {
   // MARK: Private properties
   
   /// The application's custom color theme.
-  @Environment(\.colorTheme) private var colorTheme
+  @AppStorage(Preferences.General.Keys.colorTheme) private var colorTheme = Preferences.General.Defaults.colorTheme
   
   // MARK: View body
   

@@ -15,7 +15,7 @@ struct OutlookView: View {
   // MARK: Private properties
   
   /// The application's custom color theme.
-  @Environment(\.colorTheme) private var colorTheme
+  @AppStorage(Preferences.General.Keys.colorTheme) private var colorTheme = Preferences.General.Defaults.colorTheme
   
   /// The caption to display.
   private var caption: String? {

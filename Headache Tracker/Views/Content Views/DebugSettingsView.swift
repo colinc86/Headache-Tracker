@@ -12,14 +12,19 @@ struct DebugSettingsView: View {
   
   // MARK: Private properties
   
-  /// The view's list settings.
-  @Environment(\.debugSettings) private var debugSettings
-  
   /// The app's headache manager.
   @EnvironmentObject private var headacheManager: HeadacheManager
   
   /// The app's headache predictor.
   @EnvironmentObject private var predictor: Predictor
+  
+  // Preferences
+  @AppStorage(Preferences.Debug.Keys.lastOutlookDate) var lastOutlookDate = Date()
+  @AppStorage(Preferences.Debug.Keys.nextOutlookDate) var nextOutlookDate = Date()
+  @AppStorage(Preferences.Debug.Keys.lastTrainingDate) var lastTrainingDate = Date()
+  @AppStorage(Preferences.Debug.Keys.nextTrainingDate) var nextTrainingDate = Date()
+  @AppStorage(Preferences.Debug.Keys.lastPredictionDate) var lastPredictionDate = Date()
+  @AppStorage(Preferences.Debug.Keys.nextPredictionDate) var nextPredictionDate = Date()
   
   /// The application's not present training data.
   @FetchRequest(
@@ -104,12 +109,12 @@ struct DebugSettingsView: View {
       }
       
       Section {
-        SubtitleCell(title: "Last Outlook", subtitle: "\(debugSettings.lastOutlookDate?.formattedNonRelative() ?? "N/A")")
-        SubtitleCell(title: "Next Outlook", subtitle: "\(debugSettings.nextOutlookDate?.formattedNonRelative() ?? "N/A")")
-        SubtitleCell(title: "Last Training", subtitle: "\(debugSettings.lastTrainingDate?.formattedNonRelative() ?? "N/A")")
-        SubtitleCell(title: "Next Training", subtitle: "\(debugSettings.nextTrainingDate?.formattedNonRelative() ?? "N/A")")
-        SubtitleCell(title: "Last Prediction", subtitle: "\(debugSettings.lastPredictionDate?.formattedNonRelative() ?? "N/A")")
-        SubtitleCell(title: "Next Prediction", subtitle: "\(debugSettings.nextPredictionDate?.formattedNonRelative() ?? "N/A")")
+        SubtitleCell(title: "Last Outlook", subtitle: "\(lastOutlookDate.formattedNonRelative())")
+        SubtitleCell(title: "Next Outlook", subtitle: "\(nextOutlookDate.formattedNonRelative())")
+        SubtitleCell(title: "Last Training", subtitle: "\(lastTrainingDate.formattedNonRelative())")
+        SubtitleCell(title: "Next Training", subtitle: "\(nextTrainingDate.formattedNonRelative())")
+        SubtitleCell(title: "Last Prediction", subtitle: "\(lastPredictionDate.formattedNonRelative())")
+        SubtitleCell(title: "Next Prediction", subtitle: "\(nextPredictionDate.formattedNonRelative())")
       }
       
       Section {

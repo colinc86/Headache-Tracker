@@ -12,45 +12,83 @@ import DataController
 /// Shows and manages the current headache's UI.
 struct CurrentHeadacheView: View {
   
+  // MARK: Types
+  
+  class ViewModel: ObservableObject {
+    
+    /// Whether the change severity confirmation alert is visible.
+    @State var showingSeverityConfirmation = false
+    
+    /// Whether or not the headache manager needs more not-present headache training data.
+    @State var needsInput: Bool = false
+    
+    /// The application's first appearance.
+    @State var firstAppearance: Bool = true
+    
+    /// The identifier of the predection views.
+    @State var predictionID = UUID()
+    
+    
+    
+    /// The waiter to automatically refresh the view.
+    let automaticRefreshWaiter = Waiter()
+    
+    // MARK: Private properties
+    
+    
+    
+    /// The app's scene delegate.
+    private let sceneDelegate: SceneDelegate
+    
+    /// The app's headache manager.
+    private let headacheManager: HeadacheManager
+    
+    /// The app's headache predictor.
+    private let predictor: Predictor
+    
+    /// The app's refresher.
+    private let refresher: Refresher
+    
+    // MARK: Initializers
+    
+    init(sceneDelegate: SceneDelegate, headacheManager: HeadacheManager, predictor: Predictor, refresher: Refresher) {
+      self.sceneDelegate = sceneDelegate
+      self.headacheManager = headacheManager
+      self.predictor = predictor
+      self.refresher = refresher
+    }
+    
+  }
+  
   // MARK: Private properties
   
   /// The app's scene delegate.
   @EnvironmentObject private var sceneDelegate: SceneDelegate
   
-  /// The app's headache manager.
-  @EnvironmentObject private var headacheManager: HeadacheManager
-  
   /// The app's headache predictor.
   @EnvironmentObject private var predictor: Predictor
   
-  /// The app's refresher.
-  @EnvironmentObject private var refresher: Refresher
+  /// The view's model.
+  @ObservedObject private var viewModel: ViewModel
   
-  /// The app's alert manager.
-  @EnvironmentObject private var alertManager: AlertManager
+  // Preferences
+  @AppStorage(Preferences.Lists.Keys.type) private var showTypeView = Preferences.Lists.Defaults.shown
+  @AppStorage(Preferences.Lists.Keys.onset) private var showOnsetView = Preferences.Lists.Defaults.shown
+  @AppStorage(Preferences.Lists.Keys.duration) private var showDurationView = Preferences.Lists.Defaults.shown
+  @AppStorage(Preferences.Lists.Keys.progression) private var showProgressionView = Preferences.Lists.Defaults.shown
+  @AppStorage(Preferences.Lists.Keys.notes) private var showNotesView = Preferences.Lists.Defaults.shown
+  @AppStorage(Preferences.Lists.Keys.tags) private var showTagsView = Preferences.Lists.Defaults.shown
+  @AppStorage(Preferences.Lists.Keys.outlook) private var showOutlookView = Preferences.Lists.Defaults.shown
+  @AppStorage(Preferences.Lists.Keys.severity) private var showSeverityView = Preferences.Lists.Defaults.shown
   
-  /// The view's list settings.
-  @Environment(\.listSettings) private var listSettings
-    
   /// The headaches fetch request.
-  /// Should only return one headache.
+  ///
+  /// It should ever only return at most one, unresolved, headache.
   @FetchRequest(
     sortDescriptors: [],
     predicate: NSPredicate(format: "resolved = false"),
     animation: .default)
   private var headaches: FetchedResults<Headache>
-  
-  /// Whether the change severity confirmation alert is visible.
-  @State private var showingSeverityConfirmation = false
-  
-  /// Whether or not the headache manager needs more not-present headache training data.
-  @State private var needsInput: Bool = false
-  
-  /// The application's first appearance.
-  @State private var firstAppearance: Bool = true
-  
-  /// The identifier of the predection views.
-  @State private var predictionID = UUID()
   
   /// The current (unresolved) headache.
   @MainActor private var currentHeadache: Headache? {
@@ -60,9 +98,6 @@ struct CurrentHeadacheView: View {
   /// Called when the application becomes active.
   private let didBecomeActiveNotificationPublisher = NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)
   
-  /// The waiter to automatically refresh the view.
-  private let automaticRefreshWaiter = Waiter()
-  
   // MARK: View body
   
   var body: some View {
@@ -71,7 +106,7 @@ struct CurrentHeadacheView: View {
         // New/Current Headache
         Section {
           // New/Current Severity
-          SeveritySelectionView(currentSeverity: currentHeadache?.severity, action: changeSeverity)
+          SeveritySelectionView(currentSeverity: currentHeadache?.severity, action: viewModel.changeSeverity)
         } header: {
           SectionTitleView(title: currentHeadache == nil ? "New Headache" : "Current Headache")
         } footer: {
@@ -85,9 +120,9 @@ struct CurrentHeadacheView: View {
         }
         
         // No Headache
-        if currentHeadache == nil && needsInput {
+        if currentHeadache == nil && viewModel.needsInput {
           Section {
-            ActionCard(title: "No Headache?", buttonTitle: "No Headache", systemImage: "checkmark.circle.fill", action: noHeadacheAction)
+            ActionCard(title: "No Headache?", buttonTitle: "No Headache", systemImage: "checkmark.circle.fill", action: viewModel.noHeadacheAction)
           } footer: {
             Text("No Headache? Tap above to let the app know.")
           }
@@ -107,22 +142,15 @@ struct CurrentHeadacheView: View {
       .background(Color(UIColor.systemGroupedBackground))
       .navigationTitle("Track")
       .animation(.default, value: predictor.prediction)
-      .animation(.default, value: listSettings.showTypeView)
-      .animation(.default, value: listSettings.showOnsetView)
-      .animation(.default, value: listSettings.showDurationView)
-      .animation(.default, value: listSettings.showProgressionView)
-      .animation(.default, value: listSettings.showNotesView)
-      .animation(.default, value: listSettings.showTagsView)
-      .animation(.default, value: listSettings.showOutlookView)
-      .animation(.default, value: listSettings.showSeverityView)
-      .refreshable {
-        do {
-          try await predict(forced: true)
-        }
-        catch {
-          logError("Error refreshing view: \(error)")
-        }
-      }
+      .animation(.default, value: showTypeView)
+      .animation(.default, value: showOnsetView)
+      .animation(.default, value: showDurationView)
+      .animation(.default, value: showProgressionView)
+      .animation(.default, value: showNotesView)
+      .animation(.default, value: showTagsView)
+      .animation(.default, value: showOutlookView)
+      .animation(.default, value: showSeverityView)
+      .refreshable(action: viewModel.forcedPrediction)
       .toolbar {
         ToolbarItem(placement: .automatic) {
           ListOptionsMenu()
@@ -130,23 +158,29 @@ struct CurrentHeadacheView: View {
       }
     }
     .navigationViewStyle(StackNavigationViewStyle())
-    .onReceive(didBecomeActiveNotificationPublisher, perform: didBecomeActive)
-    .onAppear(perform: onAppear)
-    .onDisappear(perform: automaticRefreshWaiter.stop)
-    .confirmationDialog("Change headache severity to \((sceneDelegate.desiredSeverity ?? .notPresent).title.lowercased())?", isPresented: $showingSeverityConfirmation, titleVisibility: .visible) {
-      AsyncButton("Change", action: confirmChangeSeverity)
-      Button("Cancel", role: .cancel, action: cancelChangeSeverity)
+    .onReceive(didBecomeActiveNotificationPublisher, perform: viewModel.didBecomeActive)
+    .onAppear(perform: viewModel.appeared)
+    .onDisappear(perform: viewModel.automaticRefreshWaiter.stop)
+    .confirmationDialog("Change headache severity to \((sceneDelegate.desiredSeverity ?? .notPresent).title.lowercased())?", isPresented: $viewModel.showingSeverityConfirmation, titleVisibility: .visible) {
+      AsyncButton("Change", action: viewModel.confirmChangeSeverity)
+      Button("Cancel", role: .cancel, action: viewModel.cancelChangeSeverity)
     }
+  }
+  
+  init(sceneDelegate: SceneDelegate, headacheManager: HeadacheManager, predictor: Predictor, refresher: Refresher) {
+    viewModel = ViewModel(sceneDelegate: sceneDelegate, headacheManager: headacheManager, predictor: predictor, refresher: refresher)
   }
   
 }
 
-// MARK: Private methods
-
-extension CurrentHeadacheView {
+extension CurrentHeadacheView.ViewModel {
+  
+  @MainActor func setNeedsInput(_ needsInput: Bool) {
+    withAnimation { self.needsInput = needsInput }
+  }
   
   /// Called when the app becomes active.
-  private func didBecomeActive(_ notification: NotificationCenter.Publisher.Output) {
+  func didBecomeActive(_ notification: NotificationCenter.Publisher.Output) {
     // Were we launched from the widget?
     if sceneDelegate.desiredSeverity != nil {
       withAnimation {
@@ -156,17 +190,12 @@ extension CurrentHeadacheView {
     
     // Run a prediction
     Task {
-      do {
-        try await predict()
-      }
-      catch {
-        logError("Error predicting: \(error)")
-      }
+      await nonForcedPrediction()
     }
   }
   
   /// Called when the view appears and reloads the classifier input.
-  private func onAppear() {
+  func appeared() {
     guard !firstAppearance else {
       firstAppearance = false
       return
@@ -174,22 +203,31 @@ extension CurrentHeadacheView {
     
     // Run a prediction
     Task {
-      do {
-        try await predict()
-      }
-      catch {
-        logError("Error predicting: \(error)")
-      }
+      await nonForcedPrediction()
+    }
+  }
+  
+  @Sendable func forcedPrediction() async {
+    do {
+      try await predict(forced: true)
+    }
+    catch {
+      logError("Error forced predicting: \(error)")
+    }
+  }
+  
+  func nonForcedPrediction() async {
+    do {
+      try await predict(forced: false)
+    }
+    catch {
+      logError("Error predicting: \(error)")
     }
   }
   
   /// Updates the classifier input.
-  private func predict(forced: Bool = false) async throws {
-    let needsData = try await headacheManager.needsTrainingData()
-    
-    await MainActor.run {
-      withAnimation { needsInput = needsData }
-    }
+  func predict(forced: Bool = true) async throws {
+    await setNeedsInput(try await headacheManager.needsTrainingData())
     
     // Check if we should run a prediction
     let now = Date()
@@ -207,8 +245,33 @@ extension CurrentHeadacheView {
     try await headacheManager.createPredict(create: false, inWidget: false)
   }
   
+  /// Changes the current headache's severity or creates a new headache if one
+  /// doesn't exist.
+  ///
+  /// - Parameter severity: The new severity.
+  func changeSeverity(to severity: Headache.Severity) async throws {
+    logDebug("Change severity to \(severity.title).")
+    
+    // Change the severity
+    try await headacheManager.changeSeverity(to: severity)
+    
+    // Get the identifier
+    let identifier = try await headacheManager.currentHeadacheIdentifier()
+    try await self.refresher.presentCheckInAlert(with: identifier)
+  }
+  
+  /// The action to perform if there is no headache.
+  func noHeadacheAction() async throws {
+    logDebug("No headache action.")
+    
+    try await headacheManager.createPredict(inWidget: false)
+    
+    // Check if we should show the not-present training data cell
+    await setNeedsInput(try await headacheManager.needsTrainingData())
+  }
+  
   /// Changes the severity to the desired severity if available.
-  private func confirmChangeSeverity() async throws {
+  @MainActor func confirmChangeSeverity() async throws {
     guard let severity = sceneDelegate.desiredSeverity else {
       return
     }
@@ -221,50 +284,22 @@ extension CurrentHeadacheView {
   }
   
   /// Cancels the severity change.
-  private func cancelChangeSeverity() {
+  func cancelChangeSeverity() {
     // Reset the desired severity
     sceneDelegate.desiredSeverity = nil
-  }
-  
-  /// Changes the current headache's severity or creates a new headache if one
-  /// doesn't exist.
-  ///
-  /// - Parameter severity: The new severity.
-  private func changeSeverity(to severity: Headache.Severity) async throws {
-    logDebug("Change severity to \(severity.title).")
-        
-    // Change the severity
-    try await headacheManager.changeSeverity(to: severity)
-    
-    // Get the identifier
-    let identifier = try await headacheManager.currentHeadacheIdentifier()
-    try await self.refresher.presentCheckInAlert(with: identifier)
-  }
-  
-  /// The action to perform if there is no headache.
-  private func noHeadacheAction() async throws {
-    logDebug("No headache action.")
-    
-    try await headacheManager.createPredict(inWidget: false)
-    
-    // Check if we should show the not-present training data cell
-    let needsData = try await headacheManager.needsTrainingData()
-    
-    await MainActor.run {
-      withAnimation { needsInput = needsData }
-    }
   }
   
 }
 
 struct CurrentHeadacheView_Previews: PreviewProvider {
+  static let refresher = Refresher()
   static var previews: some View {
-    CurrentHeadacheView()
+    CurrentHeadacheView(sceneDelegate: SceneDelegate(), headacheManager: Previewing.headacheManager, predictor: Previewing.Prediction.predictor, refresher: refresher)
       .environmentObject(SceneDelegate())
       .environment(\.managedObjectContext, Previewing.CoreData.viewContext)
       .environmentObject(Previewing.headacheManager)
-      .environmentObject(Previewing.alertManager)
       .environmentObject(Previewing.Prediction.predictor)
+      .environmentObject(refresher)
       .onAppear {
         Previewing.Prediction.predictor.prediction = .empty
       }

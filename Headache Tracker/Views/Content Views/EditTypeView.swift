@@ -33,7 +33,7 @@ struct EditTypeView: View {
   @State private var customTypeValue = ""
   
   /// The custom types to display to the user.
-  private let customTypes: [Headache.Types] = SharedUserDefaults.standard.customTypes
+  private let customTypes = Preferences().shared.customTypes
   
   /// Whether saving is currently disabled.
   private var saveDisabled: Bool {

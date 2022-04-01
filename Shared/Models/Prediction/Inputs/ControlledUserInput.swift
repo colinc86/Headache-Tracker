@@ -18,6 +18,8 @@ class ControlledUserInput: MLFeatureProvider {
     static let stepCount = "Step Count"
   }
   
+  let preferences = Preferences.Predictors()
+  
   /// Mindful Session as double value
   var Mindful_Session: Double
   
@@ -36,19 +38,19 @@ class ControlledUserInput: MLFeatureProvider {
   var featureNames: Set<String> {
     get {
       var names = Set<String>()
-      if AppSettings.shared.predictions.mindfulSession == true {
+      if preferences.mindfulSession == true {
         names.insert(FeatureName.mindfulSession)
       }
-      if AppSettings.shared.predictions.sleepSeconds == true {
+      if preferences.sleepSeconds == true {
         names.insert(FeatureName.sleepSeconds)
       }
-      if AppSettings.shared.predictions.sleepOnset == true {
+      if preferences.sleepOnset == true {
         names.insert(FeatureName.sleepOnset)
       }
-      if AppSettings.shared.predictions.headphoneAudioExposure == true {
+      if preferences.headphoneAudioExposure == true {
         names.insert(FeatureName.headphoneAudioExposure)
       }
-      if AppSettings.shared.predictions.stepCount == true {
+      if preferences.stepCount == true {
         names.insert(FeatureName.stepCount)
       }
       return names

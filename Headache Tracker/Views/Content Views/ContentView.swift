@@ -12,9 +12,25 @@ import DataController
 /// The main content view that contains the tab view.
 struct ContentView: View {
   
+  /// The app's scene delegate.
+  @EnvironmentObject private var sceneDelegate: SceneDelegate
+  
+  /// The app's headache manager.
+  @EnvironmentObject private var headacheManager: HeadacheManager
+  
+  /// The app's headache predictor.
+  @EnvironmentObject private var predictor: Predictor
+  
+  /// The app's refresher.
+  @EnvironmentObject private var refresher: Refresher
+  
   var body: some View {
     TabView {
-      CurrentHeadacheView()
+      CurrentHeadacheView(
+        sceneDelegate: sceneDelegate,
+        headacheManager: headacheManager,
+        predictor: predictor,
+        refresher: refresher)
         .tabItem {
           Label("Track", systemImage: "brain.head.profile")
         }

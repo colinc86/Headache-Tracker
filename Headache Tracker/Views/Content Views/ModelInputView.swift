@@ -14,15 +14,15 @@ struct ModelInputView: View {
   
   // MARK: Private properties
   
-  /// The view's general settings.
-  @Environment(\.generalSettings) private var generalSettings
+  /// The application's custom color theme.
+  @AppStorage(Preferences.General.Keys.colorTheme) private var colorTheme = Preferences.General.Defaults.colorTheme
   
   var body: some View {
     List {
       if let weather = input.weatherStatistics {
         if let pressure = weather.pressureMeasurement {
           Section {
-            Card(title: "Barometric Pressure", systemImage: "barometer", foregroundColor: generalSettings.colorTheme.baseColor) {
+            Card(title: "Barometric Pressure", systemImage: "barometer", foregroundColor: colorTheme.baseColor) {
               Text(Formatters.formatMeasurement(pressure))
                 .font(.title)
             }
@@ -33,7 +33,7 @@ struct ModelInputView: View {
         
         if let temperature = weather.temperatureMeasurement {
           Section {
-            Card(title: "Temperature", systemImage: "thermometer", foregroundColor: generalSettings.colorTheme.baseColor) {
+            Card(title: "Temperature", systemImage: "thermometer", foregroundColor: colorTheme.baseColor) {
               Text(Formatters.formatMeasurement(temperature))
                 .font(.title)
             }
@@ -42,7 +42,7 @@ struct ModelInputView: View {
         
         if let humidity = weather.humidityMeasurement {
           Section {
-            Card(title: "Humidity", systemImage: "humidity", foregroundColor: generalSettings.colorTheme.baseColor) {
+            Card(title: "Humidity", systemImage: "humidity", foregroundColor: colorTheme.baseColor) {
               Text(Formatters.formatMeasurement(humidity))
                 .font(.title)
             }

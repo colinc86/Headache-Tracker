@@ -12,6 +12,7 @@ import SwiftUI
 struct OutlookWidgetProvider: TimelineProvider {
   
   static let placeholder = OutlookWidgetContent(date: Date(), outlook: .noHeadache, onset: nil, duration: nil, severity: nil, hasCurrentHeadache: false)
+  let preferences = Preferences.Shared()
   
   let headacheManager: HeadacheManager = {
     let manager = HeadacheManager()
@@ -105,7 +106,7 @@ extension OutlookWidgetProvider {
   /// The current outlook content.
   private func currentContent() async throws -> [OutlookWidgetContent] {
     let headache = try await headacheManager.hasCurrentHeadache()
-    let prediction = SharedUserDefaults.standard.currentPrediction ?? .empty
+    let prediction = preferences.currentPrediction ?? .empty
     
     if headache {
       // If we're in a current headache, then we'll want to add

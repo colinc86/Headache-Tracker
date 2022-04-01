@@ -11,6 +11,7 @@ import SwiftUI
 struct SeverityWidgetProvider: TimelineProvider {
   
   static let placeholder = SeverityWidgetContent(severity: nil)
+  let preferences = Preferences.Shared()
   
   func placeholder(in context: Context) -> SeverityWidgetContent {
     SeverityWidgetProvider.placeholder
@@ -30,7 +31,7 @@ extension SeverityWidgetProvider {
   
   /// The current outlook content.
   private func currentContent() -> SeverityWidgetContent {
-    return SeverityWidgetContent(severity: SharedUserDefaults.standard.currentSeverity)
+    return SeverityWidgetContent(severity: preferences.currentSeverity)
   }
   
 }

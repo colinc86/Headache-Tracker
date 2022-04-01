@@ -46,6 +46,9 @@ class HealthKitManager: ObservableObject {
   /// The manager's health kit store.
   private let store = HKHealthStore()
   
+  /// The health preferences.
+  private let preferences = Preferences.Health()
+  
   /// The read queue when gathering training data.
   private let readQueue = DispatchQueue(label: ApplicationKey(from: "readQueue"))
   
@@ -129,7 +132,7 @@ extension HealthKitManager {
   /// - Parameter intervals: The severity intervals to save.
   func saveSeveritySamples(intervals: [Headache.Severity.Interval]) async throws {
     // Only continue if we have health integration turned on
-    guard (await AppSettings.shared.health.enabled) && !intervals.isEmpty else {
+    guard preferences.enabled && !intervals.isEmpty else {
       return
     }
     
@@ -158,9 +161,8 @@ extension HealthKitManager {
     logDebug("Delete severity samples in \(interval).")
     
     // Only continue if we have health integration turned on
-    let enabled = await AppSettings.shared.health.enabled
-    guard enabled else {
-      logWarning("Health integration is \(enabled). Not deleting severity samples.")
+    guard preferences.enabled else {
+      logWarning("Health integration is \(preferences.enabled). Not deleting severity samples.")
       return
     }
     
@@ -187,8 +189,8 @@ extension HealthKitManager {
     logDebug("Read HealthKit data in \(interval).")
     
     // Only continue if we have health integration turned on
-    guard AppSettings.shared.health.enabled || inWidget else {
-      logWarning("Health integration is \(AppSettings.shared.health.enabled). Not reading HealthKit data.")
+    guard preferences.enabled || inWidget else {
+      logWarning("Health integration is \(preferences.enabled). Not reading HealthKit data.")
       return nil
     }
     

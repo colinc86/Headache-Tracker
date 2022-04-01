@@ -82,7 +82,7 @@ struct HeadachesView: View {
     .navigationViewStyle(StackNavigationViewStyle())
     .sheet(isPresented: $showingAddHeadache, onDismiss: nil) {
       NavigationView {
-        AddHeadacheView()
+        AddHeadacheView(headacheManager: headacheManager)
       }
     }
   }

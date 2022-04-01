@@ -14,6 +14,8 @@ class ChronologicalInput: MLFeatureProvider {
     static let secondsSinceMidnight = "Seconds Since Midnight"
     static let weekday = "Weekday"
   }
+
+  let preferences = Preferences.Predictors()
   
   /// Seconds Since Midnight as double value
   var Seconds_Since_Midnight: Double
@@ -24,10 +26,10 @@ class ChronologicalInput: MLFeatureProvider {
   var featureNames: Set<String> {
     get {
       var names = Set<String>()
-      if AppSettings.shared.predictions.secondsSinceMidnight == true {
+      if preferences.secondsSinceMidnight == true {
         names.insert(FeatureName.secondsSinceMidnight)
       }
-      if AppSettings.shared.predictions.weekday == true {
+      if preferences.weekday == true {
         names.insert(FeatureName.weekday)
       }
       return names

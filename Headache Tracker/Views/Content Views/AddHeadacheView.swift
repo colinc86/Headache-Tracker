@@ -28,9 +28,16 @@ struct AddHeadacheView: View {
     /// Whether or not the view is saving its data.
     @Published var isSaving = false
     
-    /// Whether or not the view's data is valid.
-    var validData: Bool {
-      return severity != nil && onset < Date()
+    // MARK: Private properties
+    
+    /// The app's headache manager.
+    private let headacheManager: HeadacheManager
+    
+    // MARK: Initializers
+    
+    /// Creates a view model.
+    init(headacheManager: HeadacheManager) {
+      self.headacheManager = headacheManager
     }
     
   }
@@ -39,18 +46,15 @@ struct AddHeadacheView: View {
   
   @Environment(\.presentationMode) private var presentationMode
   
-  /// The app's headache manager.
-  @EnvironmentObject private var headacheManager: HeadacheManager
-  
   /// The view's model.
-  @ObservedObject private var viewModel = ViewModel()
+  @ObservedObject private var viewModel: ViewModel
   
   // MARK: View body
   
   var body: some View {
     List {
       Section {
-        SeveritySelectionView(currentSeverity: viewModel.severity, action: changeSeverity)
+        SeveritySelectionView(currentSeverity: viewModel.severity, action: viewModel.setSeverity)
       } header: {
         SectionTitleView(title: "How severe was the headache?")
       } footer: {
@@ -93,34 +97,57 @@ struct AddHeadacheView: View {
     }
   }
   
+  // MARK: Initializers
+  
+  init(headacheManager: HeadacheManager) {
+    self.viewModel = ViewModel(headacheManager: headacheManager)
+  }
+  
 }
+
+// MARK: Actions
 
 extension AddHeadacheView {
   
-  private func changeSeverity(_ severity: Headache.Severity) {
-    withAnimation { viewModel.severity = severity }
-  }
-  
-  private func dismiss() {
+  func dismiss() {
     presentationMode.wrappedValue.dismiss()
   }
   
-  private func save() async throws {
-    guard let severity = viewModel.severity else {
-      return
-    }
-    
-    await MainActor.run {
-      withAnimation { viewModel.isSaving = true }
-    }
-    
-    try await headacheManager.createHeadache(severity: severity, start: viewModel.onset, end: viewModel.resolved ? viewModel.end : nil)
-    
-    await MainActor.run {
-      withAnimation { viewModel.isSaving = false }
-    }
-    
+  func save() async throws {
+    try await viewModel.save()
     dismiss()
+  }
+  
+}
+
+extension AddHeadacheView.ViewModel {
+  
+  /// Whether or not the view's data is valid.
+  @MainActor var validData: Bool {
+    return severity != nil && onset < Date()
+  }
+  
+  /// Sets the severity.
+  @MainActor func setSeverity(_ severity: Headache.Severity) {
+    withAnimation { self.severity = severity }
+  }
+  
+  /// Sets the `isSaving` property.
+  @MainActor func setSaving(_ saving: Bool) {
+    withAnimation { isSaving = saving }
+  }
+  
+  /// Saves the headache.
+  func save() async throws {
+    guard let severity = severity else { return }
+    await setSaving(true)
+    
+    try await headacheManager.createHeadache(
+      severity: severity,
+      start: onset,
+      end: resolved ? end : nil)
+    
+    await setSaving(false)
   }
   
 }
@@ -128,7 +155,7 @@ extension AddHeadacheView {
 struct AddHeadacheView_Previews: PreviewProvider {
   static var previews: some View {
     NavigationView {
-      AddHeadacheView()
+      AddHeadacheView(headacheManager: Previewing.headacheManager)
         .environment(\.managedObjectContext, Previewing.CoreData.viewContext)
         .environmentObject(Previewing.headacheManager)
         .environmentObject(Previewing.alertManager)

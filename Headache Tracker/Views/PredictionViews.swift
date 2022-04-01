@@ -14,8 +14,9 @@ struct PredictionViews: View {
   
   // MARK: Private properties
   
-  /// The view's list settings.
-  @Environment(\.listSettings) private var listSettings
+  // Preferences
+  @AppStorage(Preferences.Lists.Keys.outlook) var showOutlookView = Preferences.Lists.Defaults.shown
+  @AppStorage(Preferences.Lists.Keys.severity) var showSeverityView = Preferences.Lists.Defaults.shown
   
   /// The headaches fetch request.
   /// Should only return one headache.
@@ -33,7 +34,7 @@ struct PredictionViews: View {
   // MARK: View body
   
   var body: some View {
-    if listSettings.showOutlookView {
+    if showOutlookView {
       Section {
         NavigationLink {
           ModelInputView(input: prediction.input)
@@ -43,17 +44,17 @@ struct PredictionViews: View {
       } header: {
         SectionTitleView(title: "Predictions")
       } footer: {
-        if !listSettings.showSeverityView, let lastPredictionDate = prediction.date {
+        if !showSeverityView, let lastPredictionDate = prediction.date {
           Text("Updated \(lastPredictionDate.formattedNonRelative()).")
         }
       }
     }
     
-    if listSettings.showSeverityView {
+    if showSeverityView {
       Section {
         SeveritySelectionView(currentSeverity: prediction.severityClassifierOutput.prediction, collapsed: true)
       } header: {
-        if !listSettings.showOutlookView {
+        if !showOutlookView {
           SectionTitleView(title: "Predictions")
         }
       } footer: {
