@@ -5,8 +5,10 @@
 //  Created by Colin Campbell on 2/28/22.
 //
 
+import ApplicationKey
 import DataController
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct DebugSettingsView: View {
   
@@ -64,6 +66,10 @@ struct DebugSettingsView: View {
   /// The apps current model evaluation calculated on appear.
   @State var evaluation: (Double, Double, Int) = (0.0, 0.0, 0)
   
+  @State var exportURL: URL? = nil
+  @State var showingExportDocument: Bool = false
+  @State var showingImportDocument: Bool = false
+  
   var body: some View {
     Form {
       Section {
@@ -118,8 +124,8 @@ struct DebugSettingsView: View {
       }
       
       Section {
-        AsyncButton("Backup Database", mode: .afterContent, action: DataController.shared.backupDatabase)
-        AsyncButton("Restore Database", mode: .afterContent, action: DataController.shared.restoreDatabase)
+        AsyncButton("Backup Database", mode: .afterContent, action: backupDatabase)
+        Button("Restore Database", action: restoreDatabase)
       }
     }
     .navigationTitle("Debug Settings")
@@ -132,7 +138,84 @@ struct DebugSettingsView: View {
         logError("Error evaluating models: \(error)")
       }
     }
+    .fileExporter(isPresented: $showingExportDocument, document: BackupDocument(url: exportURL), contentType: UTType(filenameExtension: "sqlite")!, onCompletion: exportDocumentAction)
+    .fileImporter(isPresented: $showingImportDocument, allowedContentTypes: [UTType(filenameExtension: "sqlite")!], onCompletion: importDocumentAction)
   }
+}
+
+class BackupDocument: FileDocument {
+  static var readableContentTypes: [UTType] {
+    [UTType.database]
+  }
+  
+  static var writableContentTypes: [UTType] {
+    [UTType.database]
+  }
+  
+  let url: URL?
+  
+  init(url: URL?) {
+    self.url = url
+  }
+  
+  required init(configuration: ReadConfiguration) throws {
+    url = configuration.file.symbolicLinkDestinationURL
+  }
+  
+  func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
+    if let url = url {
+      return try FileWrapper(url: url)
+    }
+    else {
+      throw NSError(domain: ApplicationKey(from: "backup"), code: NSFileNoSuchFileError)
+    }
+  }
+}
+
+// MARK: Private properties
+
+extension DebugSettingsView {
+  
+  func backupDatabase() async throws {
+    exportURL = try await DataController.shared.backupDatabase()
+    showingExportDocument = true
+  }
+  
+  func restoreDatabase() {
+    showingImportDocument = true
+  }
+  
+  func exportDocumentAction(_ result: Result<URL, Error>) {
+    switch result {
+    case .success(let url):
+      logDebug("Finished exporting database to file \(url)")
+    case .failure(let error):
+      logError("Error exporting database to file \(error)")
+    }
+  }
+  
+  func importDocumentAction(_ result: Result<URL, Error>) {
+    switch result {
+    case .success(let url):
+      guard url.startAccessingSecurityScopedResource() else {
+        return
+      }
+      
+      Task {
+        do {
+          try await DataController.shared.restoreDatabase(from: url)
+        }
+        catch {
+          logError("Error importing database from url \(url): \(error)")
+        }
+        
+        url.stopAccessingSecurityScopedResource()
+      }
+    case .failure(let error):
+      logError("Error importing database: \(error)")
+    }
+  }
+  
 }
 
 struct DebugSettingsView_Previews: PreviewProvider {

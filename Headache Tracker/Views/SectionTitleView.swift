@@ -15,20 +15,20 @@ struct SectionTitleView: View {
   // MARK: View body
   
   var body: some View {
-    Text(title)
-      .font(.headline)
-      .fontWeight(.heavy)
-      .textCase(.none)
-      .foregroundColor(.primary)
-      .padding(.top, 0)
-      .padding(.bottom, 4)
-      .offset(x: -16)
+    HStack {
+      Text(title)
+        .font(.headline)
+        .textCase(.none)
+        .foregroundColor(.primary)
+      Spacer()
+    }
+    .padding([.leading, .trailing, .top], 15)
   }
 }
 
 struct SectionTitleView_Previews: PreviewProvider {
   static var previews: some View {
     SectionTitleView(title: "Title")
-      .previewLayout(.fixed(width: 428, height: 30))
+      .previewLayout(.sizeThatFits)
   }
 }

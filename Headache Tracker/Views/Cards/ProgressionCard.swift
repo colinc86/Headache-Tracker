@@ -12,8 +12,8 @@ struct ProgressionCard: View {
   /// The headache to display.
   @StateObject var headache: Headache
   
-  /// Whether the view should be drawn expanded.
-  @Binding var expanded: Bool
+  /// Whether or not the progression view should be drawn expanded.
+  @AppStorage(Preferences.Lists.Keys.expandedProgression) private var expanded = Preferences.Lists.Defaults.expanded
   
   // MARK: Private properties
   
@@ -33,9 +33,9 @@ struct ProgressionCard: View {
       }
       .buttonStyle(DefaultButtonStyle())
     } content: {
-      LineGraph(series: headache.progression, gradient: Gradient(colors: headache.severityColors(for: colorTheme)), collapsed: !expanded)
-        .frame(height: expanded ? 100 : 40)
+      LineGraph(series: headache.progression, gradient: Gradient(colors: headache.severityColors(for: colorTheme)))
     }
+    .frame(height: expanded ? 200 : 50)
   }
 }
 
@@ -44,17 +44,17 @@ struct ProgressionCard: View {
 extension ProgressionCard {
   
   func expandCollapseAction() {
-    withAnimation { expanded = !expanded }
+    withAnimation { expanded.toggle() }
   }
   
 }
 
 struct ProgressionCard_Previews: PreviewProvider {
   static var previews: some View {
-    ProgressionCard(headache: Previewing.CoreData.resolvedHeadache, expanded: Previewing.$booleanFalseValue)
-      .previewLayout(.fixed(width: 428, height: 90))
+    ProgressionCard(headache: Previewing.CoreData.resolvedHeadache)
+      .previewLayout(.sizeThatFits)
     
-    ProgressionCard(headache: Previewing.CoreData.resolvedHeadache, expanded: Previewing.$booleanTrueValue)
-      .previewLayout(.fixed(width: 428, height: 150))
+    ProgressionCard(headache: Previewing.CoreData.resolvedHeadache)
+      .previewLayout(.sizeThatFits)
   }
 }

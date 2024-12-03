@@ -8,7 +8,7 @@
 import Foundation
 
 /// Adds conformance to `RawRepresentable` to the `UUID` structure.
-extension UUID: RawRepresentable {
+extension UUID: @retroactive RawRepresentable {
   
   public var rawValue: String {
     return uuidString

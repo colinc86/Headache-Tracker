@@ -63,19 +63,19 @@ class Weather: CustomStringConvertible {
   /// The weather statistics.
   var statistics: WeatherStatistics {
     let currentPressure = Measurement(value: weatherSpread.current.pressure, unit: UnitPressure.millibars).converted(to: .kilopascals).value
-    let currentHumidity = Measurement(value: weatherSpread.current.humidity, unit: UnitRate.percent).converted(to: .decimal).value
-    let currentTemperature = Measurement(value: weatherSpread.current.temp, unit: UnitTemperature.kelvin).converted(to: .celsius).value
-    
-    let sigmaHumidity = (abs(weatherSpread.current.humidity - weatherSpread.future.humidity) + abs(weatherSpread.current.humidity - weatherSpread.past.humidity)) / 100.0
+    let currentHumidity = weatherSpread.current.humidity
+    let currentTemperature = weatherSpread.current.temp
+  
+    let sigmaHumidity = abs(weatherSpread.current.humidity - weatherSpread.future.humidity) + abs(weatherSpread.current.humidity - weatherSpread.past.humidity)
     
     let cPressure = Measurement(value: weatherSpread.current.pressure, unit: UnitPressure.millibars).converted(to: .kilopascals).value
     let fPressure = Measurement(value: weatherSpread.future.pressure, unit: UnitPressure.millibars).converted(to: .kilopascals).value
     let pPressure = Measurement(value: weatherSpread.past.pressure, unit: UnitPressure.millibars).converted(to: .kilopascals).value
     let sigmaPressure = abs(cPressure - fPressure) + abs(cPressure - pPressure)
     
-    let cTemperature = Measurement(value: weatherSpread.current.pressure, unit: UnitTemperature.kelvin).converted(to: .celsius).value
-    let fTemperature = Measurement(value: weatherSpread.future.pressure, unit: UnitTemperature.kelvin).converted(to: .celsius).value
-    let pTemperature = Measurement(value: weatherSpread.past.pressure, unit: UnitTemperature.kelvin).converted(to: .celsius).value
+    let cTemperature = weatherSpread.current.temp
+    let fTemperature = weatherSpread.future.temp
+    let pTemperature = weatherSpread.past.temp
     let sigmaTemperature = abs(cTemperature - fTemperature) + abs(cTemperature - pTemperature)
     
     return WeatherStatistics(

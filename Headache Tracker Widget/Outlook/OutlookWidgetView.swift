@@ -27,7 +27,6 @@ struct OutlookWidgetView: View {
   
   var body: some View {
     OutlookView(outlook: outlook)
-      .padding()
   }
 }
 

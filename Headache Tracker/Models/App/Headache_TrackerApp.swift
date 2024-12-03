@@ -5,12 +5,10 @@
 //  Created by Colin Campbell on 2/3/22.
 //
 
-@_exported import BugfenderSDK
 import BackgroundTasks
 import CocoaLumberjackSwift
 import CocoaLumberjackSwiftLogBackend
 import DataController
-import Firebase
 import Logging
 import SwiftUI
 

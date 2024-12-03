@@ -62,8 +62,6 @@ struct HeadacheViews: View {
   /// Whether the edit tags view is visible.
   @State private var showingEditTagsView = false
   
-  @State private var expandedProgressionView = false
-  
   // Preferences
   @AppStorage(Preferences.General.Keys.colorTheme) private var colorTheme = Preferences.General.Defaults.colorTheme
   @AppStorage(Preferences.Lists.Keys.type) private var showTypeView = Preferences.Lists.Defaults.shown
@@ -82,7 +80,7 @@ struct HeadacheViews: View {
         Section {
           ActionCard(title: "Resolve Headache", buttonTitle: "Resolve", systemImage: "face.smiling.fill", action: resolveConfirmation)
         } footer: {
-          Text("Is your headache gone? Tap Resolve to let the app know.")
+          SectionFooterView(title: "Is your headache gone? Tap Resolve to let the app know.")
         }
       }
       else {
@@ -114,7 +112,7 @@ struct HeadacheViews: View {
       // Progression
       if showsAllCards || showProgressionView {
         Section {
-          ProgressionCard(headache: headache, expanded: $expandedProgressionView)
+          ProgressionCard(headache: headache)
         }
 //        if allowsEditing {
 //          if headache.progression.count > 1 {
@@ -339,11 +337,12 @@ extension HeadacheViews {
 
 struct CurrentHeadacheViews_Previews: PreviewProvider {
   static var previews: some View {
-    List {
+    ScrollView {
       HeadacheViews(headache: Previewing.CoreData.resolvedHeadache, allowsResolution: true, allowsEditing: true, allowsDeletion: true, showsAllCards: true)
         .environment(\.managedObjectContext, Previewing.CoreData.viewContext)
         .environmentObject(Previewing.headacheManager)
         .environmentObject(Previewing.alertManager)
     }
+    .background(Color(UIColor.systemGroupedBackground))
   }
 }

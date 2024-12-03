@@ -20,32 +20,26 @@ struct ModelInputView: View {
   var body: some View {
     List {
       if let weather = input.weatherStatistics {
-        if let pressure = weather.pressureMeasurement {
-          Section {
-            Card(title: "Barometric Pressure", systemImage: "barometer", foregroundColor: colorTheme.baseColor) {
-              Text(Formatters.formatMeasurement(pressure))
-                .font(.title)
-            }
-          } header: {
-            SectionTitleView(title: "Weather")
+        Section {
+          Card(title: "Barometric Pressure", systemImage: "barometer", foregroundColor: colorTheme.baseColor) {
+            Text(Formatters.formatMeasurement(weather.pressureMeasurement))
+              .font(.title)
+          }
+        } header: {
+          SectionTitleView(title: "Weather")
+        }
+        
+        Section {
+          Card(title: "Temperature", systemImage: "thermometer", foregroundColor: colorTheme.baseColor) {
+            Text(Formatters.formatMeasurement(weather.temperatureMeasurement))
+              .font(.title)
           }
         }
         
-        if let temperature = weather.temperatureMeasurement {
-          Section {
-            Card(title: "Temperature", systemImage: "thermometer", foregroundColor: colorTheme.baseColor) {
-              Text(Formatters.formatMeasurement(temperature))
-                .font(.title)
-            }
-          }
-        }
-        
-        if let humidity = weather.humidityMeasurement {
-          Section {
-            Card(title: "Humidity", systemImage: "humidity", foregroundColor: colorTheme.baseColor) {
-              Text(Formatters.formatMeasurement(humidity))
-                .font(.title)
-            }
+        Section {
+          Card(title: "Humidity", systemImage: "humidity", foregroundColor: colorTheme.baseColor) {
+            Text(Formatters.formatMeasurement(weather.humidityMeasurement))
+              .font(.title)
           }
         }
       }

@@ -5,12 +5,10 @@
 //  Created by Colin Campbell on 3/2/22.
 //
 
-@_exported import BugfenderSDK
 import BackgroundTasks
 import CocoaLumberjackSwift
 import CocoaLumberjackSwiftLogBackend
 import DataController
-import Firebase
 import Logging
 import SwiftUI
 
@@ -35,19 +33,6 @@ class AppDelegate: NSObject, UIApplicationDelegate, ObservableObject {
   // MARK: Override methods
   
   func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-#if NON_PREVIEW
-    FirebaseApp.configure()
-    Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(true)
-    
-    Bugfender.activateLogger(Constants.Bugfender.apiKey)
-    Bugfender.enableCrashReporting()
-    Bugfender.enableUIEventLogging()
-    DDLog.add(DDBugfenderLogger.shared)
-#else
-    DDLog.add(DDOSLogger.sharedInstance)
-    LoggingSystem.bootstrapWithCocoaLumberjack()
-#endif
-    
     logDebug("Application did finish launching.")
     
     // Adjust the table view appearance

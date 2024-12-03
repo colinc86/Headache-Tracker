@@ -186,19 +186,24 @@ struct Preferences {
   /// List settings.
   struct Lists {
     struct Keys {
-      static let type        = Key("settings.listoptions.type")
-      static let onset       = Key("settings.listoptions.onset")
-      static let duration    = Key("settings.listoptions.duration")
-      static let progression = Key("settings.listoptions.progression")
-      static let notes       = Key("settings.listoptions.notes")
-      static let tags        = Key("settings.listoptions.tags")
-      static let outlook     = Key("settings.listoptions.outlook")
-      static let severity    = Key("settings.listoptions.severity")
+      static let expandedProgression = Key("settings.listoptions.expandedProgression")
+      static let type                = Key("settings.listoptions.type")
+      static let onset               = Key("settings.listoptions.onset")
+      static let duration            = Key("settings.listoptions.duration")
+      static let progression         = Key("settings.listoptions.progression")
+      static let notes               = Key("settings.listoptions.notes")
+      static let tags                = Key("settings.listoptions.tags")
+      static let outlook             = Key("settings.listoptions.outlook")
+      static let severity            = Key("settings.listoptions.severity")
     }
     
     struct Defaults {
+      static let expanded = false
       static let shown = true
     }
+    
+    /// Whether the progression view should be drawn expanded.
+    @UserDefault(Keys.expandedProgression) var expandedProgressionView = Defaults.expanded
 
     /// Whether the type view should be shown.
     @UserDefault(Keys.type) var showTypeView = Defaults.shown

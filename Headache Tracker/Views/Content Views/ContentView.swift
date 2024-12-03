@@ -62,6 +62,7 @@ struct ContentView_Previews: PreviewProvider {
       .environmentObject(Previewing.headacheManager)
       .environmentObject(Previewing.alertManager)
       .environmentObject(Previewing.Prediction.predictor)
+      .environmentObject(Refresher())
       .environmentObject(Previewing.healthKitManager)
   }
 }

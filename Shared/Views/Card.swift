@@ -36,30 +36,30 @@ struct Card<TitleContent: View, Content: View, Caption: View>: View {
   
   var body: some View {
     VStack(alignment: .leading) {
-      VStack(alignment: .leading) {
-        HStack {
-          _CardTitle(
-            title: title,
-            systemImage: systemImage,
-            foregroundColor: foregroundColor)
-          
-          Spacer()
-          
-          titleContent
-        }
-        .padding(.bottom, 8)
+      HStack {
+        _CardTitle(
+          title: title,
+          systemImage: systemImage,
+          foregroundColor: foregroundColor)
         
-        content
+        Spacer()
         
-        if let caption = caption {
-          caption
-            .font(.subheadline)
-            .foregroundColor(.secondary)
-        }
+        titleContent
       }
+      .padding(.bottom, 8)
+      
+      Spacer()
+      content
+      
+      caption
+        .font(.subheadline)
+        .foregroundColor(.secondary)
     }
     .frame(minWidth: 0, minHeight: 70)
-    .padding([.top, .bottom], 10)
+    .padding(15)
+    .background(Color(UIColor.systemBackground))
+    .cornerRadius(15)
+    .padding([.leading, .trailing], 15)
   }
   
   // MARK: Initializers
@@ -136,42 +136,41 @@ extension Card where TitleContent == EmptyView, Caption == EmptyView {
 struct Card_Previews: PreviewProvider {
   
   static var previews: some View {
-    Card(title: "Test", systemImage: "clock", foregroundColor: .pink) {
-      Text("Content")
-    }
-    .previewLayout(.fixed(width: 428, height: 70))
-    
-    Card(title: "Test", systemImage: "clock", foregroundColor: .pink) {
-      Text("Content")
-    } caption: {
-      Text("Caption")
-    }
-    .previewLayout(.fixed(width: 428, height: 70))
-    
-    Card(title: "Test", systemImage: "clock", foregroundColor: .pink, caption: "Caption") {
-      Text("Content")
-    }
-    .previewLayout(.fixed(width: 428, height: 70))
-    
-    Card(title: "Test", systemImage: "clock", foregroundColor: .pink) {
-      Button("Edit") {
-        // Edit action
+    ScrollView {
+      Card(title: "Test", systemImage: "clock", foregroundColor: .pink) {
+        Text("Content")
       }
-    } content: {
-      Text("Content")
-    } caption: {
-      Text("Caption")
-    }
-    .previewLayout(.fixed(width: 428, height: 70))
-    
-    Card(title: "Test", systemImage: "clock", foregroundColor: .pink, caption: "Caption") {
-      Button("Edit") {
-        // Edit action
+      
+      Card(title: "Test", systemImage: "clock", foregroundColor: .pink) {
+        Text("Content")
+      } caption: {
+        Text("Caption")
       }
-    } content: {
-      Text("Content")
+      
+      Card(title: "Test", systemImage: "clock", foregroundColor: .pink, caption: "Caption") {
+        Text("Content")
+      }
+      
+      Card(title: "Test", systemImage: "clock", foregroundColor: .pink) {
+        Button("Edit") {
+          // Edit action
+        }
+      } content: {
+        Text("Content")
+      } caption: {
+        Text("Caption")
+      }
+      
+      Card(title: "Test", systemImage: "clock", foregroundColor: .pink, caption: "Caption") {
+        Button("Edit") {
+          // Edit action
+        }
+      } content: {
+        Text("Content")
+      }
     }
-    .previewLayout(.fixed(width: 428, height: 70))
+    .background(Color(UIColor.systemGroupedBackground))
+    .previewLayout(.sizeThatFits)
   }
   
 }

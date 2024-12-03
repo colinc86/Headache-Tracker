@@ -9,7 +9,7 @@ import Foundation
 import HealthKit
 import SwiftUI
 
-extension HKCategoryValueSeverity: Codable, RawRepresentable {
+extension HKCategoryValueSeverity: Codable, @retroactive RawRepresentable {
   
   // MARK: Types
   
@@ -112,7 +112,7 @@ extension HKCategoryValueSeverity: Codable, RawRepresentable {
 
 // MARK: Comparable protocol
 
-extension HKCategoryValueSeverity: Comparable {
+extension HKCategoryValueSeverity: @retroactive Comparable {
   public static func < (lhs: HKCategoryValueSeverity, rhs: HKCategoryValueSeverity) -> Bool {
     return lhs.orderingValue < rhs.orderingValue
   }

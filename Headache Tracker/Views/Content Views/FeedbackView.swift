@@ -5,7 +5,6 @@
 //  Created by Colin Campbell on 3/1/22.
 //
 
-import BugfenderSDK
 import SwiftUI
 
 struct FeedbackView: View {
@@ -99,10 +98,6 @@ extension FeedbackView {
     }
     
     var url: URL?
-    switch type {
-    case .bug: url = Bugfender.sendIssueReturningUrl(withTitle: title, text: message)
-    case .feedback: url = Bugfender.sendUserFeedbackReturningUrl(withSubject: title, message: message)
-    }
     
     if let url = url {
       logInfo("Submitted \(type.title.lowercased()) with url \(url.absoluteString).")

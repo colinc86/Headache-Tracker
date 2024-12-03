@@ -28,7 +28,6 @@ struct ColorThemePicker: View {
       }
       .pickerStyle(InlinePickerStyle())
     }
-    .onChange(of: colorTheme, perform: { _ in presentationMode.wrappedValue.dismiss() })
     .listStyle(DefaultListStyle())
     .navigationBarTitleDisplayMode(.inline)
   }

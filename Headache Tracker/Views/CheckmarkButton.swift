@@ -14,7 +14,7 @@ struct CheckmarkButton: View {
   
   var body: some View {
     Button {
-      checked = !checked
+      withAnimation { checked.toggle() }
     } label: {
       if checked {
         Label(title, systemImage: "checkmark")

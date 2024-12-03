@@ -18,9 +18,6 @@ struct LineGraph: View {
   /// The line graph's gradient.
   let gradient: Gradient
   
-  /// Whether or not the view should be drawn in its collapsed state.
-  var collapsed: Bool = false
-  
   // MARK: Private properties
   
   /// The view's trim for animating its appearance.
@@ -29,30 +26,32 @@ struct LineGraph: View {
   // MARK: View body
   
   var body: some View {
-    HStack {
-      VStack(alignment: .trailing) {
-        Text(Headache.Severity.severe.title)
-        Spacer()
-        if !collapsed {
-          Text(Headache.Severity.moderate.title)
-          Spacer()
-          Text(Headache.Severity.mild.title)
-          Spacer()
-          Text(Headache.Severity.unspecified.title)
-          Spacer()
+    GeometryReader { geometry in
+      HStack {
+        if geometry.size.height >= 100 {
+          VStack(alignment: .trailing) {
+            Text(Headache.Severity.severe.title)
+            Spacer()
+            Text(Headache.Severity.moderate.title)
+            Spacer()
+            Text(Headache.Severity.mild.title)
+            Spacer()
+            Text(Headache.Severity.unspecified.title)
+            Spacer()
+            Text(Headache.Severity.notPresent.title)
+          }
+          .font(.caption)
+          .foregroundColor(.secondary)
         }
-        Text(Headache.Severity.notPresent.title)
+        
+        Divider().padding(0)
+        
+        QuadCurve(unitPoints: pathPoints())
+          .trim(from: 0.0, to: trim)
+          .stroke(LinearGradient(gradient: gradient, startPoint: .bottom, endPoint: .top), lineWidth: 2.0)
+          .animation(.easeInOut(duration: 0.5), value: trim)
+          .onAppear(perform: { trim = 1.0 })
       }
-      .font(.caption)
-      .foregroundColor(.secondary)
-      
-      Divider().padding(0)
-      
-      QuadCurve(unitPoints: pathPoints())
-        .trim(from: 0.0, to: trim)
-        .stroke(LinearGradient(gradient: gradient, startPoint: .bottom, endPoint: .top), lineWidth: collapsed ? 2.0 : 4.0)
-        .animation(.easeInOut(duration: 0.5), value: trim)
-        .onAppear(perform: { trim = 1.0 })
     }
   }
   
@@ -86,13 +85,13 @@ extension LineGraph {
 struct LineGraph_Previews: PreviewProvider {
   static var previews: some View {
     LineGraph(series: [
-      .mild, .notPresent, .unspecified
-    ], gradient: Gradient(colors: [.cyan, .purple]), collapsed: true)
-      .previewLayout(.fixed(width: 428, height: 40))
+      .mild, .notPresent, .severe
+    ], gradient: Gradient(colors: [.red, .yellow]))
+    .previewLayout(.fixed(width: 428, height: 50))
     
     LineGraph(series: [
-      .mild, .notPresent, .unspecified
-    ], gradient: Gradient(colors: [.cyan, .purple]), collapsed: false)
-    .previewLayout(.fixed(width: 428, height: 100))
+      .mild, .notPresent, .severe
+    ], gradient: Gradient(colors: [.red, .yellow]))
+    .previewLayout(.fixed(width: 428, height: 150))
   }
 }

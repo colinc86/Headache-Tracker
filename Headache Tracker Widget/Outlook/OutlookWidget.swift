@@ -15,9 +15,11 @@ struct OutlookWidget: Widget {
   var body: some WidgetConfiguration {
     StaticConfiguration(kind: kind, provider: OutlookWidgetProvider()) { entry in
       OutlookWidgetView(entry: entry)
+        .containerBackground(Color(uiColor: .systemBackground), for: .widget)
     }
     .configurationDisplayName("Daily Outlook")
     .description("A daily headache outlook widget.")
     .supportedFamilies([.systemSmall, .systemMedium])
+    .contentMarginsDisabled()
   }
 }

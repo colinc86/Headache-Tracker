@@ -44,8 +44,8 @@ struct PredictionViews: View {
       } header: {
         SectionTitleView(title: "Predictions")
       } footer: {
-        if !showSeverityView, let lastPredictionDate = prediction.date {
-          Text("Updated \(lastPredictionDate.formattedNonRelative()).")
+        if !showSeverityView  {
+          SectionFooterView(title: "Updated \(prediction.date.formattedNonRelative()).")
         }
       }
     }
@@ -58,9 +58,7 @@ struct PredictionViews: View {
           SectionTitleView(title: "Predictions")
         }
       } footer: {
-        if let lastPredictionDate = prediction.date {
-          Text("Updated \(lastPredictionDate.formattedNonRelative()).")
-        }
+        SectionFooterView(title: "Updated \(prediction.date.formattedNonRelative()).")
       }
     }
   }
@@ -68,9 +66,10 @@ struct PredictionViews: View {
 
 struct PredictionViews_Previews: PreviewProvider {
   static var previews: some View {
-    List {
+    ScrollView {
       PredictionViews(prediction: Previewing.Prediction.prediction)
         .environment(\.managedObjectContext, Previewing.CoreData.viewContext)
     }
+    .background(Color(UIColor.systemGroupedBackground))
   }
 }

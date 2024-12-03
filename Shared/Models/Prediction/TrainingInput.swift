@@ -69,6 +69,7 @@ struct TrainingInput {
   
   private static func smote(_ inputs: [ModelInput], forModelType modelType: Predictor.ModelType) -> [ModelInput] {
     logDebug("SMOTE (\(inputs.count)) inputs for model type \(modelType).")
+    
     // Get the class names
     var targetClasses = [String]()
     switch modelType {
@@ -121,6 +122,7 @@ struct TrainingInput {
   
   static func synthesize(_ count: Int, from inputs: [ModelInput]) -> [ModelInput] {
     logDebug("Synthesize \(count) inputs from \(inputs.count) inputs.")
+    guard inputs.count > 1 else { return [] }
     
     var syntheticInputs = [ModelInput]()
     while syntheticInputs.count < count {
@@ -130,6 +132,10 @@ struct TrainingInput {
       
       // Get the k-nearest neighbors of the index
       let neighbors = knn(inputs, randomInputIndex, 5)
+      guard neighbors.count > 0 else {
+        continue
+      }
+      
       let randomNeighbor = neighbors[Int.random(in: 0 ..< neighbors.count)]
       
       // Select a random decimal percent

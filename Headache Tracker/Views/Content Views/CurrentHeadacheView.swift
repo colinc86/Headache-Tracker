@@ -71,16 +71,6 @@ struct CurrentHeadacheView: View {
   /// The view's model.
   @ObservedObject private var viewModel: ViewModel
   
-  // Preferences
-  @AppStorage(Preferences.Lists.Keys.type) private var showTypeView = Preferences.Lists.Defaults.shown
-  @AppStorage(Preferences.Lists.Keys.onset) private var showOnsetView = Preferences.Lists.Defaults.shown
-  @AppStorage(Preferences.Lists.Keys.duration) private var showDurationView = Preferences.Lists.Defaults.shown
-  @AppStorage(Preferences.Lists.Keys.progression) private var showProgressionView = Preferences.Lists.Defaults.shown
-  @AppStorage(Preferences.Lists.Keys.notes) private var showNotesView = Preferences.Lists.Defaults.shown
-  @AppStorage(Preferences.Lists.Keys.tags) private var showTagsView = Preferences.Lists.Defaults.shown
-  @AppStorage(Preferences.Lists.Keys.outlook) private var showOutlookView = Preferences.Lists.Defaults.shown
-  @AppStorage(Preferences.Lists.Keys.severity) private var showSeverityView = Preferences.Lists.Defaults.shown
-  
   /// The headaches fetch request.
   ///
   /// It should ever only return at most one, unresolved, headache.
@@ -102,7 +92,7 @@ struct CurrentHeadacheView: View {
   
   var body: some View {
     NavigationView {
-      List {
+      ScrollView {
         // New/Current Headache
         Section {
           // New/Current Severity
@@ -112,10 +102,10 @@ struct CurrentHeadacheView: View {
         } footer: {
           if let currentHeadache = currentHeadache {
             if let startTime = currentHeadache.severitiesArray.last?.startTime {
-              Text("Last updated \(startTime.formattedNonRelative())")
+              SectionFooterView(title: "Last updated \(startTime.formattedNonRelative())")
             }
           } else {
-            Text("Feel a headache coming on? Select a severity level to start tracking it.")
+            SectionFooterView(title: "Feel a headache coming on? Select a severity level to start tracking it.")
           }
         }
         
@@ -124,7 +114,7 @@ struct CurrentHeadacheView: View {
           Section {
             ActionCard(title: "No Headache?", buttonTitle: "No Headache", systemImage: "checkmark.circle.fill", action: viewModel.noHeadacheAction)
           } footer: {
-            Text("No Headache? Tap above to let the app know.")
+            SectionFooterView(title: "No Headache? Tap above to let the app know.")
           }
         }
         
@@ -142,14 +132,6 @@ struct CurrentHeadacheView: View {
       .background(Color(UIColor.systemGroupedBackground))
       .navigationTitle("Track")
       .animation(.default, value: predictor.prediction)
-      .animation(.default, value: showTypeView)
-      .animation(.default, value: showOnsetView)
-      .animation(.default, value: showDurationView)
-      .animation(.default, value: showProgressionView)
-      .animation(.default, value: showNotesView)
-      .animation(.default, value: showTagsView)
-      .animation(.default, value: showOutlookView)
-      .animation(.default, value: showSeverityView)
       .refreshable(action: viewModel.forcedPrediction)
       .toolbar {
         ToolbarItem(placement: .automatic) {

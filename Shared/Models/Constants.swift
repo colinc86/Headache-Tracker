@@ -72,16 +72,6 @@ struct Constants {
     
   }
   
-  struct WeatherAPI {
-    
-    /// The weather API username.
-    static let username = "f6fad9695be5449475ccfba804ec1018"
-    
-    /// The weather API password.
-    static let password = "c4efa0b907f057cdb110d36651e442b3"
-    
-  }
-  
   struct Widgets {
     
     /// The outlook widget's kind.

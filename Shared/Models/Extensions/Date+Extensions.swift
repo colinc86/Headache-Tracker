@@ -8,7 +8,7 @@
 import Foundation
 
 /// Adds conformance to `RawRepresentable` to the `Date` structure.
-extension Date: RawRepresentable {
+extension Date: @retroactive RawRepresentable {
   
   private static let rawFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
   private static var formatter: DateFormatter = {

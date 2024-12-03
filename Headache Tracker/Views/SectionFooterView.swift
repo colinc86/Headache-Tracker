@@ -1,0 +1,34 @@
+//
+//  SectionFooterView.swift
+//  Headache Tracker
+//
+//  Created by Colin Campbell on 4/3/22.
+//
+
+import SwiftUI
+
+struct SectionFooterView: View {
+  
+  /// The view's title.
+  let title: String
+  
+  // MARK: View body
+  
+  var body: some View {
+    HStack {
+      Text(title)
+        .font(.footnote)
+        .textCase(.none)
+        .foregroundColor(.secondary)
+      Spacer()
+    }
+    .padding([.leading, .trailing, .bottom], 30)
+  }
+}
+
+struct SectionFooterView_Previews: PreviewProvider {
+  static var previews: some View {
+    SectionFooterView(title: "This is a footnote.")
+      .previewLayout(.sizeThatFits)
+  }
+}

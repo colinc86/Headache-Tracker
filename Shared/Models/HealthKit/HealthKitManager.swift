@@ -205,7 +205,7 @@ extension HealthKitManager {
         guard let query = data.query(in: interval, completion: { query, samples, quantity, error in
           if let samples = samples as? [HKCategorySample] {
             if data == .sleepSeconds {
-              var asleepSeconds = samples.filter({ $0.value == HKCategoryValueSleepAnalysis.asleep.rawValue && interval.contains($0.startDate) }).reduce(0.0, { $0 + $1.endDate.timeIntervalSince($1.startDate) })
+              var asleepSeconds = samples.filter({ $0.value == HKCategoryValueSleepAnalysis.asleepUnspecified.rawValue && interval.contains($0.startDate) }).reduce(0.0, { $0 + $1.endDate.timeIntervalSince($1.startDate) })
               if asleepSeconds > 0.0 {
                 var sources = [String]()
                 for sample in samples {
@@ -222,7 +222,7 @@ extension HealthKitManager {
             }
             else if data == .sleepOnset {
               var onsetSeconds = -1.0
-              if let sleepOnset = samples.filter({ $0.value == HKCategoryValueSleepAnalysis.asleep.rawValue && interval.contains($0.startDate) }).min(by: { $0.startDate < $1.startDate })?.startDate {
+              if let sleepOnset = samples.filter({ $0.value == HKCategoryValueSleepAnalysis.asleepUnspecified.rawValue && interval.contains($0.startDate) }).min(by: { $0.startDate < $1.startDate })?.startDate {
                 onsetSeconds = Calendar.current.timeIntervalSinceMidnight(sleepOnset)
               }
               

@@ -5,7 +5,6 @@
 //  Created by Colin Campbell on 2/3/22.
 //
 
-import FirebaseAnalytics
 import ApplicationKey
 import CoreData
 import CoreLocation
@@ -717,10 +716,31 @@ extension HeadacheManager {
               return
             }
             
-            // Get the training input
-            let input = try TrainingInput(trainingData: trainingData)
+            var notPresentTrainingData = trainingData.filter({ $0.severity?.severity == .notPresent || $0.severity?.severity == nil })
+            var notNotPresentTrainingData = trainingData.filter({ $0.severity?.severity != .notPresent && $0.severity?.severity != nil })
             
-            logDebug("Training classifiers with \(trainingData.count) data...")
+            notPresentTrainingData.shuffle()
+            notNotPresentTrainingData.shuffle()
+            
+            if notNotPresentTrainingData.count < 50 {
+              let maxNotPresent = notNotPresentTrainingData.count * 2
+              if notPresentTrainingData.count > maxNotPresent {
+                notPresentTrainingData.removeLast(notPresentTrainingData.count - maxNotPresent)
+              }
+            }
+            else {
+              let maxNotPresent = notNotPresentTrainingData.count
+              if notPresentTrainingData.count > maxNotPresent {
+                notPresentTrainingData.removeLast(notPresentTrainingData.count - maxNotPresent)
+              }
+            }
+            
+            let trimmedTrainingData = notPresentTrainingData + notNotPresentTrainingData
+            
+            // Get the training input
+            let input = try TrainingInput(trainingData: trimmedTrainingData)
+            
+            logDebug("Training classifiers with \(trimmedTrainingData.count) data...")
             Task {
               do {
                 try await self.predictor.train(input)
@@ -734,6 +754,7 @@ extension HeadacheManager {
           }
         }
         catch {
+          logError("Got error \(error)")
           continuation.resume(throwing: error)
         }
       }

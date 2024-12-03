@@ -5,8 +5,6 @@
 //  Created by Colin Campbell on 2/4/22.
 //
 
-import BugfenderSDK
-import FirebaseCrashlytics
 import SwiftUI
 
 /// Displays the application's settings.
@@ -189,10 +187,6 @@ struct SettingsView: View {
           
           Button("Share Feedback", action: shareFeedback)
           
-          Toggle("Submit Crash Data", isOn: $crashReportingEnabled)
-            .onChange(of: crashReportingEnabled, perform: enableCrashReportingValueChanged)
-            .tint(colorTheme.baseColor)
-          
           SubtitleCell(title: "Version", subtitle: Bundle.main.humanReadableVersionString)
         }
         
@@ -251,11 +245,6 @@ extension SettingsView {
     else {
       refresher.cancelOutlookRefreshTask()
     }
-  }
-  
-  /// Turns crash reporting on or off.
-  private func enableCrashReportingValueChanged(_ newValue: Bool) {
-    Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(newValue)
   }
   
 }
