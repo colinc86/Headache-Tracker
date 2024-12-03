@@ -52,9 +52,9 @@ struct TrainingDataView: View {
         SubtitleCell(title: "Current Pressure", subtitle: trainingData.weatherData?.pressureMeasurement.formatted() ?? "N/A")
         SubtitleCell(title: "Current Humidity", subtitle: trainingData.weatherData?.humidityMeasurement.converted(to: .percent).formatted() ?? "N/A")
         SubtitleCell(title: "Current Temperature", subtitle: trainingData.weatherData?.temperatureMeasurement.formatted() ?? "N/A")
-        SubtitleCell(title: "𝚺 Pressure", subtitle: "\(trainingData.weatherData?.sigmaPressure ?? 0.0) kPa")
-        SubtitleCell(title: "𝚺 Humidity", subtitle: String(format: "%0.f%%", (trainingData.weatherData?.sigmaHumidity ?? 0.0) * 100.0))
-        SubtitleCell(title: "𝚺 Temperature", subtitle: "\(trainingData.weatherData?.sigmaTemperature ?? 0.0)℃")
+        SubtitleCell(title: "Δ Pressure", subtitle: "\(trainingData.weatherData?.sigmaPressure ?? 0.0) kPa")
+        SubtitleCell(title: "Δ Humidity", subtitle: "\((trainingData.weatherData?.sigmaHumidity ?? 0.0) * 100.0) %")
+        SubtitleCell(title: "Δ Temperature", subtitle: "\(trainingData.weatherData?.sigmaTemperature ?? 0.0) ℃")
       }
     }
     .toolbar {

@@ -72,20 +72,13 @@ extension WeatherManager {
   ///   - date: The date of the weather reading.
   /// - Returns: The weather spread.
   private func getWeatherSpread(location: CLLocation, date: Date) async throws -> Weather.WeatherSpread {
-    let now = Date()
-    let sixHoursAgo = now.addingTimeInterval(-60 * 60 * 6)
-    let sixHoursFromNow = now.addingTimeInterval(60 * 60 * 6)
-    let weather = try await WeatherService.shared.weather(for: location, including: .hourly(startDate: sixHoursAgo, endDate: sixHoursFromNow))
+    let sixHoursAgo = date.addingTimeInterval(-60 * 60 * 6)
+    let weather = try await WeatherService.shared.weather(for: location, including: .hourly(startDate: sixHoursAgo, endDate: date))
     
     guard let firstWeather = weather.first,
           let lastWeather = weather.last else {
       throw WeatherError.unknown
     }
-    
-    guard weather.count > 6 else {
-      throw WeatherError.unknown
-    }
-    let middleWeather = weather[6]
     
     let pastWeather = Weather.WeatherSpread.WeatherData(
       humidity: firstWeather.humidity,
@@ -94,12 +87,6 @@ extension WeatherManager {
       datetimeEpoch: firstWeather.date.timeIntervalSince1970)
     
     let currentWeather = Weather.WeatherSpread.WeatherData(
-      humidity: middleWeather.humidity,
-      pressure: middleWeather.pressure.converted(to: .millibars).value,
-      temp: middleWeather.temperature.converted(to: .celsius).value,
-      datetimeEpoch: middleWeather.date.timeIntervalSince1970)
-    
-    let futureWeather = Weather.WeatherSpread.WeatherData(
       humidity: lastWeather.humidity,
       pressure: lastWeather.pressure.converted(to: .millibars).value,
       temp: lastWeather.temperature.converted(to: .celsius).value,
@@ -107,13 +94,11 @@ extension WeatherManager {
     
     logDebug("Past weather \(pastWeather)")
     logDebug("Current weather \(currentWeather)")
-    logDebug("Future weather \(futureWeather)")
     
     return Weather.WeatherSpread(
       spread: 12,
-      location: Weather.WeatherSpread.WeatherLocation(latitude: 0.0, longitude: 0.0),
+      location: Weather.WeatherSpread.WeatherLocation(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude),
       current: currentWeather,
-      future: futureWeather,
       past: pastWeather)
   }
   

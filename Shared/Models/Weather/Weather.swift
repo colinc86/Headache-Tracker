@@ -37,13 +37,12 @@ class Weather: CustomStringConvertible {
     }
     
     var description: String {
-      return "{ spread: \(spread), location: \(location), current: \(current), future: \(future), past: \(past) }"
+      return "{ spread: \(spread), location: \(location), current: \(current), past: \(past) }"
     }
     
     let spread: Int
     let location: WeatherLocation
     let current: WeatherData
-    let future: WeatherData
     let past: WeatherData
   }
   
@@ -66,17 +65,15 @@ class Weather: CustomStringConvertible {
     let currentHumidity = weatherSpread.current.humidity
     let currentTemperature = weatherSpread.current.temp
   
-    let sigmaHumidity = abs(weatherSpread.current.humidity - weatherSpread.future.humidity) + abs(weatherSpread.current.humidity - weatherSpread.past.humidity)
+    let sigmaHumidity = weatherSpread.current.humidity - weatherSpread.past.humidity
     
     let cPressure = Measurement(value: weatherSpread.current.pressure, unit: UnitPressure.millibars).converted(to: .kilopascals).value
-    let fPressure = Measurement(value: weatherSpread.future.pressure, unit: UnitPressure.millibars).converted(to: .kilopascals).value
     let pPressure = Measurement(value: weatherSpread.past.pressure, unit: UnitPressure.millibars).converted(to: .kilopascals).value
-    let sigmaPressure = abs(cPressure - fPressure) + abs(cPressure - pPressure)
+    let sigmaPressure = cPressure - pPressure
     
     let cTemperature = weatherSpread.current.temp
-    let fTemperature = weatherSpread.future.temp
     let pTemperature = weatherSpread.past.temp
-    let sigmaTemperature = abs(cTemperature - fTemperature) + abs(cTemperature - pTemperature)
+    let sigmaTemperature = cTemperature - pTemperature
     
     return WeatherStatistics(
       barometricPressure: devicePressure?.converted(to: .kilopascals).value,
