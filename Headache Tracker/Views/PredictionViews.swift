@@ -55,7 +55,7 @@ struct PredictionViews: View {
       } header: {
         SectionTitleView(title: "Predictions")
       } footer: {
-        if !showSeverityView  {
+        if !(showSeverityView && needsSeverityView) {
           SectionFooterView(title: "Updated \(prediction.date.formattedNonRelative()).")
         }
       }

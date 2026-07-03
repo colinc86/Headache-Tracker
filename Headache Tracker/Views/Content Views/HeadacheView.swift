@@ -47,7 +47,7 @@ struct HeadacheView: View {
   // MARK: View body
   
   var body: some View {
-    ScrollView {
+    List {
       Section {
         SeveritySelectionView(currentSeverity: nil, severityRange: headache.severityRange, collapsed: true)
       } header: {

@@ -90,7 +90,7 @@ struct CurrentHeadacheView: View {
   
   var body: some View {
     NavigationView {
-      ScrollView {
+      List {
         // New/Current Headache
         Section {
           // New/Current Severity

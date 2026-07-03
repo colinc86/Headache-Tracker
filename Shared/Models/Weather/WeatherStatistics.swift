@@ -53,4 +53,16 @@ struct WeatherStatistics: Codable, Equatable {
   var humidityMeasurement: Measurement<UnitRate> {
     return Measurement(value: currentHumidity, unit: .decimal)
   }
+
+  var sigmaPressureMeasurement: Measurement<UnitPressure> {
+    return Measurement(value: sigmaPressure, unit: .kilopascals)
+  }
+
+  var sigmaTemperatureMeasurement: Measurement<UnitTemperature> {
+    return Measurement(value: sigmaTemperature, unit: .celsius)
+  }
+
+  var sigmaHumidityMeasurement: Measurement<UnitRate> {
+    return Measurement(value: sigmaHumidity, unit: .decimal)
+  }
 }
