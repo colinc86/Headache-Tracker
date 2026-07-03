@@ -71,6 +71,8 @@ class AppDelegate: NSObject, UIApplicationDelegate, ObservableObject {
           logInfo("Model schema changed; resetting models and evaluations.")
           headacheManager.predictor.reset()
           try await headacheManager.resetEvaluation()
+          // The four-model era's shared prediction is orphaned; clear it.
+          UserDefaults.shared?.removeObject(forKey: Preferences.Shared.Keys.legacyCurrentPrediction)
           defaults.set(Constants.modelSchemaVersion, forKey: Constants.modelSchemaVersionKey)
         }
 

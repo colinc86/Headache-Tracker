@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		CD40CD40CD40CD4000000002 /* Calibration.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD40CD40CD40CD4000000001 /* Calibration.swift */; };
+		CD40CD40CD40CD4000000003 /* Calibration.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD40CD40CD40CD4000000001 /* Calibration.swift */; };
+		CD40CD40CD40CD4000000005 /* RiskPrediction.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD40CD40CD40CD4000000004 /* RiskPrediction.swift */; };
+		CD40CD40CD40CD4000000006 /* RiskPrediction.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD40CD40CD40CD4000000004 /* RiskPrediction.swift */; };
+		CD40CD40CD40CD4000000008 /* RiskClassifierOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD40CD40CD40CD4000000007 /* RiskClassifierOutput.swift */; };
+		CD40CD40CD40CD4000000009 /* RiskClassifierOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD40CD40CD40CD4000000007 /* RiskClassifierOutput.swift */; };
 		CC30CC30CC30CC3000000002 /* HeadacheManager+Medications.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC30CC30CC30CC3000000001 /* HeadacheManager+Medications.swift */; };
 		CC30CC30CC30CC3000000003 /* HeadacheManager+Medications.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC30CC30CC30CC3000000001 /* HeadacheManager+Medications.swift */; };
 		CC30CC30CC30CC3000000005 /* HeadacheManager+Exposures.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC30CC30CC30CC3000000004 /* HeadacheManager+Exposures.swift */; };
@@ -97,14 +103,6 @@
 		3B3FFEAA27D592A000DFACC1 /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFE5F27D592A000DFACC1 /* Model.swift */; };
 		3B3FFEAB27D592A000DFACC1 /* Predictor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFE6027D592A000DFACC1 /* Predictor.swift */; };
 		3B3FFEAC27D592A000DFACC1 /* Predictor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFE6027D592A000DFACC1 /* Predictor.swift */; };
-		3B3FFEAD27D592A000DFACC1 /* SeverityClassifierOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFE6227D592A000DFACC1 /* SeverityClassifierOutput.swift */; };
-		3B3FFEAE27D592A000DFACC1 /* SeverityClassifierOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFE6227D592A000DFACC1 /* SeverityClassifierOutput.swift */; };
-		3B3FFEAF27D592A000DFACC1 /* OnsetRegressorOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFE6327D592A000DFACC1 /* OnsetRegressorOutput.swift */; };
-		3B3FFEB027D592A000DFACC1 /* OnsetRegressorOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFE6327D592A000DFACC1 /* OnsetRegressorOutput.swift */; };
-		3B3FFEB127D592A000DFACC1 /* OutlookClassifierOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFE6427D592A000DFACC1 /* OutlookClassifierOutput.swift */; };
-		3B3FFEB227D592A000DFACC1 /* OutlookClassifierOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFE6427D592A000DFACC1 /* OutlookClassifierOutput.swift */; };
-		3B3FFEB327D592A000DFACC1 /* DurationRegressorOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFE6527D592A000DFACC1 /* DurationRegressorOutput.swift */; };
-		3B3FFEB427D592A000DFACC1 /* DurationRegressorOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFE6527D592A000DFACC1 /* DurationRegressorOutput.swift */; };
 		3B3FFEB527D592A000DFACC1 /* UncontrolledUserInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFE6727D592A000DFACC1 /* UncontrolledUserInput.swift */; };
 		3B3FFEB627D592A000DFACC1 /* UncontrolledUserInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFE6727D592A000DFACC1 /* UncontrolledUserInput.swift */; };
 		3B3FFEB727D592A000DFACC1 /* ChronologicalInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFE6827D592A000DFACC1 /* ChronologicalInput.swift */; };
@@ -155,8 +153,6 @@
 		3B3FFEEA27D592A000DFACC1 /* MotionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFE8527D592A000DFACC1 /* MotionManager.swift */; };
 		3B3FFEEB27D592A000DFACC1 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFE8627D592A000DFACC1 /* LocationManager.swift */; };
 		3B3FFEEC27D592A000DFACC1 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFE8627D592A000DFACC1 /* LocationManager.swift */; };
-		3B3FFEED27D592A000DFACC1 /* HolisticOutlook.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFE8727D592A000DFACC1 /* HolisticOutlook.swift */; };
-		3B3FFEEE27D592A000DFACC1 /* HolisticOutlook.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFE8727D592A000DFACC1 /* HolisticOutlook.swift */; };
 		3B3FFEEF27D592A000DFACC1 /* Previewing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFE8827D592A000DFACC1 /* Previewing.swift */; };
 		3B3FFEF027D592A000DFACC1 /* Previewing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFE8827D592A000DFACC1 /* Previewing.swift */; };
 		3B3FFEF127D592A000DFACC1 /* Formatters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFE8927D592A000DFACC1 /* Formatters.swift */; };
@@ -178,11 +174,9 @@
 		3B3FFF1C27D8987600DFACC1 /* Waiter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFF1A27D897B700DFACC1 /* Waiter.swift */; };
 		3B3FFF1E27DA84DB00DFACC1 /* TestPredictor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFF1D27DA84DB00DFACC1 /* TestPredictor.swift */; };
 		3B3FFF2227DA8C0300DFACC1 /* ModelInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFF2127DA8C0300DFACC1 /* ModelInput.swift */; };
-		3B3FFF2427DA8C5E00DFACC1 /* PredictionOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFF2327DA8C5E00DFACC1 /* PredictionOutput.swift */; };
 		3B3FFF2627DA8D2300DFACC1 /* TrainingInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFF2527DA8D2300DFACC1 /* TrainingInput.swift */; };
 		3B3FFF2727DA8D2300DFACC1 /* TrainingInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFF2527DA8D2300DFACC1 /* TrainingInput.swift */; };
 		3B3FFF2827DA8E8100DFACC1 /* ModelInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFF2127DA8C0300DFACC1 /* ModelInput.swift */; };
-		3B3FFF2927DA8E8400DFACC1 /* PredictionOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFF2327DA8C5E00DFACC1 /* PredictionOutput.swift */; };
 		3B3FFF2A27DA8E8B00DFACC1 /* TestPredictor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFF1D27DA84DB00DFACC1 /* TestPredictor.swift */; };
 		3B3FFF2C27DAA89500DFACC1 /* WeatherStatistics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFF2B27DAA89500DFACC1 /* WeatherStatistics.swift */; };
 		3B3FFF2D27DAA89500DFACC1 /* WeatherStatistics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFF2B27DAA89500DFACC1 /* WeatherStatistics.swift */; };
@@ -310,6 +304,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		CD40CD40CD40CD4000000001 /* Calibration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Calibration.swift"; sourceTree = "<group>"; };
+		CD40CD40CD40CD4000000004 /* RiskPrediction.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "RiskPrediction.swift"; sourceTree = "<group>"; };
+		CD40CD40CD40CD4000000007 /* RiskClassifierOutput.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "RiskClassifierOutput.swift"; sourceTree = "<group>"; };
 		CC30CC30CC30CC3000000001 /* HeadacheManager+Medications.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "HeadacheManager+Medications.swift"; sourceTree = "<group>"; };
 		CC30CC30CC30CC3000000004 /* HeadacheManager+Exposures.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "HeadacheManager+Exposures.swift"; sourceTree = "<group>"; };
 		CC30CC30CC30CC3000000007 /* MedicationEntry+Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "MedicationEntry+Extensions.swift"; sourceTree = "<group>"; };
@@ -380,10 +377,6 @@
 		3B3FFE5D27D592A000DFACC1 /* HealthKitManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HealthKitManager.swift; sourceTree = "<group>"; };
 		3B3FFE5F27D592A000DFACC1 /* Model.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
 		3B3FFE6027D592A000DFACC1 /* Predictor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Predictor.swift; sourceTree = "<group>"; };
-		3B3FFE6227D592A000DFACC1 /* SeverityClassifierOutput.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SeverityClassifierOutput.swift; sourceTree = "<group>"; };
-		3B3FFE6327D592A000DFACC1 /* OnsetRegressorOutput.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OnsetRegressorOutput.swift; sourceTree = "<group>"; };
-		3B3FFE6427D592A000DFACC1 /* OutlookClassifierOutput.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OutlookClassifierOutput.swift; sourceTree = "<group>"; };
-		3B3FFE6527D592A000DFACC1 /* DurationRegressorOutput.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DurationRegressorOutput.swift; sourceTree = "<group>"; };
 		3B3FFE6727D592A000DFACC1 /* UncontrolledUserInput.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UncontrolledUserInput.swift; sourceTree = "<group>"; };
 		3B3FFE6827D592A000DFACC1 /* ChronologicalInput.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChronologicalInput.swift; sourceTree = "<group>"; };
 		3B3FFE6927D592A000DFACC1 /* ControlledUserInput.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ControlledUserInput.swift; sourceTree = "<group>"; };
@@ -411,7 +404,6 @@
 		3B3FFE8427D592A000DFACC1 /* Weather.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Weather.swift; sourceTree = "<group>"; };
 		3B3FFE8527D592A000DFACC1 /* MotionManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MotionManager.swift; sourceTree = "<group>"; };
 		3B3FFE8627D592A000DFACC1 /* LocationManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
-		3B3FFE8727D592A000DFACC1 /* HolisticOutlook.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HolisticOutlook.swift; sourceTree = "<group>"; };
 		3B3FFE8827D592A000DFACC1 /* Previewing.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Previewing.swift; sourceTree = "<group>"; };
 		3B3FFE8927D592A000DFACC1 /* Formatters.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Formatters.swift; sourceTree = "<group>"; };
 		3B3FFE8C27D592A000DFACC1 /* Logger.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
@@ -425,7 +417,6 @@
 		3B3FFF1A27D897B700DFACC1 /* Waiter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Waiter.swift; sourceTree = "<group>"; };
 		3B3FFF1D27DA84DB00DFACC1 /* TestPredictor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestPredictor.swift; sourceTree = "<group>"; };
 		3B3FFF2127DA8C0300DFACC1 /* ModelInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelInput.swift; sourceTree = "<group>"; };
-		3B3FFF2327DA8C5E00DFACC1 /* PredictionOutput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PredictionOutput.swift; sourceTree = "<group>"; };
 		3B3FFF2527DA8D2300DFACC1 /* TrainingInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingInput.swift; sourceTree = "<group>"; };
 		3B3FFF2B27DAA89500DFACC1 /* WeatherStatistics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherStatistics.swift; sourceTree = "<group>"; };
 		3B4BA6F327B6289C00F38851 /* Headache_Tracker 1.2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Headache_Tracker 1.2.xcdatamodel"; sourceTree = "<group>"; };
@@ -700,7 +691,6 @@
 				3B3FFE5A27D592A000DFACC1 /* HeadacheManager.swift */,
 				CC30CC30CC30CC3000000004 /* HeadacheManager+Exposures.swift */,
 				CC30CC30CC30CC3000000001 /* HeadacheManager+Medications.swift */,
-				3B3FFE8727D592A000DFACC1 /* HolisticOutlook.swift */,
 				3B3FFE5827D592A000DFACC1 /* Outlook.swift */,
 				3B3FFE8827D592A000DFACC1 /* Previewing.swift */,
 				3B3FFF1A27D897B700DFACC1 /* Waiter.swift */,
@@ -741,12 +731,13 @@
 			isa = PBXGroup;
 			children = (
 				CB20CB20CB20CB2000000001 /* FeatureMedians.swift */,
+				CD40CD40CD40CD4000000004 /* RiskPrediction.swift */,
+				CD40CD40CD40CD4000000001 /* Calibration.swift */,
 				CB20CB20CB20CB2000000004 /* ModelMetrics.swift */,
 				3B3FFE6627D592A000DFACC1 /* Inputs */,
 				3B3FFE6127D592A000DFACC1 /* Outputs */,
 				3B3FFE5F27D592A000DFACC1 /* Model.swift */,
 				3B3FFF2127DA8C0300DFACC1 /* ModelInput.swift */,
-				3B3FFF2327DA8C5E00DFACC1 /* PredictionOutput.swift */,
 				3B3FFE6027D592A000DFACC1 /* Predictor.swift */,
 				3B3FFF2527DA8D2300DFACC1 /* TrainingInput.swift */,
 				3B3FFF1D27DA84DB00DFACC1 /* TestPredictor.swift */,
@@ -757,10 +748,7 @@
 		3B3FFE6127D592A000DFACC1 /* Outputs */ = {
 			isa = PBXGroup;
 			children = (
-				3B3FFE6227D592A000DFACC1 /* SeverityClassifierOutput.swift */,
-				3B3FFE6327D592A000DFACC1 /* OnsetRegressorOutput.swift */,
-				3B3FFE6427D592A000DFACC1 /* OutlookClassifierOutput.swift */,
-				3B3FFE6527D592A000DFACC1 /* DurationRegressorOutput.swift */,
+				CD40CD40CD40CD4000000007 /* RiskClassifierOutput.swift */,
 			);
 			path = Outputs;
 			sourceTree = "<group>";
@@ -1255,6 +1243,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CD40CD40CD40CD4000000003 /* Calibration.swift in Sources */,
+				CD40CD40CD40CD4000000006 /* RiskPrediction.swift in Sources */,
+				CD40CD40CD40CD4000000009 /* RiskClassifierOutput.swift in Sources */,
 				CC30CC30CC30CC3000000003 /* HeadacheManager+Medications.swift in Sources */,
 				CC30CC30CC30CC3000000006 /* HeadacheManager+Exposures.swift in Sources */,
 				CC30CC30CC30CC3000000009 /* MedicationEntry+Extensions.swift in Sources */,
@@ -1283,7 +1274,6 @@
 				3B3FFD6E27D58CED00DFACC1 /* Headache_Tracker.xcdatamodeld in Sources */,
 				3B3FFD7727D58D5400DFACC1 /* OutlookView.swift in Sources */,
 				3BE7321927DB2963007C013B /* Sequence+Extensions.swift in Sources */,
-				3B3FFEB427D592A000DFACC1 /* DurationRegressorOutput.swift in Sources */,
 				3B3FFF1827D88ADC00DFACC1 /* DestructiveConfirmationDialog.swift in Sources */,
 				3B10D45727ED825F004B68AA /* Headache+CoreDataClass.swift in Sources */,
 				3B9332F127CF3B5300BACE93 /* OutlookWidget.swift in Sources */,
@@ -1304,7 +1294,6 @@
 				3B3FFF1727D88AD800DFACC1 /* ConfirmationAlert.swift in Sources */,
 				3B3FFEC627D592A000DFACC1 /* Severity+Extensions.swift in Sources */,
 				3B3FFF2827DA8E8100DFACC1 /* ModelInput.swift in Sources */,
-				3B3FFEB027D592A000DFACC1 /* OnsetRegressorOutput.swift in Sources */,
 				3B3FFEAA27D592A000DFACC1 /* Model.swift in Sources */,
 				3B3FFEBE27D592A000DFACC1 /* EnvironmentalInput.swift in Sources */,
 				3B3FFE8E27D592A000DFACC1 /* Constants.swift in Sources */,
@@ -1315,9 +1304,7 @@
 				3B68BE5327C349B9007AAAC6 /* Headache_Tracker_Widget.swift in Sources */,
 				3B3FFEE827D592A000DFACC1 /* Weather.swift in Sources */,
 				3B3FFF1C27D8987600DFACC1 /* Waiter.swift in Sources */,
-				3B3FFEEE27D592A000DFACC1 /* HolisticOutlook.swift in Sources */,
 				3B74F34327F6A9FF00F1BA0A /* UserDefaults+Extensions.swift in Sources */,
-				3B3FFF2927DA8E8400DFACC1 /* PredictionOutput.swift in Sources */,
 				3B68BE6127C34B8E007AAAC6 /* OutlookWidgetContent.swift in Sources */,
 				3B3FFED627D592A000DFACC1 /* Color+Extensions.swift in Sources */,
 				3B3FFEF027D592A000DFACC1 /* Previewing.swift in Sources */,
@@ -1333,8 +1320,6 @@
 				3B3FFED427D592A000DFACC1 /* UUID+Extensions.swift in Sources */,
 				3B3FFE9A27D592A000DFACC1 /* Preferences.swift in Sources */,
 				3B86C6EE27E4310700CCD7A0 /* Location+Extensions.swift in Sources */,
-				3B3FFEB227D592A000DFACC1 /* OutlookClassifierOutput.swift in Sources */,
-				3B3FFEAE27D592A000DFACC1 /* SeverityClassifierOutput.swift in Sources */,
 				3B5817D827F4225000F9E49B /* FilterUnit.swift in Sources */,
 				3B86C6E827E41C5B00CCD7A0 /* HealthData+Extensions.swift in Sources */,
 				3B3FFF2D27DAA89500DFACC1 /* WeatherStatistics.swift in Sources */,
@@ -1349,6 +1334,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CD40CD40CD40CD4000000002 /* Calibration.swift in Sources */,
+				CD40CD40CD40CD4000000005 /* RiskPrediction.swift in Sources */,
+				CD40CD40CD40CD4000000008 /* RiskClassifierOutput.swift in Sources */,
 				CC30CC30CC30CC3000000002 /* HeadacheManager+Medications.swift in Sources */,
 				CC30CC30CC30CC3000000005 /* HeadacheManager+Exposures.swift in Sources */,
 				CC30CC30CC30CC3000000008 /* MedicationEntry+Extensions.swift in Sources */,
@@ -1370,14 +1358,12 @@
 				3B10D45227ED5A77004B68AA /* TypeCard.swift in Sources */,
 				3B3FFEB727D592A000DFACC1 /* ChronologicalInput.swift in Sources */,
 				3BAAA69727CCA7A200C0DDC4 /* TouchLocatingView.swift in Sources */,
-				3B3FFF2427DA8C5E00DFACC1 /* PredictionOutput.swift in Sources */,
 				3B86C6E327E40B5B00CCD7A0 /* MeasurementSystem.swift in Sources */,
 				3B1C7DB427D2005E000B3A99 /* StatusCard.swift in Sources */,
 				3B93330227CF51C600BACE93 /* AppDelegate.swift in Sources */,
 				3B29F73827E98AE100C8772C /* NotesCard.swift in Sources */,
 				3B3FFEAB27D592A000DFACC1 /* Predictor.swift in Sources */,
 				3B68BDFB27BE0F00007AAAC6 /* BarGraph.swift in Sources */,
-				3B3FFEAD27D592A000DFACC1 /* SeverityClassifierOutput.swift in Sources */,
 				3B20EA2227EAA29F00B9800F /* TagsView.swift in Sources */,
 				3BA933B127DFA5D000BAD5A4 /* AddHeadacheView.swift in Sources */,
 				3B9332EA27CF1E8400BACE93 /* FeedbackView.swift in Sources */,
@@ -1385,7 +1371,6 @@
 				3B09191227BCCE1C00844F6C /* OnsetCard.swift in Sources */,
 				3B3FFE9327D592A000DFACC1 /* HeadacheStatistics.swift in Sources */,
 				3B09191427BCCF9500844F6C /* Card.swift in Sources */,
-				3B3FFEAF27D592A000DFACC1 /* OnsetRegressorOutput.swift in Sources */,
 				3B20EA1B27EA98B900B9800F /* EditTagsView.swift in Sources */,
 				3B051A4E27B0E9060017131D /* HeadachesView.swift in Sources */,
 				3B09192327BD91F400844F6C /* SectionTitleView.swift in Sources */,
@@ -1414,7 +1399,6 @@
 				3B3FFEE927D592A000DFACC1 /* MotionManager.swift in Sources */,
 				3BE7321827DB2963007C013B /* Sequence+Extensions.swift in Sources */,
 				3B20EA1327EA770700B9800F /* TagsCard.swift in Sources */,
-				3B3FFEED27D592A000DFACC1 /* HolisticOutlook.swift in Sources */,
 				3B29F73627E983F800C8772C /* ListOptionsMenu.swift in Sources */,
 				3B3FFEF527D592A000DFACC1 /* Logger.swift in Sources */,
 				3B3FFEF127D592A000DFACC1 /* Formatters.swift in Sources */,
@@ -1454,10 +1438,8 @@
 				3B3FFEA527D592A000DFACC1 /* HealthKitData.swift in Sources */,
 				3B3FFEC127D592A000DFACC1 /* HKCategoryValueSeverity+Extensions.swift in Sources */,
 				3B3FFED527D592A000DFACC1 /* Color+Extensions.swift in Sources */,
-				3B3FFEB127D592A000DFACC1 /* OutlookClassifierOutput.swift in Sources */,
 				3BBB0C7127F94DE9008FAAE4 /* DocumentPicker.swift in Sources */,
 				3B3FFEFE27D5994700DFACC1 /* Refresher.swift in Sources */,
-				3B3FFEB327D592A000DFACC1 /* DurationRegressorOutput.swift in Sources */,
 				3B3EAAF027E801BA00F5D8B4 /* MapView.swift in Sources */,
 				3B3FFEA327D592A000DFACC1 /* HeadacheManager.swift in Sources */,
 				3B3FFF0827D5A22200DFACC1 /* Previewing+Extensions.swift in Sources */,

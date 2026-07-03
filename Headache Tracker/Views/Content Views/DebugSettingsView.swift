@@ -64,7 +64,7 @@ struct DebugSettingsView: View {
   private var severeTrainingData: FetchedResults<TrainingData>
   
   /// The apps current model evaluation calculated on appear.
-  @State var evaluation: (Double, Double, Int) = (0.0, 0.0, 0)
+  @State var evaluation: (accuracy: Double, brier: Double?, count: Int) = (0.0, nil, 0)
   
   @State var exportURL: URL? = nil
   @State var showingExportDocument: Bool = false
@@ -92,38 +92,36 @@ struct DebugSettingsView: View {
       }
       
       Section {
-        SubtitleCell(title: "Outlook Classifier", subtitle: "\(predictor.prediction?.outlookClassifierOutput.prediction.rawValue ?? "")")
-        SubtitleCell(title: "Outlook Probability", subtitle: "\(predictor.prediction?.outlookClassifierOutput.probability?.percentFormat() ?? "N/A")")
-        SubtitleCell(title: "Severity Classifier", subtitle: "\(predictor.prediction?.severityClassifierOutput.prediction.title ?? "")")
-        SubtitleCell(title: "Severity Probability", subtitle: "\(predictor.prediction?.severityClassifierOutput.probability?.percentFormat() ?? "N/A")")
-        SubtitleCell(title: "Onset Regressor", subtitle: "\(predictor.prediction?.onsetRegressorOutput.prediction.formattedNonRelative() ?? "0.0")")
-        SubtitleCell(title: "Duration Regressor", subtitle: "\(predictor.prediction?.durationRegressorOutput.prediction ?? 0.0)")
+        SubtitleCell(title: "Risk Probability", subtitle: predictor.prediction.map({ String(format: "%0.1f%%", $0.probability * 100.0) }) ?? "N/A")
+        SubtitleCell(title: "Risk Tier", subtitle: predictor.prediction?.tier.title ?? "N/A")
+        SubtitleCell(title: "Top Factors", subtitle: (predictor.prediction?.topFactors.map({ $0.mlFeatureName }).joined(separator: ", ")).flatMap({ $0.isEmpty ? nil : $0 }) ?? "N/A")
       }
       
       Section {
-        SubtitleCell(title: "Outlook Evaluation", subtitle: "\(String(format: "%0.1f%%", evaluation.0 * 100.0))")
-        SubtitleCell(title: "Severity Evaluation", subtitle: "\(String(format: "%0.1f%%", evaluation.1 * 100.0))")
+        SubtitleCell(title: "Forecast Accuracy", subtitle: "\(String(format: "%0.1f%%", evaluation.accuracy * 100.0))")
+        SubtitleCell(title: "Observed Brier", subtitle: evaluation.brier.map({ String(format: "%0.3f", $0) }) ?? "N/A")
         AsyncButton("Reset Evaluation", mode: .afterContent, action: headacheManager.resetEvaluation)
       } footer: {
-        Text("Out of \(evaluation.2) resolved forecasts. Severity is scored only when a headache actually occurred.")
+        Text("Out of \(evaluation.count) resolved forecasts. Brier below 0.25 beats always guessing 50%.")
       }
 
       if let metrics = predictor.metrics {
         Section {
-          if let outlook = metrics.outlook {
-            SubtitleCell(title: "Outlook Validation", subtitle: "\(String(format: "%0.1f%%", outlook.accuracy * 100.0)) (n=\(outlook.validationRowCount))")
+          if let accuracy = metrics.accuracy {
+            SubtitleCell(title: "Validation Accuracy", subtitle: "\(String(format: "%0.1f%%", accuracy * 100.0)) (n=\(metrics.validationRowCount))")
           }
-          if let severity = metrics.severity {
-            SubtitleCell(title: "Severity Validation", subtitle: "\(String(format: "%0.1f%%", severity.accuracy * 100.0)) (n=\(severity.validationRowCount))")
+          if let brier = metrics.brier {
+            SubtitleCell(title: "Validation Brier", subtitle: String(format: "%0.3f", brier))
           }
-          if let onset = metrics.onset {
-            SubtitleCell(title: "Onset RMSE", subtitle: Formatters.formatInterval(onset.rootMeanSquaredError))
-          }
-          if let duration = metrics.duration {
-            SubtitleCell(title: "Duration RMSE", subtitle: Formatters.formatInterval(duration.rootMeanSquaredError))
+          SubtitleCell(title: "Calibrated", subtitle: metrics.isCalibrated ? "Yes" : "No (validation slice too small)")
+
+          ForEach(metrics.calibrationBuckets, id: \.lowerBound) { bucket in
+            SubtitleCell(
+              title: String(format: "Bucket %0.0f%%+", bucket.lowerBound * 100.0),
+              subtitle: String(format: "predicted %0.0f%%, observed %0.0f%% (n=%d)", bucket.meanPredicted * 100.0, bucket.observedRate * 100.0, bucket.count))
           }
         } footer: {
-          Text("Measured on a held-out validation slice the models never trained on (trained \(metrics.trainedAt.formattedNonRelative())).")
+          Text("Measured on a held-out validation slice the model never trained on (trained \(metrics.trainedAt.formattedNonRelative())).")
         }
       }
       

@@ -7,52 +7,34 @@
 
 import Foundation
 
-/// Validation metrics for the trained models, computed on a chronologically
-/// held-out slice that the models never trained on.
+/// Validation metrics for the risk model, computed on a chronologically
+/// held-out slice the model never trained on.
 struct ModelMetrics: Codable {
 
-  /// Metrics for a classifier.
-  struct ClassifierMetrics: Codable {
-
-    /// Accuracy on the held-out validation rows.
-    let accuracy: Double
-
-    /// The number of rows trained on (after balancing).
-    let trainingRowCount: Int
-
-    /// The number of held-out validation rows.
-    let validationRowCount: Int
-  }
-
-  /// Metrics for a regressor.
-  struct RegressorMetrics: Codable {
-
-    /// Root-mean-squared error on the held-out validation rows, in seconds.
-    let rootMeanSquaredError: Double
-
-    /// The largest error on the held-out validation rows, in seconds.
-    let maximumError: Double
-
-    /// The number of rows trained on.
-    let trainingRowCount: Int
-
-    /// The number of held-out validation rows.
-    let validationRowCount: Int
-  }
-
-  /// When the models were trained.
+  /// When the model was trained.
   let trainedAt: Date
 
-  /// The outlook classifier's metrics, if a validation slice existed.
-  let outlook: ClassifierMetrics?
+  /// Accuracy on the held-out validation rows (thresholded at 0.5).
+  let accuracy: Double?
 
-  /// The severity classifier's metrics, if a validation slice existed.
-  let severity: ClassifierMetrics?
+  /// The Brier score of the calibrated probabilities on the validation
+  /// rows: lower is better; 0.25 is the score of always predicting 50%.
+  let brier: Double?
 
-  /// The onset regressor's metrics, if a validation slice existed.
-  let onset: RegressorMetrics?
+  /// Calibration buckets: predicted vs. observed rates by probability range.
+  let calibrationBuckets: [PlattCalibration.Bucket]
 
-  /// The duration regressor's metrics, if a validation slice existed.
-  let duration: RegressorMetrics?
+  /// The number of rows trained on (after balancing).
+  let trainingRowCount: Int
+
+  /// The number of held-out validation rows.
+  let validationRowCount: Int
+
+  /// The number of positive rows in the validation slice.
+  let positiveCount: Int
+
+  /// Whether a real calibration was fit; false means the validation slice
+  /// was too small and probabilities pass through uncalibrated.
+  let isCalibrated: Bool
 
 }

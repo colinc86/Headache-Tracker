@@ -14,8 +14,8 @@ import CreateML
 ///
 /// Inputs are split chronologically (the newest 20% held out) so validation
 /// measures real forward performance; a random split would leak temporally
-/// autocorrelated samples across the boundary. Minority classes are balanced
-/// by capped duplication on the training slice only.
+/// autocorrelated samples across the boundary. The minority class is
+/// balanced by capped duplication on the training slice only.
 struct TrainingInput {
 
   /// The fraction of inputs (oldest first) used for training.
@@ -24,26 +24,26 @@ struct TrainingInput {
   /// The minimum inputs required before a validation slice is held out.
   static let minimumCountForValidation = 25
 
-  /// The maximum multiple a minority class may be duplicated to.
+  /// The maximum multiple the minority class may be duplicated to.
   static let maximumOversampleMultiple = 3
 
-  let outlookTable: MLDataTable
-  let severityTable: MLDataTable
-  let onsetTable: MLDataTable
-  let durationTable: MLDataTable
+  /// The training table for the binary risk classifier.
+  let riskTable: MLDataTable
 
-  let outlookValidationTable: MLDataTable?
-  let severityValidationTable: MLDataTable?
-  let onsetValidationTable: MLDataTable?
-  let durationValidationTable: MLDataTable?
+  /// The held-out validation table, when enough rows existed.
+  let riskValidationTable: MLDataTable?
 
-  /// The medians used to impute missing values, persisted beside the models
+  /// The held-out validation inputs, for per-row calibration scoring
+  /// through the compiled model.
+  let riskValidationInputs: [ModelInput]
+
+  /// The medians used to impute missing values, persisted beside the model
   /// so inference imputes identically.
   let medians: FeatureMedians
 
-  /// Whether the input's data tables are valid.
+  /// Whether the input's data table is valid.
   var isValid: Bool {
-    return outlookTable.isValid && severityTable.isValid && onsetTable.isValid && durationTable.isValid
+    return riskTable.isValid
   }
 
   // MARK: Initializers
@@ -51,15 +51,19 @@ struct TrainingInput {
   /// Initializes new training input with an array of traning data.
   ///
   /// The training data's volatile labels must already be derived (see
-  /// `deriveLabels(from:)`).
+  /// `deriveLabels(from:)`). In-headache rows are excluded — forecasting
+  /// risk during a headache is a different regime and would leak.
   ///
   /// - Parameter trainingData: The training data.
   init(trainingData: [TrainingData]) throws {
     logDebug("Creating training data.")
 
-    // Convert the training data to model inputs, oldest first.
+    // Convert to model inputs (oldest first), dropping in-headache rows.
     logDebug("Converting the training data to model inputs.")
-    let inputs = trainingData.map({ $0.modelInput }).sorted(by: { $0.date < $1.date })
+    let inputs = trainingData
+      .map({ $0.modelInput })
+      .filter({ $0.outlook != .headache })
+      .sorted(by: { $0.date < $1.date })
 
     // Split chronologically, compute medians from the training slice only,
     // and impute both slices with them.
@@ -69,98 +73,38 @@ struct TrainingInput {
     let validationInputs = inputs[splitIndex...].map(medians.imputing)
 
     logDebug("Getting the data tables (\(trainingInputs.count) training, \(validationInputs.count) validation).")
-    outlookTable = try MLDataTable(inputs: TrainingInput.balanceInputs(trainingInputs, forModelType: .outlookClassifier), forModelType: .outlookClassifier)
-    severityTable = try MLDataTable(inputs: TrainingInput.balanceInputs(trainingInputs, forModelType: .severityClassifier), forModelType: .severityClassifier)
-    onsetTable = try MLDataTable(inputs: TrainingInput.balanceInputs(trainingInputs, forModelType: .onsetRegressor), forModelType: .onsetRegressor)
-    durationTable = try MLDataTable(inputs: TrainingInput.balanceInputs(trainingInputs, forModelType: .durationRegressor), forModelType: .durationRegressor)
-
-    outlookValidationTable = try TrainingInput.validationTable(validationInputs, forModelType: .outlookClassifier)
-    severityValidationTable = try TrainingInput.validationTable(validationInputs, forModelType: .severityClassifier)
-    onsetValidationTable = try TrainingInput.validationTable(validationInputs, forModelType: .onsetRegressor)
-    durationValidationTable = try TrainingInput.validationTable(validationInputs, forModelType: .durationRegressor)
+    riskTable = try MLDataTable(inputs: TrainingInput.balanced(trainingInputs))
+    riskValidationTable = validationInputs.isEmpty ? nil : try MLDataTable(inputs: validationInputs)
+    riskValidationInputs = validationInputs
   }
 
   // MARK: Static methods
 
-  /// Builds a validation table for the model type, or nil when the slice
-  /// has no usable rows.
+  /// Balances the binary classes by duplicating the minority class up to a
+  /// cap — the honest equivalent of class weights, which CreateML boosted
+  /// trees don't expose.
   ///
-  /// - Parameters:
-  ///   - inputs: The (already imputed) validation inputs.
-  ///   - modelType: The model type.
-  /// - Returns: A data table or nil.
-  private static func validationTable(_ inputs: [ModelInput], forModelType modelType: Predictor.ModelType) throws -> MLDataTable? {
-    let filtered = filterInputs(inputs, forModelType: modelType)
-    guard !filtered.isEmpty else {
-      return nil
-    }
-    return try MLDataTable(inputs: filtered, forModelType: modelType)
-  }
+  /// - Parameter inputs: The inputs to balance.
+  /// - Returns: The balanced inputs.
+  static func balanced(_ inputs: [ModelInput]) -> [ModelInput] {
+    logDebug("Balance inputs (\(inputs.count)).")
 
-  /// Filters the inputs to those usable for the model type.
-  ///
-  /// - Parameters:
-  ///   - inputs: The inputs to filter.
-  ///   - modelType: The model type intended to train.
-  /// - Returns: The filtered inputs.
-  private static func filterInputs(_ inputs: [ModelInput], forModelType modelType: Predictor.ModelType) -> [ModelInput] {
-    switch modelType {
-    case .durationRegressor:
-      return inputs.filter({ $0.timeIntervalUntilNextHeadacheEnd != nil })
-    case .onsetRegressor:
-      return inputs.filter({ $0.timeIntervalUntilNextHeadacheStart != nil })
-    case .severityClassifier, .outlookClassifier:
+    let positives = inputs.filter({ $0.outlook == .possibleHeadache })
+    let negatives = inputs.filter({ $0.outlook != .possibleHeadache })
+
+    let (minority, majority) = positives.count <= negatives.count ? (positives, negatives) : (negatives, positives)
+    guard !minority.isEmpty, !majority.isEmpty else {
       return inputs
     }
-  }
 
-  /// Balances the inputs for the given model type.
-  ///
-  /// Classifiers oversample minority classes by duplication up to a cap;
-  /// duplication is the honest equivalent of class weights for CreateML
-  /// boosted trees, which expose no weighting API.
-  ///
-  /// - Parameters:
-  ///   - inputs: The inputs to balance.
-  ///   - modelType: The model type intended to train.
-  /// - Returns: The balanced inputs.
-  static func balanceInputs(_ inputs: [ModelInput], forModelType modelType: Predictor.ModelType) -> [ModelInput] {
-    logDebug("Balance inputs (\(inputs.count)) for model type \(modelType).")
-
-    let filtered = filterInputs(inputs, forModelType: modelType)
-
-    let classOf: (ModelInput) -> String?
-    switch modelType {
-    case .severityClassifier:
-      classOf = { $0.severity.title }
-    case .outlookClassifier:
-      classOf = { $0.outlook.rawValue }
-    case .durationRegressor, .onsetRegressor:
-      return filtered
-    }
-
-    // Group by class and find the majority count.
-    var inputsByClass = [String: [ModelInput]]()
-    for input in filtered {
-      guard let name = classOf(input) else { continue }
-      inputsByClass[name, default: []].append(input)
-    }
-
-    guard let majorityCount = inputsByClass.values.map({ $0.count }).max(), majorityCount > 0 else {
-      return filtered
-    }
-
-    // Duplicate each minority class up to min(majority, cap * original).
-    var balanced = filtered
-    for (_, classInputs) in inputsByClass {
-      let target = min(majorityCount, classInputs.count * Self.maximumOversampleMultiple)
-      var deficit = target - classInputs.count
-      var index = 0
-      while deficit > 0 {
-        balanced.append(classInputs[index % classInputs.count])
-        index += 1
-        deficit -= 1
-      }
+    let target = min(majority.count, minority.count * Self.maximumOversampleMultiple)
+    var balanced = inputs
+    var deficit = target - minority.count
+    var index = 0
+    while deficit > 0 {
+      balanced.append(minority[index % minority.count])
+      index += 1
+      deficit -= 1
     }
 
     return balanced
@@ -176,6 +120,9 @@ struct TrainingInput {
 
   /// The medians used to impute missing values.
   let medians = FeatureMedians()
+
+  /// The held-out validation inputs.
+  let riskValidationInputs = [ModelInput]()
 
   init(trainingData: [TrainingData]) throws {
   }

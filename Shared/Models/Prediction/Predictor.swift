@@ -18,13 +18,6 @@ class Predictor: ObservableObject {
 
   // MARK: Types
 
-  enum ModelType {
-    case durationRegressor
-    case onsetRegressor
-    case outlookClassifier
-    case severityClassifier
-  }
-
   enum PredictorError: DescribableError {
     case unexpectedModelOutput(String)
 
@@ -35,35 +28,29 @@ class Predictor: ObservableObject {
       }
     }
   }
-  
+
   // MARK: Static properties
-  
-  /// The filename to use for the outlook classifier.
-  private static let outlookClassifierFileName = "oc"
-  
-  /// The filename to use for the severity classifier.
-  private static let severityClassifierFileName = "sc"
-  
-  /// The filename to use for the onset regressor.
-  private static let onsetRegressorFileName = "or"
-  
-  /// The filename to use for the duration regressor.
-  private static let durationRegressorFileName = "dr"
-  
+
+  /// The filename to use for the risk classifier.
+  private static let riskClassifierFileName = "rc"
+
+  /// Legacy model filenames from the four-model era, cleaned up on reset.
+  private static let legacyFileNames = ["oc", "sc", "or", "dr"]
+
   // MARK: Public properties
-  
+
   /// Whether or not the predictor is training.
   @Published var training: Bool = false
-  
+
   /// Whether or not the predictor is ready to predict.
   @Published var ready: Bool = false
-  
+
   /// The predictor's latest prediction.
-  @Published var prediction: PredictionOutput?
-  
+  @Published var prediction: RiskPrediction?
+
   /// The model's last updated at date.
   @Published var modelUpdatedAt: Date?
-  
+
   /// The date the models were loaded.
   @Published var modelLoadedAt: Date?
 
@@ -73,33 +60,27 @@ class Predictor: ObservableObject {
 
   // MARK: Private properties
 
+  /// The classifier for predicting headache risk.
+  private var riskClassifier: Model<InputUnion, RiskClassifierOutput>?
+
+  /// The queue to do anything with models on.
+  private var modelQueue = DispatchQueue(label: ApplicationKey(from: "modelQueue"))
+
+  /// The app's current preferences.
+  private var preferences = Preferences()
+
   /// The medians used to impute missing feature values, matching the ones
   /// used at training time.
   private var medians = FeatureMedians()
+
+  /// The probability calibration fit at training time.
+  private var calibration = PlattCalibration.identity
 
   /// The latest permutation feature importances (normalized to [0, 1]).
   ///
   /// Read from arbitrary caller threads and written on the model queue, so
   /// access is lock-guarded.
   private let importances = OSAllocatedUnfairLock(initialState: [String: Double]())
-  
-  /// The classifier for predicting headache outlook.
-  private var outlookClassifier: Model<InputUnion, OutlookClassifierOutput>?
-  
-  /// The classifier for predicting headache severities.
-  private var severityClassifier: Model<InputUnion, SeverityClassifierOutput>?
-  
-  /// The regressor for predicting headache onset.
-  private var onsetRegressor: Model<InputUnion, OnsetRegressorOutput>?
-  
-  /// The regressor for predicting headache duration.
-  private var durationRegressor: Model<InputUnion, DurationRegressorOutput>?
-  
-  /// The queue to do anything with models on.
-  private var modelQueue = DispatchQueue(label: ApplicationKey(from: "modelQueue"))
-  
-  /// The app's current preferences.
-  private var preferences = Preferences()
 
   /// The predictor's training state.
   ///
@@ -118,27 +99,27 @@ class Predictor: ObservableObject {
   private var isTrainingCancelled: Bool {
     return trainingState.withLock { $0.isCancelled }
   }
-  
+
   /// The metadata to save with a model, versioned by training time.
   private func makeMetadata() -> MLModelMetadata {
     return MLModelMetadata(
       author: "Colin Campbell",
-      shortDescription: "Predicts the onset, severity and progression of headaches.",
+      shortDescription: "Predicts the risk of a headache within the next 24 hours.",
       version: Date().description)
   }
-  
+
   /// The prediction observer.
   private var predictionObserver: NSObjectProtocol?
-  
+
   // MARK: Initializers
-  
+
   init() {
     predictionObserver = Preferences.addPredictionObserver(using: predictionNotification)
     updateCurrentPredictionFromDefaults()
-    
+
     do {
       logDebug("Getting creation date.")
-      if let creationDate = try dateOfFile(at: compiledModelURL(with: Predictor.outlookClassifierFileName)) {
+      if let creationDate = try dateOfFile(at: compiledModelURL(with: Predictor.riskClassifierFileName)) {
         logDebug("Got creation date: \(creationDate.description)")
         DispatchQueue.main.async { self.modelUpdatedAt = creationDate }
       }
@@ -147,19 +128,19 @@ class Predictor: ObservableObject {
       logError("Error getting creation date: \(error)")
     }
   }
-  
+
   deinit {
     if let predictionObserver = predictionObserver {
       Preferences.removePredictionObserver(predictionObserver)
     }
   }
-  
+
 }
 
 // MARK: Public methods
 
 extension Predictor {
-  
+
   /// Loads the predictor's models.
   func load() async throws {
     return try await withCheckedThrowingContinuation({ [weak self] (continuation: CheckedContinuation<Void, Error>) in
@@ -167,7 +148,7 @@ extension Predictor {
         continuation.resume()
         return
       }
-      
+
       self.load({ error in
         if let error = error {
           continuation.resume(throwing: error)
@@ -178,7 +159,7 @@ extension Predictor {
       })
     })
   }
-  
+
   /// Trains the predictor's classifiers.
   ///
   /// - Parameter input: The training input.
@@ -188,7 +169,7 @@ extension Predictor {
         continuation.resume()
         return
       }
-      
+
       self.train(input) { error in
         if let error = error {
           continuation.resume(throwing: error)
@@ -199,7 +180,7 @@ extension Predictor {
       }
     })
   }
-  
+
   /// Cancels the current training session.
   func cancelTraining() {
     logDebug("Cancel training.")
@@ -208,17 +189,16 @@ extension Predictor {
 
   /// Resets the predictor and its classifiers.
   func reset() {
-    // Delete the compiled models and their sidecar files
-    let urls = [
-      compiledModelURL(with: Predictor.outlookClassifierFileName),
-      compiledModelURL(with: Predictor.severityClassifierFileName),
-      compiledModelURL(with: Predictor.onsetRegressorFileName),
-      compiledModelURL(with: Predictor.durationRegressorFileName),
+    // Delete the compiled model, its sidecar files, and any legacy models
+    var urls = [
+      compiledModelURL(with: Predictor.riskClassifierFileName),
       mediansURL(),
       metricsURL(),
       importancesURL(),
+      calibrationURL(),
       schemaVersionURL()
     ]
+    urls.append(contentsOf: Predictor.legacyFileNames.map({ compiledModelURL(with: $0) }))
 
     for url in urls {
       guard FileManager.default.fileExists(atPath: url.path) else {
@@ -233,13 +213,11 @@ extension Predictor {
       }
     }
 
-    // Unload the models on the model queue
+    // Unload the model on the model queue
     modelQueue.async { [weak self] in
-      self?.outlookClassifier = nil
-      self?.severityClassifier = nil
-      self?.onsetRegressor = nil
-      self?.durationRegressor = nil
+      self?.riskClassifier = nil
       self?.medians = FeatureMedians()
+      self?.calibration = .identity
       self?.importances.withLock { $0 = [:] }
     }
 
@@ -251,20 +229,20 @@ extension Predictor {
       self.metrics = nil
     }
   }
-  
+
   /// Whether the predictor needs to load (or reload) its models.
   func needsLoading() throws -> Bool {
-    guard let lastTrainingDate = try dateOfFile(at: compiledModelURL(with: Predictor.outlookClassifierFileName)) else {
+    guard let lastTrainingDate = try dateOfFile(at: compiledModelURL(with: Predictor.riskClassifierFileName)) else {
       return false
     }
-    
+
     guard let modelLoadedAt = modelLoadedAt else {
       return true
     }
 
     return lastTrainingDate > modelLoadedAt
   }
-  
+
   /// Makes a prediction.
   ///
   /// - Parameters:
@@ -272,7 +250,7 @@ extension Predictor {
   ///   - inWidget: Whether the method is being called from a widget.
   /// - Returns: The predictor's output.
   @discardableResult
-  func predict(_ input: ModelInput, inWidget: Bool) async throws -> PredictionOutput {
+  func predict(_ input: ModelInput, inWidget: Bool) async throws -> RiskPrediction {
     if try needsLoading() {
       try await load()
     }
@@ -284,48 +262,23 @@ extension Predictor {
       }
 
       self.modelQueue.async {
-        guard let outlookClassifier = self.outlookClassifier,
-              let severityClassifier = self.severityClassifier,
-              let onsetRegressor = self.onsetRegressor,
-              let durationRegressor = self.durationRegressor else {
-                continuation.resume(returning: .empty)
-                return
-              }
+        guard let riskClassifier = self.riskClassifier else {
+          continuation.resume(returning: .empty)
+          return
+        }
 
         do {
           // Impute missing values with the training-time medians so the
-          // models see the same feature distribution they trained on.
+          // model sees the same feature distribution it trained on.
           let fullInput = self.medians.imputing(input).fullInput()
-          let outlookPrediction = try outlookClassifier.prediction(input: fullInput)
-          let severityPrediction = try severityClassifier.prediction(input: fullInput)
-          let onsetPrediction = try onsetRegressor.prediction(input: fullInput)
-          let durationPrediction = try durationRegressor.prediction(input: fullInput)
+          let riskPrediction = try riskClassifier.prediction(input: fullInput)
+          let probability = self.calibration.apply(riskPrediction.positiveProbability)
 
-          guard let severity = Headache.Severity(title: severityPrediction.Severity) else {
-            throw PredictorError.unexpectedModelOutput(severityPrediction.Severity)
-          }
-
-          let prediction = PredictionOutput(
+          let prediction = RiskPrediction(
             input: input,
-
-            outlookClassifierOutput: PredictionOutput.PredictionStatistic(
-              prediction: Outlook(rawValue: outlookPrediction.Outlook) ?? .noHeadache,
-              probability: outlookPrediction.OutlookProbability[outlookPrediction.Outlook]),
-
-            severityClassifierOutput: PredictionOutput.PredictionStatistic(
-              prediction: severity,
-              probability: severityPrediction.SeverityProbability[severityPrediction.Severity]),
-
-            onsetRegressorOutput: PredictionOutput.PredictionStatistic<Date>(
-              prediction: Date().addingTimeInterval(onsetPrediction.Onset),
-              probability: nil),
-
-            // The duration model's target is time remaining until the
-            // current headache ends, not total duration.
-            durationRegressorOutput: PredictionOutput.PredictionStatistic<TimeInterval>(
-              prediction: durationPrediction.Duration,
-              probability: nil)
-          )
+            probability: probability,
+            topFactors: self.makeTopFactors(),
+            computedAt: Date())
 
           // Update the prediction value
           DispatchQueue.main.async {
@@ -333,7 +286,7 @@ extension Predictor {
           }
 
           // Save this prediction for the widget
-          self.preferences.shared.setCurrentPrediction(prediction, inWidget: inWidget)
+          self.preferences.shared.setCurrentRisk(prediction, inWidget: inWidget)
 
           continuation.resume(returning: prediction)
         }
@@ -360,25 +313,52 @@ extension Predictor {
 }
 
 extension Predictor {
-  
+
   /// Notifies the predictor that the shared prediction was changed.
   private func predictionNotification(_ notification: Notification) {
     updateCurrentPredictionFromDefaults()
   }
-  
+
   /// Updates the current prediction from the shared user defaults.
   private func updateCurrentPredictionFromDefaults() {
     DispatchQueue.main.async { [weak self] in
-      self?.prediction = self?.preferences.shared.currentPrediction
+      self?.prediction = self?.preferences.shared.currentRisk
     }
   }
-  
+
+  /// The model's top contributing factors, joined to the cached correlation
+  /// insights for direction and description.
+  ///
+  /// - Returns: The strongest factors, at most three.
+  private func makeTopFactors() -> [RiskPrediction.RiskFactor] {
+    let report = InsightsStore.shared.load()
+    let ranked = featureImportances().sorted(by: { $0.value > $1.value }).prefix(3)
+
+    return ranked.compactMap { name, importance -> RiskPrediction.RiskFactor? in
+      guard importance > 0 else {
+        return nil
+      }
+
+      let feature = CorrelationFeature.allCases.first(where: { $0.mlFeatureName == name })
+      let insight = report?.insights.first(where: { $0.target == .occurrence && $0.feature.mlFeatureName == name })
+
+      let direction: RiskPrediction.RiskFactor.Direction = (insight?.higherIsAssociated ?? true) ? .elevated : .reduced
+      let description = insight?.directionDescription ?? feature?.title ?? name
+
+      return RiskPrediction.RiskFactor(
+        feature: feature,
+        mlFeatureName: name,
+        direction: direction,
+        contributionDescription: description)
+    }
+  }
+
   /// Loads the predictor's models.
   ///
   /// - Parameter completion: Called after the models have been loaded.
   private func load(_ completion: @escaping (Error?) -> Void) {
     logDebug("Load models.")
-    
+
     modelQueue.async { [weak self] in
       guard let self = self else {
         completion(nil)
@@ -397,26 +377,16 @@ extension Predictor {
       }
 
       do {
-        logDebug("Loading outlook classifier.")
-        let outlookClassifierModelURL = self.compiledModelURL(with: Predictor.outlookClassifierFileName)
-        self.outlookClassifier = try Model<InputUnion, OutlookClassifierOutput>(contentsOf: outlookClassifierModelURL)
-        
-        logDebug("Loading severity classifier.")
-        let severityClassifierModelURL = self.compiledModelURL(with: Predictor.severityClassifierFileName)
-        self.severityClassifier = try Model<InputUnion, SeverityClassifierOutput>(contentsOf: severityClassifierModelURL)
-        
-        logDebug("Loading onset regressor.")
-        let onsetRegressorModelURL = self.compiledModelURL(with: Predictor.onsetRegressorFileName)
-        self.onsetRegressor = try Model<InputUnion, OnsetRegressorOutput>(contentsOf: onsetRegressorModelURL)
-        
-        logDebug("Loading duration regressor.")
-        let durationRegressorModelURL = self.compiledModelURL(with: Predictor.durationRegressorFileName)
-        self.durationRegressor = try Model<InputUnion, DurationRegressorOutput>(contentsOf: durationRegressorModelURL)
+        logDebug("Loading risk classifier.")
+        let riskClassifierModelURL = self.compiledModelURL(with: Predictor.riskClassifierFileName)
+        self.riskClassifier = try Model<InputUnion, RiskClassifierOutput>(contentsOf: riskClassifierModelURL)
 
-        // Load the training-time medians, metrics, and importances.
+        // Load the training-time medians, calibration, metrics, and
+        // importances.
         if let data = try? Data(contentsOf: self.mediansURL()), let medians = try? JSONDecoder().decode(FeatureMedians.self, from: data) {
           self.medians = medians
         }
+        self.calibration = (try? JSONDecoder().decode(PlattCalibration.self, from: Data(contentsOf: self.calibrationURL()))) ?? .identity
         let loadedImportances = (try? JSONDecoder().decode([String: Double].self, from: Data(contentsOf: self.importancesURL()))) ?? [:]
         self.importances.withLock { $0 = loadedImportances }
         let metrics = try? JSONDecoder().decode(ModelMetrics.self, from: Data(contentsOf: self.metricsURL()))
@@ -433,7 +403,7 @@ extension Predictor {
       }
     }
   }
-  
+
   /// Trains the predictor's classifiers.
   ///
   /// - Parameters:
@@ -471,8 +441,8 @@ extension Predictor {
       DispatchQueue.main.async { self?.training = false }
       return
     }
-    
-    // Train the models
+
+    // Train the model
     modelQueue.async { [weak self] in
       do {
         guard let self = self else {
@@ -480,103 +450,67 @@ extension Predictor {
           return
         }
 
-        var outlookMetrics: ModelMetrics.ClassifierMetrics?
-        var severityMetrics: ModelMetrics.ClassifierMetrics?
-        var onsetMetrics: ModelMetrics.RegressorMetrics?
-        var durationMetrics: ModelMetrics.RegressorMetrics?
+        guard !self.isTrainingCancelled else {
+          finished(nil)
+          return
+        }
+
+        logDebug("Training risk classifier.")
+        let classifier = try MLBoostedTreeClassifier(trainingData: input.riskTable, targetColumn: RiskClassifierOutput.FeatureName.risk)
+
+        // Permutation importances on the held-out table.
         var featureImportances = [String: Double]()
-
-        // Train the outlook classifier
-        if !self.isTrainingCancelled {
-          logDebug("Training outlook classifier.")
-          let classifier = try MLBoostedTreeClassifier(trainingData: input.outlookTable, targetColumn: OutlookClassifierOutput.FeatureName.outlook)
-
-          if let validation = input.outlookValidationTable {
-            let evaluation = classifier.evaluation(on: validation)
-            outlookMetrics = ModelMetrics.ClassifierMetrics(
-              accuracy: 1.0 - evaluation.classificationError,
-              trainingRowCount: input.outlookTable.rows.count,
-              validationRowCount: validation.rows.count)
-            self.mergeImportances(
-              into: &featureImportances,
-              from: self.permutationImportances(of: classifier, on: validation, targetColumn: OutlookClassifierOutput.FeatureName.outlook, baselineError: evaluation.classificationError))
-          }
-
-          try self.writeModel(classifier, toFileWithName: Predictor.outlookClassifierFileName)
+        if let validation = input.riskValidationTable {
+          let evaluation = classifier.evaluation(on: validation)
+          featureImportances = Predictor.normalizedImportances(
+            self.permutationImportances(of: classifier, on: validation, targetColumn: RiskClassifierOutput.FeatureName.risk, baselineError: evaluation.classificationError))
         }
 
-        // Train the severity classifier
-        if !self.isTrainingCancelled {
-          logDebug("Training severity classifier.")
-          let classifier = try MLBoostedTreeClassifier(trainingData: input.severityTable, targetColumn: SeverityClassifierOutput.FeatureName.severity)
+        // Write and compile the model so validation rows can be scored
+        // per-row (CreateML exposes no per-row probabilities at training
+        // time), then fit the calibration on the raw scores.
+        try self.writeModel(classifier, toFileWithName: Predictor.riskClassifierFileName)
 
-          if let validation = input.severityValidationTable {
-            let evaluation = classifier.evaluation(on: validation)
-            severityMetrics = ModelMetrics.ClassifierMetrics(
-              accuracy: 1.0 - evaluation.classificationError,
-              trainingRowCount: input.severityTable.rows.count,
-              validationRowCount: validation.rows.count)
-            self.mergeImportances(
-              into: &featureImportances,
-              from: self.permutationImportances(of: classifier, on: validation, targetColumn: SeverityClassifierOutput.FeatureName.severity, baselineError: evaluation.classificationError))
-          }
-
-          try self.writeModel(classifier, toFileWithName: Predictor.severityClassifierFileName)
+        let compiled = try Model<InputUnion, RiskClassifierOutput>(contentsOf: self.compiledModelURL(with: Predictor.riskClassifierFileName))
+        var rawScores = [Double]()
+        var outcomes = [Bool]()
+        for validationInput in input.riskValidationInputs {
+          let output = try compiled.prediction(input: validationInput.fullInput())
+          rawScores.append(output.positiveProbability)
+          outcomes.append(validationInput.outlook == .possibleHeadache)
         }
 
-        // Train the onset regressor
-        if !self.isTrainingCancelled {
-          logDebug("Training onset regressor.")
-          let regressor = try MLBoostedTreeRegressor(trainingData: input.onsetTable, targetColumn: OnsetRegressorOutput.FeatureName.onset)
+        let fitted = PlattCalibration.fit(scores: rawScores, outcomes: outcomes)
+        let calibration = fitted ?? .identity
+        let calibrated = rawScores.map(calibration.apply)
 
-          if let validation = input.onsetValidationTable {
-            let evaluation = regressor.evaluation(on: validation)
-            onsetMetrics = ModelMetrics.RegressorMetrics(
-              rootMeanSquaredError: evaluation.rootMeanSquaredError,
-              maximumError: evaluation.maximumError,
-              trainingRowCount: input.onsetTable.rows.count,
-              validationRowCount: validation.rows.count)
-          }
-
-          try self.writeModel(regressor, toFileWithName: Predictor.onsetRegressorFileName)
+        var accuracy: Double?
+        if !outcomes.isEmpty {
+          let correct = zip(calibrated, outcomes).lazy.filter({ ($0.0 >= 0.5) == $0.1 }).count
+          accuracy = Double(correct) / Double(outcomes.count)
         }
 
-        // Train the duration regressor
-        if !self.isTrainingCancelled {
-          logDebug("Training duration regressor.")
-          let regressor = try MLBoostedTreeRegressor(trainingData: input.durationTable, targetColumn: DurationRegressorOutput.FeatureName.duration)
-
-          if let validation = input.durationValidationTable {
-            let evaluation = regressor.evaluation(on: validation)
-            durationMetrics = ModelMetrics.RegressorMetrics(
-              rootMeanSquaredError: evaluation.rootMeanSquaredError,
-              maximumError: evaluation.maximumError,
-              trainingRowCount: input.durationTable.rows.count,
-              validationRowCount: validation.rows.count)
-          }
-
-          try self.writeModel(regressor, toFileWithName: Predictor.durationRegressorFileName)
-        }
+        let metrics = ModelMetrics(
+          trainedAt: Date(),
+          accuracy: accuracy,
+          brier: PlattCalibration.brier(probabilities: calibrated, outcomes: outcomes),
+          calibrationBuckets: PlattCalibration.buckets(probabilities: calibrated, outcomes: outcomes),
+          trainingRowCount: input.riskTable.rows.count,
+          validationRowCount: outcomes.count,
+          positiveCount: outcomes.lazy.filter({ $0 }).count,
+          isCalibrated: fitted != nil)
 
         if !self.isTrainingCancelled {
-          // Persist the medians, metrics, importances, and feature schema
-          // version beside the models. Normalization happens once, after
-          // both models' raw accuracy drops have been merged.
-          let metrics = ModelMetrics(
-            trainedAt: Date(),
-            outlook: outlookMetrics,
-            severity: severityMetrics,
-            onset: onsetMetrics,
-            duration: durationMetrics)
-
+          // Persist the sidecars beside the model.
           try JSONEncoder().encode(input.medians).write(to: self.mediansURL(), options: .atomic)
           try JSONEncoder().encode(metrics).write(to: self.metricsURL(), options: .atomic)
-          try JSONEncoder().encode(Predictor.normalizedImportances(featureImportances)).write(to: self.importancesURL(), options: .atomic)
+          try JSONEncoder().encode(featureImportances).write(to: self.importancesURL(), options: .atomic)
+          try JSONEncoder().encode(calibration).write(to: self.calibrationURL(), options: .atomic)
           try JSONEncoder().encode(Constants.modelSchemaVersion).write(to: self.schemaVersionURL(), options: .atomic)
         }
 
         logDebug("Getting creation date.")
-        if let creationDate = try self.dateOfFile(at: self.compiledModelURL(with: Predictor.outlookClassifierFileName)) {
+        if let creationDate = try self.dateOfFile(at: self.compiledModelURL(with: Predictor.riskClassifierFileName)) {
           logDebug("Got creation date: \(creationDate.description)")
           DispatchQueue.main.async { self.modelUpdatedAt = creationDate }
         }
@@ -633,17 +567,6 @@ extension Predictor {
     return importances
   }
 
-  /// Merges per-model raw importances into the combined dictionary, keeping
-  /// the larger value per feature. Values stay in raw accuracy-drop units;
-  /// normalize once with `normalizedImportances(_:)` after all merges, so
-  /// one model's normalized values are never compared against another's raw
-  /// deltas.
-  private func mergeImportances(into combined: inout [String: Double], from importances: [String: Double]) {
-    for (feature, value) in importances {
-      combined[feature] = max(combined[feature] ?? 0.0, value)
-    }
-  }
-
   /// Normalizes importances to [0, 1] by the maximum value.
   private static func normalizedImportances(_ importances: [String: Double]) -> [String: Double] {
     guard let maximum = importances.values.max(), maximum > 0.0 else {
@@ -651,7 +574,7 @@ extension Predictor {
     }
     return importances.mapValues({ $0 / maximum })
   }
-  
+
   /// Writes the model to the file with the given model name.
   ///
   /// - Parameters:
@@ -661,18 +584,18 @@ extension Predictor {
     // Write the trained model to file
     let modelURL = modelURL(with: fileName)
     try model.write(to: modelURL, metadata: makeMetadata())
-    
+
     // Compile the model
     let newCompiledModelURL = try MLModel.compileModel(at: modelURL)
-    
+
     // Replace the old compiled model with the new one
     let compiledModelURL = compiledModelURL(with: fileName)
     _ = try FileManager.default.replaceItemAt(compiledModelURL, withItemAt: newCompiledModelURL)
-    
+
     // Remove the pre-compiled model
     try FileManager.default.removeItem(at: modelURL)
   }
-  
+
   /// The date of the file with the given url.
   ///
   /// - Parameter url: The url of the file.
@@ -685,7 +608,7 @@ extension Predictor {
     let attributes = try FileManager.default.attributesOfItem(atPath: url.path)
     return attributes[.modificationDate] as? Date ?? attributes[.creationDate] as? Date
   }
-  
+
   /// The URL of a model with the given name.
   ///
   /// - Parameter name: The name of the model.
@@ -693,7 +616,7 @@ extension Predictor {
   private func modelURL(with name: String) -> URL {
     return modelsDirectory().appendingPathComponent("\(name).mlmodel")
   }
-  
+
   /// The URL of a compiled model with the given name.
   ///
   /// - Parameter name: The name of the compiled model.
@@ -717,11 +640,16 @@ extension Predictor {
     return modelsDirectory().appendingPathComponent("importances.json")
   }
 
+  /// The URL of the persisted probability calibration.
+  private func calibrationURL() -> URL {
+    return modelsDirectory().appendingPathComponent("calibration.json")
+  }
+
   /// The URL of the persisted feature schema version.
   private func schemaVersionURL() -> URL {
     return modelsDirectory().appendingPathComponent("schemaVersion.json")
   }
-  
+
   /// The predictor's models directory.
   ///
   /// - Returns: A URL.
@@ -729,6 +657,6 @@ extension Predictor {
     let fileContainerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: Constants.appGroupIdentifier) ?? FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
     return fileContainerURL.appendingPathComponent("models")
   }
-  
+
 }
 #endif

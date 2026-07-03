@@ -702,6 +702,13 @@ extension HeadacheManager {
       return headache?.severitiesArray.last?.identifier
     }
   }
+
+  /// The start time of the current headache, if one is in progress.
+  func currentHeadacheStart() async throws -> Date? {
+    return try await currentHeadache { headache, _ in
+      return headache?.startTime
+    }
+  }
   
 }
 
@@ -939,9 +946,10 @@ extension HeadacheManager {
       let episodes = try HeadacheManager.headacheEpisodes(in: context)
       trainingData.deriveLabels(from: episodes)
 
-      let trimmedTrainingData = HeadacheManager.trimmedTrainingData(trainingData)
-      logDebug("Training classifiers with \(trimmedTrainingData.count) data...")
-      return try TrainingInput(trainingData: trimmedTrainingData)
+      // Balancing happens inside TrainingInput on the binary risk label;
+      // trimming by severity here would discard possible-headache positives.
+      logDebug("Training classifiers with \(trainingData.count) data...")
+      return try TrainingInput(trainingData: trainingData)
     }
 
     try await predictor.train(input)
@@ -965,29 +973,6 @@ extension HeadacheManager {
     return try context.fetch(request).compactMap({ $0.episode })
   }
 
-  /// Balances the ratio of not-present training data to headache training data.
-  ///
-  /// Rows must have derived labels (see `deriveLabels(from:)`); rows without
-  /// them fall back to the severity relationship.
-  ///
-  /// - Parameter trainingData: The training data to trim.
-  /// - Returns: The trimmed training data.
-  static func trimmedTrainingData(_ trainingData: [TrainingData]) -> [TrainingData] {
-    let severityOf: (TrainingData) -> Headache.Severity? = { $0.derivedSeverity ?? $0.severity?.severity }
-
-    var notPresentTrainingData = trainingData.filter({ severityOf($0) == .notPresent || severityOf($0) == nil })
-    var notNotPresentTrainingData = trainingData.filter({ severityOf($0) != .notPresent && severityOf($0) != nil })
-
-    notPresentTrainingData.shuffle()
-    notNotPresentTrainingData.shuffle()
-
-    let maxNotPresent = notNotPresentTrainingData.count < 50 ? notNotPresentTrainingData.count * 2 : notNotPresentTrainingData.count
-    if notPresentTrainingData.count > maxNotPresent {
-      notPresentTrainingData.removeLast(notPresentTrainingData.count - maxNotPresent)
-    }
-
-    return notPresentTrainingData + notNotPresentTrainingData
-  }
   
   /// Records the prediction as a pending evaluation.
   ///
@@ -996,7 +981,7 @@ extension HeadacheManager {
   /// and `resolveEvaluations()` scores it against what actually happened.
   ///
   /// - Parameter prediction: The prediction.
-  private func evaluatePrediction(_ prediction: PredictionOutput) async throws {
+  private func evaluatePrediction(_ prediction: RiskPrediction) async throws {
     // Only forecasts made outside a headache are evaluated; during a
     // headache the outlook trivially matches the present.
     guard try await !hasCurrentHeadache() else {
@@ -1006,8 +991,10 @@ extension HeadacheManager {
     try await DataController.shared.performInBackground(saveOnComplete: true) { context in
       let evaluation = Evaluation(context: context)
       evaluation.timestamp = Date()
-      evaluation.predictedOutlookRaw = prediction.outlookClassifierOutput.prediction.rawValue
-      evaluation.predictedSeverityRaw = Int64(prediction.severityClassifierOutput.prediction.rawValue)
+      evaluation.predictedProbability = prediction.probability
+      evaluation.predictedOutlookRaw = prediction.probability >= RiskPrediction.RiskTier.evaluationPositiveThreshold
+        ? Outlook.possibleHeadache.rawValue
+        : Outlook.noHeadache.rawValue
       evaluation.resolveAfter = Date().addingTimeInterval([TrainingData].possibleHeadacheWindow)
       evaluation.resolved = false
     }
@@ -1037,18 +1024,6 @@ extension HeadacheManager {
         let predictedPositive = evaluation.predictedOutlookRaw == Outlook.headache.rawValue || evaluation.predictedOutlookRaw == Outlook.possibleHeadache.rawValue
 
         evaluation.outlook = predictedPositive == (actualEpisode != nil)
-
-        // Severity is only scorable when a headache actually happened;
-        // trivial not-present matches would inflate the accuracy. The
-        // sentinel excludes unscorable rows from the readout.
-        if let actualEpisode = actualEpisode {
-          let peakSeverity = actualEpisode.severities.map({ $0.severity }).max(by: { $0.orderingValue < $1.orderingValue })
-          evaluation.severity = evaluation.predictedSeverityRaw == Int64(peakSeverity?.rawValue ?? -1)
-        }
-        else {
-          evaluation.predictedSeverityRaw = -1
-        }
-
         evaluation.resolved = true
       }
 
@@ -1056,34 +1031,40 @@ extension HeadacheManager {
     }
   }
 
-  /// Calculates the current model evaluation metrics for the outlook
-  /// and severity predictions, over resolved evaluations only.
+  /// Calculates the observed forecast metrics over resolved evaluations.
   ///
-  /// - Returns: A pair of evaluation metrics and a count (outlook, severity, count).
-  func evaluation() async throws -> (Double, Double, Int) {
+  /// - Returns: The accuracy, the Brier score (nil when no probabilities
+  ///   were recorded), and the resolved evaluation count.
+  func evaluation() async throws -> (accuracy: Double, brier: Double?, count: Int) {
     return try await DataController.shared.performInBackground { context in
       let request = Evaluation.fetchRequest()
       request.predicate = NSPredicate(format: "resolved == YES")
       let evaluations = try context.fetch(request)
 
       guard evaluations.count > 0 else {
-        return (0.0, 0.0, 0)
+        return (0.0, nil, 0)
       }
 
-      var outlookSuccess = 0
-      var severitySuccess = 0
-      var severityCount = 0
+      var successCount = 0
+      var probabilities = [Double]()
+      var outcomes = [Bool]()
+
       for evaluation in evaluations {
-        outlookSuccess += evaluation.outlook ? 1 : 0
-        if evaluation.predictedSeverityRaw >= 0 {
-          severityCount += 1
-          severitySuccess += evaluation.severity ? 1 : 0
+        successCount += evaluation.outlook ? 1 : 0
+
+        // The recorded probability plus whether the forecast was correct
+        // reconstructs the actual outcome for the Brier score.
+        if evaluation.predictedProbability >= 0 {
+          let predictedPositive = evaluation.predictedProbability >= RiskPrediction.RiskTier.evaluationPositiveThreshold
+          let actualPositive = evaluation.outlook ? predictedPositive : !predictedPositive
+          probabilities.append(evaluation.predictedProbability)
+          outcomes.append(actualPositive)
         }
       }
 
-      let outlookAccuracy = Double(outlookSuccess) / Double(evaluations.count)
-      let severityAccuracy = severityCount > 0 ? Double(severitySuccess) / Double(severityCount) : 0.0
-      return (outlookAccuracy, severityAccuracy, evaluations.count)
+      let accuracy = Double(successCount) / Double(evaluations.count)
+      let brier = PlattCalibration.brier(probabilities: probabilities, outcomes: outcomes)
+      return (accuracy, brier, evaluations.count)
     }
   }
   

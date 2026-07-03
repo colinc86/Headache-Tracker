@@ -32,7 +32,7 @@ class Predictor: ObservableObject {
   @Published var ready: Bool = false
 
   /// The predictor's latest prediction.
-  @Published var prediction: PredictionOutput?
+  @Published var prediction: RiskPrediction?
 
   /// The model's last updated at date.
   @Published var modelUpdatedAt: Date?
@@ -78,8 +78,8 @@ extension Predictor {
   ///   - inWidget: Whether the method is being called from a widget.
   /// - Returns: The predictor's output.
   @discardableResult
-  func predict(_ input: ModelInput, inWidget: Bool) async throws -> PredictionOutput {
-    return PredictionOutput.empty
+  func predict(_ input: ModelInput, inWidget: Bool) async throws -> RiskPrediction {
+    return RiskPrediction.empty
   }
 
   /// The latest permutation feature importances, normalized to [0, 1].

@@ -42,7 +42,14 @@ struct Previewing {
     static let predictor = Predictor()
     
     /// The preview prediction.
-    static let prediction = PredictionOutput.empty
+    static let prediction = RiskPrediction(
+      input: .empty,
+      probability: 0.42,
+      topFactors: [
+        RiskPrediction.RiskFactor(feature: .sleepSeconds, mlFeatureName: "Sleep Seconds", direction: .reduced, contributionDescription: "Lower sleep duration before headaches"),
+        RiskPrediction.RiskFactor(feature: .sigmaPressure, mlFeatureName: "Sigma Pressure", direction: .elevated, contributionDescription: "Higher pressure change before headaches")
+      ],
+      computedAt: Date())
   }
   
   struct CoreData {

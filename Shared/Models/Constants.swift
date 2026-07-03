@@ -28,7 +28,7 @@ struct Constants {
   /// The model feature schema version. Bump when the feature set changes
   /// (renamed/added/removed features), which invalidates compiled models
   /// and stored evaluations; a launch-time check resets both.
-  static let modelSchemaVersion = 2
+  static let modelSchemaVersion = 3
 
   /// The defaults key storing the last seen model schema version.
   static let modelSchemaVersionKey = "modelSchemaVersion"

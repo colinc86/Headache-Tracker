@@ -8,67 +8,56 @@
 import SwiftUI
 
 struct OutlookView: View {
-  
+
   /// The view's outlook.
-  let outlook: HolisticOutlook
-  
+  let outlook: RiskOutlook
+
   // MARK: Private properties
-  
+
   /// The application's custom color theme.
   @AppStorage(Preferences.General.Keys.colorTheme, store: .shared) private var colorTheme = Preferences.General.Defaults.colorTheme
-  
-  private var title: String {
+
+  /// The card's tint, tracking the risk tier.
+  private var tint: Color {
     switch outlook {
-    case .headache(let severity, _):
-      if severity == .notPresent {
-        return "No Headache"
+    case .risk(let prediction):
+      switch prediction.tier {
+      case .low: return colorTheme.mint
+      case .elevated: return colorTheme.orange
+      case .high: return colorTheme.pink
       }
-      return "\(severity.title) Headache"
-    default:
-      return outlook.title
+    case .activeHeadache(let severity, _):
+      return colorTheme.color(for: severity)
     }
   }
-  
-  /// The caption to display.
-  private var caption: String? {
-    switch outlook {
-    case .noHeadache: return nil
-    case .possibleHeadache(let onset): return "at " + onset.formattedTime()
-    case .headache(let severity, let end):
-      if severity == .notPresent {
-        return nil
-      }
-      return "until " + end.formattedTime()
-    }
-  }
-  
+
   // MARK: View body
-    
+
   var body: some View {
     Card(
       title: "Outlook",
       systemImage: "sun.and.horizon",
-      foregroundColor: colorTheme.mint) {
-      Text(title)
+      foregroundColor: tint) {
+      Text(outlook.title)
         .font(.title)
     } caption: {
-      if let caption = caption {
+      if let caption = outlook.caption {
         Text(caption)
       }
     }
   }
-  
+
 }
 
 struct OutlookView_Previews: PreviewProvider {
   static var previews: some View {
-    OutlookView(outlook: .noHeadache)
-      .previewLayout(.fixed(width: 428, height: 70))
-    
-    OutlookView(outlook: .possibleHeadache(onset: Date(timeIntervalSinceNow: 3600.0)))
+    OutlookView(outlook: .risk(RiskPrediction(input: .empty, probability: 0.12, topFactors: [], computedAt: Date())))
       .previewLayout(.fixed(width: 428, height: 100))
-    
-    OutlookView(outlook: .headache(severity: .moderate, end: Date(timeIntervalSinceNow: 3600.0)))
+
+    OutlookView(outlook: .risk(RiskPrediction(input: .empty, probability: 0.72, topFactors: [], computedAt: Date())))
+      .previewLayout(.fixed(width: 428, height: 100))
+
+    OutlookView(outlook: .activeHeadache(severity: .moderate, since: Date(timeIntervalSinceNow: -3600.0)))
       .previewLayout(.fixed(width: 428, height: 100))
   }
 }

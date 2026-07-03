@@ -247,7 +247,7 @@ extension CurrentHeadacheView.ViewModel {
     
     // Check if we should run a prediction
     let now = Date()
-    if let lastPredictionDate = predictor.prediction?.date {
+    if let lastPredictionDate = predictor.prediction?.computedAt {
       let timeSinceLastPrediction = now.timeIntervalSince(lastPredictionDate)
       guard forced || timeSinceLastPrediction > Constants.Tasks.predictionRefreshInterval else {
         logDebug("Not updating prediction. Minimum interval, \(Constants.Tasks.predictionRefreshInterval), not met with interval \(now.timeIntervalSince(lastPredictionDate)).")

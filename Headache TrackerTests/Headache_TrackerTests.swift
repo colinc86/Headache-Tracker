@@ -336,6 +336,69 @@ class Headache_TrackerTests: XCTestCase {
     XCTAssertTrue(report.insufficient.contains(where: { $0.feature == .temperature }))
   }
 
+  // MARK: Risk model (Phase 2)
+
+  func testPlattCalibrationRecoversMonotoneMapping() throws {
+    // Synthetic overconfident scores: true probability is a tempered version
+    // of the raw score.
+    var scores = [Double]()
+    var outcomes = [Bool]()
+    var seed = CorrelationMath.SeededGenerator(seed: 42)
+
+    for i in 0 ..< 200 {
+      let raw = Double(i % 100) / 100.0 * 0.9 + 0.05
+      let trueProbability = 0.5 + (raw - 0.5) * 0.5
+      scores.append(raw)
+      outcomes.append(Double.random(in: 0 ... 1, using: &seed) < trueProbability)
+    }
+
+    let calibration = try XCTUnwrap(PlattCalibration.fit(scores: scores, outcomes: outcomes))
+
+    // Calibration must be monotone and reduce the Brier score.
+    XCTAssertLessThan(calibration.apply(0.2), calibration.apply(0.8))
+    let rawBrier = try XCTUnwrap(PlattCalibration.brier(probabilities: scores, outcomes: outcomes))
+    let calibratedBrier = try XCTUnwrap(PlattCalibration.brier(probabilities: scores.map(calibration.apply), outcomes: outcomes))
+    XCTAssertLessThanOrEqual(calibratedBrier, rawBrier)
+  }
+
+  func testPlattCalibrationDegenerateFallback() {
+    // Fewer than 5 positives: no fit.
+    XCTAssertNil(PlattCalibration.fit(scores: [0.1, 0.9, 0.2, 0.8], outcomes: [false, true, false, true]))
+    XCTAssertEqual(PlattCalibration.identity.apply(0.42), 0.42, accuracy: 0.0001)
+  }
+
+  func testBrierAndBuckets() throws {
+    let probabilities = [0.1, 0.9, 0.5, 0.5]
+    let outcomes = [false, true, true, false]
+    let brier = try XCTUnwrap(PlattCalibration.brier(probabilities: probabilities, outcomes: outcomes))
+    // (0.01 + 0.01 + 0.25 + 0.25) / 4
+    XCTAssertEqual(brier, 0.13, accuracy: 0.0001)
+
+    let buckets = PlattCalibration.buckets(probabilities: probabilities, outcomes: outcomes, count: 5)
+    XCTAssertEqual(buckets.count, 3)
+    let middle = try XCTUnwrap(buckets.first(where: { $0.lowerBound == 0.4 }))
+    XCTAssertEqual(middle.count, 2)
+    XCTAssertEqual(middle.observedRate, 0.5, accuracy: 0.0001)
+
+    XCTAssertNil(PlattCalibration.brier(probabilities: [], outcomes: []))
+  }
+
+  func testRiskTierBoundaries() {
+    XCTAssertEqual(RiskPrediction.RiskTier(probability: 0.0), .low)
+    XCTAssertEqual(RiskPrediction.RiskTier(probability: 0.2999), .low)
+    XCTAssertEqual(RiskPrediction.RiskTier(probability: 0.30), .elevated)
+    XCTAssertEqual(RiskPrediction.RiskTier(probability: 0.5999), .elevated)
+    XCTAssertEqual(RiskPrediction.RiskTier(probability: 0.60), .high)
+    XCTAssertEqual(RiskPrediction.RiskTier(probability: 1.0), .high)
+  }
+
+  func testRiskPredictionEqualityIgnoresComputedAt() {
+    let a = RiskPrediction(input: .empty, probability: 0.5, topFactors: [], computedAt: baseDate)
+    let b = RiskPrediction(input: .empty, probability: 0.5, topFactors: [], computedAt: baseDate.addingTimeInterval(999.0))
+    XCTAssertEqual(a, b)
+    XCTAssertNotEqual(a, RiskPrediction.empty)
+  }
+
   // MARK: Data capture (Phase 1)
 
   func testNewMetricPresenceBitsRoundTrip() {
@@ -473,34 +536,5 @@ class Headache_TrackerTests: XCTestCase {
     XCTAssertNil(events.first?.amount, "Zero amount reads as no amount")
   }
 
-  // MARK: Training data trimming
-
-  func testTrimmedTrainingDataBalancesClasses() {
-    let headache = makeHeadache(severity: .mild)
-    guard let severity = headache.severitiesArray.first else {
-      XCTFail("Expected a severity")
-      return
-    }
-
-    // 3 headache rows and 20 not-present rows.
-    var trainingData = [TrainingData]()
-    for i in 0 ..< 23 {
-      let data = TrainingData(context: context)
-      data.timestamp = baseDate.addingTimeInterval(Double(i) * 3600.0)
-      if i < 3 {
-        severity.addToTrainingData(data)
-      }
-      trainingData.append(data)
-    }
-
-    let trimmed = HeadacheManager.trimmedTrainingData(trainingData)
-    let notPresent = trimmed.filter({ $0.severity == nil || $0.severity?.severity == .notPresent })
-    let present = trimmed.filter({ $0.severity != nil && $0.severity?.severity != .notPresent })
-
-    // With fewer than 50 present rows, not-present rows are trimmed to at
-    // most twice the present count.
-    XCTAssertEqual(present.count, 3)
-    XCTAssertLessThanOrEqual(notPresent.count, 6)
-  }
 
 }

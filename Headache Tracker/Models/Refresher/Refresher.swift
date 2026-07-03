@@ -70,37 +70,45 @@ extension Refresher {
       badgeNumber: 0)
   }
   
-  /// Presents a prediction alert now.
+  /// Presents a high-risk alert now, debounced so consecutive refreshes
+  /// don't repeat it.
   ///
   /// - Parameter prediction: The prediction.
-  func presentPredictionAlert(with prediction: PredictionOutput?) async throws {
-    // Only continue if we have a prediction and prediction alerts are turned on
-    guard preferences.notifications.realTimeAlerts, let prediction = prediction,
-          prediction.severityClassifierOutput.prediction != .notPresent &&
-            prediction.outlookClassifierOutput.prediction == .headache else {
-              return
-            }
-    
+  func presentRiskAlert(with prediction: RiskPrediction?) async throws {
+    // Only continue if alerts are on and risk is high
+    guard preferences.notifications.realTimeAlerts,
+          let prediction = prediction,
+          prediction != .empty,
+          prediction.tier == .high else {
+      return
+    }
+
+    // Debounce: at most one high-risk alert per six hours.
+    if let last = preferences.debug.lastRiskAlertDate, Date().timeIntervalSince(last) < 6.0 * 3600.0 {
+      return
+    }
+
     // Present the alert
-    logDebug("Presenting alert for predicted severity: \(prediction.severityClassifierOutput.prediction.title).")
+    logDebug("Presenting high risk alert: \(prediction.probability).")
     try await alertManager.presentAlert(
-      with: HeadacheAlertRequest.prediction(severity: prediction.severityClassifierOutput.prediction),
+      with: HeadacheAlertRequest.risk(probability: prediction.probability),
       badgeNumber: 0)
+    preferences.debug.lastRiskAlertDate = Date()
   }
   
   /// Presents an outlook alert now.
   ///
   /// - Parameter prediction: The prediction.
-  func presentOutlookAlert(with prediction: PredictionOutput?) async throws {
+  func presentOutlookAlert(with prediction: RiskPrediction?) async throws {
     // Only continue if we have a prediction and prediction alerts are turned on
-    guard preferences.notifications.dailyOutlookAlerts, let prediction = prediction else {
+    guard preferences.notifications.dailyOutlookAlerts, let prediction = prediction, prediction != .empty else {
       return
     }
 
     // Present the alert
-    logDebug("Presenting alert for outlook: \(prediction.outlookClassifierOutput.prediction).")
+    logDebug("Presenting alert for outlook: \(prediction.probability).")
     try await alertManager.presentAlert(
-      with: HeadacheAlertRequest.outlook(outlook: prediction.outlookClassifierOutput.prediction, onset: prediction.onsetRegressorOutput.prediction),
+      with: HeadacheAlertRequest.outlook(tier: prediction.tier, probability: prediction.probability),
       badgeNumber: 0)
   }
 
@@ -144,7 +152,7 @@ extension Refresher {
   /// so a failed presentation is retried on the next refresh.
   ///
   /// - Parameter prediction: The prediction.
-  func presentOutlookAlertIfNeeded(with prediction: PredictionOutput?) async throws {
+  func presentOutlookAlertIfNeeded(with prediction: RiskPrediction?) async throws {
     guard isOutlookAlertDue, prediction != nil else {
       return
     }
@@ -239,7 +247,7 @@ extension Refresher {
           let prediction = try await self.headacheManager.predictor.predict(input, inWidget: false)
 
           if currentSeverityID == nil {
-            try await self.presentPredictionAlert(with: prediction)
+            try await self.presentRiskAlert(with: prediction)
           }
 
           // Present the daily outlook when due

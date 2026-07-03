@@ -61,6 +61,7 @@ struct Preferences {
       static let nextTrainingDate   = Key("settings.debug.nextTrainingDate")
       static let lastPredictionDate = Key("settings.debug.lastPredictionDate")
       static let nextPredictionDate = Key("settings.debug.nextPredictionDate")
+      static let lastRiskAlertDate  = Key("settings.debug.lastRiskAlertDate")
     }
     
     struct Defaults {
@@ -70,6 +71,7 @@ struct Preferences {
       static let nextTrainingDate: Date? = nil
       static let lastPredictionDate: Date? = nil
       static let nextPredictionDate: Date? = nil
+      static let lastRiskAlertDate: Date? = nil
     }
     
     /// The last date an outlook prediction was performed.
@@ -89,6 +91,9 @@ struct Preferences {
 
     /// The next date a prediction will be performed.
     @UserDefault(Keys.nextPredictionDate) var nextPredictionDate: Date? = Defaults.nextPredictionDate
+
+    /// The last date a high-risk alert was presented.
+    @UserDefault(Keys.lastRiskAlertDate) var lastRiskAlertDate: Date? = Defaults.lastRiskAlertDate
   }
   
   /// Filter settings.
@@ -431,20 +436,21 @@ struct Preferences {
   /// Shared settings.
   struct Shared {
     struct Keys {
-      static let currentPrediction = Key("settings.shared.currentPrediction")
+      static let currentRisk = Key("settings.shared.currentRisk")
+      static let legacyCurrentPrediction = Key("settings.shared.currentPrediction")
       static let currentSeverity =   Key("settings.shared.currentSeverity")
       static let measurementSystem = Key("settings.shared.measurementSystem")
       static let customTypes =       Key("settings.shared.customTypes")
     }
     
     struct Defaults {
-      static let currentPrediction: PredictionOutput? = nil
+      static let currentRisk: RiskPrediction? = nil
       static let currentSeverity: Headache.Severity? = nil
       static let customTypes: [Headache.Types] = []
     }
 
     /// The current prediction.
-    @CodableUserDefault(Keys.currentPrediction, store: .shared) var currentPrediction: PredictionOutput? = Defaults.currentPrediction
+    @CodableUserDefault(Keys.currentRisk, store: .shared) var currentRisk: RiskPrediction? = Defaults.currentRisk
 
     /// The current severity.
     var currentSeverity: Headache.Severity? {
@@ -460,13 +466,13 @@ struct Preferences {
     /// The application's custom headache types.
     @CodableUserDefault(Keys.customTypes, store: .shared) var customTypes: [Headache.Types] = Defaults.customTypes
 
-    /// Sets the prediction results and requests a widget reload.
+    /// Sets the risk prediction and requests a widget reload.
     ///
     /// - Parameters:
-    ///   - prediction: The prediction.
+    ///   - risk: The risk prediction.
     ///   - inWidget: Whether the method is being called from a widget.
-    mutating func setCurrentPrediction(_ prediction: PredictionOutput, inWidget: Bool) {
-      currentPrediction = prediction
+    mutating func setCurrentRisk(_ risk: RiskPrediction, inWidget: Bool) {
+      currentRisk = risk
 
       if inWidget {
         NotificationCenter.default.post(name: Preferences.predictionDidChangeNotification, object: nil)

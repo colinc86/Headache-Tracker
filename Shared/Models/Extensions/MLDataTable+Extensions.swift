@@ -10,8 +10,13 @@ import CreateML
 import Foundation
 
 extension MLDataTable {
-  
-  init(inputs: [ModelInput], forModelType modelType: Predictor.ModelType) throws {
+
+  /// Builds a table from model inputs with the binary risk target: positive
+  /// iff the row's derived outlook is a possible headache (an onset occurs
+  /// within the rolling 24-hour window).
+  ///
+  /// - Parameter inputs: The (already imputed) model inputs.
+  init(inputs: [ModelInput]) throws {
     var dictionaryInputs = [String: MLDataValueConvertible]()
     for input in inputs {
       let fullInput = input.fullInput()
@@ -26,20 +31,13 @@ extension MLDataTable {
         }
       }
     }
-    
-    switch modelType {
-    case .onsetRegressor:
-      dictionaryInputs[OnsetRegressorOutput.FeatureName.onset] = inputs.map({ $0.timeIntervalUntilNextHeadacheStart ?? 0.0 })
-    case .durationRegressor:
-      dictionaryInputs[DurationRegressorOutput.FeatureName.duration] = inputs.map({ $0.timeIntervalUntilNextHeadacheEnd ?? 0.0 })
-    case .outlookClassifier:
-      dictionaryInputs[OutlookClassifierOutput.FeatureName.outlook] = inputs.map({ $0.outlook.rawValue })
-    case .severityClassifier:
-      dictionaryInputs[SeverityClassifierOutput.FeatureName.severity] = inputs.map({ $0.severity.title })
+
+    dictionaryInputs[RiskClassifierOutput.FeatureName.risk] = inputs.map { input in
+      input.outlook == .possibleHeadache ? RiskClassifierOutput.positiveLabel : RiskClassifierOutput.negativeLabel
     }
-    
+
     try self.init(dictionary: dictionaryInputs)
   }
-  
+
 }
 #endif

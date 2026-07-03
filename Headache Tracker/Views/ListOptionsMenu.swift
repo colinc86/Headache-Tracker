@@ -17,7 +17,6 @@ struct ListOptionsMenu: View {
   @AppStorage(Preferences.Lists.Keys.notes) private var showNotesView = Preferences.Lists.Defaults.shown
   @AppStorage(Preferences.Lists.Keys.tags) private var showTagsView = Preferences.Lists.Defaults.shown
   @AppStorage(Preferences.Lists.Keys.outlook) private var showOutlookView = Preferences.Lists.Defaults.shown
-  @AppStorage(Preferences.Lists.Keys.severity) private var showSeverityView = Preferences.Lists.Defaults.shown
   @AppStorage(Preferences.Lists.Keys.medications) private var showMedicationsView = Preferences.Lists.Defaults.shown
   @AppStorage(Preferences.Lists.Keys.checkIn) private var showCheckInView = Preferences.Lists.Defaults.shown
 
@@ -40,8 +39,7 @@ struct ListOptionsMenu: View {
       }
 
       Section {
-        CheckmarkButton(title: "Outlook", checked: $showOutlookView)
-        CheckmarkButton(title: "Severity", checked: $showSeverityView)
+        CheckmarkButton(title: "Risk", checked: $showOutlookView)
       }
     } label: {
       Label("View Options", systemImage: "list.bullet.below.rectangle")

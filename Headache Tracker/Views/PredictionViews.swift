@@ -8,16 +8,15 @@
 import SwiftUI
 
 struct PredictionViews: View {
-  
+
   /// The view's prediction.
-  let prediction: PredictionOutput
-  
+  let prediction: RiskPrediction
+
   // MARK: Private properties
-  
+
   // Preferences
-  @AppStorage(Preferences.Lists.Keys.outlook) var showOutlookView = Preferences.Lists.Defaults.shown
-  @AppStorage(Preferences.Lists.Keys.severity) var showSeverityView = Preferences.Lists.Defaults.shown
-  
+  @AppStorage(Preferences.Lists.Keys.outlook) var showRiskView = Preferences.Lists.Defaults.shown
+
   /// The headaches fetch request.
   /// Should only return one headache.
   @FetchRequest(
@@ -25,51 +24,34 @@ struct PredictionViews: View {
     predicate: NSPredicate(format: "resolved = false"),
     animation: .default)
   private var headaches: FetchedResults<Headache>
-  
+
   /// The current (unresolved) headache.
   private var currentHeadache: Headache? {
     return headaches.first
   }
-  
-  private var needsSeverityView: Bool {
-    switch prediction.holisticOutlook {
-    case .noHeadache:
-      return false
-    case .possibleHeadache(_):
-      return false
-    case .headache(let severity, _):
-      return severity != .notPresent
+
+  /// What the outlook card should show.
+  private var outlook: RiskOutlook {
+    if let currentHeadache = currentHeadache {
+      return .activeHeadache(severity: currentHeadache.severity, since: currentHeadache.startTime)
     }
+    return .risk(prediction)
   }
-  
+
   // MARK: View body
-  
+
   var body: some View {
-    if showOutlookView {
+    if showRiskView && (currentHeadache != nil || prediction != .empty) {
       Section {
         NavigationLink {
           ModelInputView(input: prediction.input)
         } label: {
-          OutlookView(outlook: currentHeadache == nil ? prediction.holisticOutlook : .headache(severity: prediction.severityClassifierOutput.prediction, end: Date(timeIntervalSinceNow: prediction.durationRegressorOutput.prediction)))
+          OutlookView(outlook: outlook)
         }
       } header: {
-        SectionTitleView(title: "Predictions")
+        SectionTitleView(title: "Risk")
       } footer: {
-        if !(showSeverityView && needsSeverityView) {
-          SectionFooterView(title: "Updated \(prediction.date.formattedNonRelative()).")
-        }
-      }
-    }
-    
-    if showSeverityView && needsSeverityView {
-      Section {
-        SeveritySelectionView(currentSeverity: prediction.severityClassifierOutput.prediction, collapsed: true)
-      } header: {
-        if !showOutlookView {
-          SectionTitleView(title: "Predictions")
-        }
-      } footer: {
-        SectionFooterView(title: "Updated \(prediction.date.formattedNonRelative()).")
+        SectionFooterView(title: "Updated \(prediction.computedAt.formattedNonRelative()).")
       }
     }
   }
@@ -77,10 +59,9 @@ struct PredictionViews: View {
 
 struct PredictionViews_Previews: PreviewProvider {
   static var previews: some View {
-    ScrollView {
+    List {
       PredictionViews(prediction: Previewing.Prediction.prediction)
         .environment(\.managedObjectContext, Previewing.CoreData.viewContext)
     }
-    .background(Color(UIColor.systemGroupedBackground))
   }
 }

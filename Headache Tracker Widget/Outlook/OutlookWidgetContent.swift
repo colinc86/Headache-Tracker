@@ -9,18 +9,22 @@ import Foundation
 import WidgetKit
 
 struct OutlookWidgetContent: TimelineEntry {
+
+  /// The entry's date.
   let date: Date
-  let outlook: Outlook?
-  let onset: Date?
-  let duration: TimeInterval?
-  let severity: Headache.Severity?
-  let hasCurrentHeadache: Bool
-  
-  var holisticOutlook: HolisticOutlook {
-    return HolisticOutlook(
-      outlook: outlook ?? .noHeadache,
-      onset: onset ?? Date(timeIntervalSinceNow: 86400.0),
-      duration: duration ?? 0.0,
-      severity: severity ?? .notPresent)
+
+  /// The cached risk prediction, when one exists.
+  let risk: RiskPrediction?
+
+  /// The logged current severity, when a headache is in progress.
+  let currentSeverity: Headache.Severity?
+
+  /// The current headache's start time, for the elapsed display.
+  let headacheStart: Date?
+
+  /// Whether a headache is in progress.
+  var hasCurrentHeadache: Bool {
+    return currentSeverity != nil && currentSeverity != Headache.Severity.notPresent
   }
+
 }
