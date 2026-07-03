@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-A SwiftUI iOS app that logs headaches and uses on-device CreateML/CoreML to predict their **outlook** (whether one is coming), **severity**, **onset** time, and **duration** from weather, HealthKit, and time-of-day signals. There is also a WidgetKit extension. No backend — everything (data, training, inference) runs on device.
+A SwiftUI iOS app that logs headaches (plus medications and daily trigger exposures) and uses on-device CreateML/CoreML to predict a single calibrated **risk of a headache within the next 24 hours** from weather, HealthKit, and time-of-day signals. There is also a WidgetKit extension (two widgets + a Live Activity). No backend — everything (data, training, inference) runs on device; optional CloudKit sync (default off) mirrors user data only to the user's private database.
 
 ## Build, run, test
 
@@ -31,7 +31,7 @@ xcodebuild -project "Headache Tracker.xcodeproj" -scheme "Headache Tracker" \
 xcodebuild ... test -only-testing:"Headache TrackerTests/Headache_TrackerTests/<testMethod>"
 ```
 
-`Headache TrackerTests` contains real unit tests (headache interval invariants, label derivation, statistics math, correlation math/engine) running against an in-memory Core Data store; run them before committing model-layer changes. `Headache TrackerUITests` is still a template stub.
+`Headache TrackerTests` contains real unit tests (headache interval invariants, label derivation, statistics math, correlation math/engine, calibration, brief builder, exposures/medications, CSV escaping) running against an in-memory Core Data store; run them before committing model-layer changes. `Headache TrackerUITests` is still a template stub.
 
 Swift 5, iOS deployment target 17.0 across all targets.
 
@@ -71,7 +71,7 @@ A typical write (e.g. `changeSeverity`) both mutates Core Data **and** mirrors t
 
 ### Persistence
 
-Core Data via the external `DataController` package (`DataController.shared`). All writes go through `DataController.shared.performInBackground(saveOnComplete:)`, which runs every block on a single long-lived serial write context that saves directly to the store; the view context auto-merges those saves. **Note:** the project currently pins DataController to the local clone at `../../Packages/DataController` (v1.3.0, tagged locally) — push that repo's `main` + `v1.3.0` tag to GitHub and restore the `https://github.com/colinc86/DataController.git` URL in the project when publishing. Entities (model `Headache_Tracker 1.9`, the current version): `Headache`, `Severity`, `HealthData`, `Location`, `WeatherData`, `Tag`, `TrainingData`, `Evaluation`. `HealthData.presentMetrics`/`WeatherData.presentFields` are presence bitmasks — an unset bit means "no reading", distinct from a stored zero; always gate reads on them.
+Core Data via the external `DataController` package (`DataController.shared`). All writes go through `DataController.shared.performInBackground(saveOnComplete:)`, which runs every block on a single long-lived serial write context that saves directly to the store; the view context auto-merges those saves. **Note:** the project currently pins DataController to the local clone at `../../Packages/DataController` (v1.4.0, tagged locally) — push that repo's `main` + tags to GitHub and restore the `https://github.com/colinc86/DataController.git` URL in the project when publishing. Entities (model `Headache_Tracker 2.1`, the current version): `Headache`, `Severity`, `HealthData`, `Location`, `WeatherData`, `Tag`, `TrainingData`, `Evaluation`, `MedicationEntry`, `Exposure`. Model 2.1 defines two configurations for the optional store split: **Cloud** (Headache, Severity, Tag, MedicationEntry, Exposure) and **Local** (TrainingData, HealthData, WeatherData, Location, Evaluation); relationships must never cross that boundary (the old Severity↔TrainingData provenance link was removed for this). `HealthData.presentMetrics`/`WeatherData.presentFields` are presence bitmasks — an unset bit means "no reading", distinct from a stored zero; always gate reads on them.
 
 Domain invariant, enforced by `HeadacheManager` and a launch-time repair pass: a headache is unresolved iff its last severity has `endTime == nil`, and at most one headache is unresolved at a time.
 
@@ -81,29 +81,30 @@ All entity classes are Xcode-codegen'd except `Headache` and `TrainingData` (cod
 
 ### The ML prediction pipeline
 
-Four independent models, trained and run together (`Predictor.ModelType`):
-
-- `outlookClassifier` / `severityClassifier` — `MLBoostedTreeClassifier`
-- `onsetRegressor` / `durationRegressor` — `MLBoostedTreeRegressor`
+One binary `MLBoostedTreeClassifier` ("Risk": does a headache start within the rolling 24h window), with hand-rolled Platt calibration (`Calibration.swift`) fit on the chronologically held-out validation slice. The public surface is `RiskPrediction` (probability, tier low/elevated/high at 0.30/0.60, topFactors) and `RiskOutlook` (forecast vs. active headache) — see `Shared/Models/Prediction/RiskPrediction.swift`. In-headache rows are excluded from training and inference. `RiskBriefBuilder` turns the prediction + cached insights baselines into the "morning brief" reasons shown in notifications and the Why card.
 
 Flow:
 
 1. **Input assembly** — `HeadacheManager.predictorInput(atDate:inWidget:)` gathers location → weather → HealthKit data into a `ModelInput` (`Shared/Models/Prediction/ModelInput.swift`). HealthKit reads use per-metric sampling windows (`HealthKitData.window(endingAt:)`); metrics with no samples are *absent* from the dictionary, never zero-filled.
 2. **Feature expansion** — `ModelInput.fullInput()` produces an `InputUnion` (an `MLFeatureProvider` that merges four sub-providers: `ControlledUserInput`, `EnvironmentalInput`, `ChronologicalInput`, `UncontrolledUserInput` in `Prediction/Inputs/`). Time-of-day/weekday are sin/cos pairs; station and device pressure are separate features. The four `Prediction/Outputs/*.swift` types decode each model's prediction. When the feature set changes, bump `Constants.modelSchemaVersion` — a launch check resets models and evaluations.
 3. **Training data & labels** — user actions and hourly refreshes persist `TrainingData` rows. Labels (outlook, severity, onset/duration targets) are **derived at training time** from headache episode intervals (`deriveLabels(from:)` in `TrainingData+Extensions.swift`, rolling 24h outlook window); the `severity` relationship is provenance only. `TrainingInput` (`Prediction/TrainingInput.swift`) splits chronologically 80/20, computes per-feature medians from the training slice (`FeatureMedians`, persisted beside the models and reused at inference), imputes, and balances classifier classes by capped duplication.
-4. **Train** — `Predictor.train(_:)` trains all four models on `modelQueue`, evaluates on the held-out slice (`ModelMetrics`, `@Published metrics`), computes permutation feature importances, writes `.mlmodel`, compiles to `.mlmodelc`, and swaps them plus `medians/metrics/importances.json` into the app-group `models/` directory.
-5. **Predict** — `Predictor.predict(_:inWidget:)` loads compiled models if stale (`needsLoading()`), median-imputes the input, runs all four, builds a `PredictionOutput`, publishes it, and stores it in shared `UserDefaults` for the widget. The duration target is *time remaining* until the current headache ends, not total duration.
-6. **Evaluate** — `evaluatePrediction` writes *pending* `Evaluation` rows; `resolveEvaluations()` scores them after the 24h forecast window against what actually happened (severity only when a headache occurred).
+4. **Train** — `Predictor.train(_:)` trains the classifier on `modelQueue`, scores the held-out rows through the freshly compiled model (CreateML exposes no per-row training-time probabilities), fits the Platt calibration, computes accuracy/Brier/calibration buckets (`ModelMetrics`) and permutation importances, then swaps the compiled model plus `medians/metrics/importances/calibration/schemaVersion.json` into the app-group `models/` directory.
+5. **Predict** — `Predictor.predict(_:inWidget:)` loads the compiled model if stale, median-imputes, applies the calibration, builds a `RiskPrediction`, publishes it, and stores it in shared `UserDefaults` (`Preferences.Shared.currentRisk`) for the widget.
+6. **Evaluate** — `evaluatePrediction` writes *pending* `Evaluation` rows with the calibrated probability; `resolveEvaluations()` scores them after the 24h window; `evaluation()` reports observed accuracy + Brier.
 
 Compiled models are versioned by file modification date; `TrainingData` carries `Constants.trainingDataVersion` / `trainingDataWeatherVersion`, and `upgradeTrainingData()` back-fills HealthKit/weather data when those versions change.
 
 ### The correlation engine (Insights)
 
-`Shared/Models/Statistics/Correlation/` computes transparent per-feature associations between ~19 health/weather signals and headaches — point-biserial vs. onset-within-6/12/24/48h and Spearman vs. severity, with circular-shift permutation p-values and Benjamini–Hochberg FDR (`CorrelationMath`, `CorrelationEngine`). Pure Surge math, simulator-safe, gated on n ≥ 30 pairs and ≥ 10 events. Reports (`InsightsReport`) are cached as JSON in the app group (`InsightsStore`) and recomputed after training or when stale; `HeadacheManager.computeInsights()/insights()/featureSeries(for:)` is the API. The UI is `InsightsView`/`TriggerDetailView` (Swift Charts) plus a top-3 section in the Analyze tab.
+`Shared/Models/Statistics/Correlation/` computes transparent per-feature associations between ~30 health/weather/exposure signals and headaches — point-biserial vs. onset-within-6/12/24/48h (over personal-baseline rolling z-scores when enough history, winsorized at |z| = 6) and Spearman vs. severity, with circular-shift permutation p-values, Benjamini–Hochberg FDR, and a confounder pass that annotates findings largely explained by a co-correlated feature (first-order partial correlation). Pure Surge math, simulator-safe, gated on n ≥ 30 pairs and ≥ 10 events. Logged `Exposure` rows merge into the sample matrix as trailing-24h counts (only after the user's first check-in — absence before logging began is unknown, not zero; custom kinds are recorded but not correlated). Reports (`InsightsReport`, with per-feature 14-day baselines and a schema version) are cached as JSON in the app group (`InsightsStore`); staleness tracks row count, exposure count, age, and schema version. The UI is `InsightsView`/`TriggerDetailView` (Swift Charts) plus a top-3 section in the Analyze tab.
 
 ### Cross-process sharing (app ↔ widget)
 
-The app and widget communicate through the **app group** `group.com.cnc.Headache-Tracker.contents` (`Constants.appGroupIdentifier`): compiled ML models (plus their medians/metrics/importances sidecars) and the cached insights report live in that container, and the current severity/prediction are written to shared `UserDefaults` via `Preferences.shared` so the widgets can render without re-running inference. The color theme and measurement system also live in the shared suite (`@AppStorage(key, store: .shared)`) so widgets match the app's appearance — keep new appearance settings there. URL scheme `myheadache://severity?rawValue=…` lets widgets deep-link severity changes.
+The app and widget communicate through the **app group** `group.com.cnc.Headache-Tracker.contents` (`Constants.appGroupIdentifier`): compiled ML models (plus sidecars) and the cached insights report live in that container, and the current severity/risk are written to shared `UserDefaults` via `Preferences.shared` so the widgets can render without re-running inference. The color theme and measurement system also live in the shared suite (`@AppStorage(key, store: .shared)`). The severity widget logs via `LogSeverityIntent` (a `LiveActivityIntent`, so it executes the full `changeSeverity` flow in the app process); `myheadache://severity?rawValue=…` remains for external deep links. `HeadacheLiveActivity` shows an in-progress headache on the lock screen/Dynamic Island; `LiveActivityManager.reconcile` (app-only) is the single sync point. The widget target defines `SWIFT_ACTIVE_COMPILATION_CONDITIONS = WIDGET_EXTENSION` to exclude app-only calls from shared files. `AlertManager`/`HeadacheAlertRequest` live in `Shared/Models/Alerts/` (both targets); notification categories/actions and tap routing (`AlertDelegate`, `Router`) are app-side.
+
+### CloudKit sync (default off)
+
+`Preferences.Sync.enabled` (shared suite) is read once at store setup. Off: one combined store, exactly as pre-sync. On: two stores — the original file becomes the Local store; user data lives in `Headache_Tracker-cloud.sqlite` mirrored by `NSPersistentCloudKitContainer` (container `iCloud.com.cnc.Headache-Tracker`, app process only; the widget gets history tracking without mirroring). `CloudMigrator` copies the user-data graph into the cloud store once on first sync-enabled launch. Remote changes trigger repair + tag dedup + shared-severity refresh + history purge (`AppDelegate.observeRemoteChanges`). Enabling history tracking is one-way; database restore is disabled while syncing.
 
 ### Preferences
 
