@@ -15,6 +15,10 @@ struct Constants {
   
   /// The weather training data version.
   static let trainingDataWeatherVersion = "1.1"
+
+  /// The minimum number of training data samples required before the first
+  /// models are trained.
+  static let minimumTrainingDataCount = 50
   
   /// The application's app group identifier.
   static let appGroupIdentifier = "group.com.cnc.Headache-Tracker.contents"

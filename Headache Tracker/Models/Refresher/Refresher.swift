@@ -6,7 +6,6 @@
 //
 
 import BackgroundTasks
-import DataController
 import Foundation
 import SwiftUI
 
@@ -141,11 +140,11 @@ extension Refresher {
   private func handlePredictionRefreshTask(_ task: BGTask) {
     logDebug("Handle prediction refresh task.")
     preferences.debug.lastPredictionDate = Date()
-    
+
     // Schedule the next task
     Task { [weak self] in
       guard let self = self else { return }
-      
+
       do {
         try await self.schedulePredictionRefreshTask()
       }
@@ -153,47 +152,46 @@ extension Refresher {
         logError("Error scheduling prediction refresh task: \(error)")
       }
     }
-    
+
     // Set the task's expiration handler
+    let completion = TaskCompletionGuard(task)
     task.expirationHandler = { [weak self] in
       // Cancel the prediction
       self?.headacheManager?.cancelClassificationInput()
+      completion.complete(success: false)
     }
-    
-    // Get the current severity identifier
-    let context = DataController.shared.newNestedBackgroundContext()
-    let currentSeverityID: UUID? = context.performAndWait { [weak context] in
-      let request = Headache.fetchRequest()
-      request.predicate = NSPredicate(format: "resolved = %@", NSNumber(booleanLiteral: false))
-      let headache = (try? context?.fetch(request))?.last
-      return headache?.currentState?.identifier
-    }
-    
+
     // Get the input and either alert or finish
     Task { [weak self] in
-      guard let self = self else { return }
-      
+      guard let self = self else {
+        completion.complete(success: false)
+        return
+      }
+
       do {
+        // Get the current severity identifier
+        let currentSeverityID = try await self.headacheManager.currentSeverityIdentifier()
+
         let input = await self.headacheManager.predictorInput(atDate: Date(), inWidget: false)
-        
+
         // Should we create new training data?
         // If it's been more than half an hour then yes.
         if let timestamp = try await self.headacheManager.lastTrainingDataDate(), Date().timeIntervalSince(timestamp) > 1800.0 {
           try await self.headacheManager.createTrainingData(from: input, severityIdentifier: currentSeverityID)
         }
-        
+
         // If there is no current headache, then present a prediction
         if currentSeverityID == nil {
           // We got the input, so present the prediction
           let prediction = try await self.headacheManager.predictor.predict(input, inWidget: false)
           try await self.presentPredictionAlert(with: prediction)
         }
-        
-        task.setTaskCompleted(success: true)
+
+        completion.complete(success: true)
       }
       catch {
         logError("Error creating training data: \(error)")
-        task.setTaskCompleted(success: false)
+        completion.complete(success: false)
       }
     }
   }
@@ -262,28 +260,30 @@ extension Refresher {
     }
     
     // Set the task's expiration handler
+    let completion = TaskCompletionGuard(task)
     task.expirationHandler = { [weak self] in
       // Cancel the prediction
-      self?.headacheManager.cancelClassificationInput()
+      self?.headacheManager?.cancelClassificationInput()
+      completion.complete(success: false)
     }
-    
+
     // Run a prediction
     Task { [weak self] in
       guard let self = self else {
-        task.setTaskCompleted(success: false)
+        completion.complete(success: false)
         return
       }
-      
+
       do {
         let input = await self.headacheManager.predictorInput(atDate: Date(), inWidget: false)
         let prediction = try await self.headacheManager.predictor.predict(input, inWidget: false)
         try await self.presentOutlookAlert(with: prediction)
-        
-        task.setTaskCompleted(success: true)
+
+        completion.complete(success: true)
       }
       catch {
         logError("Error getting current classifier input: \(error)")
-        task.setTaskCompleted(success: false)
+        completion.complete(success: false)
       }
     }
   }
@@ -350,28 +350,29 @@ extension Refresher {
     }
     
     // Set the task's expiration handler
-    task.expirationHandler = { [weak task, weak self] in
-      // Cancel the prediction
-      self?.headacheManager.predictor.cancelTraining()
-      task?.setTaskCompleted(success: false)
+    let completion = TaskCompletionGuard(task)
+    task.expirationHandler = { [weak self] in
+      // Cancel the training session
+      self?.headacheManager?.predictor.cancelTraining()
+      completion.complete(success: false)
     }
-    
+
     // Train
     Task { [weak self] in
       guard let self = self else {
-        task.setTaskCompleted(success: false)
+        completion.complete(success: false)
         return
       }
-      
+
       do {
         if try await self.headacheManager.needsTraining() {
           try await self.headacheManager.trainClassifiers()
         }
-        task.setTaskCompleted(success: true)
+        completion.complete(success: true)
       }
       catch {
         logError("Error training classifiers: \(error)")
-        task.setTaskCompleted(success: false)
+        completion.complete(success: false)
       }
     }
   }

@@ -8,6 +8,7 @@
 import ApplicationKey
 import CoreML
 import Foundation
+import os
 import WidgetKit
 
 #if !targetEnvironment(simulator)
@@ -74,9 +75,24 @@ class Predictor: ObservableObject {
   
   /// The app's current preferences.
   private var preferences = Preferences()
-  
+
+  /// The predictor's training state.
+  ///
+  /// Accessed from the caller's thread, the model queue, and background task
+  /// expiration handlers, so it's guarded by a lock. The `@Published`
+  /// `training` property mirrors `isTraining` for the UI only.
+  private struct TrainingState {
+    var isTraining = false
+    var isCancelled = false
+  }
+
+  /// The lock guarding the predictor's training state.
+  private let trainingState = OSAllocatedUnfairLock(initialState: TrainingState())
+
   /// Whether or not training was cancelled.
-  private var cancelledTraining = false
+  private var isTrainingCancelled: Bool {
+    return trainingState.withLock { $0.isCancelled }
+  }
   
   /// The metadata to save with a model.
   private let metadata = MLModelMetadata(
@@ -160,27 +176,47 @@ extension Predictor {
   /// Cancels the current training session.
   func cancelTraining() {
     logDebug("Cancel training.")
-    cancelledTraining = true
+    trainingState.withLock { $0.isCancelled = true }
   }
-  
+
   /// Resets the predictor and its classifiers.
   func reset() {
-    do {
-      // Delete the compiled models
-      try FileManager.default.removeItem(at: self.compiledModelURL(with: Predictor.outlookClassifierFileName))
-      try FileManager.default.removeItem(at: self.compiledModelURL(with: Predictor.severityClassifierFileName))
-      try FileManager.default.removeItem(at: self.compiledModelURL(with: Predictor.onsetRegressorFileName))
-      try FileManager.default.removeItem(at: self.compiledModelURL(with: Predictor.durationRegressorFileName))
-      severityClassifier = nil
-      
-      // Reset the rest of our variables
-      modelUpdatedAt = nil
+    // Delete the compiled models
+    let fileNames = [
+      Predictor.outlookClassifierFileName,
+      Predictor.severityClassifierFileName,
+      Predictor.onsetRegressorFileName,
+      Predictor.durationRegressorFileName
+    ]
+
+    for fileName in fileNames {
+      let url = compiledModelURL(with: fileName)
+      guard FileManager.default.fileExists(atPath: url.path) else {
+        continue
+      }
+
+      do {
+        try FileManager.default.removeItem(at: url)
+      }
+      catch {
+        logError("Error removing compiled model \(fileName): \(error)")
+      }
     }
-    catch {
-      logError("Error resetting predictor: \(error)")
+
+    // Unload the models on the model queue
+    modelQueue.async { [weak self] in
+      self?.outlookClassifier = nil
+      self?.severityClassifier = nil
+      self?.onsetRegressor = nil
+      self?.durationRegressor = nil
     }
-    
-    DispatchQueue.main.async { self.ready = false }
+
+    // Reset published state on the main queue
+    DispatchQueue.main.async {
+      self.modelUpdatedAt = nil
+      self.modelLoadedAt = nil
+      self.ready = false
+    }
   }
   
   /// Whether the predictor needs to load (or reload) its models.
@@ -331,16 +367,33 @@ extension Predictor {
   ///   - input: The training input.
   ///   - completion: Called after training has completed.
   private func train(_ input: TrainingInput, completion: @escaping (Error?) -> Void) {
-    guard !training && input.isValid else {
+    guard input.isValid else {
       logDebug("Training data is not valid.")
       completion(nil)
       return
     }
-        
+
+    // Atomically claim the training session so overlapping triggers (the
+    // background task and the manual train button) can't both start.
+    let claimed = trainingState.withLock { state -> Bool in
+      guard !state.isTraining else {
+        return false
+      }
+      state.isTraining = true
+      state.isCancelled = false
+      return true
+    }
+
+    guard claimed else {
+      logDebug("Training is already in progress.")
+      completion(nil)
+      return
+    }
+
     DispatchQueue.main.async { [weak self] in self?.training = true }
-    cancelledTraining = false
-    
+
     let finished: (Error?) -> Void = { [weak self] error in
+      self?.trainingState.withLock { $0.isTraining = false }
       completion(error)
       DispatchQueue.main.async { self?.training = false }
       return
@@ -355,7 +408,7 @@ extension Predictor {
         }
         
         // Train the outlook classifier
-        if !self.cancelledTraining {
+        if !self.isTrainingCancelled {
           logDebug("Training outlook classifier.")
           // Train the classifier
           let classifier = try MLBoostedTreeClassifier(trainingData: input.outlookTable, targetColumn: OutlookClassifierOutput.FeatureName.outlook)
@@ -365,7 +418,7 @@ extension Predictor {
         }
         
         // Train the severity classifier
-        if !self.cancelledTraining {
+        if !self.isTrainingCancelled {
           logDebug("Training severity classifier.")
           // Train the classifier
           let classifier = try MLBoostedTreeClassifier(trainingData: input.severityTable, targetColumn: SeverityClassifierOutput.FeatureName.severity)
@@ -375,7 +428,7 @@ extension Predictor {
         }
         
         // Train the onset regressor
-        if !self.cancelledTraining {
+        if !self.isTrainingCancelled {
           logDebug("Training onset regressor.")
           // Train the regressor
           let regressor = try MLBoostedTreeRegressor(trainingData: input.onsetTable, targetColumn: OnsetRegressorOutput.FeatureName.onset)
@@ -385,7 +438,7 @@ extension Predictor {
         }
         
         // Train the duration regressor
-        if !self.cancelledTraining {
+        if !self.isTrainingCancelled {
           logDebug("Training duration regressor.")
           // Train the regressor
           let regressor = try MLBoostedTreeRegressor(trainingData: input.durationTable, targetColumn: DurationRegressorOutput.FeatureName.duration)
@@ -403,7 +456,7 @@ extension Predictor {
           logWarning("Unable to get recent model creation date.")
         }
         
-        if self.cancelledTraining {
+        if self.isTrainingCancelled {
           finished(nil)
         }
         else {
@@ -442,8 +495,12 @@ extension Predictor {
   /// The date of the file with the given url.
   ///
   /// - Parameter url: The url of the file.
-  /// - Returns: The file's creation date.
+  /// - Returns: The file's creation date, or `nil` if the file doesn't exist.
   private func dateOfFile(at url: URL) throws -> Date? {
+    guard FileManager.default.fileExists(atPath: url.path) else {
+      return nil
+    }
+
     let attributes = try FileManager.default.attributesOfItem(atPath: url.path)
     return attributes[.modificationDate] as? Date ?? attributes[.creationDate] as? Date
   }

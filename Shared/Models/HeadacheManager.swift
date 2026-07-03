@@ -539,11 +539,26 @@ extension HeadacheManager {
   ///
   /// - Returns: A boolean indicating if the app needs to train its models.
   func needsTraining() async throws -> Bool {
-    guard let lastTrainingDate = predictor.modelUpdatedAt, let timestamp = try await lastTrainingDataDate() else {
+    guard let timestamp = try await lastTrainingDataDate() else {
       return false
     }
-    
+
+    guard let lastTrainingDate = predictor.modelUpdatedAt else {
+      // No models have been trained yet. Bootstrap the first training run
+      // once enough samples have accumulated.
+      return try await trainingDataCount() >= Constants.minimumTrainingDataCount
+    }
+
     return timestamp.timeIntervalSince(lastTrainingDate) > 0.0
+  }
+
+  /// The number of training data samples.
+  ///
+  /// - Returns: The count of training data.
+  func trainingDataCount() async throws -> Int {
+    return try await trainingData { trainingData, _ in
+      return trainingData.count
+    }
   }
   
   /// Cancels the current classification input reading.
@@ -650,115 +665,109 @@ extension HeadacheManager {
   }
   
   /// Upgrades the app's training data.
+  ///
+  /// Rows to upgrade are collected in a read pass, the replacement health and
+  /// weather values are fetched outside of any managed object context, and a
+  /// final write pass applies them. Blocking a context's queue while awaiting
+  /// work on that same queue deadlocks, so no context is held while fetching.
   func upgradeTrainingData() async throws {
     logInfo("Upgrading health kit training data.")
-    try await trainingData(predicate: NSPredicate(format: "(healthData.version != %@) OR (healthData.version == %@)", Constants.trainingDataVersion as NSString, NSNull())) { [weak self] trainingData, _ in
-      logInfo("Performing upgrade on \(trainingData.count) data.")
-      // Perform the upgrade
-      for trainingDatum in trainingData {
+    let healthUpgradeTargets: [(NSManagedObjectID, Date)] = try await trainingData(predicate: NSPredicate(format: "(healthData.version != %@) OR (healthData.version == %@)", Constants.trainingDataVersion as NSString, NSNull())) { trainingData, _ in
+      return trainingData.compactMap { trainingDatum in
         guard let timestamp = trainingDatum.timestamp else {
-          continue
+          return nil
         }
+        return (trainingDatum.objectID, timestamp)
+      }
+    }
 
-        let interval = DateInterval(start: timestamp.addingTimeInterval(-86400.0), end: timestamp)
-        if let data = self?.healthKitManager.readHealthKitData(in: interval) {
+    logInfo("Performing upgrade on \(healthUpgradeTargets.count) data.")
+    var healthUpdates = [(NSManagedObjectID, [HealthKitData: Double], Date)]()
+    for (objectID, timestamp) in healthUpgradeTargets {
+      let interval = DateInterval(start: timestamp.addingTimeInterval(-86400.0), end: timestamp)
+      if let data = healthKitManager.readHealthKitData(in: interval) {
+        healthUpdates.append((objectID, data, timestamp))
+      }
+    }
+
+    if !healthUpdates.isEmpty {
+      try await DataController.shared.performInBackground(saveOnComplete: true) { context in
+        for (objectID, data, timestamp) in healthUpdates {
+          guard let trainingDatum = try? context.existingObject(with: objectID) as? TrainingData else {
+            continue
+          }
           trainingDatum.updateWithHealthKitData(data, at: timestamp)
         }
       }
-      logDebug("Finished upgrading health kit training data.")
     }
-    
+    logDebug("Finished upgrading health kit training data.")
+
     logInfo("Upgrading weather training data.")
-    try await trainingData(predicate: NSPredicate(format: "(weatherData.version != %@) OR (weatherData.version == %@)", Constants.trainingDataWeatherVersion as NSString, NSNull())) { [weak self] trainingData, context in
-      guard let self = self else {
-        return
-      }
-      
-      logInfo("Performing weather upgrade on \(trainingData.count) data.")
-      // Perform the upgrade
-      let group = DispatchGroup()
-      for trainingDatum in trainingData {
+    let weatherUpgradeTargets: [(NSManagedObjectID, Date)] = try await trainingData(predicate: NSPredicate(format: "(weatherData.version != %@) OR (weatherData.version == %@)", Constants.trainingDataWeatherVersion as NSString, NSNull())) { trainingData, _ in
+      return trainingData.compactMap { trainingDatum in
         guard let timestamp = trainingDatum.timestamp else {
-          continue
+          return nil
         }
+        return (trainingDatum.objectID, timestamp)
+      }
+    }
 
-        group.enter()
-        Task {
-          do {
-            let location = try await self.locationManager.location()
-            let weather = try await self.weatherManager.weather(at: timestamp, for: location)
-            await context.perform {
-              trainingDatum.updateWithWeatherStatistics(weather.statistics, at: timestamp)
-            }
-          }
-          catch {
-            logError("Error upgrading weather: \(error)")
-          }
+    logInfo("Performing weather upgrade on \(weatherUpgradeTargets.count) data.")
+    var weatherUpdates = [(NSManagedObjectID, WeatherStatistics, Date)]()
+    for (objectID, timestamp) in weatherUpgradeTargets {
+      do {
+        let location = try await locationManager.location()
+        let weather = try await weatherManager.weather(at: timestamp, for: location)
+        weatherUpdates.append((objectID, weather.statistics, timestamp))
+      }
+      catch {
+        logError("Error upgrading weather: \(error)")
+      }
+    }
 
-          group.leave()
+    if !weatherUpdates.isEmpty {
+      try await DataController.shared.performInBackground(saveOnComplete: true) { context in
+        for (objectID, statistics, timestamp) in weatherUpdates {
+          guard let trainingDatum = try? context.existingObject(with: objectID) as? TrainingData else {
+            continue
+          }
+          trainingDatum.updateWithWeatherStatistics(statistics, at: timestamp)
         }
       }
-      group.wait()
-      logDebug("Finished upgrading weather training data.")
     }
+    logDebug("Finished upgrading weather training data.")
   }
   
   /// Trains the classifiers.
-  ///
-  /// - Parameter completion: Called when training is complete.
   func trainClassifiers() async throws {
-    try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
-      Task {
-        do {
-          try await trainingData(predicate: NSPredicate(format: "(healthData.version == %@) AND (weatherData.version == %@)", Constants.trainingDataVersion as NSString, Constants.trainingDataWeatherVersion as NSString)) { [weak self] trainingData, _ in
-            guard let self = self else {
-              continuation.resume()
-              return
-            }
-            
-            var notPresentTrainingData = trainingData.filter({ $0.severity?.severity == .notPresent || $0.severity?.severity == nil })
-            var notNotPresentTrainingData = trainingData.filter({ $0.severity?.severity != .notPresent && $0.severity?.severity != nil })
-            
-            notPresentTrainingData.shuffle()
-            notNotPresentTrainingData.shuffle()
-            
-            if notNotPresentTrainingData.count < 50 {
-              let maxNotPresent = notNotPresentTrainingData.count * 2
-              if notPresentTrainingData.count > maxNotPresent {
-                notPresentTrainingData.removeLast(notPresentTrainingData.count - maxNotPresent)
-              }
-            }
-            else {
-              let maxNotPresent = notNotPresentTrainingData.count
-              if notPresentTrainingData.count > maxNotPresent {
-                notPresentTrainingData.removeLast(notPresentTrainingData.count - maxNotPresent)
-              }
-            }
-            
-            let trimmedTrainingData = notPresentTrainingData + notNotPresentTrainingData
-            
-            // Get the training input
-            let input = try TrainingInput(trainingData: trimmedTrainingData)
-            
-            logDebug("Training classifiers with \(trimmedTrainingData.count) data...")
-            Task {
-              do {
-                try await self.predictor.train(input)
-                continuation.resume()
-              }
-              catch {
-                logError("Error training classifiers: \(error)")
-                continuation.resume(throwing: error)
-              }
-            }
-          }
-        }
-        catch {
-          logError("Got error \(error)")
-          continuation.resume(throwing: error)
-        }
-      }
+    // Build the training input inside the context block; the input holds
+    // context-free data tables, so training itself runs outside of it.
+    let input = try await trainingData(predicate: NSPredicate(format: "(healthData.version == %@) AND (weatherData.version == %@)", Constants.trainingDataVersion as NSString, Constants.trainingDataWeatherVersion as NSString)) { trainingData, _ -> TrainingInput in
+      let trimmedTrainingData = HeadacheManager.trimmedTrainingData(trainingData)
+      logDebug("Training classifiers with \(trimmedTrainingData.count) data...")
+      return try TrainingInput(trainingData: trimmedTrainingData)
     }
+
+    try await predictor.train(input)
+  }
+
+  /// Balances the ratio of not-present training data to headache training data.
+  ///
+  /// - Parameter trainingData: The training data to trim.
+  /// - Returns: The trimmed training data.
+  static func trimmedTrainingData(_ trainingData: [TrainingData]) -> [TrainingData] {
+    var notPresentTrainingData = trainingData.filter({ $0.severity?.severity == .notPresent || $0.severity?.severity == nil })
+    var notNotPresentTrainingData = trainingData.filter({ $0.severity?.severity != .notPresent && $0.severity?.severity != nil })
+
+    notPresentTrainingData.shuffle()
+    notNotPresentTrainingData.shuffle()
+
+    let maxNotPresent = notNotPresentTrainingData.count < 50 ? notNotPresentTrainingData.count * 2 : notNotPresentTrainingData.count
+    if notPresentTrainingData.count > maxNotPresent {
+      notPresentTrainingData.removeLast(notPresentTrainingData.count - maxNotPresent)
+    }
+
+    return notPresentTrainingData + notNotPresentTrainingData
   }
   
   /// Evaluates the prediction and saves it to core data.

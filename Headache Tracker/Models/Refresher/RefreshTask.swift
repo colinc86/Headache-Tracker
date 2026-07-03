@@ -7,6 +7,45 @@
 
 import BackgroundTasks
 import Foundation
+import os
+
+/// Completes a background task exactly once, regardless of whether the
+/// expiration handler or the task's work finishes first. Calling
+/// `setTaskCompleted` twice is an API violation, and never calling it gets
+/// the app's background budget penalized.
+final class TaskCompletionGuard {
+
+  /// The guarded task.
+  private let task: BGTask
+
+  /// Whether the task has been completed.
+  private let completed = OSAllocatedUnfairLock(initialState: false)
+
+  /// Initializes a guard for the given task.
+  ///
+  /// - Parameter task: The task to guard.
+  init(_ task: BGTask) {
+    self.task = task
+  }
+
+  /// Completes the task if it hasn't already been completed.
+  ///
+  /// - Parameter success: Whether the task completed successfully.
+  func complete(success: Bool) {
+    let shouldComplete = completed.withLock { isCompleted -> Bool in
+      guard !isCompleted else {
+        return false
+      }
+      isCompleted = true
+      return true
+    }
+
+    if shouldComplete {
+      task.setTaskCompleted(success: success)
+    }
+  }
+
+}
 
 class RefreshTask {
   
@@ -74,8 +113,12 @@ extension RefreshTask {
       request.earliestBeginDate = date
     }
     else {
-      request = BGProcessingTaskRequest(identifier: self.identifier)
-      request.earliestBeginDate = date
+      let processingRequest = BGProcessingTaskRequest(identifier: self.identifier)
+      processingRequest.earliestBeginDate = date
+      // Training is local and heavy; prefer running while charging.
+      processingRequest.requiresExternalPower = true
+      processingRequest.requiresNetworkConnectivity = false
+      request = processingRequest
     }
     
     try BGTaskScheduler.shared.submit(request)
