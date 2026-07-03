@@ -42,10 +42,14 @@ struct LogSeverityIntent: LiveActivityIntent {
     let manager = HeadacheManager()
     try await manager.changeSeverity(to: targetSeverity)
 
-    // Schedule the follow-up check-in the same way an in-app change does.
+    // Schedule the follow-up check-in the same way an in-app change does —
+    // and on resolve, cancel any pending one, matching the in-app path.
     let preferences = Preferences.Notifications()
-    if preferences.checkInAlerts, targetSeverity != .notPresent,
-       let headacheIdentifier = try await manager.currentHeadacheIdentifier() {
+    if targetSeverity == .notPresent {
+      AlertManager().removePendingRequests(withIdentifiers: [HeadacheAlertRequest.checkInRequestIdentifier])
+    }
+    else if preferences.checkInAlerts,
+            let headacheIdentifier = try await manager.currentHeadacheIdentifier() {
       try await AlertManager().scheduleCheckInAlert(
         headacheIdentifier: headacheIdentifier,
         interval: preferences.checkInInterval)

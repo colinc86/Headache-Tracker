@@ -57,10 +57,15 @@ class AlertDelegate: NSObject, UNUserNotificationCenterDelegate {
   func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
     let category = response.notification.request.content.categoryIdentifier
 
-    // Background resolve from the check-in notification.
+    // Background resolve from the check-in notification. Mirror the in-app
+    // resolve path: cancel the pending check-in and end the Live Activity.
     if response.actionIdentifier == Action.resolve {
       do {
         try await headacheManager?.resolve()
+        center.removePendingNotificationRequests(withIdentifiers: [HeadacheAlertRequest.checkInRequestIdentifier])
+        if let headacheManager = headacheManager {
+          await LiveActivityManager.shared.reconcile(headacheManager: headacheManager)
+        }
       }
       catch {
         logError("Error resolving from notification action: \(error)")

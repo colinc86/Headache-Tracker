@@ -21,6 +21,9 @@ struct OutlookView: View {
   private var tint: Color {
     switch outlook {
     case .risk(let prediction):
+      guard prediction.probability >= 0 else {
+        return Color.secondary
+      }
       switch prediction.tier {
       case .low: return colorTheme.mint
       case .elevated: return colorTheme.orange

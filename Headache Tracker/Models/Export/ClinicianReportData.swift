@@ -105,10 +105,16 @@ extension ClinicianReportData {
     let insightsReport = InsightsStore.shared.load()
 
     return try await DataController.shared.performInBackground { context in
-      let request = Headache.fetchRequest()
-      request.predicate = NSPredicate(format: "(startTime >= %@) AND (startTime <= %@)", interval.start as NSDate, interval.end as NSDate)
-      request.sortDescriptors = [NSSortDescriptor(key: "startTime", ascending: false)]
-      let headaches = try context.fetch(request)
+      // Headache.startTime is a computed property (first severity's start),
+      // not a modeled attribute, so filter and sort in memory.
+      let headaches = try context.fetch(Headache.fetchRequest())
+        .filter { headache in
+          guard let start = headache.startTime else {
+            return false
+          }
+          return interval.contains(start)
+        }
+        .sorted { ($0.startTime ?? .distantPast) > ($1.startTime ?? .distantPast) }
 
       let calendar = Calendar.current
       var rows = [HeadacheRow]()

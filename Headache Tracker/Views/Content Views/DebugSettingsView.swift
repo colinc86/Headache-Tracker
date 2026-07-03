@@ -142,8 +142,12 @@ struct DebugSettingsView: View {
       
       Section {
         AsyncButton("Backup Database", mode: .afterContent, action: backupDatabase)
+          .disabled(Preferences.Sync().storeIsSplit)
         Button("Restore Database", action: restoreDatabase)
-          .disabled(Preferences.Sync().enabled)
+          .disabled(Preferences.Sync().storeIsSplit)
+          // Backup/restore copy a single store file; once the database is
+          // split for iCloud sync they would silently miss the user-data
+          // store, so both are disabled (iCloud is the offsite copy).
         AsyncButton("Initialize CloudKit Schema", mode: .replacingContent, action: initializeCloudKitSchema)
           .disabled(!Preferences.Sync().enabled)
       }

@@ -273,10 +273,11 @@ struct SettingsView: View {
       }
       .navigationTitle("Settings")
     }
-    .confirmationDialog("Turn on iCloud Sync? Your headache log will upload to your private iCloud database. This also enables change tracking on the database, which stays on even if you turn sync off later.", isPresented: $showingSyncConfirmation, titleVisibility: .visible) {
+    .confirmationDialog("Turn on iCloud Sync? Your headache log will upload to your private iCloud database. This splits the database into synced and device-only parts — turning sync off later stops uploads but keeps that layout.", isPresented: $showingSyncConfirmation, titleVisibility: .visible) {
       Button("Turn On Sync") {
         var sync = Preferences.Sync()
         sync.enabled = true
+        sync.storeIsSplit = true
         syncEnabled = true
         showingRelaunchAlert = true
       }

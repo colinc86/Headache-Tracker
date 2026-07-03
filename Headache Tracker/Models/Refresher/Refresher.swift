@@ -89,10 +89,12 @@ extension Refresher {
   /// baseline-deviation reasons.
   ///
   /// - Parameter prediction: The prediction.
-  func presentMorningBrief(with prediction: RiskPrediction?) async throws {
-    // Only continue if we have a prediction and prediction alerts are turned on
+  /// - Returns: Whether the brief was actually presented.
+  @discardableResult
+  func presentMorningBrief(with prediction: RiskPrediction?) async throws -> Bool {
+    // Only continue if we have a prediction and brief alerts are turned on
     guard preferences.notifications.dailyOutlookAlerts, let prediction = prediction, prediction != .empty else {
-      return
+      return false
     }
 
     let brief = RiskBriefBuilder.makeBrief(
@@ -105,6 +107,7 @@ extension Refresher {
     try await alertManager.presentAlert(
       with: HeadacheAlertRequest.morningBrief(tier: prediction.tier, probability: prediction.probability, reasons: brief?.reasons ?? []),
       badgeNumber: 0)
+    return true
   }
 
   /// Schedules (or cancels) the repeating evening exposure check-in
@@ -152,7 +155,12 @@ extension Refresher {
       return
     }
 
-    try await presentMorningBrief(with: prediction)
+    // Consume the day's slot only when a brief was actually presented —
+    // an empty prediction (e.g. right after a model reset) declines
+    // silently and should retry on the next refresh.
+    guard try await presentMorningBrief(with: prediction) else {
+      return
+    }
 
     let now = Date()
     preferences.debug.lastOutlookDate = now

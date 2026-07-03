@@ -114,10 +114,22 @@ enum RiskOutlook {
   /// A headache is in progress.
   case activeHeadache(severity: Headache.Severity, since: Date?)
 
+  /// Whether the outlook has no real forecast to show.
+  var isEmpty: Bool {
+    if case .risk(let prediction) = self {
+      return prediction.probability < 0
+    }
+    return false
+  }
+
   /// A title suitable for the user interface.
   var title: String {
     switch self {
     case .risk(let prediction):
+      // An empty prediction must not read as a real "Low Risk" forecast.
+      guard prediction.probability >= 0 else {
+        return "No Forecast Yet"
+      }
       return prediction.tier.title
     case .activeHeadache(let severity, _):
       return "\(severity.title) Headache"

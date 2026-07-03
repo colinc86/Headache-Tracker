@@ -92,10 +92,16 @@ struct ClinicianReportBuilder {
     let formatter = ISO8601DateFormatter()
 
     let lines: [String] = try await DataController.shared.performInBackground { context in
-      let request = Headache.fetchRequest()
-      request.predicate = NSPredicate(format: "(startTime >= %@) AND (startTime <= %@)", interval.start as NSDate, interval.end as NSDate)
-      request.sortDescriptors = [NSSortDescriptor(key: "startTime", ascending: true)]
-      let headaches = try context.fetch(request)
+      // Headache.startTime is a computed property (first severity's start),
+      // not a modeled attribute, so filter and sort in memory.
+      let headaches = try context.fetch(Headache.fetchRequest())
+        .filter { headache in
+          guard let start = headache.startTime else {
+            return false
+          }
+          return interval.contains(start)
+        }
+        .sorted { ($0.startTime ?? .distantPast) < ($1.startTime ?? .distantPast) }
 
       var lines = ["headache_id,headache_start,type,classification,severity,severity_start,severity_end,medications,tags,notes"]
       for headache in headaches {

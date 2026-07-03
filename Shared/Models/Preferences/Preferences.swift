@@ -445,11 +445,13 @@ struct Preferences {
     struct Keys {
       static let enabled            = Key("settings.sync.enabled")
       static let didMigrateUserData = Key("settings.sync.didMigrateUserData")
+      static let storeIsSplit       = Key("settings.sync.storeIsSplit")
     }
 
     struct Defaults {
       static let enabled = false
       static let didMigrateUserData = false
+      static let storeIsSplit = false
     }
 
     /// Whether iCloud sync is enabled. Read at store setup, so changes take
@@ -460,6 +462,12 @@ struct Preferences {
 
     /// Whether the one-time user-data migration into the cloud store ran.
     @UserDefault(Keys.didMigrateUserData, store: .shared) var didMigrateUserData = Defaults.didMigrateUserData
+
+    /// Whether the store has ever been split into Cloud/Local files. Set
+    /// when sync is first enabled and never unset: turning sync off stops
+    /// CloudKit mirroring but must keep the split layout (and history
+    /// tracking), or every row in the cloud store would become unreachable.
+    @UserDefault(Keys.storeIsSplit, store: .shared) var storeIsSplit = Defaults.storeIsSplit
   }
 
   /// Shared settings.

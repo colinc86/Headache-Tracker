@@ -11,6 +11,10 @@ import UserNotifications
 enum HeadacheAlertRequest: AlertRequest {
   
   static let headacheIdentifierUserInfoKey = "headacheIdentifier"
+
+  /// The stable identifier of the pending headache check-in request, for
+  /// scoped removal from paths that don't have a request instance.
+  static let checkInRequestIdentifier = "headache-check-in"
   
   case checkIn(headacheIdentifier: UUID)
   case risk(probability: Double)
@@ -21,7 +25,7 @@ enum HeadacheAlertRequest: AlertRequest {
   /// the same kind, and removal can be scoped instead of nuking everything.
   public var identifier: String {
     switch self {
-    case .checkIn: return "headache-check-in"
+    case .checkIn: return HeadacheAlertRequest.checkInRequestIdentifier
     case .risk: return "risk"
     case .morningBrief: return "morning-brief"
     case .exposureCheckIn: return "exposure-check-in"

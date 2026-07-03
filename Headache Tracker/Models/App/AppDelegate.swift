@@ -98,6 +98,15 @@ class AppDelegate: NSObject, UIApplicationDelegate, ObservableObject {
           defaults.set(Constants.modelSchemaVersion, forKey: Constants.modelSchemaVersionKey)
         }
 
+        // One-time user-data migration into the cloud store, then start
+        // observing remote changes. This must run before anything that can
+        // throw for unrelated reasons (alert authorization), or the
+        // migration could be skipped while the split layout is live.
+        if preferences.sync.storeIsSplit {
+          try await CloudMigrator.migrateIfNeeded()
+          observeRemoteChanges()
+        }
+
         // Repair any data integrity issues from earlier versions
         try await headacheManager.repairDataIntegrity()
 
@@ -110,14 +119,13 @@ class AppDelegate: NSObject, UIApplicationDelegate, ObservableObject {
         // Load our ML classifiers
         try await headacheManager.predictor.load()
 
-        // Keep the evening check-in reminder aligned with preferences
-        try await refresher.updateExposureReminderSchedule()
-
-        // One-time user-data migration into the cloud store, then start
-        // observing remote changes
-        if preferences.sync.enabled {
-          try await CloudMigrator.migrateIfNeeded()
-          observeRemoteChanges()
+        // Keep the evening check-in reminder aligned with preferences.
+        // Non-critical: scheduling throws when notifications are denied.
+        do {
+          try await refresher.updateExposureReminderSchedule()
+        }
+        catch {
+          logError("Error scheduling check-in reminder: \(error)")
         }
       }
       catch {
@@ -216,8 +224,11 @@ extension AppDelegate {
   }
 
   /// Subscribes to remote store changes: after a CloudKit import (or a
-  /// widget write), repair invariants, dedupe tags, refresh the shared
-  /// severity, and trim persistent history.
+  /// widget write), repair invariants, dedupe tags, and refresh the shared
+  /// severity. Persistent history is deliberately NOT purged here — the
+  /// CloudKit mirroring delegate consumes that history to export local
+  /// changes, and purging it while a device is offline would silently drop
+  /// unexported rows from sync.
   private func observeRemoteChanges() {
     remoteChangeCancellable = DataController.shared.remoteChangePublisher
       .debounce(for: .seconds(2.0), scheduler: DispatchQueue.main)
@@ -232,7 +243,6 @@ extension AppDelegate {
             try await self.headacheManager.repairDataIntegrity()
             try await self.headacheManager.dedupeTags()
             try await self.headacheManager.refreshSharedState()
-            try await DataController.shared.purgeHistory()
             WidgetCenter.shared.reloadAllTimelines()
           }
           catch {

@@ -466,6 +466,15 @@ extension Predictor {
             self.permutationImportances(of: classifier, on: validation, targetColumn: RiskClassifierOutput.FeatureName.risk, baselineError: evaluation.classificationError))
         }
 
+        // A cancellation after this point would leave the new model file
+        // paired with the previous run's medians and calibration, so this
+        // is the last cancellation gate: past it, the model and all of its
+        // sidecars are written together.
+        guard !self.isTrainingCancelled else {
+          finished(nil)
+          return
+        }
+
         // Write and compile the model so validation rows can be scored
         // per-row (CreateML exposes no per-row probabilities at training
         // time), then fit the calibration on the raw scores.
@@ -500,14 +509,14 @@ extension Predictor {
           positiveCount: outcomes.lazy.filter({ $0 }).count,
           isCalibrated: fitted != nil)
 
-        if !self.isTrainingCancelled {
-          // Persist the sidecars beside the model.
-          try JSONEncoder().encode(input.medians).write(to: self.mediansURL(), options: .atomic)
-          try JSONEncoder().encode(metrics).write(to: self.metricsURL(), options: .atomic)
-          try JSONEncoder().encode(featureImportances).write(to: self.importancesURL(), options: .atomic)
-          try JSONEncoder().encode(calibration).write(to: self.calibrationURL(), options: .atomic)
-          try JSONEncoder().encode(Constants.modelSchemaVersion).write(to: self.schemaVersionURL(), options: .atomic)
-        }
+        // Persist the sidecars beside the model unconditionally — the model
+        // file is already in place, and skipping these on a late
+        // cancellation would mismatch them.
+        try JSONEncoder().encode(input.medians).write(to: self.mediansURL(), options: .atomic)
+        try JSONEncoder().encode(metrics).write(to: self.metricsURL(), options: .atomic)
+        try JSONEncoder().encode(featureImportances).write(to: self.importancesURL(), options: .atomic)
+        try JSONEncoder().encode(calibration).write(to: self.calibrationURL(), options: .atomic)
+        try JSONEncoder().encode(Constants.modelSchemaVersion).write(to: self.schemaVersionURL(), options: .atomic)
 
         logDebug("Getting creation date.")
         if let creationDate = try self.dateOfFile(at: self.compiledModelURL(with: Predictor.riskClassifierFileName)) {
@@ -518,13 +527,8 @@ extension Predictor {
           logWarning("Unable to get recent model creation date.")
         }
 
-        if self.isTrainingCancelled {
-          finished(nil)
-        }
-        else {
-          self.load { error in
-            finished(error)
-          }
+        self.load { error in
+          finished(error)
         }
       }
       catch {

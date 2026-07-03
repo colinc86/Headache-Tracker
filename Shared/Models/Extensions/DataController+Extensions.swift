@@ -22,22 +22,25 @@ extension DataController {
   static let cloudStoreFileName = "\(Constants.CoreData.sqliteContainerName)-cloud.sqlite"
 
   static let shared: DataController = {
-    let syncEnabled = Preferences.Sync().enabled
+    let sync = Preferences.Sync()
     let isExtension = Bundle.main.bundleURL.pathExtension == "appex"
 
-    guard syncEnabled else {
-      // Single combined store, exactly as before sync existed. History
-      // tracking stays off until the user opts in.
+    // The store layout follows the split flag, not the sync toggle: once
+    // the split (and history tracking) has happened it can't be undone
+    // without losing the cloud store's rows. Turning sync off only stops
+    // the CloudKit mirroring.
+    guard sync.storeIsSplit else {
+      // Single combined store, exactly as before sync existed.
       return DataController(containerName: Constants.CoreData.sqliteContainerName, appGroup: Constants.appGroupIdentifier)
     }
 
-    // Split stores: user data mirrors to CloudKit (app process only — the
-    // widget reads the same files but never runs the mirroring), device
-    // data stays local.
+    // Split stores: user data mirrors to CloudKit while sync is enabled
+    // (app process only — the widget reads the same files but never runs
+    // the mirroring), device data stays local.
     return DataController(
       containerName: Constants.CoreData.sqliteContainerName,
       appGroup: Constants.appGroupIdentifier,
-      cloudKit: isExtension ? nil : CloudKitConfiguration(containerIdentifier: Constants.cloudKitContainerIdentifier),
+      cloudKit: (sync.enabled && !isExtension) ? CloudKitConfiguration(containerIdentifier: Constants.cloudKitContainerIdentifier) : nil,
       storeConfigurations: [
         StoreConfiguration(modelConfiguration: "Local", fileName: localStoreFileName),
         StoreConfiguration(modelConfiguration: "Cloud", fileName: cloudStoreFileName, syncsToCloudKit: true)
