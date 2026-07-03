@@ -281,6 +281,23 @@ extension Headache {
     createdAt = severities.first?.startTime
   }
 
+  /// A context-free snapshot of the headache's intervals for label
+  /// derivation, or nil when the headache has no dated severities.
+  var episode: HeadacheEpisode? {
+    guard let startTime = startTime else {
+      return nil
+    }
+
+    let severityIntervals: [HeadacheEpisode.SeverityInterval] = severitiesArray.compactMap { state in
+      guard let start = state.startTime else {
+        return nil
+      }
+      return HeadacheEpisode.SeverityInterval(severity: state.severity, start: start, end: state.endTime)
+    }
+
+    return HeadacheEpisode(start: startTime, end: endTime ?? (resolved ? pendingEndTime : nil), severities: severityIntervals)
+  }
+
   /// The duration-weighted average severity over the headache's progression.
   var averageSeverity: Double {
     let now = Date()

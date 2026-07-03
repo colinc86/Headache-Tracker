@@ -195,6 +195,54 @@ class Headache_TrackerTests: XCTestCase {
     XCTAssertGreaterThan(unsorted.2, 0.0)
   }
 
+  // MARK: Label derivation
+
+  func testDeriveLabelsFromEpisodes() throws {
+    let onset = baseDate.addingTimeInterval(100_000)
+    let headache = makeHeadache(severity: .severe, start: onset, end: onset.addingTimeInterval(10_000))
+    let episodes = [try XCTUnwrap(headache.episode)]
+
+    let far = TrainingData(context: context)
+    far.timestamp = onset.addingTimeInterval(-172_800) // 48 h before onset
+
+    let near = TrainingData(context: context)
+    near.timestamp = onset.addingTimeInterval(-72_000) // 20 h before onset
+
+    let during = TrainingData(context: context)
+    during.timestamp = onset.addingTimeInterval(5_000)
+
+    let after = TrainingData(context: context)
+    after.timestamp = onset.addingTimeInterval(20_000)
+
+    [far, near, during, after].deriveLabels(from: episodes)
+
+    XCTAssertEqual(far.outlook, .noHeadache)
+    XCTAssertEqual(near.outlook, .possibleHeadache)
+    XCTAssertEqual(near.timeIntervalUntilNextHeadacheStart ?? 0, 72_000, accuracy: 0.001)
+    XCTAssertEqual(during.outlook, .headache)
+    XCTAssertEqual(during.derivedSeverity, .severe)
+    XCTAssertEqual(during.timeIntervalUntilNextHeadacheEnd ?? 0, 5_000, accuracy: 0.001)
+    XCTAssertEqual(after.outlook, .noHeadache)
+    XCTAssertEqual(after.derivedSeverity, .notPresent)
+    XCTAssertNil(after.timeIntervalUntilNextHeadacheStart)
+  }
+
+  func testDeriveLabelsUsesRollingWindowNotCalendarDay() throws {
+    // A sample one hour before a headache that starts just after midnight.
+    // The old calendar-day logic labeled this .noHeadache.
+    let midnight = Calendar.current.startOfDay(for: baseDate.addingTimeInterval(86_400))
+    let onset = midnight.addingTimeInterval(1_800) // 00:30
+    let headache = makeHeadache(severity: .mild, start: onset, end: onset.addingTimeInterval(3_600))
+    let episodes = [try XCTUnwrap(headache.episode)]
+
+    let sample = TrainingData(context: context)
+    sample.timestamp = midnight.addingTimeInterval(-1_800) // 23:30 the day before
+
+    [sample].deriveLabels(from: episodes)
+
+    XCTAssertEqual(sample.outlook, .possibleHeadache)
+  }
+
   // MARK: Training data trimming
 
   func testTrimmedTrainingDataBalancesClasses() {

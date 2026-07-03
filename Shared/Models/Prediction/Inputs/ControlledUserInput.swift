@@ -77,10 +77,17 @@ class ControlledUserInput: MLFeatureProvider {
   }
   
   convenience init(healthKitData: [HealthKitData: Double]?) {
+    // Sleep onset is carried as a reference-date interval; the feature is
+    // its time of day. Legacy values were already seconds since midnight.
+    var sleepOnset = healthKitData?[HealthKitData.sleepOnset] ?? 0.0
+    if sleepOnset > 86400.0 {
+      sleepOnset = Calendar.current.timeIntervalSinceMidnight(Date(timeIntervalSinceReferenceDate: sleepOnset))
+    }
+
     self.init(
       Mindful_Session: healthKitData?[HealthKitData.mindfulSession] ?? 0.0,
       Sleep_Seconds: healthKitData?[HealthKitData.sleepSeconds] ?? 0.0,
-      Sleep_Onset: healthKitData?[HealthKitData.sleepOnset] ?? 0.0,
+      Sleep_Onset: sleepOnset,
       Headphone_Audio_Exposure: healthKitData?[HealthKitData.headphoneAudioExposure] ?? 0.0,
       Step_Count: healthKitData?[HealthKitData.stepCount] ?? 0.0
     )

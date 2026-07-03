@@ -399,12 +399,8 @@ extension HeadacheManager {
     var originalSeverityIdentifiers = [UUID]()
     var newSeveritySamples = [Headache.Severity.Interval]()
 
-    let modified = try await severityWithIdentifier(identifier: identifier) { (severity, context) -> Bool in
-      var modified = false
-
+    try await severityWithIdentifier(identifier: identifier) { (severity, context) in
       if let severity = severity {
-        modified = severity.startTime != startTime
-
         let headache = severity.headache
         originalHeadacheInterval = headache?.dateInterval
         originalSeverityIdentifiers = (headache?.severitiesArray ?? []).compactMap({ $0.identifier })
@@ -424,14 +420,6 @@ extension HeadacheManager {
           newSeveritySamples.append(interval)
         }
       }
-
-      return modified
-    }
-
-    // Update the training data if needed
-    if modified {
-      let input = await predictorInput(atDate: startTime, inWidget: false)
-      try await createTrainingData(from: input, severityIdentifier: identifier, replacingExistingData: true)
     }
 
     // Check to see if we need to delete and re-add samples
@@ -701,8 +689,7 @@ extension HeadacheManager {
     }
     
     // Get the health kit data
-    let interval = DateInterval(start: date.addingTimeInterval(-86400.0), end: date)
-    let healthKitData = healthKitManager.readHealthKitData(in: interval, inWidget: inWidget)
+    let healthKitData = healthKitManager.readHealthKitData(endingAt: date, inWidget: inWidget)
     
     // Return the model input
     return ModelInput(date: date, location: location, weatherStatistics: weather?.statistics, healthKitData: healthKitData)
@@ -734,30 +721,23 @@ extension HeadacheManager {
   /// with the given identifier. If no identifier is present, then the training data is
   /// still created but orphaned (a not-present severity).
   ///
+  /// The relationship is advisory provenance; training labels are derived
+  /// from headache intervals at training time, so edits to a severity never
+  /// require replacing its training data.
+  ///
   /// - Parameters:
   ///   - input: The input data to create the training data from.
   ///   - severityIdentifier: The identifier of the training data's parent severity, if any.
-  ///   - replacingExistingData: Whether the severity's existing training data should be replaced with the new data.
-  func createTrainingData(from input: ModelInput, severityIdentifier: UUID? = nil, replacingExistingData: Bool = false) async throws {
+  func createTrainingData(from input: ModelInput, severityIdentifier: UUID? = nil) async throws {
     logInfo("Creating training data...")
     try await DataController.shared.performInBackground(saveOnComplete: true) { context in
       // Create the training data
       let trainingData = TrainingData(context: context, input: input)
       logDebug("Created training data.")
-      
+
       if let severityIdentifier = severityIdentifier {
         let request = SeverityState.fetchRequest(withIdentifier: severityIdentifier)
         if let severity = ((try? context.fetch(request)) ?? []).first {
-          if replacingExistingData {
-            if let existingTrainingData = severity.trainingData {
-              for data in existingTrainingData {
-                guard let uData = data as? TrainingData else { continue }
-                severity.removeFromTrainingData(uData)
-                context.delete(uData)
-              }
-            }
-          }
-          
           severity.addToTrainingData(trainingData)
         }
         else {
@@ -787,8 +767,7 @@ extension HeadacheManager {
     logInfo("Performing upgrade on \(healthUpgradeTargets.count) data.")
     var healthUpdates = [(NSManagedObjectID, [HealthKitData: Double], Date)]()
     for (objectID, timestamp) in healthUpgradeTargets {
-      let interval = DateInterval(start: timestamp.addingTimeInterval(-86400.0), end: timestamp)
-      if let data = healthKitManager.readHealthKitData(in: interval) {
+      if let data = healthKitManager.readHealthKitData(endingAt: timestamp) {
         healthUpdates.append((objectID, data, timestamp))
       }
     }
@@ -845,7 +824,12 @@ extension HeadacheManager {
   func trainClassifiers() async throws {
     // Build the training input inside the context block; the input holds
     // context-free data tables, so training itself runs outside of it.
-    let input = try await trainingData(predicate: NSPredicate(format: "(healthData.version == %@) AND (weatherData.version == %@)", Constants.trainingDataVersion as NSString, Constants.trainingDataWeatherVersion as NSString)) { trainingData, _ -> TrainingInput in
+    let input = try await trainingData(predicate: NSPredicate(format: "(healthData.version == %@) AND (weatherData.version == %@)", Constants.trainingDataVersion as NSString, Constants.trainingDataWeatherVersion as NSString)) { trainingData, context -> TrainingInput in
+      // Derive labels from headache intervals rather than the severity
+      // relationship, so edited and deleted headaches still label correctly.
+      let episodes = try HeadacheManager.headacheEpisodes(in: context)
+      trainingData.deriveLabels(from: episodes)
+
       let trimmedTrainingData = HeadacheManager.trimmedTrainingData(trainingData)
       logDebug("Training classifiers with \(trimmedTrainingData.count) data...")
       return try TrainingInput(trainingData: trimmedTrainingData)
@@ -854,13 +838,27 @@ extension HeadacheManager {
     try await predictor.train(input)
   }
 
+  /// The episodes of every headache in the store.
+  ///
+  /// - Parameter context: The context to fetch in.
+  /// - Returns: An array of headache episodes.
+  static func headacheEpisodes(in context: NSManagedObjectContext) throws -> [HeadacheEpisode] {
+    let request = Headache.fetchRequest()
+    return try context.fetch(request).compactMap({ $0.episode })
+  }
+
   /// Balances the ratio of not-present training data to headache training data.
+  ///
+  /// Rows must have derived labels (see `deriveLabels(from:)`); rows without
+  /// them fall back to the severity relationship.
   ///
   /// - Parameter trainingData: The training data to trim.
   /// - Returns: The trimmed training data.
   static func trimmedTrainingData(_ trainingData: [TrainingData]) -> [TrainingData] {
-    var notPresentTrainingData = trainingData.filter({ $0.severity?.severity == .notPresent || $0.severity?.severity == nil })
-    var notNotPresentTrainingData = trainingData.filter({ $0.severity?.severity != .notPresent && $0.severity?.severity != nil })
+    let severityOf: (TrainingData) -> Headache.Severity? = { $0.derivedSeverity ?? $0.severity?.severity }
+
+    var notPresentTrainingData = trainingData.filter({ severityOf($0) == .notPresent || severityOf($0) == nil })
+    var notNotPresentTrainingData = trainingData.filter({ severityOf($0) != .notPresent && severityOf($0) != nil })
 
     notPresentTrainingData.shuffle()
     notNotPresentTrainingData.shuffle()

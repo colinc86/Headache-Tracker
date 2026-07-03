@@ -8,8 +8,31 @@
 import CoreData
 import Foundation
 
+/// The set of weather fields that were actually captured when a snapshot was
+/// taken. Distinguishes "no reading" from a measured zero. The bit
+/// assignments are stable and persisted; never reorder them.
+struct WeatherFieldPresence: OptionSet {
+  let rawValue: Int64
+
+  static let devicePressure   = WeatherFieldPresence(rawValue: 1 << 0)
+  static let pressure         = WeatherFieldPresence(rawValue: 1 << 1)
+  static let humidity         = WeatherFieldPresence(rawValue: 1 << 2)
+  static let temperature      = WeatherFieldPresence(rawValue: 1 << 3)
+  static let sigmaPressure    = WeatherFieldPresence(rawValue: 1 << 4)
+  static let sigmaHumidity    = WeatherFieldPresence(rawValue: 1 << 5)
+  static let sigmaTemperature = WeatherFieldPresence(rawValue: 1 << 6)
+
+  /// All fields sourced from the weather service.
+  static let station: WeatherFieldPresence = [.pressure, .humidity, .temperature, .sigmaPressure, .sigmaHumidity, .sigmaTemperature]
+}
+
 extension WeatherData {
-  
+
+  /// The set of fields that were actually captured for this snapshot.
+  var presence: WeatherFieldPresence {
+    return WeatherFieldPresence(rawValue: presentFields)
+  }
+
   /// The device pressure measurement in kilopascals.
   var devicePressureMeasurement: Measurement<UnitPressure> {
     Measurement(value: devicePressure, unit: .kilopascals)
@@ -32,8 +55,12 @@ extension WeatherData {
   
   /// The weather data's weather statistics.
   var weatherStatistics: WeatherStatistics {
-    WeatherStatistics(
-      barometricPressure: devicePressure == 0.0 ? nil : devicePressure,
+    // Rows written before presence tracking used devicePressure == 0.0 as
+    // the "not captured" sentinel.
+    let hasDevicePressure = presence.isEmpty ? devicePressure != 0.0 : presence.contains(.devicePressure)
+
+    return WeatherStatistics(
+      barometricPressure: hasDevicePressure ? devicePressure : nil,
       currentPressure: pressure,
       currentHumidity: humidity,
       currentTemperature: temperature,
@@ -61,30 +88,32 @@ extension WeatherData {
   ///   - weatherStatistics: The weather statistics.
   ///   - timestamp: The weather statistic's timestamp.
   func updateWithWeatherStatistics(_ weatherStatistics: WeatherStatistics?, at timestamp: Date?) {
-    if let weatherStatistics = weatherStatistics {
-      devicePressure = weatherStatistics.barometricPressure ?? 0.0
-      pressure = weatherStatistics.currentPressure
-      humidity = weatherStatistics.currentHumidity
-      temperature = weatherStatistics.currentTemperature
-      sigmaPressure = weatherStatistics.sigmaPressure
-      sigmaHumidity = weatherStatistics.sigmaHumidity
-      sigmaTemperature = weatherStatistics.sigmaTemperature
-      
-      // Update the data version if everything went well
-      self.timestamp = timestamp
-      version = Constants.trainingDataWeatherVersion
-    }
-    else {
+    guard let weatherStatistics = weatherStatistics else {
+      // Nothing was captured. Record the absence rather than writing zeros
+      // that are indistinguishable from real measurements.
       self.timestamp = nil
       version = nil
-      devicePressure = 0.0
-      pressure = 0.0
-      humidity = 0.0
-      temperature = 0.0
-      sigmaPressure = 0.0
-      sigmaHumidity = 0.0
-      sigmaTemperature = 0.0
+      presentFields = 0
+      return
     }
+
+    var presence = WeatherFieldPresence.station
+    if let barometricPressure = weatherStatistics.barometricPressure {
+      devicePressure = barometricPressure
+      presence.insert(.devicePressure)
+    }
+
+    pressure = weatherStatistics.currentPressure
+    humidity = weatherStatistics.currentHumidity
+    temperature = weatherStatistics.currentTemperature
+    sigmaPressure = weatherStatistics.sigmaPressure
+    sigmaHumidity = weatherStatistics.sigmaHumidity
+    sigmaTemperature = weatherStatistics.sigmaTemperature
+
+    // Update the presence, data version, and timestamp
+    presentFields = presence.rawValue
+    self.timestamp = timestamp
+    version = Constants.trainingDataWeatherVersion
   }
   
 }

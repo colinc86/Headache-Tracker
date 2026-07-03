@@ -28,14 +28,13 @@ struct TrainingInput {
   
   /// Initializes new training input with an array of traning data.
   ///
+  /// The training data's volatile labels must already be derived (see
+  /// `deriveLabels(from:)`).
+  ///
   /// - Parameter trainingData: The training data.
   init(trainingData: [TrainingData]) throws {
     logDebug("Creating training data.")
-    
-    // Set the training classes
-    logDebug("Setting the training classes.")
-    trainingData.setVolitileVariables()
-    
+
     // Convert the training data to model inputs
     logDebug("Converting the training data to model inputs.")
     let inputs = trainingData.map({ $0.modelInput })

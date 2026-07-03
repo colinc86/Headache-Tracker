@@ -11,7 +11,10 @@ import Foundation
 struct Constants {
   
   /// The current training data version.
-  static let trainingDataVersion = "1.1"
+  ///
+  /// 1.2: per-metric sampling windows, sleep stages, HRV in milliseconds,
+  /// presence bits, and sleep onset as a date.
+  static let trainingDataVersion = "1.2"
   
   /// The weather training data version.
   static let trainingDataWeatherVersion = "1.1"

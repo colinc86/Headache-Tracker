@@ -11,7 +11,7 @@ import CoreML
 import Foundation
 
 extension TrainingData {
-  
+
   /// The training data's model input.
   var modelInput: ModelInput {
     ModelInput(
@@ -22,7 +22,7 @@ extension TrainingData {
       timeIntervalUntilNextHeadacheStart: timeIntervalUntilNextHeadacheStart,
       timeIntervalUntilNextHeadacheEnd: timeIntervalUntilNextHeadacheEnd,
       outlook: outlook ?? .noHeadache,
-      severity: severity?.severity ?? .notPresent)
+      severity: derivedSeverity ?? severity?.severity ?? .notPresent)
   }
   
   // MARK: Initializers
@@ -88,42 +88,93 @@ extension TrainingData {
   
 }
 
+/// A context-free snapshot of a headache's intervals, used to derive
+/// training labels independently of the `severity` relationship.
+struct HeadacheEpisode {
+
+  /// A severity value over a time interval.
+  struct SeverityInterval {
+    let severity: Headache.Severity
+    let start: Date
+    let end: Date?
+  }
+
+  /// The episode's start time.
+  let start: Date
+
+  /// The episode's end time, or nil if it's still in progress.
+  let end: Date?
+
+  /// The episode's severity progression.
+  let severities: [SeverityInterval]
+
+  /// Whether the episode contains the given date.
+  ///
+  /// - Parameter date: The date.
+  /// - Returns: A boolean.
+  func contains(_ date: Date) -> Bool {
+    return start <= date && date < (end ?? .distantFuture)
+  }
+
+  /// The severity at the given date.
+  ///
+  /// - Parameter date: The date.
+  /// - Returns: The severity in effect at the date, or nil when the date is
+  ///   outside the episode.
+  func severity(at date: Date) -> Headache.Severity? {
+    guard contains(date) else {
+      return nil
+    }
+    return severities.last(where: { $0.start <= date && date < ($0.end ?? .distantFuture) })?.severity
+  }
+
+}
+
 extension Array where Element == TrainingData {
-  
-  /// Sets the volitile training variables.
-  func setVolitileVariables() {
-    for i in 0 ..< count {
-      // Handle start and end times and outlook
-      guard let timestamp = self[i].timestamp else {
+
+  /// The rolling window ahead of a sample within which an upcoming headache
+  /// counts as a "possible headache" outlook.
+  static var possibleHeadacheWindow: TimeInterval { 86400.0 }
+
+  /// Derives the volatile training labels from headache intervals.
+  ///
+  /// Labels are computed against the full set of episodes rather than the
+  /// `severity` relationship, so they survive headache edits and deletions
+  /// and use a rolling 24-hour outlook window instead of a calendar-day
+  /// boundary.
+  ///
+  /// - Parameter episodes: The headache episodes to derive labels from.
+  func deriveLabels(from episodes: [HeadacheEpisode]) {
+    let sortedEpisodes = episodes.sorted(by: { $0.start < $1.start })
+
+    for row in self {
+      guard let timestamp = row.timestamp else {
         continue
       }
-      
-      if self[i].severity?.headache == nil {
-        // Set the time to the next headache start
-        if i < count - 1 {
-          for j in i + 1 ..< count {
-            if let startTime = self[j].severity?.headache?.startTime {
-              let interval = startTime.timeIntervalSince(timestamp)
-              self[i].timeIntervalUntilNextHeadacheStart = interval
-              
-              // Is the headache today?
-              if Calendar.current.numberOfDaysBetween(timestamp, and: startTime) == 0 {
-                self[i].outlook = .possibleHeadache
-              }
-              else {
-                self[i].outlook = .noHeadache
-              }
-              break
-            }
-          }
-        }
+
+      if let current = sortedEpisodes.last(where: { $0.contains(timestamp) }) {
+        // Inside a headache.
+        row.outlook = .headache
+        row.derivedSeverity = current.severity(at: timestamp) ?? .unspecified
+        row.timeIntervalUntilNextHeadacheStart = nil
+        row.timeIntervalUntilNextHeadacheEnd = current.end.map({ $0.timeIntervalSince(timestamp) })
       }
-      else if let endTime = self[i].severity?.headache?.endTime {
-        // Set the time to the next headache end
-        self[i].timeIntervalUntilNextHeadacheEnd = endTime.timeIntervalSince(timestamp)
-        self[i].outlook = .headache
+      else {
+        // Outside a headache.
+        row.derivedSeverity = .notPresent
+        row.timeIntervalUntilNextHeadacheEnd = nil
+
+        if let next = sortedEpisodes.first(where: { $0.start > timestamp }) {
+          let interval = next.start.timeIntervalSince(timestamp)
+          row.timeIntervalUntilNextHeadacheStart = interval
+          row.outlook = interval <= Self.possibleHeadacheWindow ? .possibleHeadache : .noHeadache
+        }
+        else {
+          row.timeIntervalUntilNextHeadacheStart = nil
+          row.outlook = .noHeadache
+        }
       }
     }
   }
-  
+
 }
