@@ -17,12 +17,28 @@ struct OutlookView: View {
   /// The application's custom color theme.
   @AppStorage(Preferences.General.Keys.colorTheme) private var colorTheme = Preferences.General.Defaults.colorTheme
   
+  private var title: String {
+    switch outlook {
+    case .headache(let severity, _):
+      if severity == .notPresent {
+        return "No Headache"
+      }
+      return "\(severity.title) Headache"
+    default:
+      return outlook.title
+    }
+  }
+  
   /// The caption to display.
   private var caption: String? {
     switch outlook {
     case .noHeadache: return nil
     case .possibleHeadache(let onset): return "at " + onset.formattedTime()
-    case .headache(_, let end): return "until " + end.formattedTime()
+    case .headache(let severity, let end):
+      if severity == .notPresent {
+        return nil
+      }
+      return "until " + end.formattedTime()
     }
   }
   
@@ -33,7 +49,7 @@ struct OutlookView: View {
       title: "Outlook",
       systemImage: "sun.and.horizon",
       foregroundColor: colorTheme.mint) {
-      Text(outlook.title)
+      Text(title)
         .font(.title)
     } caption: {
       if let caption = caption {

@@ -18,12 +18,14 @@ struct ModelInputView: View {
   @AppStorage(Preferences.General.Keys.colorTheme) private var colorTheme = Preferences.General.Defaults.colorTheme
   
   var body: some View {
-    List {
+    ScrollView {
       if let weather = input.weatherStatistics {
         Section {
           Card(title: "Barometric Pressure", systemImage: "barometer", foregroundColor: colorTheme.baseColor) {
             Text(Formatters.formatMeasurement(weather.pressureMeasurement))
               .font(.title)
+          } caption: {
+            Text("Δ \(weather.sigmaPressure) kPa")
           }
         } header: {
           SectionTitleView(title: "Weather")
@@ -33,6 +35,8 @@ struct ModelInputView: View {
           Card(title: "Temperature", systemImage: "thermometer", foregroundColor: colorTheme.baseColor) {
             Text(Formatters.formatMeasurement(weather.temperatureMeasurement))
               .font(.title)
+          } caption: {
+            Text("Δ \(weather.sigmaTemperature) ℃")
           }
         }
         
@@ -40,6 +44,8 @@ struct ModelInputView: View {
           Card(title: "Humidity", systemImage: "humidity", foregroundColor: colorTheme.baseColor) {
             Text(Formatters.formatMeasurement(weather.humidityMeasurement))
               .font(.title)
+          } caption: {
+            Text("Δ \(weather.sigmaHumidity) %")
           }
         }
       }

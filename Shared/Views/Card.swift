@@ -12,6 +12,10 @@ import SwiftUI
 /// The card can also display title content and a caption.
 struct Card<TitleContent: View, Content: View, Caption: View>: View {
   
+  // MARK: Environment variables
+  
+  @Environment(\.colorScheme) var colorScheme
+  
   // MARK: Public properties
   
   /// The cell's title.
@@ -57,7 +61,7 @@ struct Card<TitleContent: View, Content: View, Caption: View>: View {
     }
     .frame(minWidth: 0, minHeight: 70)
     .padding(15)
-    .background(Color(UIColor.systemBackground))
+    .background(colorScheme == .dark ? Color(UIColor.secondarySystemBackground) : Color(UIColor.systemBackground))
     .cornerRadius(15)
     .padding([.leading, .trailing], 15)
   }

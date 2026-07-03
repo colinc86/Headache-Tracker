@@ -31,6 +31,17 @@ struct PredictionViews: View {
     return headaches.first
   }
   
+  private var needsSeverityView: Bool {
+    switch prediction.holisticOutlook {
+    case .noHeadache:
+      return false
+    case .possibleHeadache(_):
+      return false
+    case .headache(let severity, _):
+      return severity != .notPresent
+    }
+  }
+  
   // MARK: View body
   
   var body: some View {
@@ -50,7 +61,7 @@ struct PredictionViews: View {
       }
     }
     
-    if showSeverityView {
+    if showSeverityView && needsSeverityView {
       Section {
         SeveritySelectionView(currentSeverity: prediction.severityClassifierOutput.prediction, collapsed: true)
       } header: {

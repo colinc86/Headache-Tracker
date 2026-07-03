@@ -28,7 +28,7 @@ struct GraphList: View {
   private let earliestDate: Date
   
   var body: some View {
-    List {
+    ScrollView {
       if let statistics = statistics {
         if filterUnit == .year || filterUnit == .month || filterUnit == .week {
           Section {
@@ -38,6 +38,7 @@ struct GraphList: View {
                 subtitle: String(format: "%0.1f", statistics.headachesPerYear),
                 systemImage: statistics.headachesPerYearTrend.systemImage,
                 imageForegroundColor: statistics.headachesPerYearTrend.foregroundColor(for: colorTheme))
+              .padding()
             }
             else if filterUnit == .month {
               SubtitleCell(
@@ -45,6 +46,7 @@ struct GraphList: View {
                 subtitle: String(format: "%0.1f", statistics.headachesPerMonth),
                 systemImage: statistics.headachesPerMonthTrend.systemImage,
                 imageForegroundColor: statistics.headachesPerMonthTrend.foregroundColor(for: colorTheme))
+              .padding()
             }
             else {
               SubtitleCell(
@@ -52,6 +54,7 @@ struct GraphList: View {
                 subtitle: String(format: "%0.1f", statistics.headachesPerWeek),
                 systemImage: statistics.headachesPerWeekTrend.systemImage,
                 imageForegroundColor: statistics.headachesPerWeekTrend.foregroundColor(for: colorTheme))
+              .padding()
             }
           } header: {
             SectionTitleView(title: "Headaches")
@@ -83,6 +86,7 @@ struct GraphList: View {
             subtitle: statistics.peaks.meanDescription,
             systemImage: statistics.peaks.meanTrend.systemImage,
             imageForegroundColor: statistics.peaks.meanTrend.foregroundColor(for: colorTheme))
+          .padding()
         }
         
         Section {
@@ -102,6 +106,7 @@ struct GraphList: View {
             subtitle: statistics.averages.meanDescription,
             systemImage: statistics.averages.meanTrend.systemImage,
             imageForegroundColor: statistics.averages.meanTrend.foregroundColor(for: colorTheme))
+          .padding()
         }
         
         Section {
@@ -121,6 +126,7 @@ struct GraphList: View {
             subtitle: statistics.onsets.meanDescription,
             systemImage: statistics.onsets.meanTrend.systemImage,
             imageForegroundColor: statistics.onsets.meanTrend.foregroundColor(for: colorTheme))
+          .padding()
         } header: {
           SectionTitleView(title: "Onset")
         }
@@ -141,16 +147,19 @@ struct GraphList: View {
             subtitle: statistics.durations.meanDescription,
             systemImage: statistics.durations.meanTrend.systemImage,
             imageForegroundColor: statistics.durations.meanTrend.foregroundColor(for: colorTheme))
+          .padding()
           SubtitleCell(
             title: "Min",
             subtitle: statistics.durations.minDescription,
             systemImage: statistics.durations.minTrend.systemImage,
             imageForegroundColor: statistics.durations.minTrend.foregroundColor(for: colorTheme))
+          .padding()
           SubtitleCell(
             title: "Max",
             subtitle: statistics.durations.maxDescription,
             systemImage: statistics.durations.maxTrend.systemImage,
             imageForegroundColor: statistics.durations.maxTrend.foregroundColor(for: colorTheme))
+          .padding()
         } header: {
           SectionTitleView(title: "Duration")
         }

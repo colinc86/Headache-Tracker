@@ -35,8 +35,6 @@ struct CurrentHeadacheView: View {
     
     // MARK: Private properties
     
-    
-    
     /// The app's scene delegate.
     private let sceneDelegate: SceneDelegate
     
