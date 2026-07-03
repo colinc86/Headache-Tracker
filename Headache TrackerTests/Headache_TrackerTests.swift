@@ -243,6 +243,98 @@ class Headache_TrackerTests: XCTestCase {
     XCTAssertEqual(sample.outlook, .possibleHeadache)
   }
 
+  // MARK: Correlation math
+
+  func testPearsonKnownValues() throws {
+    let x = [1.0, 2.0, 3.0, 4.0, 5.0]
+    XCTAssertEqual(try XCTUnwrap(CorrelationMath.pearson(x, [2.0, 4.0, 6.0, 8.0, 10.0])), 1.0, accuracy: 1e-10)
+    XCTAssertEqual(try XCTUnwrap(CorrelationMath.pearson(x, [10.0, 8.0, 6.0, 4.0, 2.0])), -1.0, accuracy: 1e-10)
+    XCTAssertNil(CorrelationMath.pearson(x, [3.0, 3.0, 3.0, 3.0, 3.0]), "Constant arrays have no defined correlation")
+    XCTAssertNil(CorrelationMath.pearson(x, [1.0, 2.0]), "Mismatched lengths")
+  }
+
+  func testRanksAverageTies() {
+    XCTAssertEqual(CorrelationMath.ranks([1.0, 2.0, 2.0, 3.0]), [1.0, 2.5, 2.5, 4.0])
+    XCTAssertEqual(CorrelationMath.ranks([5.0, 1.0, 3.0]), [3.0, 1.0, 2.0])
+  }
+
+  func testSpearmanMonotonicNonlinear() throws {
+    let x = (1 ... 20).map(Double.init)
+    let y = x.map({ exp($0 / 5.0) })
+    XCTAssertEqual(try XCTUnwrap(CorrelationMath.spearman(x, y)), 1.0, accuracy: 1e-10)
+  }
+
+  func testPointBiserialSeparatedGroups() throws {
+    let x = [1.0, 1.0, 1.0, 5.0, 5.0, 5.0]
+    let target = [false, false, false, true, true, true]
+    XCTAssertEqual(try XCTUnwrap(CorrelationMath.pointBiserial(x, target)), 1.0, accuracy: 1e-10)
+  }
+
+  func testBenjaminiHochberg() {
+    let q = CorrelationMath.benjaminiHochberg([0.005, 0.04, 0.04, 0.05])
+    XCTAssertEqual(q[0], 0.02, accuracy: 1e-10)
+    XCTAssertEqual(q[1], 0.05, accuracy: 1e-10)
+    XCTAssertEqual(q[2], 0.05, accuracy: 1e-10)
+    XCTAssertEqual(q[3], 0.05, accuracy: 1e-10)
+  }
+
+  func testCircularShiftPValueDetectsStrongSignal() {
+    let x = (0 ..< 120).map({ sin(Double($0) / 3.0) })
+    let p = CorrelationMath.circularShiftPValue(coefficient: 1.0, x: x, y: x)
+    XCTAssertLessThan(p, 0.05)
+    XCTAssertGreaterThan(p, 0.0)
+  }
+
+  // MARK: Correlation engine
+
+  func testEngineFindsPlantedTrigger() {
+    // Hourly samples over ~12 days with 10 headache episodes every 30 hours.
+    // The planted feature is elevated in the 6 hours before each onset.
+    let start = baseDate
+    var episodes = [HeadacheEpisode]()
+    for k in 1 ... 10 {
+      let onset = start.addingTimeInterval(Double(k) * 30.0 * 3600.0)
+      episodes.append(HeadacheEpisode(
+        start: onset,
+        end: onset.addingTimeInterval(2.0 * 3600.0),
+        severities: [HeadacheEpisode.SeverityInterval(severity: .moderate, start: onset, end: onset.addingTimeInterval(2.0 * 3600.0))]))
+    }
+
+    var samples = [CorrelationSample]()
+    for hour in 0 ..< 320 {
+      let timestamp = start.addingTimeInterval(Double(hour) * 3600.0)
+      let preOnset = episodes.contains(where: { episode in
+        episode.start > timestamp && episode.start.timeIntervalSince(timestamp) <= 6.0 * 3600.0
+      })
+      // Deterministic jitter keeps the arrays non-constant.
+      let jitter = Double(hour % 3) * 0.01
+      samples.append(CorrelationSample(
+        timestamp: timestamp,
+        values: [.heartRate: (preOnset ? 5.0 : 1.0) + jitter]))
+    }
+
+    let report = CorrelationEngine(samples: samples, episodes: episodes).computeReport()
+
+    let occurrence = report.insights.first(where: { $0.feature == .heartRate && $0.target == .occurrence })
+    XCTAssertNotNil(occurrence, "Expected an occurrence insight for the planted trigger")
+    XCTAssertGreaterThan(occurrence?.coefficient ?? 0.0, 0.8)
+    XCTAssertEqual(occurrence?.bestLagHours, 6)
+    XCTAssertGreaterThanOrEqual(occurrence?.eventCount ?? 0, CorrelationEngine.minimumEventCount)
+    XCTAssertGreaterThan(occurrence?.positiveMean ?? 0.0, occurrence?.baselineMean ?? 0.0)
+  }
+
+  func testEngineGatesInsufficientData() {
+    // Too few samples for any test.
+    let samples = (0 ..< 5).map { hour in
+      CorrelationSample(timestamp: baseDate.addingTimeInterval(Double(hour) * 3600.0), values: [.temperature: Double(hour)])
+    }
+
+    let report = CorrelationEngine(samples: samples, episodes: []).computeReport()
+
+    XCTAssertTrue(report.insights.isEmpty)
+    XCTAssertTrue(report.insufficient.contains(where: { $0.feature == .temperature }))
+  }
+
   // MARK: Training data trimming
 
   func testTrimmedTrainingDataBalancesClasses() {

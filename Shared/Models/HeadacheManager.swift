@@ -431,6 +431,71 @@ extension HeadacheManager {
   
 }
 
+// MARK: - Insights
+
+extension HeadacheManager {
+
+  /// Builds correlation samples and headache episodes, runs the correlation
+  /// engine outside of any managed object context, and caches the report.
+  ///
+  /// - Returns: The freshly computed report.
+  @discardableResult
+  func computeInsights() async throws -> InsightsReport {
+    let (samples, episodes) = try await DataController.shared.performInBackground { context -> ([CorrelationSample], [HeadacheEpisode]) in
+      let request = TrainingData.fetchRequest()
+      request.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: true)]
+      let trainingData = try context.fetch(request)
+      let samples = trainingData.compactMap({ $0.correlationSample })
+      let episodes = try HeadacheManager.headacheEpisodes(in: context)
+      return (samples, episodes)
+    }
+
+    logInfo("Computing insights from \(samples.count) samples and \(episodes.count) episodes.")
+    let engine = CorrelationEngine(samples: samples, episodes: episodes)
+    let report = engine.computeReport()
+    InsightsStore.shared.save(report)
+    return report
+  }
+
+  /// The latest insights report, recomputing when stale.
+  ///
+  /// - Returns: The report.
+  func insights() async throws -> InsightsReport {
+    let rowCount = try await trainingDataCount()
+    if InsightsStore.shared.isStale(rowCount: rowCount) {
+      return try await computeInsights()
+    }
+    if let report = InsightsStore.shared.load() {
+      return report
+    }
+    return try await computeInsights()
+  }
+
+  /// The dated series of a feature's values along with all headache
+  /// episodes, for the trigger detail chart.
+  ///
+  /// - Parameter feature: The feature.
+  /// - Returns: The feature's series and the headache episodes.
+  func featureSeries(for feature: CorrelationFeature) async throws -> ([DatedValue], [HeadacheEpisode]) {
+    return try await DataController.shared.performInBackground { context in
+      let request = TrainingData.fetchRequest()
+      request.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: true)]
+      let trainingData = try context.fetch(request)
+
+      let series: [DatedValue] = trainingData.compactMap { row in
+        guard let sample = row.correlationSample, let value = sample.values[feature] else {
+          return nil
+        }
+        return DatedValue(date: sample.timestamp, value: value)
+      }
+
+      let episodes = try HeadacheManager.headacheEpisodes(in: context)
+      return (series, episodes)
+    }
+  }
+
+}
+
 // MARK: - Data integrity
 
 extension HeadacheManager {
@@ -836,6 +901,15 @@ extension HeadacheManager {
     }
 
     try await predictor.train(input)
+
+    // Refresh the correlation insights on the new data; a failure here
+    // shouldn't fail training.
+    do {
+      try await computeInsights()
+    }
+    catch {
+      logError("Error computing insights after training: \(error)")
+    }
   }
 
   /// The episodes of every headache in the store.

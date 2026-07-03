@@ -7,6 +7,18 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		CA10CA10CA10CA1000000002 /* CorrelationFeature.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10CA10CA10CA1000000001 /* CorrelationFeature.swift */; };
+		CA10CA10CA10CA1000000003 /* CorrelationFeature.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10CA10CA10CA1000000001 /* CorrelationFeature.swift */; };
+		CA10CA10CA10CA1000000005 /* CorrelationMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10CA10CA10CA1000000004 /* CorrelationMath.swift */; };
+		CA10CA10CA10CA1000000006 /* CorrelationMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10CA10CA10CA1000000004 /* CorrelationMath.swift */; };
+		CA10CA10CA10CA1000000008 /* CorrelationEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10CA10CA10CA1000000007 /* CorrelationEngine.swift */; };
+		CA10CA10CA10CA1000000009 /* CorrelationEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10CA10CA10CA1000000007 /* CorrelationEngine.swift */; };
+		CA10CA10CA10CA100000000B /* TriggerInsight.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10CA10CA10CA100000000A /* TriggerInsight.swift */; };
+		CA10CA10CA10CA100000000C /* TriggerInsight.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10CA10CA10CA100000000A /* TriggerInsight.swift */; };
+		CA10CA10CA10CA100000000E /* InsightsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10CA10CA10CA100000000D /* InsightsStore.swift */; };
+		CA10CA10CA10CA100000000F /* InsightsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10CA10CA10CA100000000D /* InsightsStore.swift */; };
+		CA10CA10CA10CA1000000011 /* InsightsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10CA10CA10CA1000000010 /* InsightsView.swift */; };
+		CA10CA10CA10CA1000000013 /* TriggerDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10CA10CA10CA1000000012 /* TriggerDetailView.swift */; };
 		3B051A4E27B0E9060017131D /* HeadachesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B051A4D27B0E9060017131D /* HeadachesView.swift */; };
 		3B051A5027B0E9410017131D /* CurrentHeadacheView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B051A4F27B0E9410017131D /* CurrentHeadacheView.swift */; };
 		3B051A8F27B0FA9B0017131D /* HeadacheCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B051A8E27B0FA9B0017131D /* HeadacheCell.swift */; };
@@ -284,6 +296,13 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		CA10CA10CA10CA1000000001 /* CorrelationFeature.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CorrelationFeature.swift; sourceTree = "<group>"; };
+		CA10CA10CA10CA1000000004 /* CorrelationMath.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CorrelationMath.swift; sourceTree = "<group>"; };
+		CA10CA10CA10CA1000000007 /* CorrelationEngine.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CorrelationEngine.swift; sourceTree = "<group>"; };
+		CA10CA10CA10CA100000000A /* TriggerInsight.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TriggerInsight.swift; sourceTree = "<group>"; };
+		CA10CA10CA10CA100000000D /* InsightsStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InsightsStore.swift; sourceTree = "<group>"; };
+		CA10CA10CA10CA1000000010 /* InsightsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InsightsView.swift; sourceTree = "<group>"; };
+		CA10CA10CA10CA1000000012 /* TriggerDetailView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TriggerDetailView.swift; sourceTree = "<group>"; };
 		3B051A4927B0B3590017131D /* Headache_Tracker 1.0.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Headache_Tracker 1.0.xcdatamodel"; sourceTree = "<group>"; };
 		3B051A4D27B0E9060017131D /* HeadachesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeadachesView.swift; sourceTree = "<group>"; };
 		3B051A4F27B0E9410017131D /* CurrentHeadacheView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentHeadacheView.swift; sourceTree = "<group>"; };
@@ -509,9 +528,23 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		CA10CA10CA10CA10000003E7 /* Correlation */ = {
+			isa = PBXGroup;
+			children = (
+				CA10CA10CA10CA1000000001 /* CorrelationFeature.swift */,
+				CA10CA10CA10CA1000000004 /* CorrelationMath.swift */,
+				CA10CA10CA10CA1000000007 /* CorrelationEngine.swift */,
+				CA10CA10CA10CA100000000A /* TriggerInsight.swift */,
+				CA10CA10CA10CA100000000D /* InsightsStore.swift */,
+			);
+			path = Correlation;
+			sourceTree = "<group>";
+		};
 		3B051A9627B198CB0017131D /* Content Views */ = {
 			isa = PBXGroup;
 			children = (
+				CA10CA10CA10CA1000000010 /* InsightsView.swift */,
+				CA10CA10CA10CA1000000012 /* TriggerDetailView.swift */,
 				3BA933B027DFA5D000BAD5A4 /* AddHeadacheView.swift */,
 				3B68BDF827BDFCD3007AAAC6 /* AnalyzeView.swift */,
 				3BF5313827ACE18D00056673 /* ContentView.swift */,
@@ -648,6 +681,7 @@
 		3B3FFE4E27D592A000DFACC1 /* Statistics */ = {
 			isa = PBXGroup;
 			children = (
+				CA10CA10CA10CA10000003E7 /* Correlation */,
 				3B3FFE5127D592A000DFACC1 /* HeadacheStatistics.swift */,
 				3B3FFE5027D592A000DFACC1 /* Trend.swift */,
 				3B3FFE4F27D592A000DFACC1 /* Statistic.swift */,
@@ -1188,6 +1222,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CA10CA10CA10CA1000000003 /* CorrelationFeature.swift in Sources */,
+				CA10CA10CA10CA1000000006 /* CorrelationMath.swift in Sources */,
+				CA10CA10CA10CA1000000009 /* CorrelationEngine.swift in Sources */,
+				CA10CA10CA10CA100000000C /* TriggerInsight.swift in Sources */,
+				CA10CA10CA10CA100000000F /* InsightsStore.swift in Sources */,
 				3B3FFEEA27D592A000DFACC1 /* MotionManager.swift in Sources */,
 				3B3FFEE627D592A000DFACC1 /* WeatherManager.swift in Sources */,
 				3BD1D34C27E192D30072A576 /* ToggleCell.swift in Sources */,
@@ -1272,6 +1311,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CA10CA10CA10CA1000000002 /* CorrelationFeature.swift in Sources */,
+				CA10CA10CA10CA1000000005 /* CorrelationMath.swift in Sources */,
+				CA10CA10CA10CA1000000008 /* CorrelationEngine.swift in Sources */,
+				CA10CA10CA10CA100000000B /* TriggerInsight.swift in Sources */,
+				CA10CA10CA10CA100000000E /* InsightsStore.swift in Sources */,
+				CA10CA10CA10CA1000000011 /* InsightsView.swift in Sources */,
+				CA10CA10CA10CA1000000013 /* TriggerDetailView.swift in Sources */,
 				3B3FFF1527D87EAE00DFACC1 /* ErrorButton.swift in Sources */,
 				3B051A8F27B0FA9B0017131D /* HeadacheCell.swift in Sources */,
 				3B10D45227ED5A77004B68AA /* TypeCard.swift in Sources */,

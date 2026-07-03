@@ -11,12 +11,18 @@ struct GraphList: View {
   
   // MARK: Private properties
   
+  /// The app's headache manager.
+  @EnvironmentObject private var headacheManager: HeadacheManager
+
   /// The resolved headaches fetch request.
   /// Returns a list of all resolved headaches.
   @FetchRequest private var resolvedHeadaches: FetchedResults<Headache>
-  
+
   /// The headache statistics to display.
   @State private var statistics: HeadacheStatistics?
+
+  /// The top correlation insights.
+  @State private var topInsights = [TriggerInsight]()
   
   /// The application's custom color theme.
   @AppStorage(Preferences.General.Keys.colorTheme) private var colorTheme = Preferences.General.Defaults.colorTheme
@@ -29,6 +35,35 @@ struct GraphList: View {
   
   var body: some View {
     List {
+      // Possible triggers
+      Section {
+        if topInsights.isEmpty {
+          NavigationLink {
+            InsightsView()
+          } label: {
+            Label("Possible Triggers", systemImage: "sparkle.magnifyingglass")
+          }
+        }
+        else {
+          ForEach(topInsights.prefix(3)) { insight in
+            NavigationLink {
+              TriggerDetailView(insight: insight)
+            } label: {
+              TriggerInsightCell(insight: insight)
+            }
+          }
+
+          NavigationLink {
+            InsightsView()
+          } label: {
+            Text("All Insights")
+              .foregroundColor(colorTheme.baseColor)
+          }
+        }
+      } header: {
+        SectionTitleView(title: "Insights")
+      }
+
       if let statistics = statistics {
         if filterUnit == .year || filterUnit == .month || filterUnit == .week {
           Section {
@@ -157,6 +192,9 @@ struct GraphList: View {
       }
     }
     .onAppear(perform: appeared)
+    .task {
+      await loadInsights()
+    }
   }
   
   // MARK: Initializers
@@ -183,7 +221,17 @@ extension GraphList {
     let now = Date()
     statistics = HeadacheStatistics(headaches: resolvedHeadaches.sorted(by: { $0.startTime ?? now < $1.startTime ?? now }), earliestDate: earliestDate)
   }
-  
+
+  /// Loads the top correlation insights.
+  func loadInsights() async {
+    do {
+      topInsights = try await headacheManager.insights().insights
+    }
+    catch {
+      logError("Error loading insights: \(error)")
+    }
+  }
+
 }
 
 struct GraphList_Previews: PreviewProvider {
