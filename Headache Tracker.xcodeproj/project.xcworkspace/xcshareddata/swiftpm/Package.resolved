@@ -1,5 +1,5 @@
 {
-  "originHash" : "dcc41ec08ad19ae3baaad428aeb4d13b661c1bb127d6479b23bc046516842f72",
+  "originHash" : "57dc710651ba89fddabc0ad8e67517f9814510227eb7c919abe595166e8f4eea",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -30,11 +30,11 @@
     },
     {
       "identity" : "datacontroller",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/colinc86/DataController.git",
+      "kind" : "localSourceControl",
+      "location" : "/Users/colin/Local Documents/Programming/Xcode Projects/Packages/DataController",
       "state" : {
-        "revision" : "5d2b1bca54c229b697e907099a17c30ea1510357",
-        "version" : "1.0.7"
+        "revision" : "540d8bd258c14260e29bf0dea9dd746f0d74e29b",
+        "version" : "1.3.0"
       }
     },
     {

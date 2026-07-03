@@ -2018,10 +2018,10 @@
 		};
 		3BD1D34127E12DEA0072A576 /* XCRemoteSwiftPackageReference "DataController" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/colinc86/DataController.git";
+			repositoryURL = "file:///Users/colin/Local Documents/Programming/Xcode Projects/Packages/DataController";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.7;
+				minimumVersion = 1.3.0;
 			};
 		};
 		3BE731F827DB11DB007C013B /* XCRemoteSwiftPackageReference "CocoaLumberjack" */ = {
