@@ -154,11 +154,11 @@ struct SeverityButton: View {
   var body: some View {
     VStack {
       let content = ZStack {
-        RoundedRectangle(cornerRadius: 12)
+        RoundedRectangle(cornerRadius: Tokens.Radius.md)
           .frame(width: dimension, height: dimension)
           .foregroundColor(selected ? colorTheme.color(for: severity) : Color.secondary.opacity(0.25))
           .overlay(
-            RoundedRectangle(cornerRadius: 12)
+            RoundedRectangle(cornerRadius: Tokens.Radius.md)
               .stroke(colorTheme.color(for: severity).opacity(0.25), lineWidth: 4.0)
           )
       }
@@ -172,7 +172,7 @@ struct SeverityButton: View {
         }
         .buttonStyle(BorderlessButtonStyle())
         .foregroundColor(selected ? colorTheme.color(for: severity) : Color.secondary.opacity(0.25))
-        .cornerRadius(12)
+        .cornerRadius(Tokens.Radius.md)
       case .action(let action):
         AsyncButton {
           try await action(severity)
@@ -181,9 +181,9 @@ struct SeverityButton: View {
         }
         .buttonStyle(BorderlessButtonStyle())
         .foregroundColor(selected ? colorTheme.color(for: severity) : Color.secondary.opacity(0.25))
-        .cornerRadius(12)
+        .cornerRadius(Tokens.Radius.md)
       case .display:
-        RoundedRectangle(cornerRadius: 12)
+        RoundedRectangle(cornerRadius: Tokens.Radius.md)
           .frame(width: dimension, height: collapsed ? 8.0 : dimension)
           .foregroundColor(selected ? colorTheme.color(for: severity) : Color.secondary.opacity(0.25))
       }

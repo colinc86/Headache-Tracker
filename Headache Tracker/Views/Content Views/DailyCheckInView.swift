@@ -118,26 +118,17 @@ struct DailyCheckInView: View {
     let title = ExposureKind(rawValue: kind)?.title ?? kind.capitalized
     let systemImage = ExposureKind(rawValue: kind)?.systemImage ?? "tag.fill"
 
-    return Button {
-      if selected {
-        selectedKinds.remove(kind)
+    return Chip(
+      title: title,
+      systemImage: selected ? "checkmark.circle.fill" : systemImage,
+      style: selected ? .selected : .unselected) {
+        if selected {
+          selectedKinds.remove(kind)
+        }
+        else {
+          selectedKinds.insert(kind)
+        }
       }
-      else {
-        selectedKinds.insert(kind)
-      }
-    } label: {
-      HStack(spacing: 4) {
-        Image(systemName: selected ? "checkmark.circle.fill" : systemImage)
-          .font(.caption)
-        Text(title)
-          .font(.callout)
-      }
-      .padding(.horizontal, 10)
-      .padding(.vertical, 6)
-      .background(Capsule().fill(selected ? colorTheme.baseColor : Color(UIColor.tertiarySystemFill)))
-      .foregroundColor(selected ? Color(UIColor.systemBackground) : .primary)
-    }
-    .buttonStyle(.borderless)
   }
 
   private func addCustomKind() {

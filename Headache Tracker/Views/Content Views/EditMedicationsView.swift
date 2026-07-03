@@ -57,11 +57,10 @@ struct EditMedicationsView: View {
             .autocorrectionDisabled()
 
           if !suggestedNames.isEmpty {
-            FlexibleView(data: suggestedNames, spacing: 8, alignment: .leading) { name in
-              Button(name) {
+            FlexibleView(data: suggestedNames, spacing: Tokens.Spacing.sm, alignment: .leading) { name in
+              Chip(title: name, style: .unselected) {
                 newName = name
               }
-              .buttonStyle(TagButtonStyle())
             }
           }
 

@@ -22,7 +22,7 @@ struct SectionTitleView: View {
         .foregroundColor(.primary)
       Spacer()
     }
-    .padding([.leading, .trailing, .top], 15)
+    .padding([.leading, .trailing, .top], Tokens.Spacing.gutter)
   }
 }
 

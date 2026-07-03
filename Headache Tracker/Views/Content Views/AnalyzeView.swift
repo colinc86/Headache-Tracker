@@ -40,7 +40,7 @@ struct AnalyzeView: View {
               }
             }
             .padding([.leading, .trailing])
-            .background(RoundedRectangle(cornerRadius: 8)
+            .background(RoundedRectangle(cornerRadius: Tokens.Radius.sm)
                           .fill(Color.secondary.opacity(0.25)))
             .onChange(of: filterCount) { _, newValue in changedFilterCount(newValue) }
             
@@ -51,7 +51,7 @@ struct AnalyzeView: View {
               Text(FilterUnit.year.rawValue + (filterCount == 1 ? "." : "s.")).tag(FilterUnit.year)
             }
             .padding([.leading, .trailing])
-            .background(RoundedRectangle(cornerRadius: 8)
+            .background(RoundedRectangle(cornerRadius: Tokens.Radius.sm)
                           .fill(Color.secondary.opacity(0.25)))
             .onChange(of: filterUnit) { _, newValue in changedFilterUnit(newValue) }
           }

@@ -150,7 +150,7 @@ struct TriggerInsightCell: View {
       if let explainedBy = insight.explainedBy {
         Label("May be explained by \(explainedBy.title)", systemImage: "arrow.triangle.branch")
           .font(.caption)
-          .foregroundColor(.orange)
+          .foregroundColor(colorTheme.confounderFlag)
       }
 
       // Strength bar
@@ -201,11 +201,7 @@ struct TriggerInsightCell: View {
   // MARK: Private properties
 
   private var confidenceColor: Color {
-    switch insight.confidence {
-    case .strong: return .green
-    case .moderate: return .orange
-    case .suggestive: return .secondary
-    }
+    return colorTheme.color(for: insight.confidence)
   }
 
 }

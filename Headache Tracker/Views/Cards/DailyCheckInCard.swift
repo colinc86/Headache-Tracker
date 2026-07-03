@@ -32,17 +32,11 @@ struct DailyCheckInCard: View {
           .foregroundColor(.secondary)
       }
       else {
-        FlexibleView(data: kinds, spacing: 8, alignment: .leading) { kind in
-          HStack(spacing: 4) {
-            Image(systemName: ExposureKind(rawValue: kind)?.systemImage ?? "tag.fill")
-              .font(.caption)
-            Text(ExposureKind(rawValue: kind)?.title ?? kind.capitalized)
-              .font(.callout)
-          }
-          .padding(.horizontal, 10)
-          .padding(.vertical, 5)
-          .background(Capsule().fill(colorTheme.baseColor.opacity(0.15)))
-          .foregroundColor(colorTheme.baseColor)
+        FlexibleView(data: kinds, spacing: Tokens.Spacing.sm, alignment: .leading) { kind in
+          Chip(
+            title: ExposureKind(rawValue: kind)?.title ?? kind.capitalized,
+            systemImage: ExposureKind(rawValue: kind)?.systemImage ?? "tag.fill",
+            style: .readonly)
         }
       }
     }

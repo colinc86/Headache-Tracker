@@ -60,10 +60,10 @@ struct Card<TitleContent: View, Content: View, Caption: View>: View {
         .foregroundColor(.secondary)
     }
     .frame(minWidth: 0, minHeight: 70)
-    .padding(15)
+    .padding(Tokens.Spacing.cardPadding)
     .background(colorScheme == .dark ? Color(UIColor.secondarySystemBackground) : Color(UIColor.systemBackground))
-    .cornerRadius(15)
-    .padding([.leading, .trailing], 15)
+    .cornerRadius(Tokens.Radius.lg)
+    .padding([.leading, .trailing], Tokens.Spacing.gutter)
   }
   
   // MARK: Initializers

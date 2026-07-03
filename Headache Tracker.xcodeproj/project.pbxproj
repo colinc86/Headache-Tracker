@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		DA10DA10DA10DA1000000002 /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA10DA10DA10DA1000000001 /* DesignSystem.swift */; };
+		DA10DA10DA10DA1000000003 /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA10DA10DA10DA1000000001 /* DesignSystem.swift */; };
+		DA10DA10DA10DA1000000005 /* Chip.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA10DA10DA10DA1000000004 /* Chip.swift */; };
+		DA10DA10DA10DA1000000006 /* Chip.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA10DA10DA10DA1000000004 /* Chip.swift */; };
+		DA10DA10DA10DA1000000008 /* CardListRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA10DA10DA10DA1000000007 /* CardListRow.swift */; };
+		DA10DA10DA10DA1000000009 /* CardListRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA10DA10DA10DA1000000007 /* CardListRow.swift */; };
 		D0A0D0A0D0A0D0A000000011 /* CloudMigrator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0A0D0A0D0A0D0A000000001 /* CloudMigrator.swift */; };
 		D080D080D080D08000000011 /* ClinicianReportData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D080D080D080D08000000001 /* ClinicianReportData.swift */; };
 		D080D080D080D08000000012 /* ClinicianReportBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = D080D080D080D08000000002 /* ClinicianReportBuilder.swift */; };
@@ -324,6 +330,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		DA10DA10DA10DA1000000001 /* DesignSystem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "DesignSystem.swift"; sourceTree = "<group>"; };
+		DA10DA10DA10DA1000000004 /* Chip.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Chip.swift"; sourceTree = "<group>"; };
+		DA10DA10DA10DA1000000007 /* CardListRow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CardListRow.swift"; sourceTree = "<group>"; };
 		D0A0D0A0D0A0D0A000000001 /* CloudMigrator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CloudMigrator.swift"; sourceTree = "<group>"; };
 		D090D090D090D09000000001 /* Headache_Tracker 2.1.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Headache_Tracker 2.1.xcdatamodel"; sourceTree = "<group>"; };
 		D080D080D080D08000000001 /* ClinicianReportData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ClinicianReportData.swift"; sourceTree = "<group>"; };
@@ -623,6 +632,7 @@
 		3B051AA127B357830017131D /* Modifiers */ = {
 			isa = PBXGroup;
 			children = (
+				DA10DA10DA10DA1000000007 /* CardListRow.swift */,
 				3B051A9D27B3555E0017131D /* ConfirmationAlert.swift */,
 				3B051A9F27B3577B0017131D /* DestructiveConfirmationDialog.swift */,
 			);
@@ -689,6 +699,8 @@
 		3B3FFDD027D5909B00DFACC1 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				DA10DA10DA10DA1000000004 /* Chip.swift */,
+				DA10DA10DA10DA1000000001 /* DesignSystem.swift */,
 				3B051AA127B357830017131D /* Modifiers */,
 				3B3FFF0E27D858DF00DFACC1 /* AsyncButton.swift */,
 				3B3FFF1427D87EAE00DFACC1 /* ErrorButton.swift */,
@@ -1332,6 +1344,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DA10DA10DA10DA1000000003 /* DesignSystem.swift in Sources */,
+				DA10DA10DA10DA1000000006 /* Chip.swift in Sources */,
+				DA10DA10DA10DA1000000009 /* CardListRow.swift in Sources */,
 				D070D070D070D07000000012 /* HeadacheActivityAttributes.swift in Sources */,
 				D070D070D070D07000000014 /* HeadacheLiveActivity.swift in Sources */,
 				CF60CF60CF60CF6000000024 /* SeverityAppEnum.swift in Sources */,
@@ -1430,6 +1445,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DA10DA10DA10DA1000000002 /* DesignSystem.swift in Sources */,
+				DA10DA10DA10DA1000000005 /* Chip.swift in Sources */,
+				DA10DA10DA10DA1000000008 /* CardListRow.swift in Sources */,
 				D0A0D0A0D0A0D0A000000011 /* CloudMigrator.swift in Sources */,
 				D080D080D080D08000000011 /* ClinicianReportData.swift in Sources */,
 				D080D080D080D08000000012 /* ClinicianReportBuilder.swift in Sources */,

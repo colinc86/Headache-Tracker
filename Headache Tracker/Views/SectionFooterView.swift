@@ -22,7 +22,7 @@ struct SectionFooterView: View {
         .foregroundColor(.secondary)
       Spacer()
     }
-    .padding([.leading, .trailing, .bottom], 30)
+    .padding([.leading, .trailing, .bottom], Tokens.Spacing.footerBottom)
   }
 }
 
