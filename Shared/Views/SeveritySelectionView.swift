@@ -7,6 +7,21 @@
 
 import SwiftUI
 
+/// How a severity selection view responds to taps.
+enum SeveritySelectionMode {
+
+  /// A non-interactive display.
+  case display
+
+  /// Runs a closure on tap (in-app).
+  case action((Headache.Severity) async throws -> Void)
+
+  /// Runs `LogSeverityIntent` on tap (widgets) — logs directly in the app
+  /// process without opening the app.
+  case widget
+
+}
+
 /// Draws a horizontal severity level indicator.
 struct SeveritySelectionView: View {
   
@@ -21,11 +36,8 @@ struct SeveritySelectionView: View {
   /// The collapsed state of the view.
   var collapsed: Bool = false
   
-  /// Whether the view should represent links.
-  var link: Bool = false
-  
-  /// The action for each button.
-  var action: ((Headache.Severity) async throws -> Void)? = nil
+  /// The view's interaction mode.
+  var mode: SeveritySelectionMode = .display
   
   // MARK: Private properties
   
@@ -45,8 +57,7 @@ struct SeveritySelectionView: View {
               selectedSeverity: currentSeverity,
               selectedSeverityRange: severityRange,
               collapsed: collapsed,
-              link: link,
-              action: action)
+              mode: mode)
             
             if i < 4 {
               Spacer(minLength: 0.0)
@@ -75,28 +86,28 @@ extension SeveritySelectionView {
 
 struct SeveritySelectionView_Previews: PreviewProvider {
   static var previews: some View {
-    SeveritySelectionView(currentSeverity: nil, severityRange: nil, collapsed: false, action: nil)
+    SeveritySelectionView(currentSeverity: nil, severityRange: nil, collapsed: false)
       .environment(\.managedObjectContext, Previewing.CoreData.viewContext)
       .environmentObject(Previewing.headacheManager)
       .environmentObject(Previewing.Prediction.predictor)
       .environmentObject(Previewing.healthKitManager)
       .previewLayout(PreviewLayout.fixed(width: 428, height: 130))
     
-    SeveritySelectionView(currentSeverity: .mild, severityRange: nil, collapsed: false, action: nil)
+    SeveritySelectionView(currentSeverity: .mild, severityRange: nil, collapsed: false)
       .environment(\.managedObjectContext, Previewing.CoreData.viewContext)
       .environmentObject(Previewing.headacheManager)
       .environmentObject(Previewing.Prediction.predictor)
       .environmentObject(Previewing.healthKitManager)
       .previewLayout(PreviewLayout.fixed(width: 428, height: 130))
     
-    SeveritySelectionView(currentSeverity: nil, severityRange: Headache.Severity.Range(uncheckedBounds: (.notPresent, .severe)), collapsed: false, action: nil)
+    SeveritySelectionView(currentSeverity: nil, severityRange: Headache.Severity.Range(uncheckedBounds: (.notPresent, .severe)), collapsed: false)
       .environment(\.managedObjectContext, Previewing.CoreData.viewContext)
       .environmentObject(Previewing.headacheManager)
       .environmentObject(Previewing.Prediction.predictor)
       .environmentObject(Previewing.healthKitManager)
       .previewLayout(PreviewLayout.fixed(width: 428, height: 130))
     
-    SeveritySelectionView(currentSeverity: nil, severityRange: nil, collapsed: true, action: nil)
+    SeveritySelectionView(currentSeverity: nil, severityRange: nil, collapsed: true)
       .environment(\.managedObjectContext, Previewing.CoreData.viewContext)
       .environmentObject(Previewing.headacheManager)
       .environmentObject(Previewing.Prediction.predictor)
@@ -121,12 +132,8 @@ struct SeverityButton: View {
   /// Whether or not the button should be drawn collapsed.
   var collapsed: Bool = false
   
-  /// Whether the button represents a link.
-  var link: Bool = false
-  
-  /// The button's action. If nil, then the button is drawn
-  /// as a rectantle instead.
-  var action: ((Headache.Severity) async throws -> Void)? = nil
+  /// The button's interaction mode.
+  var mode: SeveritySelectionMode = .display
   
   // MARK: Private properties
   
@@ -138,7 +145,7 @@ struct SeverityButton: View {
   
   /// Whether or not this button is the selected button.
   private var selected: Bool {
-    if link {
+    if case .widget = mode {
       return severity == selectedSeverity
     }
     return (severity == selectedSeverity) || (selectedSeverityRange?.contains(severity) ?? false)
@@ -156,30 +163,29 @@ struct SeverityButton: View {
           )
       }
       
-      if link {
-        Link(destination: URL(string: "myheadache://severity?rawValue=\(severity.rawValue)")!) {
+      switch mode {
+      case .widget:
+        // The intent executes in the app process; no confirm dialog and no
+        // app launch. (The myheadache:// URL path remains for deep links.)
+        Button(intent: LogSeverityIntent(severity: SeverityAppEnum(severity))) {
           content
         }
         .buttonStyle(BorderlessButtonStyle())
         .foregroundColor(selected ? colorTheme.color(for: severity) : Color.secondary.opacity(0.25))
         .cornerRadius(12)
-      }
-      else {
-        if let action = action {
-          AsyncButton {
-            try await action(severity)
-          } label: {
-            content
-          }
-          .buttonStyle(BorderlessButtonStyle())
+      case .action(let action):
+        AsyncButton {
+          try await action(severity)
+        } label: {
+          content
+        }
+        .buttonStyle(BorderlessButtonStyle())
+        .foregroundColor(selected ? colorTheme.color(for: severity) : Color.secondary.opacity(0.25))
+        .cornerRadius(12)
+      case .display:
+        RoundedRectangle(cornerRadius: 12)
+          .frame(width: dimension, height: collapsed ? 8.0 : dimension)
           .foregroundColor(selected ? colorTheme.color(for: severity) : Color.secondary.opacity(0.25))
-          .cornerRadius(12)
-        }
-        else {
-          RoundedRectangle(cornerRadius: 12)
-            .frame(width: dimension, height: collapsed ? 8.0 : dimension)
-            .foregroundColor(selected ? colorTheme.color(for: severity) : Color.secondary.opacity(0.25))
-        }
       }
       
       Text(severity.title)
@@ -193,19 +199,19 @@ struct SeverityButton: View {
 
 struct SeverityButton_Previews: PreviewProvider {
   static var previews: some View {
-    SeverityButton(severity: .notPresent, selectedSeverity: nil, collapsed: false, action: nil)
+    SeverityButton(severity: .notPresent, selectedSeverity: nil, collapsed: false)
       .previewLayout(.fixed(width: 100, height: 100))
     
-    SeverityButton(severity: .unspecified, selectedSeverity: .unspecified, collapsed: false, action: nil)
+    SeverityButton(severity: .unspecified, selectedSeverity: .unspecified, collapsed: false)
       .previewLayout(.fixed(width: 100, height: 100))
     
-    SeverityButton(severity: .mild, selectedSeverity: nil, collapsed: true, action: nil)
+    SeverityButton(severity: .mild, selectedSeverity: nil, collapsed: true)
       .previewLayout(.fixed(width: 100, height: 100))
     
-    SeverityButton(severity: .moderate, selectedSeverity: .moderate, collapsed: true, action: nil)
+    SeverityButton(severity: .moderate, selectedSeverity: .moderate, collapsed: true)
       .previewLayout(.fixed(width: 100, height: 100))
     
-    SeverityButton(severity: .severe, selectedSeverity: nil, collapsed: false, action: nil)
+    SeverityButton(severity: .severe, selectedSeverity: nil, collapsed: false)
       .previewLayout(.fixed(width: 100, height: 100))
   }
 }

@@ -73,7 +73,12 @@ enum HeadacheAlertRequest: AlertRequest {
   }
   
   var categoryIdentifier: String {
-    return "alert"
+    switch self {
+    case .checkIn: return "checkIn"
+    case .risk: return "risk"
+    case .morningBrief: return "morningBrief"
+    case .exposureCheckIn: return "exposureCheckIn"
+    }
   }
   
   var sound: UNNotificationSound {

@@ -7,6 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		CF60CF60CF60CF6000000021 /* AlertManager+Delegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF60CF60CF60CF6000000001 /* AlertManager+Delegate.swift */; };
+		CF60CF60CF60CF6000000022 /* HeadacheAppShortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF60CF60CF60CF6000000002 /* HeadacheAppShortcuts.swift */; };
+		CF60CF60CF60CF6000000023 /* SeverityAppEnum.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF60CF60CF60CF6000000003 /* SeverityAppEnum.swift */; };
+		CF60CF60CF60CF6000000024 /* SeverityAppEnum.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF60CF60CF60CF6000000003 /* SeverityAppEnum.swift */; };
+		CF60CF60CF60CF6000000025 /* LogSeverityIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF60CF60CF60CF6000000004 /* LogSeverityIntent.swift */; };
+		CF60CF60CF60CF6000000026 /* LogSeverityIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF60CF60CF60CF6000000004 /* LogSeverityIntent.swift */; };
+		CF60CF60CF60CF6000000027 /* Router.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF60CF60CF60CF6000000005 /* Router.swift */; };
+		CF60CF60CF60CF6000000028 /* AlertManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFE7F27D592A000DFACC1 /* AlertManager.swift */; };
+		CF60CF60CF60CF6000000029 /* HeadacheAlertRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3FFE7E27D592A000DFACC1 /* HeadacheAlertRequest.swift */; };
 		CE50CE50CE50CE5000000002 /* RiskBriefBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE50CE50CE50CE5000000001 /* RiskBriefBuilder.swift */; };
 		CE50CE50CE50CE5000000003 /* RiskBriefBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE50CE50CE50CE5000000001 /* RiskBriefBuilder.swift */; };
 		CD40CD40CD40CD4000000002 /* Calibration.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD40CD40CD40CD4000000001 /* Calibration.swift */; };
@@ -306,6 +315,11 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		CF60CF60CF60CF6000000001 /* AlertManager+Delegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "AlertManager+Delegate.swift"; sourceTree = "<group>"; };
+		CF60CF60CF60CF6000000002 /* HeadacheAppShortcuts.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "HeadacheAppShortcuts.swift"; sourceTree = "<group>"; };
+		CF60CF60CF60CF6000000003 /* SeverityAppEnum.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "SeverityAppEnum.swift"; sourceTree = "<group>"; };
+		CF60CF60CF60CF6000000004 /* LogSeverityIntent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "LogSeverityIntent.swift"; sourceTree = "<group>"; };
+		CF60CF60CF60CF6000000005 /* Router.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Router.swift"; sourceTree = "<group>"; };
 		CE50CE50CE50CE5000000001 /* RiskBriefBuilder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "RiskBriefBuilder.swift"; sourceTree = "<group>"; };
 		CD40CD40CD40CD4000000001 /* Calibration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Calibration.swift"; sourceTree = "<group>"; };
 		CD40CD40CD40CD4000000004 /* RiskPrediction.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "RiskPrediction.swift"; sourceTree = "<group>"; };
@@ -668,7 +682,8 @@
 		3B3FFDD127D591A000DFACC1 /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				3B3FFE7D27D592A000DFACC1 /* Alerts */,
+				CF60CF60CF60CF6000000010 /* Alerts */,
+				CF60CF60CF60CF6000000011 /* Intents */,
 				3B3FFF0127D59DB100DFACC1 /* App */,
 				3B3FFF0A27D5A68A00DFACC1 /* Extensions */,
 				3B3FFF0027D59D3800DFACC1 /* Refresher */,
@@ -679,6 +694,8 @@
 		3B3FFE4C27D592A000DFACC1 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				3B3FFE7D27D592A000DFACC1 /* Alerts */,
+				CF60CF60CF60CF6000000012 /* Intents */,
 				3B3FFE5627D592A000DFACC1 /* Core Data */,
 				3B3FFE6D27D592A000DFACC1 /* Extensions */,
 				3B3FFE5B27D592A000DFACC1 /* HealthKit */,
@@ -813,6 +830,31 @@
 			path = Alerts;
 			sourceTree = "<group>";
 		};
+		CF60CF60CF60CF6000000010 /* Alerts */ = {
+			isa = PBXGroup;
+			children = (
+				CF60CF60CF60CF6000000001 /* AlertManager+Delegate.swift */,
+			);
+			path = Alerts;
+			sourceTree = "<group>";
+		};
+		CF60CF60CF60CF6000000011 /* Intents */ = {
+			isa = PBXGroup;
+			children = (
+				CF60CF60CF60CF6000000002 /* HeadacheAppShortcuts.swift */,
+			);
+			path = Intents;
+			sourceTree = "<group>";
+		};
+		CF60CF60CF60CF6000000012 /* Intents */ = {
+			isa = PBXGroup;
+			children = (
+				CF60CF60CF60CF6000000003 /* SeverityAppEnum.swift */,
+				CF60CF60CF60CF6000000004 /* LogSeverityIntent.swift */,
+			);
+			path = Intents;
+			sourceTree = "<group>";
+		};
 		3B3FFE8227D592A000DFACC1 /* Weather */ = {
 			isa = PBXGroup;
 			children = (
@@ -846,6 +888,7 @@
 		3B3FFF0127D59DB100DFACC1 /* App */ = {
 			isa = PBXGroup;
 			children = (
+				CF60CF60CF60CF6000000005 /* Router.swift */,
 				3B93330127CF51C600BACE93 /* AppDelegate.swift */,
 				3BF5313627ACE18D00056673 /* Headache_TrackerApp.swift */,
 				3B93330327CF51D500BACE93 /* SceneDelegate.swift */,
@@ -1247,6 +1290,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CF60CF60CF60CF6000000024 /* SeverityAppEnum.swift in Sources */,
+				CF60CF60CF60CF6000000026 /* LogSeverityIntent.swift in Sources */,
+				CF60CF60CF60CF6000000028 /* AlertManager.swift in Sources */,
+				CF60CF60CF60CF6000000029 /* HeadacheAlertRequest.swift in Sources */,
 				CE50CE50CE50CE5000000003 /* RiskBriefBuilder.swift in Sources */,
 				CD40CD40CD40CD4000000003 /* Calibration.swift in Sources */,
 				CD40CD40CD40CD4000000006 /* RiskPrediction.swift in Sources */,
@@ -1339,6 +1386,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CF60CF60CF60CF6000000021 /* AlertManager+Delegate.swift in Sources */,
+				CF60CF60CF60CF6000000022 /* HeadacheAppShortcuts.swift in Sources */,
+				CF60CF60CF60CF6000000023 /* SeverityAppEnum.swift in Sources */,
+				CF60CF60CF60CF6000000025 /* LogSeverityIntent.swift in Sources */,
+				CF60CF60CF60CF6000000027 /* Router.swift in Sources */,
 				CE50CE50CE50CE5000000002 /* RiskBriefBuilder.swift in Sources */,
 				CD40CD40CD40CD4000000002 /* Calibration.swift in Sources */,
 				CD40CD40CD40CD4000000005 /* RiskPrediction.swift in Sources */,

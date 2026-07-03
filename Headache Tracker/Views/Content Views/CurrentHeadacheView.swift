@@ -88,6 +88,9 @@ struct CurrentHeadacheView: View {
   /// Whether the daily check-in sheet is visible.
   @State private var showingCheckInView = false
 
+  /// The app's notification tap router.
+  @EnvironmentObject private var router: Router
+
   /// Whether the check-in card should be shown.
   @AppStorage(Preferences.Lists.Keys.checkIn) private var showCheckInView = Preferences.Lists.Defaults.shown
   
@@ -102,7 +105,7 @@ struct CurrentHeadacheView: View {
         // New/Current Headache
         Section {
           // New/Current Severity
-          SeveritySelectionView(currentSeverity: currentHeadache?.severity, action: viewModel.changeSeverity)
+          SeveritySelectionView(currentSeverity: currentHeadache?.severity, mode: .action(viewModel.changeSeverity))
         } header: {
           SectionTitleView(title: currentHeadache == nil ? "New Headache" : "Current Headache")
         } footer: {
@@ -162,6 +165,13 @@ struct CurrentHeadacheView: View {
     .onAppear(perform: viewModel.appeared)
     .sheet(isPresented: $showingCheckInView) {
       DailyCheckInView()
+    }
+    .onReceive(router.$pendingRoute) { route in
+      guard case .dailyCheckIn = route else {
+        return
+      }
+      router.pendingRoute = nil
+      showingCheckInView = true
     }
     .onDisappear(perform: viewModel.automaticRefreshWaiter.stop)
     .confirmationDialog("Change headache severity to \((sceneDelegate.desiredSeverity ?? .notPresent).title.lowercased())?", isPresented: $viewModel.showingSeverityConfirmation, titleVisibility: .visible) {

@@ -46,6 +46,7 @@ struct Headache_TrackerApp: App {
         .environmentObject(appDelegate.headacheManager.healthKitManager)
         .environmentObject(appDelegate.refresher.alertManager)
         .environmentObject(appDelegate.refresher)
+        .environmentObject(appDelegate.router)
       
         // Subscribe to notifications
         .onReceive(didBecomeActiveNotificationPublisher, perform: didBecomeActive)

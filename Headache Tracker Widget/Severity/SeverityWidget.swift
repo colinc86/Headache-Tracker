@@ -14,7 +14,7 @@ struct SeverityWidget: Widget {
   
   var body: some WidgetConfiguration {
     StaticConfiguration(kind: kind, provider: SeverityWidgetProvider()) { entry in
-      SeveritySelectionView(currentSeverity: entry.severity, link: true)
+      SeveritySelectionView(currentSeverity: entry.severity, mode: .widget)
         .containerBackground(Color(uiColor: .systemBackground), for: .widget)
     }
     .configurationDisplayName("Track Headache")

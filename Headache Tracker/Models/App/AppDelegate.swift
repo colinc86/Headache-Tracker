@@ -11,6 +11,7 @@ import CocoaLumberjackSwiftLogBackend
 import DataController
 import Logging
 import SwiftUI
+import UserNotifications
 
 class AppDelegate: NSObject, UIApplicationDelegate, ObservableObject {
   
@@ -21,6 +22,12 @@ class AppDelegate: NSObject, UIApplicationDelegate, ObservableObject {
   
   /// The application's headache manager.
   var headacheManager = HeadacheManager()
+
+  /// The application's notification tap router.
+  var router = Router()
+
+  /// The application's notification delegate.
+  let alertDelegate = AlertDelegate()
   
   // MARK: Private properties
   
@@ -49,6 +56,13 @@ class AppDelegate: NSObject, UIApplicationDelegate, ObservableObject {
     // Adjust the table view appearance
     UITableView.appearance().sectionFooterHeight = 0
     
+    // Wire the notification delegate synchronously so a cold-start tap on a
+    // notification is delivered to it
+    alertDelegate.headacheManager = headacheManager
+    alertDelegate.router = router
+    UNUserNotificationCenter.current().delegate = alertDelegate
+    alertDelegate.registerCategories(with: UNUserNotificationCenter.current())
+
     // Set up the refresh tasks
     refresher.setupPredictionRefreshTask()
     refresher.setupTrainingProcessingTask()

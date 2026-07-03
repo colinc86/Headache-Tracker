@@ -7,8 +7,6 @@
 
 import Foundation
 import UserNotifications
-import SwiftUI
-import UIKit
 
 protocol AlertRequest {
   var identifier: String { get }
@@ -101,6 +99,28 @@ extension AlertManager {
     return (await checkNotificationSettings()).authorizationStatus
   }
   
+  /// Schedules a check-in alert for the given headache after the given
+  /// interval, replacing any pending check-in.
+  ///
+  /// - Parameters:
+  ///   - headacheIdentifier: The headache's identifier.
+  ///   - interval: The interval from now at which the alert fires.
+  @MainActor func scheduleCheckInAlert(headacheIdentifier: UUID, interval: TimeInterval) async throws {
+    // Cancel any pending check-in notification (scoped, so the repeating
+    // evening exposure reminder survives)
+    let request = HeadacheAlertRequest.checkIn(headacheIdentifier: headacheIdentifier)
+    removePendingRequests(withIdentifiers: [request.identifier])
+
+    let futureDate = Date(timeIntervalSinceNow: interval)
+    let components = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: futureDate)
+
+    logDebug("Scheduling check-in alert at \(futureDate).")
+    try await presentAlert(
+      with: request,
+      trigger: UNCalendarNotificationTrigger(dateMatching: components, repeats: false),
+      badgeNumber: 0)
+  }
+
   /// Removes pending requests with the given identifiers.
   ///
   /// - Parameter identifiers: The notification request identifiers.

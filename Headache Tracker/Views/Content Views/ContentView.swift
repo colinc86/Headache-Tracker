@@ -23,9 +23,12 @@ struct ContentView: View {
   
   /// The app's refresher.
   @EnvironmentObject private var refresher: Refresher
-  
+
+  /// The app's notification tap router.
+  @EnvironmentObject private var router: Router
+
   var body: some View {
-    TabView {
+    TabView(selection: $router.selectedTab) {
       CurrentHeadacheView(
         headacheManager: headacheManager,
         predictor: predictor,
@@ -33,21 +36,25 @@ struct ContentView: View {
         .tabItem {
           Label("Track", systemImage: "brain.head.profile")
         }
+        .tag(Router.Tab.track)
       
       AnalyzeView()
         .tabItem {
           Label("Analyze", systemImage: "chart.bar.xaxis")
         }
+        .tag(Router.Tab.analyze)
       
       HeadachesView()
         .tabItem {
           Label("Headaches", systemImage: "list.bullet")
         }
+        .tag(Router.Tab.headaches)
       
       SettingsView()
         .tabItem {
           Label("Settings", systemImage: "gear")
         }
+        .tag(Router.Tab.settings)
     }
   }
   
@@ -57,6 +64,7 @@ struct ContentView_Previews: PreviewProvider {
   static var previews: some View {
     ContentView()
       .environmentObject(SceneDelegate())
+      .environmentObject(Router())
       .environment(\.managedObjectContext, Previewing.CoreData.viewContext)
       .environmentObject(Previewing.headacheManager)
       .environmentObject(Previewing.alertManager)

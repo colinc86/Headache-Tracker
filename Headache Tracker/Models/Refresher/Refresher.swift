@@ -54,20 +54,9 @@ extension Refresher {
       return
     }
     
-    // Cancel any pending check-in notification (scoped, so the repeating
-    // evening exposure reminder survives)
-    alertManager.removePendingRequests(withIdentifiers: [HeadacheAlertRequest.checkIn(headacheIdentifier: headacheIdentifier).identifier])
-    
-    // Get our date components
-    let futureDate = Date(timeIntervalSinceNow: preferences.notifications.checkInInterval)
-    let components = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: futureDate)
-    
-    // Present the alert
-    logDebug("Presenting alert with components at date \(futureDate).")
-    try await alertManager.presentAlert(
-      with: HeadacheAlertRequest.checkIn(headacheIdentifier: headacheIdentifier),
-      trigger: UNCalendarNotificationTrigger(dateMatching: components, repeats: false),
-      badgeNumber: 0)
+    try await alertManager.scheduleCheckInAlert(
+      headacheIdentifier: headacheIdentifier,
+      interval: preferences.notifications.checkInInterval)
   }
   
   /// Presents a high-risk alert now, debounced so consecutive refreshes

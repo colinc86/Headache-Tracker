@@ -54,7 +54,7 @@ struct AddHeadacheView: View {
   var body: some View {
     List {
       Section {
-        SeveritySelectionView(currentSeverity: viewModel.severity, action: viewModel.setSeverity)
+        SeveritySelectionView(currentSeverity: viewModel.severity, mode: .action(viewModel.setSeverity))
       } header: {
         SectionTitleView(title: "How severe was the headache?")
       } footer: {
