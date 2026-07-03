@@ -96,19 +96,25 @@ extension Refresher {
     preferences.debug.lastRiskAlertDate = Date()
   }
   
-  /// Presents an outlook alert now.
+  /// Presents the morning brief now: the risk tier plus the strongest
+  /// baseline-deviation reasons.
   ///
   /// - Parameter prediction: The prediction.
-  func presentOutlookAlert(with prediction: RiskPrediction?) async throws {
+  func presentMorningBrief(with prediction: RiskPrediction?) async throws {
     // Only continue if we have a prediction and prediction alerts are turned on
     guard preferences.notifications.dailyOutlookAlerts, let prediction = prediction, prediction != .empty else {
       return
     }
 
+    let brief = RiskBriefBuilder.makeBrief(
+      risk: prediction,
+      todayValues: prediction.input.correlationValues(),
+      report: InsightsStore.shared.load())
+
     // Present the alert
-    logDebug("Presenting alert for outlook: \(prediction.probability).")
+    logDebug("Presenting morning brief: \(prediction.probability).")
     try await alertManager.presentAlert(
-      with: HeadacheAlertRequest.outlook(tier: prediction.tier, probability: prediction.probability),
+      with: HeadacheAlertRequest.morningBrief(tier: prediction.tier, probability: prediction.probability, reasons: brief?.reasons ?? []),
       badgeNumber: 0)
   }
 
@@ -134,9 +140,9 @@ extension Refresher {
       badgeNumber: 0)
   }
 
-  /// Whether the daily outlook alert is due: outlook alerts are on, today's
-  /// outlook time has passed, and no outlook was presented since.
-  var isOutlookAlertDue: Bool {
+  /// Whether the morning brief is due: brief alerts are on, today's brief
+  /// time has passed, and no brief was presented since.
+  var isMorningBriefDue: Bool {
     guard preferences.notifications.dailyOutlookAlerts else {
       return false
     }
@@ -146,18 +152,18 @@ extension Refresher {
     return now >= todaysOutlookDate && (preferences.debug.lastOutlookDate ?? .distantPast) < todaysOutlookDate
   }
 
-  /// Presents the daily outlook alert if it's due.
+  /// Presents the morning brief if it's due.
   ///
   /// The day's slot is consumed only after the alert is actually presented,
   /// so a failed presentation is retried on the next refresh.
   ///
   /// - Parameter prediction: The prediction.
-  func presentOutlookAlertIfNeeded(with prediction: RiskPrediction?) async throws {
-    guard isOutlookAlertDue, prediction != nil else {
+  func presentMorningBriefIfNeeded(with prediction: RiskPrediction?) async throws {
+    guard isMorningBriefDue, prediction != nil else {
       return
     }
 
-    try await presentOutlookAlert(with: prediction)
+    try await presentMorningBrief(with: prediction)
 
     let now = Date()
     preferences.debug.lastOutlookDate = now
@@ -243,15 +249,15 @@ extension Refresher {
 
         // Run a prediction when there's no current headache, or when the
         // daily outlook is due (which must fire even during a headache).
-        if currentSeverityID == nil || self.isOutlookAlertDue {
+        if currentSeverityID == nil || self.isMorningBriefDue {
           let prediction = try await self.headacheManager.predictor.predict(input, inWidget: false)
 
           if currentSeverityID == nil {
             try await self.presentRiskAlert(with: prediction)
           }
 
-          // Present the daily outlook when due
-          try await self.presentOutlookAlertIfNeeded(with: prediction)
+          // Present the morning brief when due
+          try await self.presentMorningBriefIfNeeded(with: prediction)
         }
 
         completion.complete(success: true)

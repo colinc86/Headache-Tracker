@@ -145,6 +145,80 @@ struct CorrelationMath {
     return Double(extremeCount + 1) / Double(iterations + 1)
   }
 
+  /// Rolling personal-baseline z-scores over a trailing window.
+  ///
+  /// Each value is standardized against the mean and standard deviation of
+  /// the values in the trailing window *before* it (the value itself is
+  /// excluded). Nil when fewer than `minimumCount` trailing values exist or
+  /// the trailing values are constant. Deviations from personal baseline
+  /// carry the trigger signal better than absolute levels, and z-scoring
+  /// removes slow seasonal drift.
+  ///
+  /// - Parameters:
+  ///   - values: The time-ordered values.
+  ///   - timestamps: The values' timestamps (same order and length).
+  ///   - window: The trailing window.
+  ///   - minimumCount: The minimum trailing values required.
+  /// - Returns: A z-score (or nil) per input value.
+  static func rollingZScores(values: [Double], timestamps: [Date], window: TimeInterval = 14.0 * 86400.0, minimumCount: Int = 5) -> [Double?] {
+    guard values.count == timestamps.count else {
+      return values.map({ _ in nil })
+    }
+
+    var zScores = [Double?]()
+    var windowStart = 0
+
+    for index in values.indices {
+      // Advance the trailing window's left edge.
+      while windowStart < index && timestamps[index].timeIntervalSince(timestamps[windowStart]) > window {
+        windowStart += 1
+      }
+
+      let trailing = values[windowStart ..< index]
+      guard trailing.count >= minimumCount else {
+        zScores.append(nil)
+        continue
+      }
+
+      let mean = trailing.reduce(0.0, +) / Double(trailing.count)
+      let variance = trailing.reduce(0.0, { $0 + ($1 - mean) * ($1 - mean) }) / Double(trailing.count)
+      let std = sqrt(variance)
+
+      guard std > 0.0 else {
+        zScores.append(nil)
+        continue
+      }
+
+      // Winsorize: a near-constant trailing window makes tiny deviations
+      // explode into extreme z-scores whose leverage dominates Pearson.
+      let z = (values[index] - mean) / std
+      zScores.append(min(max(z, -6.0), 6.0))
+    }
+
+    return zScores
+  }
+
+  /// First-order partial correlation between x and y controlling for z,
+  /// via the closed form over the pairwise Pearson coefficients.
+  ///
+  /// - Parameters:
+  ///   - x: The first array.
+  ///   - y: The second array.
+  ///   - z: The control array.
+  /// - Returns: The partial correlation, or nil when undefined.
+  static func partial(_ x: [Double], _ y: [Double], controlling z: [Double]) -> Double? {
+    guard let rxy = pearson(x, y), let rxz = pearson(x, z), let ryz = pearson(y, z) else {
+      return nil
+    }
+
+    let denominator = sqrt((1.0 - rxz * rxz) * (1.0 - ryz * ryz))
+    guard denominator > 0.0 else {
+      return nil
+    }
+
+    return (rxy - rxz * ryz) / denominator
+  }
+
   /// Benjamini-Hochberg FDR-adjusted q-values for a family of p-values.
   ///
   /// - Parameter pValues: The p-values.

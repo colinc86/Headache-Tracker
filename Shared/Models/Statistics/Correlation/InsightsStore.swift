@@ -66,7 +66,8 @@ extension InsightsStore {
     guard let report = load() else {
       return true
     }
-    return report.rowCount != rowCount
+    return report.schemaVersion != InsightsReport.currentSchemaVersion
+      || report.rowCount != rowCount
       || (report.exposureCount ?? 0) != exposureCount
       || Date().timeIntervalSince(report.generatedAt) > 86400.0
   }

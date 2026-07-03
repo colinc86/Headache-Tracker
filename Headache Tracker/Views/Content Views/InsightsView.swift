@@ -141,6 +141,18 @@ struct TriggerInsightCell: View {
         .font(.subheadline)
         .foregroundColor(.secondary)
 
+      if insight.usesBaselineRelative == true {
+        Text("vs. your baseline")
+          .font(.caption)
+          .foregroundColor(.secondary)
+      }
+
+      if let explainedBy = insight.explainedBy {
+        Label("May be explained by \(explainedBy.title)", systemImage: "arrow.triangle.branch")
+          .font(.caption)
+          .foregroundColor(.orange)
+      }
+
       // Strength bar
       GeometryReader { geometry in
         ZStack(alignment: .leading) {

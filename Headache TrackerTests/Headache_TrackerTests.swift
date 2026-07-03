@@ -336,6 +336,132 @@ class Headache_TrackerTests: XCTestCase {
     XCTAssertTrue(report.insufficient.contains(where: { $0.feature == .temperature }))
   }
 
+  // MARK: Insight quality + brief (Phase 3)
+
+  func testRollingZScores() {
+    let timestamps = (0 ..< 10).map { baseDate.addingTimeInterval(Double($0) * 86_400.0) }
+    let values: [Double] = [10, 10, 12, 8, 10, 10, 10, 10, 10, 20]
+
+    let z = CorrelationMath.rollingZScores(values: values, timestamps: timestamps, minimumCount: 5)
+
+    // First five have too little history.
+    for index in 0 ..< 5 {
+      XCTAssertNil(z[index])
+    }
+    // The last value is a strong positive deviation.
+    XCTAssertNotNil(z[9])
+    XCTAssertGreaterThan(z[9] ?? 0, 2.0)
+
+    // Constant series: std == 0 -> nil.
+    let constant = CorrelationMath.rollingZScores(values: [Double](repeating: 5.0, count: 10), timestamps: timestamps, minimumCount: 5)
+    XCTAssertTrue(constant[5...].allSatisfy({ $0 == nil }))
+  }
+
+  func testPartialCorrelationRemovesConfounder() throws {
+    // x and y are both driven by z; their raw correlation is high, but the
+    // partial correlation controlling for z collapses.
+    var generator = CorrelationMath.SeededGenerator(seed: 7)
+    var x = [Double](), y = [Double](), z = [Double]()
+    for _ in 0 ..< 200 {
+      let driver = Double.random(in: 0 ... 1, using: &generator)
+      z.append(driver)
+      x.append(driver + Double.random(in: -0.05 ... 0.05, using: &generator))
+      y.append(driver + Double.random(in: -0.05 ... 0.05, using: &generator))
+    }
+
+    let raw = try XCTUnwrap(CorrelationMath.pearson(x, y))
+    let partial = try XCTUnwrap(CorrelationMath.partial(x, y, controlling: z))
+    XCTAssertGreaterThan(raw, 0.9)
+    XCTAssertLessThan(abs(partial), 0.5 * raw)
+  }
+
+  func testEngineAnnotatesConfounder() {
+    // Two features that are near-copies of each other, both correlated with
+    // onsets: the engine should keep the associations but flag one (or
+    // both) as explained by the other.
+    let start = baseDate
+    var episodes = [HeadacheEpisode]()
+    for k in 1 ... 12 {
+      let onset = start.addingTimeInterval(Double(k) * 30.0 * 3_600.0)
+      episodes.append(HeadacheEpisode(start: onset, end: onset.addingTimeInterval(3_600.0), severities: [HeadacheEpisode.SeverityInterval(severity: .mild, start: onset, end: onset.addingTimeInterval(3_600.0))]))
+    }
+
+    var samples = [CorrelationSample]()
+    for hour in 0 ..< 380 {
+      let timestamp = start.addingTimeInterval(Double(hour) * 3_600.0)
+      let preOnset = episodes.contains(where: { $0.start > timestamp && $0.start.timeIntervalSince(timestamp) <= 6.0 * 3_600.0 })
+      let signal = (preOnset ? 5.0 : 1.0) + Double(hour % 5) * 0.05
+      samples.append(CorrelationSample(timestamp: timestamp, values: [
+        .heartRate: signal,
+        .respiratoryRate: signal * 0.5 + 0.2
+      ]))
+    }
+
+    let report = CorrelationEngine(samples: samples, episodes: episodes).computeReport()
+    let occurrence = report.insights.filter({ $0.target == .occurrence })
+    XCTAssertFalse(occurrence.isEmpty)
+    XCTAssertTrue(occurrence.contains(where: { $0.explainedBy != nil }), "Near-duplicate features should be flagged as confounded")
+    XCTAssertEqual(report.schemaVersion, InsightsReport.currentSchemaVersion)
+    XCTAssertNotNil(report.baselines)
+  }
+
+  func testBriefBuilder() {
+    let insight = TriggerInsight(
+      feature: .sleepSeconds,
+      target: .occurrence,
+      coefficient: -0.5,
+      qValue: 0.01,
+      bestLagHours: 24,
+      lagProfile: [24: -0.5],
+      sampleCount: 100,
+      eventCount: 20,
+      positiveMean: 5.0 * 3_600.0,
+      baselineMean: 7.0 * 3_600.0,
+      usesBaselineRelative: true,
+      explainedBy: nil,
+      partialCoefficient: nil)
+
+    let report = InsightsReport(
+      generatedAt: baseDate,
+      rowCount: 100,
+      exposureCount: 0,
+      insights: [insight],
+      insufficient: [],
+      baselines: [.sleepSeconds: FeatureBaseline(mean: 7.0 * 3_600.0, std: 3_600.0, count: 14)],
+      schemaVersion: InsightsReport.currentSchemaVersion)
+
+    let risk = RiskPrediction(input: .empty, probability: 0.7, topFactors: [], computedAt: baseDate)
+
+    // Short sleep (negative deviation) matches the negative association.
+    let shortSleep = RiskBriefBuilder.makeBrief(risk: risk, todayValues: [.sleepSeconds: 4.5 * 3_600.0], report: report)
+    XCTAssertEqual(shortSleep?.tier, .high)
+    XCTAssertEqual(shortSleep?.reasons.count, 1)
+
+    // Long sleep deviates but in the protective direction: no reason.
+    let longSleep = RiskBriefBuilder.makeBrief(risk: risk, todayValues: [.sleepSeconds: 9.5 * 3_600.0], report: report)
+    XCTAssertEqual(longSleep?.reasons.count, 0)
+
+    // Within a standard deviation: no reason.
+    let normalSleep = RiskBriefBuilder.makeBrief(risk: risk, todayValues: [.sleepSeconds: 6.8 * 3_600.0], report: report)
+    XCTAssertEqual(normalSleep?.reasons.count, 0)
+
+    // Empty prediction: no brief.
+    XCTAssertNil(RiskBriefBuilder.makeBrief(risk: .empty, todayValues: [:], report: report))
+  }
+
+  func testLegacyReportDecodes() throws {
+    // A report shaped like the pre-Phase-3 cache: no baselines, no
+    // schemaVersion, no exposureCount, insights without the new fields.
+    let json = """
+    {"generatedAt": 700000000, "rowCount": 10, "insights": [], "insufficient": []}
+    """
+    let decoder = JSONDecoder()
+    let report = try decoder.decode(InsightsReport.self, from: Data(json.utf8))
+    XCTAssertNil(report.schemaVersion)
+    XCTAssertNil(report.baselines)
+    XCTAssertEqual(report.rowCount, 10)
+  }
+
   // MARK: Risk model (Phase 2)
 
   func testPlattCalibrationRecoversMonotoneMapping() throws {

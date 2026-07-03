@@ -137,8 +137,14 @@ struct TriggerDetailView: View {
     }
 
     var text = "A \(strength) association (r = \(String(format: "%.2f", insight.coefficient)), q = \(String(format: "%.3f", insight.qValue)))"
+    if insight.usesBaselineRelative == true {
+      text += ", measured against your personal baseline"
+    }
     if let lag = insight.bestLagHours {
       text += ", strongest in the \(lag) hours before onset"
+    }
+    if let explainedBy = insight.explainedBy, let partial = insight.partialCoefficient {
+      text += ". Controlling for \(explainedBy.title.lowercased()), the association drops to r = \(String(format: "%.2f", partial)) — it may be explained by that signal"
     }
     return text + "."
   }

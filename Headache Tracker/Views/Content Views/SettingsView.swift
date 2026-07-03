@@ -156,10 +156,10 @@ struct SettingsView: View {
           Toggle("Prediction Notifications", isOn: $realTimeAlerts)
             .tint(colorTheme.baseColor)
           
-          Toggle("Daily Outlook", isOn: $dailyOutlookAlerts)
+          Toggle("Morning Brief", isOn: $dailyOutlookAlerts)
             .tint(colorTheme.baseColor)
           
-          DatePicker("Daily Outlook Time", selection: dailyOutlookDate, displayedComponents: .hourAndMinute)
+          DatePicker("Morning Brief Time", selection: dailyOutlookDate, displayedComponents: .hourAndMinute)
             .disabled(!dailyOutlookAlerts)
         }
 

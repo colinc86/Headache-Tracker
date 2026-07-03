@@ -14,7 +14,7 @@ enum HeadacheAlertRequest: AlertRequest {
   
   case checkIn(headacheIdentifier: UUID)
   case risk(probability: Double)
-  case outlook(tier: RiskPrediction.RiskTier, probability: Double)
+  case morningBrief(tier: RiskPrediction.RiskTier, probability: Double, reasons: [String])
   case exposureCheckIn
 
   /// Stable identifiers so scheduling replaces prior pending requests of
@@ -23,7 +23,7 @@ enum HeadacheAlertRequest: AlertRequest {
     switch self {
     case .checkIn: return "headache-check-in"
     case .risk: return "risk"
-    case .outlook: return "outlook"
+    case .morningBrief: return "morning-brief"
     case .exposureCheckIn: return "exposure-check-in"
     }
   }
@@ -34,8 +34,8 @@ enum HeadacheAlertRequest: AlertRequest {
       return "How's your headache?"
     case .risk:
       return "High Headache Risk"
-    case .outlook:
-      return "Your Daily Headache Outlook"
+    case .morningBrief:
+      return "Your Morning Brief"
     case .exposureCheckIn:
       return "Daily Check-In"
     }
@@ -47,13 +47,18 @@ enum HeadacheAlertRequest: AlertRequest {
       return "Tap here to give an update on your headache."
     case .risk(let probability):
       return "Your headache risk is high: \(Int((probability * 100.0).rounded()))% in the next 24 hours."
-    case .outlook(let tier, let probability):
+    case .morningBrief(let tier, let probability, let reasons):
+      var body: String
       switch tier {
       case .low:
-        return "Your daily outlook is good — low headache risk today."
+        body = "Low headache risk today."
       case .elevated, .high:
-        return "Heads up: \(Int((probability * 100.0).rounded()))% chance of a headache in the next 24 hours."
+        body = "Heads up: \(Int((probability * 100.0).rounded()))% chance of a headache in the next 24 hours."
       }
+      if let reason = reasons.first {
+        body += " \(reason)."
+      }
+      return body
     case .exposureCheckIn:
       return "Log today's exposures — caffeine, alcohol, stress, and more — to sharpen your insights."
     }

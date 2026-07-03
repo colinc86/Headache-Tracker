@@ -202,6 +202,7 @@ struct Preferences {
       static let severity            = Key("settings.listoptions.severity")
       static let medications         = Key("settings.listoptions.medications")
       static let checkIn             = Key("settings.listoptions.checkIn")
+      static let brief               = Key("settings.listoptions.brief")
     }
     
     struct Defaults {
@@ -241,6 +242,9 @@ struct Preferences {
 
     /// Whether the daily check-in view should be shown.
     @UserDefault(Keys.checkIn) var showCheckInView = Defaults.shown
+
+    /// Whether the morning brief reasons should be shown.
+    @UserDefault(Keys.brief) var showBriefView = Defaults.shown
   }
 
   /// Notification settings.

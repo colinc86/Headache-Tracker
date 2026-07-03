@@ -467,7 +467,9 @@ extension HeadacheManager {
       rowCount: totalRowCount,
       exposureCount: exposures.count,
       insights: computed.insights,
-      insufficient: computed.insufficient)
+      insufficient: computed.insufficient,
+      baselines: computed.baselines,
+      schemaVersion: computed.schemaVersion)
     InsightsStore.shared.save(report)
     return report
   }

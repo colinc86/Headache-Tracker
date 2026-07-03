@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		CE50CE50CE50CE5000000002 /* RiskBriefBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE50CE50CE50CE5000000001 /* RiskBriefBuilder.swift */; };
+		CE50CE50CE50CE5000000003 /* RiskBriefBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE50CE50CE50CE5000000001 /* RiskBriefBuilder.swift */; };
 		CD40CD40CD40CD4000000002 /* Calibration.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD40CD40CD40CD4000000001 /* Calibration.swift */; };
 		CD40CD40CD40CD4000000003 /* Calibration.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD40CD40CD40CD4000000001 /* Calibration.swift */; };
 		CD40CD40CD40CD4000000005 /* RiskPrediction.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD40CD40CD40CD4000000004 /* RiskPrediction.swift */; };
@@ -304,6 +306,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		CE50CE50CE50CE5000000001 /* RiskBriefBuilder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "RiskBriefBuilder.swift"; sourceTree = "<group>"; };
 		CD40CD40CD40CD4000000001 /* Calibration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Calibration.swift"; sourceTree = "<group>"; };
 		CD40CD40CD40CD4000000004 /* RiskPrediction.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "RiskPrediction.swift"; sourceTree = "<group>"; };
 		CD40CD40CD40CD4000000007 /* RiskClassifierOutput.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "RiskClassifierOutput.swift"; sourceTree = "<group>"; };
@@ -732,6 +735,7 @@
 			children = (
 				CB20CB20CB20CB2000000001 /* FeatureMedians.swift */,
 				CD40CD40CD40CD4000000004 /* RiskPrediction.swift */,
+				CE50CE50CE50CE5000000001 /* RiskBriefBuilder.swift */,
 				CD40CD40CD40CD4000000001 /* Calibration.swift */,
 				CB20CB20CB20CB2000000004 /* ModelMetrics.swift */,
 				3B3FFE6627D592A000DFACC1 /* Inputs */,
@@ -1243,6 +1247,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CE50CE50CE50CE5000000003 /* RiskBriefBuilder.swift in Sources */,
 				CD40CD40CD40CD4000000003 /* Calibration.swift in Sources */,
 				CD40CD40CD40CD4000000006 /* RiskPrediction.swift in Sources */,
 				CD40CD40CD40CD4000000009 /* RiskClassifierOutput.swift in Sources */,
@@ -1334,6 +1339,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CE50CE50CE50CE5000000002 /* RiskBriefBuilder.swift in Sources */,
 				CD40CD40CD40CD4000000002 /* Calibration.swift in Sources */,
 				CD40CD40CD40CD4000000005 /* RiskPrediction.swift in Sources */,
 				CD40CD40CD40CD4000000008 /* RiskClassifierOutput.swift in Sources */,

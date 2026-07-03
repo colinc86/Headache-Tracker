@@ -17,6 +17,7 @@ struct ListOptionsMenu: View {
   @AppStorage(Preferences.Lists.Keys.notes) private var showNotesView = Preferences.Lists.Defaults.shown
   @AppStorage(Preferences.Lists.Keys.tags) private var showTagsView = Preferences.Lists.Defaults.shown
   @AppStorage(Preferences.Lists.Keys.outlook) private var showOutlookView = Preferences.Lists.Defaults.shown
+  @AppStorage(Preferences.Lists.Keys.brief) private var showBriefView = Preferences.Lists.Defaults.shown
   @AppStorage(Preferences.Lists.Keys.medications) private var showMedicationsView = Preferences.Lists.Defaults.shown
   @AppStorage(Preferences.Lists.Keys.checkIn) private var showCheckInView = Preferences.Lists.Defaults.shown
 
@@ -40,6 +41,7 @@ struct ListOptionsMenu: View {
 
       Section {
         CheckmarkButton(title: "Risk", checked: $showOutlookView)
+        CheckmarkButton(title: "Morning Brief", checked: $showBriefView)
       }
     } label: {
       Label("View Options", systemImage: "list.bullet.below.rectangle")
