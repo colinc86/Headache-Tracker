@@ -121,7 +121,7 @@ struct Preferences {
     }
     
     struct Defaults {
-      static let measurementSystem: MeasurementSystem = NSLocale.system.usesMetricSystem ? .metric : .imperial
+      static let measurementSystem: MeasurementSystem = Locale.current.measurementSystem == .metric ? .metric : .imperial
       static let colorTheme = ColorTheme.system
       static let shouldDimScreen = false
       static let screenDimPercent = 0.5
@@ -129,7 +129,7 @@ struct Preferences {
     }
 
     /// The application's custom color theme.
-    @RawUserDefault(Keys.colorTheme) var colorTheme = Defaults.colorTheme
+    @RawUserDefault(Keys.colorTheme, store: .shared) var colorTheme = Defaults.colorTheme
 
     /// Whether or not the screen should dim.
     @UserDefault(Keys.shouldDimScreen) var shouldDimScreen = Defaults.shouldDimScreen
@@ -139,7 +139,7 @@ struct Preferences {
     @UserDefault(Keys.screenDimPercent) var screenDimPercent = Defaults.screenDimPercent
 
     /// The application's measurement system.
-    @RawUserDefault(Keys.measurementSystem) var measurementSystem = Defaults.measurementSystem
+    @RawUserDefault(Keys.measurementSystem, store: .shared) var measurementSystem = Defaults.measurementSystem
 
     /// Whether or not to enable crash reporting with Crashlytics.
     @UserDefault(Keys.crashReportingEnabled) var crashReportingEnabled = Defaults.crashReportingEnabled
@@ -393,7 +393,6 @@ struct Preferences {
       
       set {
         UserDefaults.shared?.setRawValue(newValue, forKey: Keys.currentSeverity)
-        UserDefaults.shared?.synchronize()
       }
     }
 

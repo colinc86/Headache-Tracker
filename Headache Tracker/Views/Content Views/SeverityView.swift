@@ -23,7 +23,7 @@ struct SeverityView: View {
   // MARK: Private properties
   
   /// The view's presentation mode.
-  @Environment(\.presentationMode) private var presentationMode
+  @Environment(\.dismiss) private var dismiss
   
   /// The app's headache manager.
   @EnvironmentObject private var headacheManager: HeadacheManager
@@ -194,7 +194,7 @@ extension SeverityView {
       Task {
         do {
           try await headacheManager.deleteSeverity(identifier: identifier)
-          presentationMode.wrappedValue.dismiss()
+          dismiss()
         }
         catch {
           showAlert("Unable to Delete Severity", error)

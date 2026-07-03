@@ -21,7 +21,7 @@ struct EditTypeView: View {
   // MARK: Private properties
   
   /// The view's presentation mode.
-  @Environment(\.presentationMode) private var presentationMode
+  @Environment(\.dismiss) private var dismiss
   
   /// The app's headache manager.
   @EnvironmentObject private var headacheManager: HeadacheManager
@@ -46,7 +46,7 @@ struct EditTypeView: View {
   // MARK: View body
   
   var body: some View {
-    NavigationView {
+    NavigationStack {
       Form {
         Picker("Class", selection: $classification) {
           Text(Headache.Classification.primary.title).tag(Headache.Classification.primary)
@@ -74,8 +74,8 @@ struct EditTypeView: View {
         }
       }
       .navigationTitle("Type")
-      .onChange(of: type, perform: changedType)
-      .onChange(of: customTypeValue, perform: changedCustomTypeValue)
+      .onChange(of: type) { _, newValue in changedType(newValue) }
+      .onChange(of: customTypeValue) { _, newValue in changedCustomTypeValue(newValue) }
       .toolbar {
         ToolbarItem(placement: .cancellationAction) {
           Button("Cancel", role: .cancel, action: cancel)
@@ -114,11 +114,6 @@ extension EditTypeView {
     try await headacheManager.updateCustomTypes()
     
     dismiss()
-  }
-  
-  /// Dismisses the view.
-  private func dismiss() {
-    presentationMode.wrappedValue.dismiss()
   }
   
   /// Called when the type changes.

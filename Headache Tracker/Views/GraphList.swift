@@ -25,7 +25,7 @@ struct GraphList: View {
   @State private var topInsights = [TriggerInsight]()
   
   /// The application's custom color theme.
-  @AppStorage(Preferences.General.Keys.colorTheme) private var colorTheme = Preferences.General.Defaults.colorTheme
+  @AppStorage(Preferences.General.Keys.colorTheme, store: .shared) private var colorTheme = Preferences.General.Defaults.colorTheme
   
   /// The analyze view's filter unit.
   private let filterUnit: FilterUnit

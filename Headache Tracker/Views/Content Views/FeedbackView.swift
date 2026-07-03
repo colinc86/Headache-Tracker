@@ -34,7 +34,7 @@ struct FeedbackView: View {
   // MARK: Private properties
   
   /// The view's presentation mode.
-  @Environment(\.presentationMode) private var presentationMode
+  @Environment(\.dismiss) private var dismiss
   
   /// The view's title.
   @State private var title: String = ""
@@ -48,7 +48,7 @@ struct FeedbackView: View {
   // MARK: View body
   
   var body: some View {
-    NavigationView {
+    NavigationStack {
       Form {
         Section {
           TextField("Title", text: $title)
@@ -107,10 +107,6 @@ extension FeedbackView {
     }
     
     dismiss()
-  }
-  
-  private func dismiss() {
-    presentationMode.wrappedValue.dismiss()
   }
   
 }

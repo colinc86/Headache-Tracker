@@ -25,7 +25,7 @@ struct AnalyzeView: View {
   // MARK: View body
   
   var body: some View {
-    NavigationView {
+    NavigationStack {
       GraphList(filterUnit: filterUnit, earliestDate: filterUnit.dateBeforeNow(withCount: filterCount))
       .id(viewIdentifier)
       .navigationTitle("Analyze")
@@ -42,7 +42,7 @@ struct AnalyzeView: View {
             .padding([.leading, .trailing])
             .background(RoundedRectangle(cornerRadius: 8)
                           .fill(Color.secondary.opacity(0.25)))
-            .onChange(of: filterCount, perform: changedFilterCount)
+            .onChange(of: filterCount) { _, newValue in changedFilterCount(newValue) }
             
             Picker("\(filterUnit.rawValue)\(filterCount == 1 ? "." : "s.")", selection: $filterUnit) {
               Text(FilterUnit.day.rawValue + (filterCount == 1 ? "." : "s.")).tag(FilterUnit.day)
@@ -53,12 +53,11 @@ struct AnalyzeView: View {
             .padding([.leading, .trailing])
             .background(RoundedRectangle(cornerRadius: 8)
                           .fill(Color.secondary.opacity(0.25)))
-            .onChange(of: filterUnit, perform: changedFilterUnit)
+            .onChange(of: filterUnit) { _, newValue in changedFilterUnit(newValue) }
           }
         }
       }
     }
-    .navigationViewStyle(StackNavigationViewStyle())
   }
   
 }

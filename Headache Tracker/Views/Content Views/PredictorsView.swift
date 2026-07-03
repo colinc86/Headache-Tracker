@@ -155,7 +155,7 @@ extension PredictorsView {
 
 struct PredictorsView_Previews: PreviewProvider {
   static var previews: some View {
-    NavigationView {
+    NavigationStack {
       PredictorsView()
         .environment(\.managedObjectContext, Previewing.CoreData.viewContext)
         .environmentObject(Previewing.headacheManager)

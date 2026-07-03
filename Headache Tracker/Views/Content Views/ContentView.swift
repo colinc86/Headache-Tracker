@@ -27,7 +27,6 @@ struct ContentView: View {
   var body: some View {
     TabView {
       CurrentHeadacheView(
-        sceneDelegate: sceneDelegate,
         headacheManager: headacheManager,
         predictor: predictor,
         refresher: refresher)

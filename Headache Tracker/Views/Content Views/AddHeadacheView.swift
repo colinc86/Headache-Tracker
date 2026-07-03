@@ -44,7 +44,7 @@ struct AddHeadacheView: View {
   
   // MARK: Private properties
   
-  @Environment(\.presentationMode) private var presentationMode
+  @Environment(\.dismiss) private var dismiss
   
   /// The view's model.
   @ObservedObject private var viewModel: ViewModel
@@ -86,7 +86,7 @@ struct AddHeadacheView: View {
     .navigationTitle("New Headache")
     .toolbar {
       ToolbarItem(placement: .cancellationAction) {
-        Button("Cancel", action: dismiss)
+        Button("Cancel") { dismiss() }
           .disabled(viewModel.isSaving)
       }
       
@@ -108,11 +108,7 @@ struct AddHeadacheView: View {
 // MARK: Actions
 
 extension AddHeadacheView {
-  
-  func dismiss() {
-    presentationMode.wrappedValue.dismiss()
-  }
-  
+
   func save() async throws {
     try await viewModel.save()
     dismiss()
@@ -154,7 +150,7 @@ extension AddHeadacheView.ViewModel {
 
 struct AddHeadacheView_Previews: PreviewProvider {
   static var previews: some View {
-    NavigationView {
+    NavigationStack {
       AddHeadacheView(headacheManager: Previewing.headacheManager)
         .environment(\.managedObjectContext, Previewing.CoreData.viewContext)
         .environmentObject(Previewing.headacheManager)

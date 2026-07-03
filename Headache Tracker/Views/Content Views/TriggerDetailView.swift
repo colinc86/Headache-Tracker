@@ -19,7 +19,7 @@ struct TriggerDetailView: View {
   @EnvironmentObject private var headacheManager: HeadacheManager
 
   /// The application's custom color theme.
-  @AppStorage(Preferences.General.Keys.colorTheme) private var colorTheme = Preferences.General.Defaults.colorTheme
+  @AppStorage(Preferences.General.Keys.colorTheme, store: .shared) private var colorTheme = Preferences.General.Defaults.colorTheme
 
   /// The feature's dated series.
   @State private var series = [DatedValue]()

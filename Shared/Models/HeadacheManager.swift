@@ -71,10 +71,7 @@ class HeadacheManager: ObservableObject {
   
   /// The app's preferences.
   private var preferences = Preferences()
-  
-  /// The queue to train on.
-  private var trainingQueue = DispatchQueue(label: ApplicationKey(from: "trainingQueue"))
-  
+
 }
 
 // MARK: - Current headache methods

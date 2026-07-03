@@ -18,7 +18,7 @@ struct EditNotesView: View {
   // MARK: Private properties
   
   /// The view's presentation mode.
-  @Environment(\.presentationMode) private var presentationMode
+  @Environment(\.dismiss) private var dismiss
   
   /// The app's headache manager.
   @EnvironmentObject private var headacheManager: HeadacheManager
@@ -27,7 +27,7 @@ struct EditNotesView: View {
   @State private var saving: Bool = false
   
   var body: some View {
-    NavigationView {
+    NavigationStack {
       ZStack(alignment: .topLeading) {
         TextEditor(text: $notes)
         
@@ -73,11 +73,6 @@ extension EditNotesView {
     try await headacheManager.updateHeadacheNotes(notes.isEmpty ? nil : notes, identifier: identifier)
     
     dismiss()
-  }
-  
-  /// Dismisses the view.
-  private func dismiss() {
-    presentationMode.wrappedValue.dismiss()
   }
   
 }

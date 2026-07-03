@@ -39,7 +39,7 @@ struct TagButton: View {
 struct TagButtonStyle: ButtonStyle {
   
   /// The application's custom color theme.
-  @AppStorage(Preferences.General.Keys.colorTheme) private var colorTheme = Preferences.General.Defaults.colorTheme
+  @AppStorage(Preferences.General.Keys.colorTheme, store: .shared) private var colorTheme = Preferences.General.Defaults.colorTheme
   
   func makeBody(configuration: Configuration) -> some View {
     configuration.label
@@ -52,7 +52,7 @@ struct TagButtonStyle: ButtonStyle {
 struct DeletableTagButtonStyle: ButtonStyle {
   
   /// The application's custom color theme.
-  @AppStorage(Preferences.General.Keys.colorTheme) private var colorTheme = Preferences.General.Defaults.colorTheme
+  @AppStorage(Preferences.General.Keys.colorTheme, store: .shared) private var colorTheme = Preferences.General.Defaults.colorTheme
   
   func makeBody(configuration: Configuration) -> some View {
     HStack {

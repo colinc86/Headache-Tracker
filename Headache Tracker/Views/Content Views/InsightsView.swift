@@ -15,7 +15,7 @@ struct InsightsView: View {
   @EnvironmentObject private var headacheManager: HeadacheManager
 
   /// The application's custom color theme.
-  @AppStorage(Preferences.General.Keys.colorTheme) private var colorTheme = Preferences.General.Defaults.colorTheme
+  @AppStorage(Preferences.General.Keys.colorTheme, store: .shared) private var colorTheme = Preferences.General.Defaults.colorTheme
 
   /// The latest insights report.
   @State private var report: InsightsReport?
@@ -121,7 +121,7 @@ struct TriggerInsightCell: View {
   var modelImportance: Double?
 
   /// The application's custom color theme.
-  @AppStorage(Preferences.General.Keys.colorTheme) private var colorTheme = Preferences.General.Defaults.colorTheme
+  @AppStorage(Preferences.General.Keys.colorTheme, store: .shared) private var colorTheme = Preferences.General.Defaults.colorTheme
 
   // MARK: View body
 
@@ -200,7 +200,7 @@ struct TriggerInsightCell: View {
 
 struct InsightsView_Previews: PreviewProvider {
   static var previews: some View {
-    NavigationView {
+    NavigationStack {
       InsightsView()
         .environmentObject(Previewing.headacheManager)
     }

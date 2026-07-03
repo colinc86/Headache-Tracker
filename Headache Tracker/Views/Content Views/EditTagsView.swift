@@ -18,7 +18,7 @@ struct EditTagsView: View {
   // MARK: Private properties
   
   /// The view's presentation mode.
-  @Environment(\.presentationMode) private var presentationMode
+  @Environment(\.dismiss) private var dismiss
   
   /// The app's headache manager.
   @EnvironmentObject private var headacheManager: HeadacheManager
@@ -72,7 +72,7 @@ struct EditTagsView: View {
   // MARK: View body
   
   var body: some View {
-    NavigationView {
+    NavigationStack {
       ScrollView {
         VStack(alignment: newTag.isEmpty ? .center : .leading) {
           if !tags.isEmpty {
@@ -186,11 +186,6 @@ extension EditTagsView {
     try await headacheManager.updateHeadacheTags(tags, identifier: identifier)
     
     dismiss()
-  }
-  
-  /// Dismisses the view.
-  private func dismiss() {
-    presentationMode.wrappedValue.dismiss()
   }
   
 }

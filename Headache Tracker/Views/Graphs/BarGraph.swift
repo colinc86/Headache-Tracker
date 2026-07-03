@@ -203,79 +203,54 @@ extension BarGraph {
 }
 
 struct Bars: Shape {
-  
-  struct Line {
-    let endpointA: CGPoint
-    let endpointB: CGPoint
-  }
-  
-  /// The series to plot.
-  let series: [(Double, Date)]
-  
-  /// The earliest date in the series.
-  let earliestDate: Date?
-  
-  /// The maximum value in the series.
-  let staticMax: Double?
+
+  /// The maximum series value per day, indexed from the earliest date.
+  private let dayValues: [Double]
 
   /// The maximum value to use when calculating values.
-  private var max: Double {
-    return staticMax ?? Surge.max(series.map({ $0.0 }))
-  }
-  
+  private let maxValue: Double
+
   func path(in rect: CGRect) -> Path {
     Path { path in
-      for line in pathLines(for: rect.size) {
-        path.move(to: CGPoint(x: line.0, y: rect.height))
-        path.addLine(to: CGPoint(x: line.0, y: line.1))
+      guard maxValue > 0.0 && !dayValues.isEmpty else {
+        return
+      }
+
+      let xStep = rect.width / CGFloat(dayValues.count)
+      for (i, value) in dayValues.enumerated() {
+        let xCenter = xStep * CGFloat(i) + xStep / 2.0
+        let yValue = rect.height * (1.0 - CGFloat(value) / maxValue)
+        path.move(to: CGPoint(x: xCenter, y: rect.height))
+        path.addLine(to: CGPoint(x: xCenter, y: yValue))
       }
     }
   }
-  
+
   init(series: [(Double, Date)], earliestDate: Date?, staticMax: Double?) {
-    self.series = series
-    self.earliestDate = earliestDate
-    self.staticMax = staticMax
-  }
-}
-
-// MARK: Private methods
-
-extension Bars {
-  
-  /// The bar graph's rectangles.
-  ///
-  /// - Returns: An array of unit points.
-  func pathLines(for size: CGSize) -> [(CGFloat, CGFloat)] {
+    // Bucket the series by day once. path(in:) runs on every layout and
+    // animation frame; recomputing the day-by-day filter there made
+    // scrubbing O(days x series) per frame.
     guard let earliestDate = earliestDate ?? series.first?.1 else {
-      return []
+      dayValues = []
+      maxValue = 0.0
+      return
     }
-    
-    let count = Calendar.current.numberOfDaysBetween(earliestDate, and: Date())
-    
-    guard max > 0.0 && count > 0 else {
-      return []
+
+    let calendar = Calendar.current
+    let count = calendar.numberOfDaysBetween(earliestDate, and: Date())
+
+    var values = [Double](repeating: 0.0, count: Swift.max(count, 0))
+    let startDay = calendar.startOfDay(for: earliestDate)
+    for (value, date) in series {
+      let index = calendar.dateComponents([.day], from: startDay, to: calendar.startOfDay(for: date)).day ?? -1
+      if index >= 0 && index < values.count && value > values[index] {
+        values[index] = value
+      }
     }
-    
-    let xStep = size.width / CGFloat(count)
-    var pathLines = [(CGFloat, CGFloat)]()
-    
-    for i in 0 ..< count {
-      let date = earliestDate.addingTimeInterval(TimeInterval(i) * 86400.0)
-      
-      // Get the series values on this date
-      let values = series.filter({ Calendar.current.numberOfDaysBetween(date, and: $0.1) == 0 })
-      
-      // Get the maximum series value
-      let seriesValue = values.max(by: { $0.0 < $1.0 })?.0 ?? 0.0
-      let xCenter = xStep * CGFloat(i) + xStep / 2.0
-      let yValue = size.height * (1.0 - CGFloat(seriesValue) / max)
-      pathLines.append((xCenter, yValue))
-    }
-    
-    return pathLines
+
+    dayValues = values
+    maxValue = staticMax ?? (series.isEmpty ? 0.0 : Surge.max(series.map({ $0.0 })))
   }
-  
 }
 
 struct BarGraph_Previews: PreviewProvider {

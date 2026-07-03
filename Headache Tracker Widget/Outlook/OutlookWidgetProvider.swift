@@ -40,7 +40,7 @@ struct OutlookWidgetProvider: TimelineProvider {
           completion(placeholder(in: context))
         }
         else {
-          completion((try await currentContent()).first!)
+          completion((try await currentContent()).first ?? OutlookWidgetProvider.placeholder)
         }
       }
       catch {
@@ -48,51 +48,43 @@ struct OutlookWidgetProvider: TimelineProvider {
         completion(placeholder(in: context))
       }
     }
-    
+
   }
-  
+
   func getTimeline(in context: Context, completion: @escaping (Timeline<OutlookWidgetContent>) -> ()) {
     let now = Date()
-    
+
     Task {
       do {
-        let content = try await currentContent()
-        let firstDate = content.first!.date
-        
+        var content = try await currentContent()
+        var firstDate = content.first?.date ?? now
+
         if now.timeIntervalSince(firstDate) >= 600.0 && headacheManager.predictor.ready && headacheManager.authorizedForWidgetUpdates {
-          // Get a new prediction
+          // Get a new prediction and content
           try await headacheManager.createPredict(create: false, inWidget: true)
-          
-          // Get the new content
-          let newContent = try await currentContent()
-          
-          // Use new content
-          if newContent.first!.hasCurrentHeadache {
-            // Duration prediction in headache
-            completion(Timeline(entries: newContent, policy: .atEnd))
-          }
-          else {
-            // Reload on a future date
-            let reloadDate = firstDate.addingTimeInterval(600.0)
-            completion(Timeline(entries: newContent, policy: .after(reloadDate)))
-          }
+          content = try await currentContent()
+          firstDate = content.first?.date ?? now
+        }
+
+        guard let first = content.first else {
+          let reloadDate = now.addingTimeInterval(600.0)
+          completion(Timeline(entries: [placeholder(in: context)], policy: .after(reloadDate)))
+          return
+        }
+
+        if first.hasCurrentHeadache {
+          // Duration prediction in headache
+          completion(Timeline(entries: content, policy: .atEnd))
         }
         else {
-          // Use old content
-          if content.first!.hasCurrentHeadache {
-            // Duration prediction in headache
-            completion(Timeline(entries: content, policy: .atEnd))
-          }
-          else {
-            // Reload on a future date
-            let reloadDate = firstDate.addingTimeInterval(600.0)
-            completion(Timeline(entries: content, policy: .after(reloadDate)))
-          }
+          // Reload on a future date
+          let reloadDate = firstDate.addingTimeInterval(600.0)
+          completion(Timeline(entries: content, policy: .after(reloadDate)))
         }
       }
       catch {
         NSLog("Error getting current content: \(error)")
-              
+
         let reloadDate = now.addingTimeInterval(600.0)
         completion(Timeline(entries: [placeholder(in: context)], policy: .after(reloadDate)))
       }

@@ -133,8 +133,8 @@ extension AlertManager {
     guard await checkAuthorization() else {
       throw AlertError.notAuthorized
     }
-    
-    UIApplication.shared.applicationIconBadgeNumber = number
+
+    try await center.setBadgeCount(number)
   }
   
 }

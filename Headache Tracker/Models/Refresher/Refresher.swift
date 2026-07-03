@@ -24,12 +24,12 @@ class Refresher: ObservableObject {
   /// The application's preferences.
   private var preferences = Preferences()
   
-  /// The refresh task responsible for creating background samples.
+  /// The refresh task responsible for creating background samples and, when
+  /// due, the daily outlook alert. A single app-refresh identifier is used
+  /// because iOS budgets refresh opportunities per app; two competing
+  /// identifiers meant one rarely fired.
   private let predictionRefreshTask = RefreshTask(identifier: Constants.Tasks.backgroundPredictionTaskIdentifier, type: .appRefresh)
-  
-  /// The refresh task responsible for getting the daily outlook.
-  private let outlookRefreshTask = RefreshTask(identifier: Constants.Tasks.backgroundOutlookTaskIdentifier, type: .appRefresh)
-  
+
   /// The refresh task responsible for re-training the machine learning models.
   private let trainingProcessingTask = RefreshTask(identifier: Constants.Tasks.backgroundTrainingTaskIdentifier, type: .processing)
   
@@ -95,14 +95,34 @@ extension Refresher {
     guard preferences.notifications.dailyOutlookAlerts, let prediction = prediction else {
       return
     }
-    
+
     // Present the alert
     logDebug("Presenting alert for outlook: \(prediction.outlookClassifierOutput.prediction).")
     try await alertManager.presentAlert(
       with: HeadacheAlertRequest.outlook(outlook: prediction.outlookClassifierOutput.prediction, onset: prediction.onsetRegressorOutput.prediction),
       badgeNumber: 0)
   }
-  
+
+  /// Presents the daily outlook alert if it's due: outlook alerts are on,
+  /// today's outlook time has passed, and no outlook was presented since.
+  ///
+  /// - Parameter prediction: The prediction.
+  func presentOutlookAlertIfNeeded(with prediction: PredictionOutput?) async throws {
+    guard preferences.notifications.dailyOutlookAlerts else {
+      return
+    }
+
+    let now = Date()
+    let todaysOutlookDate = Calendar.current.startOfDay(for: now).addingTimeInterval(preferences.notifications.dailyOutlookTime)
+    guard now >= todaysOutlookDate, (preferences.debug.lastOutlookDate ?? .distantPast) < todaysOutlookDate else {
+      return
+    }
+
+    preferences.debug.lastOutlookDate = now
+    preferences.debug.nextOutlookDate = todaysOutlookDate.addingTimeInterval(86400.0)
+    try await presentOutlookAlert(with: prediction)
+  }
+
 }
 
 // MARK: - Predictions background refresh methods
@@ -185,104 +205,15 @@ extension Refresher {
           // We got the input, so present the prediction
           let prediction = try await self.headacheManager.predictor.predict(input, inWidget: false)
           try await self.presentPredictionAlert(with: prediction)
+
+          // Present the daily outlook when due
+          try await self.presentOutlookAlertIfNeeded(with: prediction)
         }
 
         completion.complete(success: true)
       }
       catch {
         logError("Error creating training data: \(error)")
-        completion.complete(success: false)
-      }
-    }
-  }
-  
-}
-
-// MARK: - Daily outlook background refresh methods
-
-extension Refresher {
-  
-  /// Sets up the refresh task by registering it.
-  func setupOutlookRefreshTask() {
-    logDebug("Registering outlook refresh task handler.")
-    outlookRefreshTask.register(handleOutlookRefreshTask)
-  }
-  
-  /// Cancels the refresh task.
-  func cancelOutlookRefreshTask() {
-    logDebug("Cancelling outlook refresh task.")
-    outlookRefreshTask.cancel()
-  }
-  
-  /// Schedules the outlook task for the daily outlook time.
-  @MainActor func scheduleOutlookRefreshTask() async throws {
-    // Get the number of seconds past midnight.
-    let now = Date()
-    let secondsPastMidnight = Calendar.current.timeIntervalSinceMidnight(now)
-    
-    // Get the number of seconds until the next outlook time
-    var secondsUntilOutlook: TimeInterval = 0.0
-    
-    // Are we past the daily outlook time?
-    if secondsPastMidnight < preferences.notifications.dailyOutlookTime {
-      // We haven't passed the outlook time yet.
-      secondsUntilOutlook = preferences.notifications.dailyOutlookTime - secondsPastMidnight
-    }
-    else {
-      // We've already passed the outlook time.
-      let futureOutlookDate = Calendar.current.midnightAfter(now).addingTimeInterval(preferences.notifications.dailyOutlookTime)
-      secondsUntilOutlook = futureOutlookDate.timeIntervalSince(now)
-    }
-    
-    // Schedule the outlook task
-    logDebug("Scheduling outlook refresh task with date \(Date(timeIntervalSinceNow: secondsUntilOutlook)).")
-    try await outlookRefreshTask.schedule(interval: secondsUntilOutlook)
-    
-    logDebug("Successfully scheduled outlook refresh task.")
-    preferences.debug.nextOutlookDate = Date(timeIntervalSinceNow: secondsUntilOutlook)
-  }
-  
-  /// Handles the refresh task.
-  private func handleOutlookRefreshTask(_ task: BGTask) {
-    logDebug("Handle outlook refresh task.")
-    preferences.debug.lastOutlookDate = Date()
-    
-    // Schedule the next task
-    if preferences.notifications.dailyOutlookAlerts {
-      Task {
-        do {
-          try await scheduleOutlookRefreshTask()
-        }
-        catch {
-          logError("Error scheduling outlook refresh task: \(error)")
-        }
-      }
-    }
-    
-    // Set the task's expiration handler
-    let completion = TaskCompletionGuard(task)
-    task.expirationHandler = { [weak self] in
-      // Cancel the prediction
-      self?.headacheManager?.cancelClassificationInput()
-      completion.complete(success: false)
-    }
-
-    // Run a prediction
-    Task { [weak self] in
-      guard let self = self else {
-        completion.complete(success: false)
-        return
-      }
-
-      do {
-        let input = await self.headacheManager.predictorInput(atDate: Date(), inWidget: false)
-        let prediction = try await self.headacheManager.predictor.predict(input, inWidget: false)
-        try await self.presentOutlookAlert(with: prediction)
-
-        completion.complete(success: true)
-      }
-      catch {
-        logError("Error getting current classifier input: \(error)")
         completion.complete(success: false)
       }
     }
