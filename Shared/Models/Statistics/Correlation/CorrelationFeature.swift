@@ -179,7 +179,13 @@ extension TrainingData {
         case .heartRate: values[.heartRate] = value
         case .restingHeartRate: values[.restingHeartRate] = value
         case .walkingHeartRateAverage: values[.walkingHeartRateAverage] = value
-        case .heartRateVariabilitySDNN: values[.heartRateVariability] = value
+        case .heartRateVariabilitySDNN:
+          // HRV changed units (seconds -> milliseconds) with presence
+          // tracking; legacy rows would mix scales 1000x apart into the
+          // same series, so only presence-tracked values participate.
+          if presence.contains(.heartRateVariabilitySDNN) {
+            values[.heartRateVariability] = value
+          }
         case .oxygenSaturation: values[.oxygenSaturation] = value
         case .respiratoryRate: values[.respiratoryRate] = value
         case .headache: break

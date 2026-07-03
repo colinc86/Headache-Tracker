@@ -78,7 +78,10 @@ class Predictor: ObservableObject {
   private var medians = FeatureMedians()
 
   /// The latest permutation feature importances (normalized to [0, 1]).
-  private var importances = [String: Double]()
+  ///
+  /// Read from arbitrary caller threads and written on the model queue, so
+  /// access is lock-guarded.
+  private let importances = OSAllocatedUnfairLock(initialState: [String: Double]())
   
   /// The classifier for predicting headache outlook.
   private var outlookClassifier: Model<InputUnion, OutlookClassifierOutput>?
@@ -213,7 +216,8 @@ extension Predictor {
       compiledModelURL(with: Predictor.durationRegressorFileName),
       mediansURL(),
       metricsURL(),
-      importancesURL()
+      importancesURL(),
+      schemaVersionURL()
     ]
 
     for url in urls {
@@ -236,7 +240,7 @@ extension Predictor {
       self?.onsetRegressor = nil
       self?.durationRegressor = nil
       self?.medians = FeatureMedians()
-      self?.importances = [:]
+      self?.importances.withLock { $0 = [:] }
     }
 
     // Reset published state on the main queue
@@ -345,10 +349,12 @@ extension Predictor {
   ///
   /// - Returns: Importance per feature name.
   func featureImportances() -> [String: Double] {
-    if importances.isEmpty {
-      importances = (try? JSONDecoder().decode([String: Double].self, from: Data(contentsOf: importancesURL()))) ?? [:]
+    return importances.withLock { importances in
+      if importances.isEmpty {
+        importances = (try? JSONDecoder().decode([String: Double].self, from: Data(contentsOf: importancesURL()))) ?? [:]
+      }
+      return importances
     }
-    return importances
   }
 
 }
@@ -378,7 +384,18 @@ extension Predictor {
         completion(nil)
         return
       }
-      
+
+      // Refuse to load models trained on an old feature schema; they'd be
+      // fed feature names they don't know. This check must run here (not
+      // just at app launch) because the widget process loads models from
+      // the shared container independently of the app.
+      let storedSchemaVersion = (try? JSONDecoder().decode(Int.self, from: Data(contentsOf: self.schemaVersionURL()))) ?? 0
+      guard storedSchemaVersion == Constants.modelSchemaVersion else {
+        logWarning("Compiled models use feature schema \(storedSchemaVersion), expected \(Constants.modelSchemaVersion); not loading.")
+        completion(nil)
+        return
+      }
+
       do {
         logDebug("Loading outlook classifier.")
         let outlookClassifierModelURL = self.compiledModelURL(with: Predictor.outlookClassifierFileName)
@@ -400,7 +417,8 @@ extension Predictor {
         if let data = try? Data(contentsOf: self.mediansURL()), let medians = try? JSONDecoder().decode(FeatureMedians.self, from: data) {
           self.medians = medians
         }
-        self.importances = (try? JSONDecoder().decode([String: Double].self, from: Data(contentsOf: self.importancesURL()))) ?? [:]
+        let loadedImportances = (try? JSONDecoder().decode([String: Double].self, from: Data(contentsOf: self.importancesURL()))) ?? [:]
+        self.importances.withLock { $0 = loadedImportances }
         let metrics = try? JSONDecoder().decode(ModelMetrics.self, from: Data(contentsOf: self.metricsURL()))
 
         completion(nil)
@@ -541,7 +559,9 @@ extension Predictor {
         }
 
         if !self.isTrainingCancelled {
-          // Persist the medians, metrics, and importances beside the models.
+          // Persist the medians, metrics, importances, and feature schema
+          // version beside the models. Normalization happens once, after
+          // both models' raw accuracy drops have been merged.
           let metrics = ModelMetrics(
             trainedAt: Date(),
             outlook: outlookMetrics,
@@ -551,7 +571,8 @@ extension Predictor {
 
           try JSONEncoder().encode(input.medians).write(to: self.mediansURL(), options: .atomic)
           try JSONEncoder().encode(metrics).write(to: self.metricsURL(), options: .atomic)
-          try JSONEncoder().encode(featureImportances).write(to: self.importancesURL(), options: .atomic)
+          try JSONEncoder().encode(Predictor.normalizedImportances(featureImportances)).write(to: self.importancesURL(), options: .atomic)
+          try JSONEncoder().encode(Constants.modelSchemaVersion).write(to: self.schemaVersionURL(), options: .atomic)
         }
 
         logDebug("Getting creation date.")
@@ -612,17 +633,23 @@ extension Predictor {
     return importances
   }
 
-  /// Merges per-model importances into the combined dictionary, keeping the
-  /// larger value per feature and normalizing to [0, 1] by the maximum.
+  /// Merges per-model raw importances into the combined dictionary, keeping
+  /// the larger value per feature. Values stay in raw accuracy-drop units;
+  /// normalize once with `normalizedImportances(_:)` after all merges, so
+  /// one model's normalized values are never compared against another's raw
+  /// deltas.
   private func mergeImportances(into combined: inout [String: Double], from importances: [String: Double]) {
     for (feature, value) in importances {
       combined[feature] = max(combined[feature] ?? 0.0, value)
     }
-    if let maximum = combined.values.max(), maximum > 0.0 {
-      for (feature, value) in combined {
-        combined[feature] = value / maximum
-      }
+  }
+
+  /// Normalizes importances to [0, 1] by the maximum value.
+  private static func normalizedImportances(_ importances: [String: Double]) -> [String: Double] {
+    guard let maximum = importances.values.max(), maximum > 0.0 else {
+      return importances
     }
+    return importances.mapValues({ $0 / maximum })
   }
   
   /// Writes the model to the file with the given model name.
@@ -688,6 +715,11 @@ extension Predictor {
   /// The URL of the persisted feature importances.
   private func importancesURL() -> URL {
     return modelsDirectory().appendingPathComponent("importances.json")
+  }
+
+  /// The URL of the persisted feature schema version.
+  private func schemaVersionURL() -> URL {
+    return modelsDirectory().appendingPathComponent("schemaVersion.json")
   }
   
   /// The predictor's models directory.

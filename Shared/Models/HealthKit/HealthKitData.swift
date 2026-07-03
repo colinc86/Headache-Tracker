@@ -169,10 +169,14 @@ enum HealthKitData: CaseIterable, Codable {
       return nil
     }
 
-    // Default overlap semantics: a sleep block that started before the
-    // window but overlaps it still counts.
+    // Sleep uses overlap semantics (a block that started before the window
+    // but overlaps it still counts, clamped when summed). Everything else
+    // keeps strict starts: statistics queries count a matched sample's full
+    // value, so overlap semantics would double count sums like step count
+    // across successive sampling windows.
     let interval = window(endingAt: date)
-    let predicate = HKQuery.predicateForSamples(withStart: interval.start, end: interval.end, options: [])
+    let options: HKQueryOptions = (self == .sleepSeconds || self == .sleepOnset) ? [] : .strictStartDate
+    let predicate = HKQuery.predicateForSamples(withStart: interval.start, end: interval.end, options: options)
     let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)
     let limit = Int(Int32.max)
     

@@ -368,6 +368,13 @@ extension HeadacheManager {
         context.delete(severity)
         headache?.reorganize()
 
+        // Deleting the open severity may have left the headache with only
+        // closed intervals; keep the resolved flag consistent with the
+        // open-interval invariant.
+        if let headache = headache, !headache.severitiesArray.isEmpty {
+          headache.resolved = headache.severitiesArray.last?.endTime != nil
+        }
+
         for severity in headache?.severitiesArray ?? [] {
           guard let interval = severity.severityInterval else { continue }
           newSeveritySamples.append(interval)
@@ -438,18 +445,27 @@ extension HeadacheManager {
   /// - Returns: The freshly computed report.
   @discardableResult
   func computeInsights() async throws -> InsightsReport {
-    let (samples, episodes) = try await DataController.shared.performInBackground { context -> ([CorrelationSample], [HeadacheEpisode]) in
+    let (samples, episodes, totalRowCount) = try await DataController.shared.performInBackground { context -> ([CorrelationSample], [HeadacheEpisode], Int) in
       let request = TrainingData.fetchRequest()
       request.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: true)]
       let trainingData = try context.fetch(request)
       let samples = trainingData.compactMap({ $0.correlationSample })
       let episodes = try HeadacheManager.headacheEpisodes(in: context)
-      return (samples, episodes)
+      return (samples, episodes, trainingData.count)
     }
 
     logInfo("Computing insights from \(samples.count) samples and \(episodes.count) episodes.")
     let engine = CorrelationEngine(samples: samples, episodes: episodes)
-    let report = engine.computeReport()
+    let computed = engine.computeReport()
+
+    // Store the total row count — the same number insights() compares
+    // against for staleness. Using the filtered sample count instead made
+    // the cache permanently stale when any row lacked usable values.
+    let report = InsightsReport(
+      generatedAt: computed.generatedAt,
+      rowCount: totalRowCount,
+      insights: computed.insights,
+      insufficient: computed.insufficient)
     InsightsStore.shared.save(report)
     return report
   }
@@ -778,7 +794,13 @@ extension HeadacheManager {
       try await resolveEvaluations()
 
       let prediction = try await predictor.predict(input, inWidget: inWidget)
-      try await evaluatePrediction(prediction)
+
+      // Only record forecasts a model actually made; before the first
+      // training, predict returns the empty placeholder, and evaluating it
+      // would inflate the accuracy readout with fabricated no-headache rows.
+      if prediction != .empty {
+        try await evaluatePrediction(prediction)
+      }
     }
   }
   

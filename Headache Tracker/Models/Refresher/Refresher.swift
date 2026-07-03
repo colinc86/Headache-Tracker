@@ -103,24 +103,34 @@ extension Refresher {
       badgeNumber: 0)
   }
 
-  /// Presents the daily outlook alert if it's due: outlook alerts are on,
-  /// today's outlook time has passed, and no outlook was presented since.
-  ///
-  /// - Parameter prediction: The prediction.
-  func presentOutlookAlertIfNeeded(with prediction: PredictionOutput?) async throws {
+  /// Whether the daily outlook alert is due: outlook alerts are on, today's
+  /// outlook time has passed, and no outlook was presented since.
+  var isOutlookAlertDue: Bool {
     guard preferences.notifications.dailyOutlookAlerts else {
-      return
+      return false
     }
 
     let now = Date()
     let todaysOutlookDate = Calendar.current.startOfDay(for: now).addingTimeInterval(preferences.notifications.dailyOutlookTime)
-    guard now >= todaysOutlookDate, (preferences.debug.lastOutlookDate ?? .distantPast) < todaysOutlookDate else {
+    return now >= todaysOutlookDate && (preferences.debug.lastOutlookDate ?? .distantPast) < todaysOutlookDate
+  }
+
+  /// Presents the daily outlook alert if it's due.
+  ///
+  /// The day's slot is consumed only after the alert is actually presented,
+  /// so a failed presentation is retried on the next refresh.
+  ///
+  /// - Parameter prediction: The prediction.
+  func presentOutlookAlertIfNeeded(with prediction: PredictionOutput?) async throws {
+    guard isOutlookAlertDue, prediction != nil else {
       return
     }
 
-    preferences.debug.lastOutlookDate = now
-    preferences.debug.nextOutlookDate = todaysOutlookDate.addingTimeInterval(86400.0)
     try await presentOutlookAlert(with: prediction)
+
+    let now = Date()
+    preferences.debug.lastOutlookDate = now
+    preferences.debug.nextOutlookDate = Calendar.current.startOfDay(for: now).addingTimeInterval(preferences.notifications.dailyOutlookTime + 86400.0)
   }
 
 }
@@ -200,11 +210,14 @@ extension Refresher {
           try await self.headacheManager.createTrainingData(from: input, severityIdentifier: currentSeverityID)
         }
 
-        // If there is no current headache, then present a prediction
-        if currentSeverityID == nil {
-          // We got the input, so present the prediction
+        // Run a prediction when there's no current headache, or when the
+        // daily outlook is due (which must fire even during a headache).
+        if currentSeverityID == nil || self.isOutlookAlertDue {
           let prediction = try await self.headacheManager.predictor.predict(input, inWidget: false)
-          try await self.presentPredictionAlert(with: prediction)
+
+          if currentSeverityID == nil {
+            try await self.presentPredictionAlert(with: prediction)
+          }
 
           // Present the daily outlook when due
           try await self.presentOutlookAlertIfNeeded(with: prediction)
