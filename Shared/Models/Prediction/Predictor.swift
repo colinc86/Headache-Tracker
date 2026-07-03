@@ -10,7 +10,7 @@ import CoreML
 import Foundation
 import WidgetKit
 
-#if NON_PREVIEW
+#if !targetEnvironment(simulator)
 import CreateML
 
 class Predictor: ObservableObject {

@@ -8,7 +8,7 @@
 import Accelerate
 import Foundation
 
-#if NON_PREVIEW
+#if !targetEnvironment(simulator)
 import CreateML
 
 /// Creates and houses the tables for training.

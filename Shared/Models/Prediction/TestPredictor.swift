@@ -7,7 +7,7 @@
 
 import Foundation
 
-#if !NON_PREVIEW
+#if targetEnvironment(simulator)
 class Predictor: ObservableObject {
   
   // MARK: Types

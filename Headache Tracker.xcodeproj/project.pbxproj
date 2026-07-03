@@ -305,6 +305,7 @@
 		3B10D45427ED7D78004B68AA /* Headache_Tracker 1.8.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Headache_Tracker 1.8.xcdatamodel"; sourceTree = "<group>"; };
 		3B10D45527ED825F004B68AA /* Headache+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Headache+CoreDataClass.swift"; sourceTree = "<group>"; };
 		3B10D45827ED8FD3004B68AA /* EditTypeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditTypeView.swift; sourceTree = "<group>"; };
+		3B18180E2D00147000CEAA9E /* CreateML.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CreateML.framework; path = System/Library/Frameworks/CreateML.framework; sourceTree = SDKROOT; };
 		3B1C7DAE27D1EE32000B3A99 /* Headache_Tracker 1.6.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Headache_Tracker 1.6.xcdatamodel"; sourceTree = "<group>"; };
 		3B1C7DB327D2005E000B3A99 /* StatusCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusCard.swift; sourceTree = "<group>"; };
 		3B1C7DB527D205EE000B3A99 /* ActionCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionCard.swift; sourceTree = "<group>"; };
@@ -939,6 +940,7 @@
 		3BF5316627ACE1DA00056673 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				3B18180E2D00147000CEAA9E /* CreateML.framework */,
 				3B9332D227CE005B00BACE93 /* libc++.tbd */,
 				3B9332D027CE005200BACE93 /* CoreGraphics.framework */,
 				3B9332CE27CE004400BACE93 /* CoreServices.framework */,

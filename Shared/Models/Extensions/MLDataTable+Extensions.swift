@@ -5,7 +5,7 @@
 //  Created by Colin Campbell on 3/11/22.
 //
 
-#if NON_PREVIEW
+#if !targetEnvironment(simulator)
 import CreateML
 import Foundation
 
