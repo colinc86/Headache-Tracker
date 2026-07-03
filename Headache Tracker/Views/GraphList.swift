@@ -69,21 +69,21 @@ struct GraphList: View {
           Section {
             if filterUnit == .year {
               SubtitleCell(
-                title: "Heaches Per Year",
+                title: "Headaches Per Year",
                 subtitle: String(format: "%0.1f", statistics.headachesPerYear),
                 systemImage: statistics.headachesPerYearTrend.systemImage,
                 imageForegroundColor: statistics.headachesPerYearTrend.foregroundColor(for: colorTheme))
             }
             else if filterUnit == .month {
               SubtitleCell(
-                title: "Heaches Per Month",
+                title: "Headaches Per Month",
                 subtitle: String(format: "%0.1f", statistics.headachesPerMonth),
                 systemImage: statistics.headachesPerMonthTrend.systemImage,
                 imageForegroundColor: statistics.headachesPerMonthTrend.foregroundColor(for: colorTheme))
             }
             else {
               SubtitleCell(
-                title: "Heaches Per Week",
+                title: "Headaches Per Week",
                 subtitle: String(format: "%0.1f", statistics.headachesPerWeek),
                 systemImage: statistics.headachesPerWeekTrend.systemImage,
                 imageForegroundColor: statistics.headachesPerWeekTrend.foregroundColor(for: colorTheme))
@@ -97,6 +97,7 @@ struct GraphList: View {
           Card(title: "Severity", systemImage: "dial.max.fill", foregroundColor: colorTheme.cyan) {
             BlockGraph(series: statistics.severityRanges, earliestDate: earliestDate)
           }
+            .cardListRow()
         } header: {
           SectionTitleView(title: "Severity")
         }
@@ -112,6 +113,7 @@ struct GraphList: View {
               staticMax: 4)
               .frame(height: 100)
           }
+            .cardListRow()
           
           SubtitleCell(
             title: "Mean",
@@ -131,6 +133,7 @@ struct GraphList: View {
               staticMax: 4)
               .frame(height: 100)
           }
+            .cardListRow()
           
           SubtitleCell(
             title: "Mean",
@@ -150,6 +153,7 @@ struct GraphList: View {
               staticMax: 86400)
               .frame(height: 100)
           }
+            .cardListRow()
           
           SubtitleCell(
             title: "Mean",
@@ -170,6 +174,7 @@ struct GraphList: View {
               earliestDate: earliestDate)
               .frame(height: 100)
           }
+            .cardListRow()
           
           SubtitleCell(
             title: "Mean",

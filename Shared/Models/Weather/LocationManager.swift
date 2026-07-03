@@ -51,6 +51,11 @@ class LocationManager: NSObject {
   
   /// The location manager.
   private let manager = CLLocationManager()
+
+  #if DEBUG
+  /// Whether the process was launched by the screenshot sweep.
+  static let isUITestSeeding = ProcessInfo.processInfo.arguments.contains("--uitest-seed")
+  #endif
   private var isUpdatingLocation = false
   private var pendingCompletionBlocks = [LocationCompletion]()
   private var pendingCompletionBlocksSemaphore = DispatchSemaphore(value: 1)
@@ -70,6 +75,11 @@ extension LocationManager {
   
   /// Sets up the location manager for use.
   func setup() {
+    #if DEBUG
+    if LocationManager.isUITestSeeding {
+      return
+    }
+    #endif
     if manager.authorizationStatus == .notDetermined {
       manager.requestAlwaysAuthorization()
     }
@@ -129,6 +139,15 @@ extension LocationManager {
   /// - Parameter completion: Called when the location has been fetched.
   private func location(completion: @escaping (CLLocation?, Error?) -> Void) {
     logDebug("Get location.")
+
+    #if DEBUG
+    // The screenshot sweep must never touch CoreLocation (the system prompt
+    // makes the app non-idle and hangs XCUITest). Return a fixed location.
+    if LocationManager.isUITestSeeding {
+      completion(CLLocation(latitude: 32.781334, longitude: -96.778609), nil)
+      return
+    }
+    #endif
     
     guard CLLocationManager.locationServicesEnabled() else {
       logWarning("Location services not available.")

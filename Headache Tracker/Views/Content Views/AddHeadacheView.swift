@@ -55,14 +55,16 @@ struct AddHeadacheView: View {
     List {
       Section {
         SeveritySelectionView(currentSeverity: viewModel.severity, mode: .action(viewModel.setSeverity))
+          .cardListRow()
       } header: {
         SectionTitleView(title: "How severe was the headache?")
       } footer: {
-        Text("You can modify this and add more values later.")
+        SectionFooterView(title: "You can modify this and add more values later.")
       }
       
       Section {
         EditableDateTimeCard(title: "Onset", foregroundColor: .purple, date: $viewModel.onset)
+          .cardListRow()
       } header: {
         SectionTitleView(title: "When did it start?")
       }
@@ -77,6 +79,7 @@ struct AddHeadacheView: View {
       if viewModel.resolved {
         Section {
           EditableDateTimeCard(title: "End", foregroundColor: .teal, date: $viewModel.end)
+            .cardListRow()
         } header: {
           SectionTitleView(title: "When did it end?")
         }

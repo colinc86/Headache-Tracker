@@ -202,9 +202,9 @@ struct SettingsView: View {
             .disabled(!checkInReminderAlerts)
             .onChange(of: checkInReminderTime) { _, _ in rescheduleCheckInReminder() }
         } header: {
-          SectionTitleView(title: "Daily Check-In")
+          Text("Daily Check-In")
         } footer: {
-          SectionFooterView(title: "An evening nudge to log the day's exposures.")
+          Text("An evening nudge to log the day's exposures.")
         }
         
         // Data
@@ -218,9 +218,9 @@ struct SettingsView: View {
           Toggle("iCloud Sync", isOn: syncToggleBinding)
             .tint(colorTheme.baseColor)
         } header: {
-          SectionTitleView(title: "Data")
+          Text("Data")
         } footer: {
-          SectionFooterView(title: "Sync your headaches, medications, tags, and check-ins across devices. Prediction and training data stay on this device.")
+          Text("Sync your headaches, medications, tags, and check-ins across devices. Prediction and training data stay on this device.")
         }
 
         // Information

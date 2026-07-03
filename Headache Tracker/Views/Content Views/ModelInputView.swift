@@ -27,6 +27,7 @@ struct ModelInputView: View {
           } caption: {
             Text("Δ \(Formatters.formatMeasurementDelta(weather.sigmaPressureMeasurement))")
           }
+          .cardListRow()
         } header: {
           SectionTitleView(title: "Weather")
         }
@@ -38,6 +39,7 @@ struct ModelInputView: View {
           } caption: {
             Text("Δ \(Formatters.formatMeasurementDelta(weather.sigmaTemperatureMeasurement))")
           }
+          .cardListRow()
         }
 
         Section {
@@ -47,6 +49,7 @@ struct ModelInputView: View {
           } caption: {
             Text("Δ \(Formatters.formatMeasurementDelta(weather.sigmaHumidityMeasurement))")
           }
+          .cardListRow()
         }
       }
     }

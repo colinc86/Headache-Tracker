@@ -106,6 +106,7 @@ struct CurrentHeadacheView: View {
         Section {
           // New/Current Severity
           SeveritySelectionView(currentSeverity: currentHeadache?.severity, mode: .action(viewModel.changeSeverity))
+            .cardListRow()
         } header: {
           SectionTitleView(title: currentHeadache == nil ? "New Headache" : "Current Headache")
         } footer: {
@@ -122,6 +123,7 @@ struct CurrentHeadacheView: View {
         if currentHeadache == nil && viewModel.needsInput {
           Section {
             ActionCard(title: "No Headache?", buttonTitle: "No Headache", systemImage: "checkmark.circle.fill", action: viewModel.noHeadacheAction)
+              .cardListRow()
           } footer: {
             SectionFooterView(title: "No Headache? Tap above to let the app know.")
           }
@@ -139,6 +141,7 @@ struct CurrentHeadacheView: View {
             DailyCheckInCard(kinds: todaysExposures.compactMap({ $0.kindRaw })) {
               showingCheckInView = true
             }
+            .cardListRow()
           } footer: {
             SectionFooterView(title: "Logged exposures feed your correlation insights.")
           }

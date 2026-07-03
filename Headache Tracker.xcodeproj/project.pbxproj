@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		DB10DB10DB10DB1000000004 /* UITestSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB10DB10DB10DB1000000003 /* UITestSupport.swift */; };
+		DB10DB10DB10DB1000000002 /* ScreenshotSweepTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB10DB10DB10DB1000000001 /* ScreenshotSweepTests.swift */; };
 		DA10DA10DA10DA1000000002 /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA10DA10DA10DA1000000001 /* DesignSystem.swift */; };
 		DA10DA10DA10DA1000000003 /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA10DA10DA10DA1000000001 /* DesignSystem.swift */; };
 		DA10DA10DA10DA1000000005 /* Chip.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA10DA10DA10DA1000000004 /* Chip.swift */; };
@@ -330,6 +332,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		DB10DB10DB10DB1000000003 /* UITestSupport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UITestSupport.swift"; sourceTree = "<group>"; };
+		DB10DB10DB10DB1000000001 /* ScreenshotSweepTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ScreenshotSweepTests.swift"; sourceTree = "<group>"; };
 		DA10DA10DA10DA1000000001 /* DesignSystem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "DesignSystem.swift"; sourceTree = "<group>"; };
 		DA10DA10DA10DA1000000004 /* Chip.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Chip.swift"; sourceTree = "<group>"; };
 		DA10DA10DA10DA1000000007 /* CardListRow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CardListRow.swift"; sourceTree = "<group>"; };
@@ -939,6 +943,7 @@
 		3B3FFF0127D59DB100DFACC1 /* App */ = {
 			isa = PBXGroup;
 			children = (
+				DB10DB10DB10DB1000000003 /* UITestSupport.swift */,
 				CF60CF60CF60CF6000000005 /* Router.swift */,
 				D0A0D0A0D0A0D0A000000001 /* CloudMigrator.swift */,
 				D070D070D070D07000000002 /* LiveActivityManager.swift */,
@@ -1088,6 +1093,7 @@
 		3BF5315527ACE18F00056673 /* Headache TrackerUITests */ = {
 			isa = PBXGroup;
 			children = (
+				DB10DB10DB10DB1000000001 /* ScreenshotSweepTests.swift */,
 				3BF5315627ACE18F00056673 /* Headache_TrackerUITests.swift */,
 				3BF5315827ACE18F00056673 /* Headache_TrackerUITestsLaunchTests.swift */,
 			);
@@ -1445,6 +1451,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DB10DB10DB10DB1000000004 /* UITestSupport.swift in Sources */,
 				DA10DA10DA10DA1000000002 /* DesignSystem.swift in Sources */,
 				DA10DA10DA10DA1000000005 /* Chip.swift in Sources */,
 				DA10DA10DA10DA1000000008 /* CardListRow.swift in Sources */,
@@ -1616,6 +1623,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DB10DB10DB10DB1000000002 /* ScreenshotSweepTests.swift in Sources */,
 				3BF5315927ACE18F00056673 /* Headache_TrackerUITestsLaunchTests.swift in Sources */,
 				3BF5315727ACE18F00056673 /* Headache_TrackerUITests.swift in Sources */,
 			);

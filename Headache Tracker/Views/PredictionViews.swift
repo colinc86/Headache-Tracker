@@ -62,6 +62,7 @@ struct PredictionViews: View {
         } label: {
           OutlookView(outlook: outlook)
         }
+        .cardListRow()
       } header: {
         SectionTitleView(title: "Risk")
       } footer: {
@@ -84,6 +85,7 @@ struct PredictionViews: View {
               }
             }
           }
+          .cardListRow()
         } footer: {
           SectionFooterView(title: "Today vs. your 14-day baseline, for signals that correlate with your headaches.")
         }

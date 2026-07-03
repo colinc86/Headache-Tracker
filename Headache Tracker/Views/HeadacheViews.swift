@@ -83,6 +83,7 @@ struct HeadacheViews: View {
         // Resolve the Headache
         Section {
           ActionCard(title: "Resolve Headache", buttonTitle: "Resolve", systemImage: "face.smiling.fill", action: resolveConfirmation)
+            .cardListRow()
         } footer: {
           SectionFooterView(title: "Is your headache gone? Tap Resolve to let the app know.")
         }
@@ -90,12 +91,14 @@ struct HeadacheViews: View {
       else {
         Section {
           StatusCard(resolved: headache.resolved)
+            .cardListRow()
         }
       }
       
       if showsAllCards || showTypeView {
         Section {
           TypeCard(type: headache.headacheType, classification: headache.headacheClassification, editAction: editTypeAction)
+            .cardListRow()
         }
       }
       
@@ -103,6 +106,7 @@ struct HeadacheViews: View {
       if showsAllCards || showOnsetView, let onset = headache.startTime {
         Section {
           OnsetCard(onset: onset)
+            .cardListRow()
         }
       }
       
@@ -110,6 +114,7 @@ struct HeadacheViews: View {
       if showsAllCards || showDurationView {
         Section {
           DurationCard(headache: headache)
+            .cardListRow()
         }
       }
       
@@ -117,6 +122,7 @@ struct HeadacheViews: View {
       if showsAllCards || showProgressionView {
         Section {
           ProgressionCard(headache: headache)
+            .cardListRow()
         }
 //        if allowsEditing {
 //          if headache.progression.count > 1 {
@@ -150,6 +156,7 @@ struct HeadacheViews: View {
       if showsAllCards || showNotesView {
         Section {
           NotesCard(notes: headache.notes ?? "", editAction: editNotesAction)
+            .cardListRow()
         }
       }
       
@@ -157,6 +164,7 @@ struct HeadacheViews: View {
       if showsAllCards || showMedicationsView {
         Section {
           MedicationsCard(headache: headache, editAction: editMedicationsAction)
+            .cardListRow()
         }
       }
 
@@ -164,6 +172,7 @@ struct HeadacheViews: View {
       if showsAllCards || showTagsView {
         Section {
           TagsCard(tags: headache.tagValues, editAction: editTagsAction, tagAction: { _ in })
+            .cardListRow()
         }
       }
       
@@ -175,6 +184,8 @@ struct HeadacheViews: View {
               .foregroundColor(.red)
             Spacer()
           }
+          .padding(.vertical, Tokens.Spacing.sm)
+          .cardListRow()
         }
       }
     }

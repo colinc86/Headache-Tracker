@@ -50,11 +50,12 @@ struct HeadacheView: View {
     List {
       Section {
         SeveritySelectionView(currentSeverity: nil, severityRange: headache.severityRange, collapsed: true)
+          .cardListRow()
       } header: {
         SectionTitleView(title: "Headache")
       } footer: {
         if !headache.resolved, let startTime = headache.severitiesArray.last?.startTime {
-          Text("Last updated \(startTime.formattedNonRelative())")
+          SectionFooterView(title: "Last updated \(startTime.formattedNonRelative())")
         }
       }
       

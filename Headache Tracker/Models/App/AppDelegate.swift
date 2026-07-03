@@ -50,6 +50,12 @@ class AppDelegate: NSObject, UIApplicationDelegate, ObservableObject {
   func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
     logDebug("Application did finish launching.")
 
+    #if DEBUG
+    // Screenshot-sweep UI test: apply theme/animation overrides before the
+    // first view renders.
+    UITestSupport.applyLaunchOverrides()
+    #endif
+
     // Theme and units moved to the shared suite so widgets render with the
     // user's settings; migrate existing values from standard defaults once.
     if let shared = UserDefaults.shared {
@@ -79,11 +85,25 @@ class AppDelegate: NSObject, UIApplicationDelegate, ObservableObject {
     setHeadacheManagerReferences()
     
     // Check our location authorization status
+    #if DEBUG
+    // The screenshot sweep must not be blocked by the system location
+    // prompt (it makes the app non-idle and hangs XCUITest).
+    if !UITestSupport.isSeedingRequested {
+      headacheManager.locationManager.setup()
+    }
+    #else
     headacheManager.locationManager.setup()
+    #endif
     
     // Set up the async stuff
     Task {
       do {
+        #if DEBUG
+        // Screenshot-sweep UI test: seed representative data before the
+        // predictor reads the shared risk.
+        await UITestSupport.seedIfNeeded()
+        #endif
+
         // The models' feature schema changed (circular time encoding,
         // separate device pressure); models trained on the old schema can't
         // serve the new features, and old evaluations scored a different
@@ -210,6 +230,12 @@ extension AppDelegate {
   
   /// Setup alerts.
   private func checkAlertAuthorizationStatus() async throws {
+    #if DEBUG
+    // The screenshot sweep must not be blocked by the system prompt.
+    if UITestSupport.isSeedingRequested {
+      return
+    }
+    #endif
     if refresher.alertManager.authorizationStatus == .notDetermined {
       try await refresher.alertManager.setup(options: [.alert, .badge, .sound])
     }
@@ -218,6 +244,12 @@ extension AppDelegate {
   /// Setup health kit (only if it hasn't been done before) and the setting
   /// is on.
   private func checkHealthKitAuthorizationStatus() async throws {
+    #if DEBUG
+    // The screenshot sweep must not be blocked by the HealthKit prompt.
+    if UITestSupport.isSeedingRequested {
+      return
+    }
+    #endif
     if preferences.health.enabled && headacheManager.healthKitManager.needsAuthorization() {
       try await headacheManager.healthKitManager.authorize()
     }
