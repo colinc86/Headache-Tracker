@@ -119,3 +119,10 @@ Remote SPM packages: Alamofire (no longer referenced by any source; safe to drop
 - 2-space indentation; `// MARK:` extensions group methods by concern, and most types are split across multiple `extension` blocks.
 - Domain operations are `async throws`; errors conform to `CustomStringConvertible` (e.g. `HeadacheManager.HeadacheError`) for user-facing messages.
 - Heavy ML work runs on dedicated `DispatchQueue`s (`modelQueue`, `trainingQueue`) bridged to `async` with `withCheckedThrowingContinuation`.
+
+### UI / design system
+
+- **Design tokens** live in `Shared/Views/DesignSystem.swift` (`Tokens.Spacing`, `Tokens.Radius`, `Tokens.Motion`). Use them instead of inline magic numbers. Colors flow from the active `ColorTheme` (never hardcode system colors on themed surfaces — route through it, e.g. `colorTheme.color(for: confidence)`), so every built-in theme stays coherent. `DesignSystem.swift` documents the per-surface accent table.
+- **`Card`** (`Shared/Views/Card.swift`) is the content atom: gradient-titled, self-drawing background, its own 15pt gutter. It renders in the widget *outside* a `List`, so never bake list behavior into it. When a card is a `List`/`Section` row, apply **`.cardListRow()`** (`Shared/Views/Modifiers/CardListRow.swift`) so it floats cleanly on the grouped background (zeroes the system inset, clears the cell background, hides the separator).
+- **`Chip`** (`Shared/Views/Chip.swift`) is the one chip vocabulary (selected / unselected / readonly). Card-based screens use `SectionTitleView`/`SectionFooterView`; `Settings` stays a native `Form`. Depth is flat (no shadows/materials) — contrast only.
+- **Visual verification**: the DEBUG-only `--uitest-seed` launch path (`Headache Tracker/Models/App/UITestSupport.swift`) seeds representative data and suppresses permission prompts; `Headache TrackerUITests/ScreenshotSweepTests.swift` drives every screen and captures screenshots. Run via the `sweep.sh`-style flow and inspect the exported PNGs. Never let this ship-affecting; it is all `#if DEBUG` / launch-arg gated.
