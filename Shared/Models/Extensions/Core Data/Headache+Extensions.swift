@@ -266,13 +266,39 @@ extension Headache {
     guard severities?.count ?? 0 > 1 else {
       return
     }
-    
+
     let severities = severitiesArray
     for i in 0 ..< severities.count - 1 {
       severities[i].endTime = severities[i + 1].startTime
     }
-    
+
+    // Chaining leaves the last severity's end time untouched (it may be
+    // open); clamp it so an edit can't produce a negative-length interval.
+    if let last = severities.last, let lastStart = last.startTime, let lastEnd = last.endTime, lastEnd < lastStart {
+      last.endTime = lastStart
+    }
+
     createdAt = severities.first?.startTime
+  }
+
+  /// The duration-weighted average severity over the headache's progression.
+  var averageSeverity: Double {
+    let now = Date()
+    var weightedTotal = 0.0
+    var totalDuration = 0.0
+
+    for state in severitiesArray {
+      guard let start = state.startTime else { continue }
+      let duration = (state.endTime ?? now).timeIntervalSince(start)
+      guard duration > 0 else { continue }
+      weightedTotal += Double(state.severity.orderingValue) * duration
+      totalDuration += duration
+    }
+
+    guard totalDuration > 0 else {
+      return Double(severity.orderingValue)
+    }
+    return weightedTotal / totalDuration
   }
   
   /// Adds the severity to the headache.

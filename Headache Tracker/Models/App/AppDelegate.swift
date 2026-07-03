@@ -52,12 +52,15 @@ class AppDelegate: NSObject, UIApplicationDelegate, ObservableObject {
     // Set up the async stuff
     Task {
       do {
+        // Repair any data integrity issues from earlier versions
+        try await headacheManager.repairDataIntegrity()
+
         // Check our alert authorization status
         try await checkAlertAuthorizationStatus()
-        
+
         // Check our health kit authorization status
         try await checkHealthKitAuthorizationStatus()
-        
+
         // Load our ML classifiers
         try await headacheManager.predictor.load()
       }

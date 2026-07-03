@@ -146,38 +146,88 @@ extension HealthKitManager {
       throw HealthKitError.typeNotAvailable
     }
     
+    // Stamp each sample with its severity's identifier so saves replace
+    // prior samples for the same severity and deletes can be scoped to the
+    // owning headache instead of everything in a date interval.
+    let syncVersion = Int(Date().timeIntervalSince1970)
     var samples = [HKObject]()
     for interval in intervals {
-      samples.append(HKCategorySample(type: headacheType, value: interval.severity.rawValue, start: interval.interval.start, end: interval.interval.end))
+      var metadata: [String: Any]?
+      if let identifier = interval.identifier {
+        metadata = [
+          HKMetadataKeySyncIdentifier: identifier.uuidString,
+          HKMetadataKeySyncVersion: syncVersion
+        ]
+      }
+      samples.append(HKCategorySample(type: headacheType, value: interval.severity.rawValue, start: interval.interval.start, end: interval.interval.end, metadata: metadata))
     }
-    
+
     try await store.save(samples)
   }
-  
+
   /// Deletes the severity samples in the given date interval.
   ///
-  /// - Parameter interval: The interval.
-  func deleteSeveritySamples(in interval: DateInterval) async throws {
+  /// - Parameters:
+  ///   - interval: The interval.
+  ///   - severityIdentifiers: When provided, only this app's samples whose
+  ///     sync identifier matches one of these severities (or legacy samples
+  ///     without a sync identifier) are deleted. When nil, all of this app's
+  ///     headache samples in the interval are deleted.
+  func deleteSeveritySamples(in interval: DateInterval, severityIdentifiers: [UUID]? = nil) async throws {
     logDebug("Delete severity samples in \(interval).")
-    
+
     // Only continue if we have health integration turned on
     guard preferences.enabled else {
       logWarning("Health integration is \(preferences.enabled). Not deleting severity samples.")
       return
     }
-    
+
     // Get the headache type
     guard let headacheType = HKObjectType.categoryType(forIdentifier: .headache) else {
       logWarning("Unable to get headache category type.")
       throw HealthKitError.notAvailable
     }
-    
+
     // Create our predicate
     let predicate = HKQuery.predicateForSamples(withStart: interval.start, end: interval.end, options: [])
-    
-    // Delete the objects
-    let count = try await store.deleteObjects(of: headacheType, predicate: predicate)
-    logDebug("Deleted \(count) severity samples.")
+
+    guard let severityIdentifiers = severityIdentifiers else {
+      // Delete all of this app's headache samples in the interval.
+      let count = try await store.deleteObjects(of: headacheType, predicate: predicate)
+      logDebug("Deleted \(count) severity samples.")
+      return
+    }
+
+    // Fetch the samples in the interval and scope the deletion to the given
+    // severities. Legacy samples without a sync identifier can't be
+    // attributed to a severity, so they fall back to interval scoping.
+    let samples: [HKSample] = try await withCheckedThrowingContinuation { [weak self] continuation in
+      let query = HKSampleQuery(sampleType: headacheType, predicate: predicate, limit: HKObjectQueryNoLimit, sortDescriptors: nil) { _, samples, error in
+        if let error = error {
+          continuation.resume(throwing: error)
+        }
+        else {
+          continuation.resume(returning: samples ?? [])
+        }
+      }
+      self?.store.execute(query)
+    }
+
+    let identifierStrings = Set(severityIdentifiers.map({ $0.uuidString }))
+    let samplesToDelete = samples.filter { sample in
+      guard let syncIdentifier = sample.metadata?[HKMetadataKeySyncIdentifier] as? String else {
+        return true
+      }
+      return identifierStrings.contains(syncIdentifier)
+    }
+
+    guard !samplesToDelete.isEmpty else {
+      logDebug("No severity samples to delete.")
+      return
+    }
+
+    try await store.delete(samplesToDelete)
+    logDebug("Deleted \(samplesToDelete.count) severity samples.")
   }
   
   /// Reads health kit training data.

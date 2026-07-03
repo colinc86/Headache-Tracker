@@ -23,42 +23,44 @@ extension DataController {
   /// Backs up the core data store to a backup file.
   func backupDatabase() async throws -> URL {
     let backupURL = backupURL
-    
+
     // Make sure the backup location is clear
-    try FileManager.default.removeItem(at: backupURL)
-    
-    // Perform the backup
-    return try await withCheckedThrowingContinuation({ continuation in
-      DispatchQueue(label: ApplicationKey(from: "backupDatabaseQueue")).async {
-        logInfo("Backing up core data store...")
-        
-        let container = NSPersistentContainer(name: Constants.CoreData.sqliteContainerName)
-        guard let fileContainer = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: Constants.appGroupIdentifier) else {
-          continuation.resume(throwing: NSError(domain: ApplicationKey("backup"), code: NSFileNoSuchFileError))
-          return
-        }
-        
-        let storeURL = fileContainer.appendingPathComponent("\(Constants.CoreData.sqliteContainerName).sqlite")
-        let storeDescription = NSPersistentStoreDescription(url: storeURL)
-        container.persistentStoreDescriptions = [storeDescription]
-        container.loadPersistentStores { (storeDescription, error) in
-          if let error = error {
-            continuation.resume(throwing: error)
-          }
-          else if let store = container.persistentStoreCoordinator.persistentStores.last {
-            do {
-              try container.persistentStoreCoordinator.migratePersistentStore(store, to: backupURL, options: nil, withType: NSSQLiteStoreType)
-              continuation.resume(returning: backupURL)
-            } catch {
-              continuation.resume(throwing: error)
-            }
-          }
-          else {
-            continuation.resume(throwing: NSError(domain: ApplicationKey("backup"), code: NSFileNoSuchFileError))
-          }
-        }
+    if FileManager.default.fileExists(atPath: backupURL.path) {
+      try FileManager.default.removeItem(at: backupURL)
+    }
+
+    // Quiesce writes while the copy runs by performing the backup inside the
+    // serialized write block; the second container opens the store read-only.
+    try await DataController.shared.performInBackground { _ in
+      logInfo("Backing up core data store...")
+
+      let container = NSPersistentContainer(name: Constants.CoreData.sqliteContainerName)
+      guard let fileContainer = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: Constants.appGroupIdentifier) else {
+        throw NSError(domain: ApplicationKey("backup"), code: NSFileNoSuchFileError)
       }
-    })
+
+      let storeURL = fileContainer.appendingPathComponent("\(Constants.CoreData.sqliteContainerName).sqlite")
+      let storeDescription = NSPersistentStoreDescription(url: storeURL)
+      storeDescription.isReadOnly = true
+      storeDescription.shouldAddStoreAsynchronously = false
+      container.persistentStoreDescriptions = [storeDescription]
+
+      var loadError: Error?
+      container.loadPersistentStores { _, error in
+        loadError = error
+      }
+      if let loadError = loadError {
+        throw loadError
+      }
+
+      guard let store = container.persistentStoreCoordinator.persistentStores.last else {
+        throw NSError(domain: ApplicationKey("backup"), code: NSFileNoSuchFileError)
+      }
+
+      try container.persistentStoreCoordinator.migratePersistentStore(store, to: backupURL, options: nil, withType: NSSQLiteStoreType)
+    }
+
+    return backupURL
   }
   
   /// Restores the core data database.

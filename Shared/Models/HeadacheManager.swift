@@ -19,7 +19,8 @@ class HeadacheManager: ObservableObject {
     case testing
     case missing
     case headacheDateRange
-    
+    case alreadyActive
+
     var description: String {
       switch self {
       case .testing:
@@ -28,6 +29,8 @@ class HeadacheManager: ObservableObject {
         return "The required data was missing."
       case .headacheDateRange:
         return "The headache's onset must be before its end."
+      case .alreadyActive:
+        return "A headache is already in progress. Resolve it before starting another."
       }
     }
   }
@@ -84,10 +87,17 @@ extension HeadacheManager {
   /// - Parameter severity: The headache's current severity.
   func changeSeverity(to severity: Headache.Severity) async throws {
     logDebug("Change severity to \(severity.title).")
-    
+
+    // Selecting "not present" means the headache is over; resolve it instead
+    // of leaving it open with a not-present severity.
+    guard severity != .notPresent else {
+      try await resolve()
+      return
+    }
+
     let classification = preferences.headaches.defaultHeadacheClassification
     let type = preferences.headaches.defaultHeadacheType
-    
+
     // The date interval of the severity to save to health kit
     let severityUpdates: Headache.SeverityUpdates = try await currentHeadache { headache, context in
       // Add to the current headache or create a new one
@@ -95,7 +105,7 @@ extension HeadacheManager {
         logDebug("Adding severity to current headache.")
         return headache.addSeverity(severity, start: Date())
       }
-      
+
       logDebug("Creating new headache.")
       _ = Headache(context: context, severity: severity, classification: classification, type: type, start: Date())
       return .empty
@@ -154,10 +164,26 @@ extension HeadacheManager {
   ///   - startTime: The headache's start time.
   ///   - endTime: The headache's end time.
   func createHeadache(severity: Headache.Severity, start: Date, end: Date?) async throws {
+    if let end = end {
+      guard start < end else {
+        throw HeadacheError.headacheDateRange
+      }
+    }
+
     let classification = preferences.headaches.defaultHeadacheClassification
     let type = preferences.headaches.defaultHeadacheType
-    
+
     let severityIdentifier = try await DataController.shared.performInBackground(saveOnComplete: true) { (context) -> UUID? in
+      // Only one headache may be open at a time.
+      if end == nil {
+        let request = Headache.fetchRequest()
+        request.predicate = NSPredicate(format: "resolved = NO")
+        request.fetchLimit = 1
+        if try context.fetch(request).first != nil {
+          throw HeadacheError.alreadyActive
+        }
+      }
+
       let headache = Headache(context: context, severity: severity, classification: classification, type: type, start: start, end: end)
       return headache.severitiesArray.first?.identifier
     }
@@ -283,13 +309,13 @@ extension HeadacheManager {
       return
     }
     
-    // The start and end times to delete from health kit
-    var startTime: Date?
-    var endTime: Date?
-    
+    // The interval and severities to delete from health kit
+    var headacheInterval: DateInterval?
+    var severityIdentifiers = [UUID]()
+
     try await headacheWithIdentifier(identifier: identifier) { [weak self] headache, context in
       logDebug("Deleting headache.")
-      
+
       // Get the headache
       if let headache = headache {
         // Remove the headache from its tags
@@ -299,12 +325,12 @@ extension HeadacheManager {
             context.delete(tag)
           }
         }
-        
+
         // Delete the headache
-        startTime = headache.startTime
-        endTime = headache.endTime ?? headache.pendingEndTime
+        headacheInterval = headache.dateInterval
+        severityIdentifiers = headache.severitiesArray.compactMap({ $0.identifier })
         context.delete(headache)
-        
+
         // If this headache was the current headache, then cancel any pending check-in notifications
         // and reset the current severity.
         if !headache.resolved {
@@ -312,11 +338,11 @@ extension HeadacheManager {
         }
       }
     }
-    
+
     // If there wasn't an error, then we should check and delete it from health kit
-    if deleteHealthKitData, let startTime = startTime, let endTime = endTime {
+    if deleteHealthKitData, let headacheInterval = headacheInterval {
       logDebug("Successfully reset headache. Deleting severity samples.")
-      try await healthKitManager.deleteSeveritySamples(in: DateInterval(start: startTime, end: endTime))
+      try await healthKitManager.deleteSeveritySamples(in: headacheInterval, severityIdentifiers: severityIdentifiers)
     }
     else {
       logDebug("Successfully reset headache, but not deleting severity samples.")
@@ -333,26 +359,28 @@ extension HeadacheManager {
     }
     
     var originalHeadacheInterval: DateInterval?
+    var originalSeverityIdentifiers = [UUID]()
     var newSeveritySamples = [Headache.Severity.Interval]()
-    
+
     try await severityWithIdentifier(identifier: identifier) { severity, context in
       if let severity = severity {
         let headache = severity.headache
         originalHeadacheInterval = headache?.dateInterval
+        originalSeverityIdentifiers = (headache?.severitiesArray ?? []).compactMap({ $0.identifier })
         headache?.removeFromSeverities(severity)
         context.delete(severity)
         headache?.reorganize()
-        
+
         for severity in headache?.severitiesArray ?? [] {
           guard let interval = severity.severityInterval else { continue }
           newSeveritySamples.append(interval)
         }
       }
     }
-    
+
     // Check to see if we need to delete and re-add samples
     if let originalHeadacheInterval = originalHeadacheInterval {
-      try await healthKitManager.deleteSeveritySamples(in: originalHeadacheInterval)
+      try await healthKitManager.deleteSeveritySamples(in: originalHeadacheInterval, severityIdentifiers: originalSeverityIdentifiers)
       try await healthKitManager.saveSeveritySamples(intervals: newSeveritySamples)
     }
   }
@@ -362,45 +390,118 @@ extension HeadacheManager {
   /// - Parameter identifier: The severity's identifier.
   func updateSeverity(identifier: UUID, value: Headache.Severity, startTime: Date, endTime: Date) async throws {
     logDebug("Update severity.")
-    
+
+    guard startTime < endTime else {
+      throw HeadacheError.headacheDateRange
+    }
+
     var originalHeadacheInterval: DateInterval?
+    var originalSeverityIdentifiers = [UUID]()
     var newSeveritySamples = [Headache.Severity.Interval]()
-    
+
     let modified = try await severityWithIdentifier(identifier: identifier) { (severity, context) -> Bool in
       var modified = false
-      
+
       if let severity = severity {
         modified = severity.startTime != startTime
-        
+
         let headache = severity.headache
         originalHeadacheInterval = headache?.dateInterval
+        originalSeverityIdentifiers = (headache?.severitiesArray ?? []).compactMap({ $0.identifier })
         severity.severity = value
         severity.startTime = startTime
         severity.endTime = endTime
         headache?.reorganize()
-        
+
+        // Editing may have closed (or reopened) the last severity; keep the
+        // resolved flag consistent with the open-interval invariant.
+        if let headache = headache {
+          headache.resolved = headache.severitiesArray.last?.endTime != nil
+        }
+
         for severity in headache?.severitiesArray ?? [] {
           guard let interval = severity.severityInterval else { continue }
           newSeveritySamples.append(interval)
         }
       }
-      
+
       return modified
     }
-    
+
     // Update the training data if needed
     if modified {
       let input = await predictorInput(atDate: startTime, inWidget: false)
       try await createTrainingData(from: input, severityIdentifier: identifier, replacingExistingData: true)
     }
-    
+
     // Check to see if we need to delete and re-add samples
     if let originalHeadacheInterval = originalHeadacheInterval {
-      try await healthKitManager.deleteSeveritySamples(in: originalHeadacheInterval)
+      try await healthKitManager.deleteSeveritySamples(in: originalHeadacheInterval, severityIdentifiers: originalSeverityIdentifiers)
       try await healthKitManager.saveSeveritySamples(intervals: newSeveritySamples)
     }
   }
   
+}
+
+// MARK: - Data integrity
+
+extension HeadacheManager {
+
+  /// Repairs data integrity violations left behind by earlier versions:
+  /// resolved flags that disagree with the open-severity invariant, multiple
+  /// unresolved headaches, and missing identifiers.
+  func repairDataIntegrity() async throws {
+    try await DataController.shared.performInBackground(saveOnComplete: true) { context in
+      let request = Headache.fetchRequest()
+      request.sortDescriptors = [NSSortDescriptor(key: "createdAt", ascending: true)]
+      let headaches = try context.fetch(request)
+
+      var repairedCount = 0
+      var unresolved = [Headache]()
+
+      for headache in headaches {
+        // Assign missing identifiers so edits can address the objects.
+        if headache.identifier == nil {
+          headache.identifier = UUID()
+          repairedCount += 1
+        }
+
+        for severity in headache.severitiesArray where severity.identifier == nil {
+          severity.identifier = UUID()
+          repairedCount += 1
+        }
+
+        guard !headache.severitiesArray.isEmpty else {
+          continue
+        }
+
+        // Reconcile the resolved flag with the open-severity invariant:
+        // unresolved if and only if the last severity has no end time.
+        let hasOpenSeverity = headache.severitiesArray.last?.endTime == nil
+        if headache.resolved == hasOpenSeverity {
+          headache.resolved = !hasOpenSeverity
+          repairedCount += 1
+        }
+
+        if !headache.resolved {
+          unresolved.append(headache)
+        }
+      }
+
+      // At most one headache may be open; keep the newest and resolve the rest.
+      if unresolved.count > 1 {
+        for headache in unresolved.dropLast() {
+          _ = headache.resolve(end: headache.pendingEndTime ?? Date())
+          repairedCount += 1
+        }
+      }
+
+      if repairedCount > 0 {
+        logInfo("Repaired \(repairedCount) data integrity issues.")
+      }
+    }
+  }
+
 }
 
 // MARK: - Caching
@@ -434,7 +535,9 @@ extension HeadacheManager {
   private func currentHeadache<T>(update: @escaping (Headache?, NSManagedObjectContext) throws -> T) async throws -> T {
     try await DataController.shared.performInBackground(saveOnComplete: true) { context in
       let request = Headache.fetchRequest()
-      request.predicate = NSPredicate(format: "ANY severities.endTime = nil")
+      request.predicate = NSPredicate(format: "resolved = NO")
+      request.sortDescriptors = [NSSortDescriptor(key: "createdAt", ascending: false)]
+      request.fetchLimit = 1
       return try update(try context.fetch(request).first, context)
     }
   }
