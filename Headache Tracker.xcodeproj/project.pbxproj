@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D080D080D080D08000000011 /* ClinicianReportData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D080D080D080D08000000001 /* ClinicianReportData.swift */; };
+		D080D080D080D08000000012 /* ClinicianReportBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = D080D080D080D08000000002 /* ClinicianReportBuilder.swift */; };
+		D080D080D080D08000000013 /* ReportPageViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = D080D080D080D08000000003 /* ReportPageViews.swift */; };
+		D080D080D080D08000000014 /* ExportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D080D080D080D08000000004 /* ExportView.swift */; };
 		D070D070D070D07000000011 /* HeadacheActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = D070D070D070D07000000001 /* HeadacheActivityAttributes.swift */; };
 		D070D070D070D07000000012 /* HeadacheActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = D070D070D070D07000000001 /* HeadacheActivityAttributes.swift */; };
 		D070D070D070D07000000013 /* LiveActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D070D070D070D07000000002 /* LiveActivityManager.swift */; };
@@ -319,6 +323,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		D080D080D080D08000000001 /* ClinicianReportData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ClinicianReportData.swift"; sourceTree = "<group>"; };
+		D080D080D080D08000000002 /* ClinicianReportBuilder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ClinicianReportBuilder.swift"; sourceTree = "<group>"; };
+		D080D080D080D08000000003 /* ReportPageViews.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ReportPageViews.swift"; sourceTree = "<group>"; };
+		D080D080D080D08000000004 /* ExportView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ExportView.swift"; sourceTree = "<group>"; };
 		D070D070D070D07000000001 /* HeadacheActivityAttributes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "HeadacheActivityAttributes.swift"; sourceTree = "<group>"; };
 		D070D070D070D07000000002 /* LiveActivityManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "LiveActivityManager.swift"; sourceTree = "<group>"; };
 		D070D070D070D07000000003 /* HeadacheLiveActivity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "HeadacheLiveActivity.swift"; sourceTree = "<group>"; };
@@ -584,6 +592,7 @@
 			children = (
 				CC30CC30CC30CC3000000010 /* EditMedicationsView.swift */,
 				CC30CC30CC30CC300000000E /* DailyCheckInView.swift */,
+				D080D080D080D08000000004 /* ExportView.swift */,
 				CA10CA10CA10CA1000000010 /* InsightsView.swift */,
 				CA10CA10CA10CA1000000012 /* TriggerDetailView.swift */,
 				3BA933B027DFA5D000BAD5A4 /* AddHeadacheView.swift */,
@@ -650,6 +659,7 @@
 			isa = PBXGroup;
 			children = (
 				3B1C7DB227D2003C000B3A99 /* Cards */,
+				D080D080D080D08000000021 /* Report */,
 				3B09191027BCC9B200844F6C /* Cells */,
 				3B051A9627B198CB0017131D /* Content Views */,
 				3B68BDFC27BE0FF0007AAAC6 /* Graphs */,
@@ -691,6 +701,7 @@
 			children = (
 				CF60CF60CF60CF6000000010 /* Alerts */,
 				CF60CF60CF60CF6000000011 /* Intents */,
+				D080D080D080D08000000020 /* Export */,
 				3B3FFF0127D59DB100DFACC1 /* App */,
 				3B3FFF0A27D5A68A00DFACC1 /* Extensions */,
 				3B3FFF0027D59D3800DFACC1 /* Refresher */,
@@ -836,6 +847,23 @@
 				3B3FFE7E27D592A000DFACC1 /* HeadacheAlertRequest.swift */,
 			);
 			path = Alerts;
+			sourceTree = "<group>";
+		};
+		D080D080D080D08000000020 /* Export */ = {
+			isa = PBXGroup;
+			children = (
+				D080D080D080D08000000001 /* ClinicianReportData.swift */,
+				D080D080D080D08000000002 /* ClinicianReportBuilder.swift */,
+			);
+			path = Export;
+			sourceTree = "<group>";
+		};
+		D080D080D080D08000000021 /* Report */ = {
+			isa = PBXGroup;
+			children = (
+				D080D080D080D08000000003 /* ReportPageViews.swift */,
+			);
+			path = Report;
 			sourceTree = "<group>";
 		};
 		CF60CF60CF60CF6000000010 /* Alerts */ = {
@@ -1398,6 +1426,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D080D080D080D08000000011 /* ClinicianReportData.swift in Sources */,
+				D080D080D080D08000000012 /* ClinicianReportBuilder.swift in Sources */,
+				D080D080D080D08000000013 /* ReportPageViews.swift in Sources */,
+				D080D080D080D08000000014 /* ExportView.swift in Sources */,
 				D070D070D070D07000000011 /* HeadacheActivityAttributes.swift in Sources */,
 				D070D070D070D07000000013 /* LiveActivityManager.swift in Sources */,
 				CF60CF60CF60CF6000000021 /* AlertManager+Delegate.swift in Sources */,

@@ -179,6 +179,15 @@ struct SettingsView: View {
           SectionFooterView(title: "An evening nudge to log the day's exposures.")
         }
         
+        // Data
+        Section("Data") {
+          NavigationLink {
+            ExportView()
+          } label: {
+            Text("Export for Clinician")
+          }
+        }
+
         // Information
         Section("General") {
           Picker("Measurement System", selection: $measurementSystem) {

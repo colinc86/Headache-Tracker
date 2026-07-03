@@ -336,6 +336,15 @@ class Headache_TrackerTests: XCTestCase {
     XCTAssertTrue(report.insufficient.contains(where: { $0.feature == .temperature }))
   }
 
+  // MARK: Clinician export (Phase 6)
+
+  func testCSVEscaping() {
+    XCTAssertEqual(ClinicianReportBuilder.escaped("plain"), "plain")
+    XCTAssertEqual(ClinicianReportBuilder.escaped("has, comma"), "\"has, comma\"")
+    XCTAssertEqual(ClinicianReportBuilder.escaped("says \"hi\""), "\"says \"\"hi\"\"\"")
+    XCTAssertEqual(ClinicianReportBuilder.escaped("line\nbreak"), "\"line\nbreak\"")
+  }
+
   // MARK: Insight quality + brief (Phase 3)
 
   func testRollingZScores() {
