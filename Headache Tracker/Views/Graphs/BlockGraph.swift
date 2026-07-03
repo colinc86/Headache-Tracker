@@ -57,8 +57,30 @@ struct BlockGraph: View {
         }
       }
     }
+    // Ranges don't map cleanly to an audio graph; a summary element is
+    // more useful than 5 x days of unlabeled rectangles.
+    .accessibilityElement(children: .ignore)
+    .accessibilityLabel("Daily severity ranges")
+    .accessibilityValue(accessibilitySummary)
   }
   
+}
+
+// MARK: Accessibility
+
+extension BlockGraph {
+
+  /// The spoken summary: shown days and headache days.
+  var accessibilitySummary: String {
+    let dayRanges = ranges()
+    guard !dayRanges.isEmpty else {
+      return "No data"
+    }
+
+    let headacheDays = dayRanges.lazy.filter({ $0 != .empty }).count
+    return "\(dayRanges.count) days shown, \(headacheDays) with headaches"
+  }
+
 }
 
 extension BlockGraph {

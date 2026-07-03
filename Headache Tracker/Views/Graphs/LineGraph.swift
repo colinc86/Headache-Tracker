@@ -5,6 +5,7 @@
 //  Created by Colin Campbell on 2/16/22.
 //
 
+import Accessibility
 import Shapes
 import SwiftUI
 
@@ -53,8 +54,55 @@ struct LineGraph: View {
           .onAppear(perform: { trim = 1.0 })
       }
     }
+    .accessibilityElement(children: .ignore)
+    .accessibilityLabel("Severity progression")
+    .accessibilityValue(accessibilitySummary)
+    .accessibilityChartDescriptor(self)
   }
   
+}
+
+// MARK: Accessibility
+
+extension LineGraph: AXChartDescriptorRepresentable {
+
+  /// The spoken summary: start, peak, and end severities.
+  var accessibilitySummary: String {
+    guard let first = series.first, let last = series.last else {
+      return "No data"
+    }
+
+    let peak = series.max(by: { $0.orderingValue < $1.orderingValue }) ?? first
+    return "Starts \(first.title.lowercased()), peaks at \(peak.title.lowercased()), ends \(last.title.lowercased()). \(series.count) updates."
+  }
+
+  func makeChartDescriptor() -> AXChartDescriptor {
+    let points = series.enumerated().map { index, severity in
+      AXDataPoint(x: "Update \(index + 1)", y: Double(severity.orderingValue), additionalValues: [], label: severity.title)
+    }
+
+    let xAxis = AXCategoricalDataAxisDescriptor(
+      title: "Update",
+      categoryOrder: series.indices.map({ "Update \($0 + 1)" }))
+
+    let yAxis = AXNumericDataAxisDescriptor(
+      title: "Severity",
+      range: 0.0 ... 4.0,
+      gridlinePositions: []) { value in
+        Headache.Severity(orderingValue: Int(value))?.title ?? ""
+      }
+
+    let series = AXDataSeriesDescriptor(name: "Severity progression", isContinuous: true, dataPoints: points)
+
+    return AXChartDescriptor(
+      title: "Severity progression",
+      summary: accessibilitySummary,
+      xAxis: xAxis,
+      yAxis: yAxis,
+      additionalAxes: [],
+      series: [series])
+  }
+
 }
 
 // MARK: Private methods

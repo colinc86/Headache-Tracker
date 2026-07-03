@@ -192,7 +192,22 @@ struct SeverityButton: View {
         .font(.caption)
         .foregroundColor(selectedSeverity == nil && selectedSeverityRange == nil ? .primary : (selected ? .primary : .secondary))
     }
-    
+    .accessibilityElement(children: .ignore)
+    .accessibilityLabel("\(severity.title) severity")
+    .accessibilityAddTraits(accessibilityTraits)
+  }
+
+  /// The button's traits: interactive modes read as buttons, and the
+  /// current selection is announced.
+  private var accessibilityTraits: AccessibilityTraits {
+    var traits = AccessibilityTraits()
+    if case .display = mode {} else {
+      _ = traits.insert(.isButton)
+    }
+    if selected {
+      _ = traits.insert(.isSelected)
+    }
+    return traits
   }
   
 }

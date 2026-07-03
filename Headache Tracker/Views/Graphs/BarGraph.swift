@@ -5,6 +5,7 @@
 //  Created by Colin Campbell on 2/16/22.
 //
 
+import Accessibility
 import Surge
 import SwiftUI
 
@@ -132,8 +133,81 @@ struct BarGraph: View {
       }
       .padding(.leading, 4)
     }
+    // One element per graph: VoiceOver reads a summary, and the Audio
+    // Graphs rotor gets the full series via the chart descriptor.
+    .accessibilityElement(children: .ignore)
+    .accessibilityLabel(accessibilityTitle)
+    .accessibilityValue(accessibilitySummary)
+    .accessibilityChartDescriptor(self)
   }
   
+}
+
+// MARK: Accessibility
+
+extension BarGraph: AXChartDescriptorRepresentable {
+
+  /// The graph's spoken title.
+  var accessibilityTitle: String {
+    switch graphUnit {
+    case .severity: return "Severity over time"
+    case .time: return "Onset time over time"
+    case .duration: return "Duration over time"
+    }
+  }
+
+  /// The graph's spoken summary: count, peak, and trend.
+  var accessibilitySummary: String {
+    guard statistic.count > 0 else {
+      return "No data"
+    }
+
+    var parts = ["\(statistic.count) headaches"]
+    if let peak = displayString(for: statistic.max) {
+      parts.append("peak \(peak)")
+    }
+
+    let trend = statistic.meanTrend
+    if trend.isSteady {
+      parts.append("steady trend")
+    }
+    else {
+      parts.append(trend.valueB > trend.valueA ? "rising trend" : "falling trend")
+    }
+
+    return parts.joined(separator: ", ")
+  }
+
+  func makeChartDescriptor() -> AXChartDescriptor {
+    let dateFormatter = DateFormatter()
+    dateFormatter.dateStyle = .medium
+
+    let points = statistic.signal.map { value, date in
+      AXDataPoint(x: dateFormatter.string(from: date), y: value, additionalValues: [], label: nil)
+    }
+
+    let xAxis = AXCategoricalDataAxisDescriptor(
+      title: "Date",
+      categoryOrder: statistic.signal.map({ dateFormatter.string(from: $0.1) }))
+
+    let yAxis = AXNumericDataAxisDescriptor(
+      title: accessibilityTitle,
+      range: 0.0 ... Swift.max(max, 1.0),
+      gridlinePositions: []) { value in
+        self.displayString(for: value) ?? String(format: "%.1f", value)
+      }
+
+    let series = AXDataSeriesDescriptor(name: accessibilityTitle, isContinuous: false, dataPoints: points)
+
+    return AXChartDescriptor(
+      title: accessibilityTitle,
+      summary: accessibilitySummary,
+      xAxis: xAxis,
+      yAxis: yAxis,
+      additionalAxes: [],
+      series: [series])
+  }
+
 }
 
 extension BarGraph {
@@ -189,7 +263,7 @@ extension BarGraph {
   ///
   /// - Parameter value: The selected value.
   /// - Returns: The string to display.
-  private func displayString(for value: Double) -> String? {
+  func displayString(for value: Double) -> String? {
     switch graphUnit {
     case .severity:
       return Headache.Severity(orderingValue: Int(value))?.title
