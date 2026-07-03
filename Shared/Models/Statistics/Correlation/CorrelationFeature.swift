@@ -112,6 +112,32 @@ enum CorrelationFeature: String, CaseIterable, Codable, Identifiable {
     }
   }
 
+  /// The ML feature name corresponding to this signal, for looking up the
+  /// trained models' permutation feature importances.
+  var mlFeatureName: String {
+    switch self {
+    case .sleepSeconds: return "Sleep Seconds"
+    case .sleepOnsetHour: return "Sleep Onset"
+    case .mindfulSeconds: return "Mindful Session"
+    case .stepCount: return "Step Count"
+    case .environmentalAudioExposure: return "Environment Audio Exposure"
+    case .headphoneAudioExposure: return "Headphone Audio Exposure"
+    case .heartRate: return "Heart Rate"
+    case .restingHeartRate: return "Resting Heart Rate"
+    case .walkingHeartRateAverage: return "Walking Heart Rate Average"
+    case .heartRateVariability: return "Heart Rate Variability"
+    case .oxygenSaturation: return "Oxygen Saturation"
+    case .respiratoryRate: return "Respiratory Rate"
+    case .pressure: return "Current Pressure"
+    case .devicePressure: return "Device Pressure"
+    case .humidity: return "Current Humidity"
+    case .temperature: return "Current Temperature"
+    case .sigmaPressure: return "Sigma Pressure"
+    case .sigmaHumidity: return "Sigma Humidity"
+    case .sigmaTemperature: return "Sigma Temperature"
+    }
+  }
+
   /// A sleep onset date as continuous hours after 6 PM, avoiding the
   /// discontinuity at midnight for typical bedtimes.
   ///

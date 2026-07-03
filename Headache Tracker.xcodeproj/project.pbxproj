@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		CB20CB20CB20CB2000000002 /* FeatureMedians.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB20CB20CB20CB2000000001 /* FeatureMedians.swift */; };
+		CB20CB20CB20CB2000000003 /* FeatureMedians.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB20CB20CB20CB2000000001 /* FeatureMedians.swift */; };
+		CB20CB20CB20CB2000000005 /* ModelMetrics.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB20CB20CB20CB2000000004 /* ModelMetrics.swift */; };
+		CB20CB20CB20CB2000000006 /* ModelMetrics.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB20CB20CB20CB2000000004 /* ModelMetrics.swift */; };
 		CA10CA10CA10CA1000000002 /* CorrelationFeature.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10CA10CA10CA1000000001 /* CorrelationFeature.swift */; };
 		CA10CA10CA10CA1000000003 /* CorrelationFeature.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10CA10CA10CA1000000001 /* CorrelationFeature.swift */; };
 		CA10CA10CA10CA1000000005 /* CorrelationMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10CA10CA10CA1000000004 /* CorrelationMath.swift */; };
@@ -296,6 +300,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		CB20CB20CB20CB2000000001 /* FeatureMedians.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FeatureMedians.swift; sourceTree = "<group>"; };
+		CB20CB20CB20CB2000000004 /* ModelMetrics.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModelMetrics.swift; sourceTree = "<group>"; };
 		CA10CA10CA10CA1000000001 /* CorrelationFeature.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CorrelationFeature.swift; sourceTree = "<group>"; };
 		CA10CA10CA10CA1000000004 /* CorrelationMath.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CorrelationMath.swift; sourceTree = "<group>"; };
 		CA10CA10CA10CA1000000007 /* CorrelationEngine.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CorrelationEngine.swift; sourceTree = "<group>"; };
@@ -710,6 +716,8 @@
 		3B3FFE5E27D592A000DFACC1 /* Prediction */ = {
 			isa = PBXGroup;
 			children = (
+				CB20CB20CB20CB2000000001 /* FeatureMedians.swift */,
+				CB20CB20CB20CB2000000004 /* ModelMetrics.swift */,
 				3B3FFE6627D592A000DFACC1 /* Inputs */,
 				3B3FFE6127D592A000DFACC1 /* Outputs */,
 				3B3FFE5F27D592A000DFACC1 /* Model.swift */,
@@ -1222,6 +1230,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CB20CB20CB20CB2000000003 /* FeatureMedians.swift in Sources */,
+				CB20CB20CB20CB2000000006 /* ModelMetrics.swift in Sources */,
 				CA10CA10CA10CA1000000003 /* CorrelationFeature.swift in Sources */,
 				CA10CA10CA10CA1000000006 /* CorrelationMath.swift in Sources */,
 				CA10CA10CA10CA1000000009 /* CorrelationEngine.swift in Sources */,
@@ -1311,6 +1321,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CB20CB20CB20CB2000000002 /* FeatureMedians.swift in Sources */,
+				CB20CB20CB20CB2000000005 /* ModelMetrics.swift in Sources */,
 				CA10CA10CA10CA1000000002 /* CorrelationFeature.swift in Sources */,
 				CA10CA10CA10CA1000000005 /* CorrelationMath.swift in Sources */,
 				CA10CA10CA10CA1000000008 /* CorrelationEngine.swift in Sources */,

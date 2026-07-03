@@ -20,6 +20,9 @@ struct InsightsView: View {
   /// The latest insights report.
   @State private var report: InsightsReport?
 
+  /// The trained models' permutation feature importances.
+  @State private var importances = [String: Double]()
+
   /// Whether the report is being computed.
   @State private var loading = true
 
@@ -43,7 +46,7 @@ struct InsightsView: View {
               NavigationLink {
                 TriggerDetailView(insight: insight)
               } label: {
-                TriggerInsightCell(insight: insight)
+                TriggerInsightCell(insight: insight, modelImportance: importances[insight.feature.mlFeatureName])
               }
             }
           } header: {
@@ -99,6 +102,7 @@ struct InsightsView: View {
 
     do {
       report = force ? try await headacheManager.computeInsights() : try await headacheManager.insights()
+      importances = headacheManager.predictor.featureImportances()
     }
     catch {
       logError("Error loading insights: \(error)")
@@ -112,6 +116,9 @@ struct TriggerInsightCell: View {
 
   /// The insight to display.
   let insight: TriggerInsight
+
+  /// The trained models' importance for this feature, when available.
+  var modelImportance: Double?
 
   /// The application's custom color theme.
   @AppStorage(Preferences.General.Keys.colorTheme) private var colorTheme = Preferences.General.Defaults.colorTheme
@@ -157,6 +164,15 @@ struct TriggerInsightCell: View {
         if let lag = insight.bestLagHours {
           Text("strongest \(lag) h before onset")
             .font(.caption)
+            .foregroundColor(.secondary)
+        }
+
+        if let modelImportance = modelImportance, modelImportance > 0.3 {
+          Label("model", systemImage: "cpu")
+            .font(.caption2.weight(.semibold))
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .background(Capsule().fill(Color(UIColor.tertiarySystemFill)))
             .foregroundColor(.secondary)
         }
 

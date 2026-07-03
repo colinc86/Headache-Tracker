@@ -52,6 +52,18 @@ class AppDelegate: NSObject, UIApplicationDelegate, ObservableObject {
     // Set up the async stuff
     Task {
       do {
+        // The models' feature schema changed (circular time encoding,
+        // separate device pressure); models trained on the old schema can't
+        // serve the new features, and old evaluations scored a different
+        // methodology. Reset both once.
+        let defaults = UserDefaults.standard
+        if defaults.integer(forKey: Constants.modelSchemaVersionKey) < Constants.modelSchemaVersion {
+          logInfo("Model schema changed; resetting models and evaluations.")
+          headacheManager.predictor.reset()
+          try await headacheManager.resetEvaluation()
+          defaults.set(Constants.modelSchemaVersion, forKey: Constants.modelSchemaVersionKey)
+        }
+
         // Repair any data integrity issues from earlier versions
         try await headacheManager.repairDataIntegrity()
 

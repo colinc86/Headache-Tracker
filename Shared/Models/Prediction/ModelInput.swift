@@ -78,15 +78,7 @@ struct ModelInput: Codable {
   func fullInput() -> InputUnion {
     return InputUnion(providers: [controlledUserInput(), environmentalInput(), chronologicalInput(), uncontrolledUserInput()])
   }
-  
-  /// A floating point representation of the input.
-  ///
-  /// - Returns: An array of double values.
-  func buffer() -> [Double] {
-    let input = fullInput()
-    return input.featureNames.map({ input.featureValue(for: $0)?.doubleValue ?? 0.0 })
-  }
-  
+
 }
 
 // MARK: Private methods

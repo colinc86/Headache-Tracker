@@ -22,6 +22,14 @@ struct Constants {
   /// The minimum number of training data samples required before the first
   /// models are trained.
   static let minimumTrainingDataCount = 50
+
+  /// The model feature schema version. Bump when the feature set changes
+  /// (renamed/added/removed features), which invalidates compiled models
+  /// and stored evaluations; a launch-time check resets both.
+  static let modelSchemaVersion = 2
+
+  /// The defaults key storing the last seen model schema version.
+  static let modelSchemaVersionKey = "modelSchemaVersion"
   
   /// The application's app group identifier.
   static let appGroupIdentifier = "group.com.cnc.Headache-Tracker.contents"

@@ -777,6 +777,9 @@ extension HeadacheManager {
     }
     
     if predict {
+      // Score any matured forecasts before recording a new one.
+      try await resolveEvaluations()
+
       let prediction = try await predictor.predict(input, inWidget: inWidget)
       try await evaluatePrediction(prediction)
     }
@@ -945,45 +948,101 @@ extension HeadacheManager {
     return notPresentTrainingData + notNotPresentTrainingData
   }
   
-  /// Evaluates the prediction and saves it to core data.
+  /// Records the prediction as a pending evaluation.
+  ///
+  /// An outlook forecast predicts the *future*, so it can't be scored
+  /// against the present; the pending row matures after its window passes
+  /// and `resolveEvaluations()` scores it against what actually happened.
   ///
   /// - Parameter prediction: The prediction.
   private func evaluatePrediction(_ prediction: PredictionOutput) async throws {
-    let hasCurrent = try await hasCurrentHeadache()
-    let severity = try await currentHeadache { headache, _ in
-      return headache?.severity ?? .notPresent
+    // Only forecasts made outside a headache are evaluated; during a
+    // headache the outlook trivially matches the present.
+    guard try await !hasCurrentHeadache() else {
+      return
     }
-    
+
     try await DataController.shared.performInBackground(saveOnComplete: true) { context in
       let evaluation = Evaluation(context: context)
       evaluation.timestamp = Date()
-      evaluation.outlook = (hasCurrent && prediction.outlookClassifierOutput.prediction == .headache) || (!hasCurrent && prediction.outlookClassifierOutput.prediction == .noHeadache)
-      evaluation.severity = severity == prediction.severityClassifierOutput.prediction
+      evaluation.predictedOutlookRaw = prediction.outlookClassifierOutput.prediction.rawValue
+      evaluation.predictedSeverityRaw = Int64(prediction.severityClassifierOutput.prediction.rawValue)
+      evaluation.resolveAfter = Date().addingTimeInterval([TrainingData].possibleHeadacheWindow)
+      evaluation.resolved = false
     }
   }
-  
+
+  /// Scores matured pending evaluations against the actual headache record.
+  func resolveEvaluations() async throws {
+    try await DataController.shared.performInBackground(saveOnComplete: true) { context in
+      let request = Evaluation.fetchRequest()
+      request.predicate = NSPredicate(format: "(resolved == NO) AND (resolveAfter != nil) AND (resolveAfter <= %@)", Date() as NSDate)
+      let pending = try context.fetch(request)
+
+      guard !pending.isEmpty else {
+        return
+      }
+
+      let episodes = try HeadacheManager.headacheEpisodes(in: context).sorted(by: { $0.start < $1.start })
+
+      for evaluation in pending {
+        guard let timestamp = evaluation.timestamp, let resolveAfter = evaluation.resolveAfter else {
+          evaluation.resolved = true
+          continue
+        }
+
+        // Did a headache actually start within the forecast window?
+        let actualEpisode = episodes.first(where: { $0.start > timestamp && $0.start <= resolveAfter })
+        let predictedPositive = evaluation.predictedOutlookRaw == Outlook.headache.rawValue || evaluation.predictedOutlookRaw == Outlook.possibleHeadache.rawValue
+
+        evaluation.outlook = predictedPositive == (actualEpisode != nil)
+
+        // Severity is only scorable when a headache actually happened;
+        // trivial not-present matches would inflate the accuracy. The
+        // sentinel excludes unscorable rows from the readout.
+        if let actualEpisode = actualEpisode {
+          let peakSeverity = actualEpisode.severities.map({ $0.severity }).max(by: { $0.orderingValue < $1.orderingValue })
+          evaluation.severity = evaluation.predictedSeverityRaw == Int64(peakSeverity?.rawValue ?? -1)
+        }
+        else {
+          evaluation.predictedSeverityRaw = -1
+        }
+
+        evaluation.resolved = true
+      }
+
+      logInfo("Resolved \(pending.count) pending evaluations.")
+    }
+  }
+
   /// Calculates the current model evaluation metrics for the outlook
-  /// and severity predictions.
+  /// and severity predictions, over resolved evaluations only.
   ///
   /// - Returns: A pair of evaluation metrics and a count (outlook, severity, count).
   func evaluation() async throws -> (Double, Double, Int) {
     return try await DataController.shared.performInBackground { context in
       let request = Evaluation.fetchRequest()
+      request.predicate = NSPredicate(format: "resolved == YES")
       let evaluations = try context.fetch(request)
-      
+
       guard evaluations.count > 0 else {
         return (0.0, 0.0, 0)
       }
-      
+
       var outlookSuccess = 0
       var severitySuccess = 0
+      var severityCount = 0
       for evaluation in evaluations {
         outlookSuccess += evaluation.outlook ? 1 : 0
-        severitySuccess += evaluation.severity ? 1 : 0
+        if evaluation.predictedSeverityRaw >= 0 {
+          severityCount += 1
+          severitySuccess += evaluation.severity ? 1 : 0
+        }
       }
-      
-      let evaluationCount = Double(evaluations.count)
-      return (Double(outlookSuccess) / evaluationCount, Double(severitySuccess) / evaluationCount, evaluations.count)
+
+      let outlookAccuracy = Double(outlookSuccess) / Double(evaluations.count)
+      let severityAccuracy = severityCount > 0 ? Double(severitySuccess) / Double(severityCount) : 0.0
+      return (outlookAccuracy, severityAccuracy, evaluations.count)
     }
   }
   

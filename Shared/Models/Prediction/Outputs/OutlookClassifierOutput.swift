@@ -20,12 +20,18 @@ class OutlookClassifierOutput: MLFeatureInitializable {
   
   /// Outlook as string value
   lazy var Outlook: String = {
-    [unowned self] in return self.provider.featureValue(for: FeatureName.outlook)!.stringValue
+    [unowned self] in return self.provider.featureValue(for: FeatureName.outlook)?.stringValue ?? ""
   }()
-  
+
   /// OutlookProbability as dictionary of strings to doubles
   lazy var OutlookProbability: [String: Double] = {
-    [unowned self] in return self.provider.featureValue(for: "OutlookProbability")!.dictionaryValue as! [String: Double]
+    [unowned self] in
+    let dictionary = self.provider.featureValue(for: "OutlookProbability")?.dictionaryValue ?? [:]
+    return dictionary.reduce(into: [String: Double]()) { result, entry in
+      if let key = entry.key as? String {
+        result[key] = entry.value.doubleValue
+      }
+    }
   }()
   
   var featureNames: Set<String> {
