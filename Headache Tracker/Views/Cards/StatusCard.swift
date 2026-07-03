@@ -15,7 +15,7 @@ struct StatusCard: View {
   // MARK: Private properties
   
   /// The application's custom color theme.
-  @AppStorage(Preferences.General.Keys.colorTheme) private var colorTheme = Preferences.General.Defaults.colorTheme
+  @AppStorage(Preferences.General.Keys.colorTheme, store: .shared) private var colorTheme = Preferences.General.Defaults.colorTheme
   
   // MARK: View body
   

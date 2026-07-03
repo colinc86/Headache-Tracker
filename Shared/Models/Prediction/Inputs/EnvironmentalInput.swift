@@ -12,6 +12,7 @@ class EnvironmentalInput: MLFeatureProvider {
   
   struct FeatureName {
     static let currentPressure = "Current Pressure"
+    static let devicePressure = "Device Pressure"
     static let currentHumidity = "Current Humidity"
     static let currentTemperature = "Current Temperature"
     static let sigmaPressure = "Sigma Pressure"
@@ -19,11 +20,14 @@ class EnvironmentalInput: MLFeatureProvider {
     static let sigmaTemperature = "Sigma Temperature"
     static let environmentAudioExposure = "Environment Audio Exposure"
   }
-  
+
   let preferences = Preferences.Predictors()
-  
+
   /// Current Pressure as double value
   var Current_Pressure: Double
+
+  /// Device Pressure as double value
+  var Device_Pressure: Double
   
   /// Current Humidity as double value
   var Current_Humidity: Double
@@ -48,6 +52,7 @@ class EnvironmentalInput: MLFeatureProvider {
       var names = Set<String>()
       if preferences.barometricPressure == true {
         names.insert(FeatureName.currentPressure)
+        names.insert(FeatureName.devicePressure)
         names.insert(FeatureName.sigmaPressure)
       }
       if preferences.humidity == true {
@@ -68,6 +73,9 @@ class EnvironmentalInput: MLFeatureProvider {
   func featureValue(for featureName: String) -> MLFeatureValue? {
     if (featureName == FeatureName.currentPressure) {
       return MLFeatureValue(double: Current_Pressure)
+    }
+    if (featureName == FeatureName.devicePressure) {
+      return MLFeatureValue(double: Device_Pressure)
     }
     if (featureName == FeatureName.currentHumidity) {
       return MLFeatureValue(double: Current_Humidity)
@@ -91,8 +99,12 @@ class EnvironmentalInput: MLFeatureProvider {
   }
   
   convenience init(weatherStatistics: WeatherStatistics?, healthKitData: [HealthKitData: Double]?) {
+    // Station and device pressure are separate features; coalescing them
+    // into one column mixed incomparable sources across samples. Missing
+    // values are median-imputed upstream (see FeatureMedians).
     self.init(
-      Current_Pressure: weatherStatistics?.barometricPressure ?? (weatherStatistics?.currentPressure ?? 0.0),
+      Current_Pressure: weatherStatistics?.currentPressure ?? 0.0,
+      Device_Pressure: weatherStatistics?.barometricPressure ?? 0.0,
       Current_Humidity: weatherStatistics?.currentHumidity ?? 0.0,
       Current_Temperature: weatherStatistics?.currentTemperature ?? 0.0,
       Sigma_Pressure: weatherStatistics?.sigmaPressure ?? 0.0,
@@ -101,9 +113,10 @@ class EnvironmentalInput: MLFeatureProvider {
       Environment_Audio_Exposure: healthKitData?[HealthKitData.environmentalAudioExposure] ?? 0.0
     )
   }
-  
-  init(Current_Pressure: Double, Current_Humidity: Double, Current_Temperature: Double, Sigma_Pressure: Double, Sigma_Humidity: Double, Sigma_Temperature: Double, Environment_Audio_Exposure: Double) {
+
+  init(Current_Pressure: Double, Device_Pressure: Double, Current_Humidity: Double, Current_Temperature: Double, Sigma_Pressure: Double, Sigma_Humidity: Double, Sigma_Temperature: Double, Environment_Audio_Exposure: Double) {
     self.Current_Pressure = Current_Pressure
+    self.Device_Pressure = Device_Pressure
     self.Current_Humidity = Current_Humidity
     self.Current_Temperature = Current_Temperature
     self.Sigma_Pressure = Sigma_Pressure

@@ -31,8 +31,8 @@ struct SettingsView: View {
   @State private var showingShareFeedback = false
   
   // Preferences
-  @AppStorage(Preferences.General.Keys.colorTheme) private var colorTheme = Preferences.General.Defaults.colorTheme
-  @AppStorage(Preferences.General.Keys.measurementSystem) private var measurementSystem = Preferences.General.Defaults.measurementSystem
+  @AppStorage(Preferences.General.Keys.colorTheme, store: .shared) private var colorTheme = Preferences.General.Defaults.colorTheme
+  @AppStorage(Preferences.General.Keys.measurementSystem, store: .shared) private var measurementSystem = Preferences.General.Defaults.measurementSystem
   @AppStorage(Preferences.General.Keys.shouldDimScreen) private var shouldDimScreen = Preferences.General.Defaults.shouldDimScreen
   @AppStorage(Preferences.General.Keys.screenDimPercent) private var screenDimPercent = Preferences.General.Defaults.screenDimPercent
   @AppStorage(Preferences.General.Keys.crashReportingEnabled) private var crashReportingEnabled = Preferences.General.Defaults.crashReportingEnabled
@@ -91,7 +91,7 @@ struct SettingsView: View {
   // MARK: View body
   
   var body: some View {
-    NavigationView {
+    NavigationStack {
       Form {
         // Integrations
         Section("Integrations") {
@@ -146,7 +146,6 @@ struct SettingsView: View {
             .tint(colorTheme.baseColor)
           
           Toggle("Daily Outlook", isOn: $dailyOutlookAlerts)
-            .onChange(of: dailyOutlookAlerts, perform: dailyOutlookAlertsChanged)
             .tint(colorTheme.baseColor)
           
           DatePicker("Daily Outlook Time", selection: dailyOutlookDate, displayedComponents: .hourAndMinute)
@@ -203,7 +202,6 @@ struct SettingsView: View {
       }
       .navigationTitle("Settings")
     }
-    .navigationViewStyle(StackNavigationViewStyle())
     .sheet(isPresented: $showingReportBug, onDismiss: nil) {
       FeedbackView(type: .bug)
     }
@@ -225,25 +223,6 @@ extension SettingsView {
   private func shareFeedback() {
     withAnimation {
       showingShareFeedback = true
-    }
-  }
-  
-  /// Called when the `dailyOutlookAlerts` setting changes.
-  ///
-  /// - Parameter newValue: The new `dailyOutlookAlerts` value.
-  private func dailyOutlookAlertsChanged(_ newValue: Bool) {
-    if newValue {
-      Task {
-        do {
-          try await refresher.scheduleOutlookRefreshTask()
-        }
-        catch {
-          logError("Error scheduling outlook refresh task: \(error)")
-        }
-      }
-    }
-    else {
-      refresher.cancelOutlookRefreshTask()
     }
   }
   

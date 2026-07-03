@@ -11,10 +11,25 @@ import Foundation
 struct Constants {
   
   /// The current training data version.
-  static let trainingDataVersion = "1.1"
+  ///
+  /// 1.2: per-metric sampling windows, sleep stages, HRV in milliseconds,
+  /// presence bits, and sleep onset as a date.
+  static let trainingDataVersion = "1.2"
   
   /// The weather training data version.
   static let trainingDataWeatherVersion = "1.1"
+
+  /// The minimum number of training data samples required before the first
+  /// models are trained.
+  static let minimumTrainingDataCount = 50
+
+  /// The model feature schema version. Bump when the feature set changes
+  /// (renamed/added/removed features), which invalidates compiled models
+  /// and stored evaluations; a launch-time check resets both.
+  static let modelSchemaVersion = 2
+
+  /// The defaults key storing the last seen model schema version.
+  static let modelSchemaVersionKey = "modelSchemaVersion"
   
   /// The application's app group identifier.
   static let appGroupIdentifier = "group.com.cnc.Headache-Tracker.contents"
@@ -59,9 +74,6 @@ struct Constants {
     
     /// The identifier to use with background prediction tasks.
     static let backgroundPredictionTaskIdentifier = ApplicationKey(from: "predict")
-    
-    /// The identifier to use with daily outlook tasks.
-    static let backgroundOutlookTaskIdentifier = ApplicationKey(from: "outlook")
   }
   
   struct URLSchemes {

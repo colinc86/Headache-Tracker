@@ -66,5 +66,19 @@ struct Formatters {
     
     return measurementFormatter.string(from: convertedUnit)
   }
-  
+
+  /// Formats the given measurement as a difference between two values.
+  ///
+  /// Temperature deltas are converted by scale only, since applying the
+  /// affine celsius-to-fahrenheit conversion to a difference would add the
+  /// 32° offset.
+  static func formatMeasurementDelta<T: Dimension>(_ measurement: Measurement<T>) -> String {
+    if measurement.unit is UnitTemperature {
+      let unit = Preferences.General().measurementSystem.temperatureUnit
+      let value = unit == .fahrenheit ? measurement.value * 9.0 / 5.0 : measurement.value
+      return measurementFormatter.string(from: Measurement(value: value, unit: unit))
+    }
+    return formatMeasurement(measurement)
+  }
+
 }

@@ -36,7 +36,7 @@ struct ToggleCell: View {
       }
       Toggle(title, isOn: $state)
         .tint(.accentColor)
-        .onChange(of: state) { newValue in
+        .onChange(of: state) { _, newValue in
           valueChanged?(data, newValue)
         }
     }

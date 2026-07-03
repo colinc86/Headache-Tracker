@@ -146,121 +146,233 @@ extension HealthKitManager {
       throw HealthKitError.typeNotAvailable
     }
     
+    // Stamp each sample with its severity's identifier so saves replace
+    // prior samples for the same severity and deletes can be scoped to the
+    // owning headache instead of everything in a date interval.
+    let syncVersion = Int(Date().timeIntervalSince1970)
     var samples = [HKObject]()
     for interval in intervals {
-      samples.append(HKCategorySample(type: headacheType, value: interval.severity.rawValue, start: interval.interval.start, end: interval.interval.end))
+      var metadata: [String: Any]?
+      if let identifier = interval.identifier {
+        metadata = [
+          HKMetadataKeySyncIdentifier: identifier.uuidString,
+          HKMetadataKeySyncVersion: syncVersion
+        ]
+      }
+      samples.append(HKCategorySample(type: headacheType, value: interval.severity.rawValue, start: interval.interval.start, end: interval.interval.end, metadata: metadata))
     }
-    
+
     try await store.save(samples)
   }
-  
+
   /// Deletes the severity samples in the given date interval.
   ///
-  /// - Parameter interval: The interval.
-  func deleteSeveritySamples(in interval: DateInterval) async throws {
+  /// - Parameters:
+  ///   - interval: The interval.
+  ///   - severityIdentifiers: When provided, only this app's samples whose
+  ///     sync identifier matches one of these severities (or legacy samples
+  ///     without a sync identifier) are deleted. When nil, all of this app's
+  ///     headache samples in the interval are deleted.
+  func deleteSeveritySamples(in interval: DateInterval, severityIdentifiers: [UUID]? = nil) async throws {
     logDebug("Delete severity samples in \(interval).")
-    
+
     // Only continue if we have health integration turned on
     guard preferences.enabled else {
       logWarning("Health integration is \(preferences.enabled). Not deleting severity samples.")
       return
     }
-    
+
     // Get the headache type
     guard let headacheType = HKObjectType.categoryType(forIdentifier: .headache) else {
       logWarning("Unable to get headache category type.")
       throw HealthKitError.notAvailable
     }
-    
+
     // Create our predicate
     let predicate = HKQuery.predicateForSamples(withStart: interval.start, end: interval.end, options: [])
-    
-    // Delete the objects
-    let count = try await store.deleteObjects(of: headacheType, predicate: predicate)
-    logDebug("Deleted \(count) severity samples.")
+
+    guard let severityIdentifiers = severityIdentifiers else {
+      // Delete all of this app's headache samples in the interval.
+      let count = try await store.deleteObjects(of: headacheType, predicate: predicate)
+      logDebug("Deleted \(count) severity samples.")
+      return
+    }
+
+    // Fetch the samples in the interval and scope the deletion to the given
+    // severities. Legacy samples without a sync identifier can't be
+    // attributed to a severity, so they fall back to interval scoping.
+    let samples: [HKSample] = try await withCheckedThrowingContinuation { [weak self] continuation in
+      let query = HKSampleQuery(sampleType: headacheType, predicate: predicate, limit: HKObjectQueryNoLimit, sortDescriptors: nil) { _, samples, error in
+        if let error = error {
+          continuation.resume(throwing: error)
+        }
+        else {
+          continuation.resume(returning: samples ?? [])
+        }
+      }
+      self?.store.execute(query)
+    }
+
+    let identifierStrings = Set(severityIdentifiers.map({ $0.uuidString }))
+    let samplesToDelete = samples.filter { sample in
+      guard let syncIdentifier = sample.metadata?[HKMetadataKeySyncIdentifier] as? String else {
+        return true
+      }
+      return identifierStrings.contains(syncIdentifier)
+    }
+
+    guard !samplesToDelete.isEmpty else {
+      logDebug("No severity samples to delete.")
+      return
+    }
+
+    try await store.delete(samplesToDelete)
+    logDebug("Deleted \(samplesToDelete.count) severity samples.")
   }
   
-  /// Reads health kit training data.
+  /// Reads health kit training data using each metric's sampling window.
+  ///
+  /// Only metrics that produced actual samples appear in the returned
+  /// dictionary — an absent key means "no reading", which is distinct from a
+  /// measured zero.
+  ///
   /// - Parameters:
-  ///   - interval: The interval of the data to query.
+  ///   - date: The end of the sampling windows.
   ///   - inWidget: Whether this method is being called by a widget.
-  /// - Returns: A dictionary of training data.
-  func readHealthKitData(in interval: DateInterval, inWidget: Bool = false) -> [HealthKitData: Double]? {
-    logDebug("Read HealthKit data in \(interval).")
-    
+  /// - Returns: A dictionary of training data, or nil when nothing was read.
+  func readHealthKitData(endingAt date: Date, inWidget: Bool = false) -> [HealthKitData: Double]? {
+    logDebug("Read HealthKit data ending at \(date).")
+
     // Only continue if we have health integration turned on
     guard preferences.enabled || inWidget else {
       logWarning("Health integration is \(preferences.enabled). Not reading HealthKit data.")
       return nil
     }
-    
+
     var healthKitData = [HealthKitData: Double]()
-    var didSet = false
-    let didSetSemaphore = DispatchSemaphore(value: 1)
-    
+    let dataSemaphore = DispatchSemaphore(value: 1)
+
+    let setValue: (HealthKitData, Double) -> Void = { data, value in
+      dataSemaphore.wait()
+      healthKitData[data] = value
+      dataSemaphore.signal()
+    }
+
     let group = DispatchGroup()
-    for data in HealthKitData.allCases {
+    for data in HealthKitData.allCases where !data.isShareType {
       group.enter()
       readQueue.async {
-        guard let query = data.query(in: interval, completion: { query, samples, quantity, error in
+        guard let query = data.query(endingAt: date, completion: { query, samples, quantity, error in
+          defer { group.leave() }
+
           if let samples = samples as? [HKCategorySample] {
-            if data == .sleepSeconds {
-              var asleepSeconds = samples.filter({ $0.value == HKCategoryValueSleepAnalysis.asleepUnspecified.rawValue && interval.contains($0.startDate) }).reduce(0.0, { $0 + $1.endDate.timeIntervalSince($1.startDate) })
-              if asleepSeconds > 0.0 {
-                var sources = [String]()
-                for sample in samples {
-                  let id = sample.sourceRevision.source.bundleIdentifier
-                  if !sources.contains(id) { sources.append(id) }
-                }
-                asleepSeconds /= sources.count > 0 ? Double(sources.count) : 1.0
+            let window = data.window(endingAt: date)
+            switch data {
+            case .sleepSeconds:
+              if let asleepSeconds = HealthKitManager.asleepSeconds(from: samples, in: window) {
+                setValue(.sleepSeconds, asleepSeconds)
               }
-              
-              didSetSemaphore.wait()
-              healthKitData[.sleepSeconds] = asleepSeconds
-              didSet = true
-              didSetSemaphore.signal()
-            }
-            else if data == .sleepOnset {
-              var onsetSeconds = -1.0
-              if let sleepOnset = samples.filter({ $0.value == HKCategoryValueSleepAnalysis.asleepUnspecified.rawValue && interval.contains($0.startDate) }).min(by: { $0.startDate < $1.startDate })?.startDate {
-                onsetSeconds = Calendar.current.timeIntervalSinceMidnight(sleepOnset)
+            case .sleepOnset:
+              if let onset = HealthKitManager.sleepOnset(from: samples, in: window) {
+                // Carried as a reference-date interval so consumers can
+                // reconstruct the full onset Date.
+                setValue(.sleepOnset, onset.timeIntervalSinceReferenceDate)
               }
-              
-              didSetSemaphore.wait()
-              healthKitData[.sleepOnset] = onsetSeconds
-              didSet = true
-              didSetSemaphore.signal()
-            }
-            else if data == .mindfulSession {
-              didSetSemaphore.wait()
-              healthKitData[.mindfulSession] = samples.reduce(0.0, { $0 + $1.endDate.timeIntervalSince($1.startDate) })
-              didSet = true
-              didSetSemaphore.signal()
+            case .mindfulSession:
+              guard !samples.isEmpty else { break }
+              setValue(.mindfulSession, samples.reduce(0.0, { $0 + $1.endDate.timeIntervalSince($1.startDate) }))
+            default:
+              break
             }
           }
           else if let quantity = quantity, let unit = data.unit {
-            didSetSemaphore.wait()
-            healthKitData[data] = quantity.doubleValue(for: unit)
-            didSet = true
-            didSetSemaphore.signal()
+            setValue(data, quantity.doubleValue(for: unit))
           }
-          group.leave()
         }) else {
           group.leave()
           return
         }
-        
+
         self.store.execute(query)
       }
     }
 
     group.wait()
-    
-    if didSet {
-      return healthKitData
-    }
-    
-    return nil
+
+    return healthKitData.isEmpty ? nil : healthKitData
   }
-  
+
+}
+
+// MARK: Sleep sample analysis
+
+extension HealthKitManager {
+
+  /// All sleep-analysis raw values that count as asleep, including the
+  /// iOS 16+ sleep stages that replaced `asleepUnspecified` on most devices.
+  private static let asleepValues: Set<Int> = Set(HKCategoryValueSleepAnalysis.allAsleepValues.map({ $0.rawValue }))
+
+  /// The merged asleep intervals per source, clamped to the window.
+  ///
+  /// - Parameters:
+  ///   - samples: The sleep analysis samples.
+  ///   - window: The window to clamp to.
+  /// - Returns: Merged asleep intervals keyed by source bundle identifier.
+  private static func asleepIntervalsBySource(from samples: [HKCategorySample], in window: DateInterval) -> [String: [DateInterval]] {
+    var intervalsBySource = [String: [DateInterval]]()
+
+    for sample in samples where asleepValues.contains(sample.value) {
+      guard let overlap = window.intersection(with: DateInterval(start: sample.startDate, end: sample.endDate)), overlap.duration > 0 else {
+        continue
+      }
+      intervalsBySource[sample.sourceRevision.source.bundleIdentifier, default: []].append(overlap)
+    }
+
+    // Merge overlapping intervals within each source so stages that overlap
+    // (or duplicate records) aren't double counted.
+    for (source, intervals) in intervalsBySource {
+      let sorted = intervals.sorted(by: { $0.start < $1.start })
+      var merged = [DateInterval]()
+      for interval in sorted {
+        if let last = merged.last, interval.start <= last.end {
+          merged[merged.count - 1] = DateInterval(start: last.start, end: max(last.end, interval.end))
+        }
+        else {
+          merged.append(interval)
+        }
+      }
+      intervalsBySource[source] = merged
+    }
+
+    return intervalsBySource
+  }
+
+  /// The total asleep seconds in the window, taken from the source with the
+  /// most recorded sleep (the watch wins over the phone) rather than
+  /// averaging across sources.
+  ///
+  /// - Parameters:
+  ///   - samples: The sleep analysis samples.
+  ///   - window: The window to clamp to.
+  /// - Returns: Asleep seconds, or nil when no source recorded sleep.
+  static func asleepSeconds(from samples: [HKCategorySample], in window: DateInterval) -> Double? {
+    let intervalsBySource = asleepIntervalsBySource(from: samples, in: window)
+    let totals = intervalsBySource.values.map({ intervals in intervals.reduce(0.0, { $0 + $1.duration }) })
+    return totals.max()
+  }
+
+  /// The sleep onset in the window from the best source.
+  ///
+  /// - Parameters:
+  ///   - samples: The sleep analysis samples.
+  ///   - window: The window to clamp to.
+  /// - Returns: The onset date, or nil when no source recorded sleep.
+  static func sleepOnset(from samples: [HKCategorySample], in window: DateInterval) -> Date? {
+    let intervalsBySource = asleepIntervalsBySource(from: samples, in: window)
+    let bestSource = intervalsBySource.max(by: { lhs, rhs in
+      lhs.value.reduce(0.0, { $0 + $1.duration }) < rhs.value.reduce(0.0, { $0 + $1.duration })
+    })
+    return bestSource?.value.first?.start
+  }
+
 }

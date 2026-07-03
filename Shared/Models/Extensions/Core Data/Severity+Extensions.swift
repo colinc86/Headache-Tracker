@@ -23,7 +23,7 @@ extension SeverityState {
     guard let startTime = startTime, let endTime = endTime else {
       return nil
     }
-    return  Headache.Severity.Interval(severity, start: startTime, end: endTime)
+    return Headache.Severity.Interval(severity, start: startTime, end: endTime, identifier: identifier)
   }
   
   /// The severity's training data as an array.

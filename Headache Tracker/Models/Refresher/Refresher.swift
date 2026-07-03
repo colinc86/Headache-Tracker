@@ -6,7 +6,6 @@
 //
 
 import BackgroundTasks
-import DataController
 import Foundation
 import SwiftUI
 
@@ -25,12 +24,12 @@ class Refresher: ObservableObject {
   /// The application's preferences.
   private var preferences = Preferences()
   
-  /// The refresh task responsible for creating background samples.
+  /// The refresh task responsible for creating background samples and, when
+  /// due, the daily outlook alert. A single app-refresh identifier is used
+  /// because iOS budgets refresh opportunities per app; two competing
+  /// identifiers meant one rarely fired.
   private let predictionRefreshTask = RefreshTask(identifier: Constants.Tasks.backgroundPredictionTaskIdentifier, type: .appRefresh)
-  
-  /// The refresh task responsible for getting the daily outlook.
-  private let outlookRefreshTask = RefreshTask(identifier: Constants.Tasks.backgroundOutlookTaskIdentifier, type: .appRefresh)
-  
+
   /// The refresh task responsible for re-training the machine learning models.
   private let trainingProcessingTask = RefreshTask(identifier: Constants.Tasks.backgroundTrainingTaskIdentifier, type: .processing)
   
@@ -96,14 +95,44 @@ extension Refresher {
     guard preferences.notifications.dailyOutlookAlerts, let prediction = prediction else {
       return
     }
-    
+
     // Present the alert
     logDebug("Presenting alert for outlook: \(prediction.outlookClassifierOutput.prediction).")
     try await alertManager.presentAlert(
       with: HeadacheAlertRequest.outlook(outlook: prediction.outlookClassifierOutput.prediction, onset: prediction.onsetRegressorOutput.prediction),
       badgeNumber: 0)
   }
-  
+
+  /// Whether the daily outlook alert is due: outlook alerts are on, today's
+  /// outlook time has passed, and no outlook was presented since.
+  var isOutlookAlertDue: Bool {
+    guard preferences.notifications.dailyOutlookAlerts else {
+      return false
+    }
+
+    let now = Date()
+    let todaysOutlookDate = Calendar.current.startOfDay(for: now).addingTimeInterval(preferences.notifications.dailyOutlookTime)
+    return now >= todaysOutlookDate && (preferences.debug.lastOutlookDate ?? .distantPast) < todaysOutlookDate
+  }
+
+  /// Presents the daily outlook alert if it's due.
+  ///
+  /// The day's slot is consumed only after the alert is actually presented,
+  /// so a failed presentation is retried on the next refresh.
+  ///
+  /// - Parameter prediction: The prediction.
+  func presentOutlookAlertIfNeeded(with prediction: PredictionOutput?) async throws {
+    guard isOutlookAlertDue, prediction != nil else {
+      return
+    }
+
+    try await presentOutlookAlert(with: prediction)
+
+    let now = Date()
+    preferences.debug.lastOutlookDate = now
+    preferences.debug.nextOutlookDate = Calendar.current.startOfDay(for: now).addingTimeInterval(preferences.notifications.dailyOutlookTime + 86400.0)
+  }
+
 }
 
 // MARK: - Predictions background refresh methods
@@ -141,11 +170,11 @@ extension Refresher {
   private func handlePredictionRefreshTask(_ task: BGTask) {
     logDebug("Handle prediction refresh task.")
     preferences.debug.lastPredictionDate = Date()
-    
+
     // Schedule the next task
     Task { [weak self] in
       guard let self = self else { return }
-      
+
       do {
         try await self.schedulePredictionRefreshTask()
       }
@@ -153,137 +182,52 @@ extension Refresher {
         logError("Error scheduling prediction refresh task: \(error)")
       }
     }
-    
+
     // Set the task's expiration handler
+    let completion = TaskCompletionGuard(task)
     task.expirationHandler = { [weak self] in
       // Cancel the prediction
       self?.headacheManager?.cancelClassificationInput()
+      completion.complete(success: false)
     }
-    
-    // Get the current severity identifier
-    let context = DataController.shared.newNestedBackgroundContext()
-    let currentSeverityID: UUID? = context.performAndWait { [weak context] in
-      let request = Headache.fetchRequest()
-      request.predicate = NSPredicate(format: "resolved = %@", NSNumber(booleanLiteral: false))
-      let headache = (try? context?.fetch(request))?.last
-      return headache?.currentState?.identifier
-    }
-    
+
     // Get the input and either alert or finish
     Task { [weak self] in
-      guard let self = self else { return }
-      
+      guard let self = self else {
+        completion.complete(success: false)
+        return
+      }
+
       do {
+        // Get the current severity identifier
+        let currentSeverityID = try await self.headacheManager.currentSeverityIdentifier()
+
         let input = await self.headacheManager.predictorInput(atDate: Date(), inWidget: false)
-        
+
         // Should we create new training data?
         // If it's been more than half an hour then yes.
         if let timestamp = try await self.headacheManager.lastTrainingDataDate(), Date().timeIntervalSince(timestamp) > 1800.0 {
           try await self.headacheManager.createTrainingData(from: input, severityIdentifier: currentSeverityID)
         }
-        
-        // If there is no current headache, then present a prediction
-        if currentSeverityID == nil {
-          // We got the input, so present the prediction
+
+        // Run a prediction when there's no current headache, or when the
+        // daily outlook is due (which must fire even during a headache).
+        if currentSeverityID == nil || self.isOutlookAlertDue {
           let prediction = try await self.headacheManager.predictor.predict(input, inWidget: false)
-          try await self.presentPredictionAlert(with: prediction)
+
+          if currentSeverityID == nil {
+            try await self.presentPredictionAlert(with: prediction)
+          }
+
+          // Present the daily outlook when due
+          try await self.presentOutlookAlertIfNeeded(with: prediction)
         }
-        
-        task.setTaskCompleted(success: true)
+
+        completion.complete(success: true)
       }
       catch {
         logError("Error creating training data: \(error)")
-        task.setTaskCompleted(success: false)
-      }
-    }
-  }
-  
-}
-
-// MARK: - Daily outlook background refresh methods
-
-extension Refresher {
-  
-  /// Sets up the refresh task by registering it.
-  func setupOutlookRefreshTask() {
-    logDebug("Registering outlook refresh task handler.")
-    outlookRefreshTask.register(handleOutlookRefreshTask)
-  }
-  
-  /// Cancels the refresh task.
-  func cancelOutlookRefreshTask() {
-    logDebug("Cancelling outlook refresh task.")
-    outlookRefreshTask.cancel()
-  }
-  
-  /// Schedules the outlook task for the daily outlook time.
-  @MainActor func scheduleOutlookRefreshTask() async throws {
-    // Get the number of seconds past midnight.
-    let now = Date()
-    let secondsPastMidnight = Calendar.current.timeIntervalSinceMidnight(now)
-    
-    // Get the number of seconds until the next outlook time
-    var secondsUntilOutlook: TimeInterval = 0.0
-    
-    // Are we past the daily outlook time?
-    if secondsPastMidnight < preferences.notifications.dailyOutlookTime {
-      // We haven't passed the outlook time yet.
-      secondsUntilOutlook = preferences.notifications.dailyOutlookTime - secondsPastMidnight
-    }
-    else {
-      // We've already passed the outlook time.
-      let futureOutlookDate = Calendar.current.midnightAfter(now).addingTimeInterval(preferences.notifications.dailyOutlookTime)
-      secondsUntilOutlook = futureOutlookDate.timeIntervalSince(now)
-    }
-    
-    // Schedule the outlook task
-    logDebug("Scheduling outlook refresh task with date \(Date(timeIntervalSinceNow: secondsUntilOutlook)).")
-    try await outlookRefreshTask.schedule(interval: secondsUntilOutlook)
-    
-    logDebug("Successfully scheduled outlook refresh task.")
-    preferences.debug.nextOutlookDate = Date(timeIntervalSinceNow: secondsUntilOutlook)
-  }
-  
-  /// Handles the refresh task.
-  private func handleOutlookRefreshTask(_ task: BGTask) {
-    logDebug("Handle outlook refresh task.")
-    preferences.debug.lastOutlookDate = Date()
-    
-    // Schedule the next task
-    if preferences.notifications.dailyOutlookAlerts {
-      Task {
-        do {
-          try await scheduleOutlookRefreshTask()
-        }
-        catch {
-          logError("Error scheduling outlook refresh task: \(error)")
-        }
-      }
-    }
-    
-    // Set the task's expiration handler
-    task.expirationHandler = { [weak self] in
-      // Cancel the prediction
-      self?.headacheManager.cancelClassificationInput()
-    }
-    
-    // Run a prediction
-    Task { [weak self] in
-      guard let self = self else {
-        task.setTaskCompleted(success: false)
-        return
-      }
-      
-      do {
-        let input = await self.headacheManager.predictorInput(atDate: Date(), inWidget: false)
-        let prediction = try await self.headacheManager.predictor.predict(input, inWidget: false)
-        try await self.presentOutlookAlert(with: prediction)
-        
-        task.setTaskCompleted(success: true)
-      }
-      catch {
-        logError("Error getting current classifier input: \(error)")
-        task.setTaskCompleted(success: false)
+        completion.complete(success: false)
       }
     }
   }
@@ -350,28 +294,29 @@ extension Refresher {
     }
     
     // Set the task's expiration handler
-    task.expirationHandler = { [weak task, weak self] in
-      // Cancel the prediction
-      self?.headacheManager.predictor.cancelTraining()
-      task?.setTaskCompleted(success: false)
+    let completion = TaskCompletionGuard(task)
+    task.expirationHandler = { [weak self] in
+      // Cancel the training session
+      self?.headacheManager?.predictor.cancelTraining()
+      completion.complete(success: false)
     }
-    
+
     // Train
     Task { [weak self] in
       guard let self = self else {
-        task.setTaskCompleted(success: false)
+        completion.complete(success: false)
         return
       }
-      
+
       do {
         if try await self.headacheManager.needsTraining() {
           try await self.headacheManager.trainClassifiers()
         }
-        task.setTaskCompleted(success: true)
+        completion.complete(success: true)
       }
       catch {
         logError("Error training classifiers: \(error)")
-        task.setTaskCompleted(success: false)
+        completion.complete(success: false)
       }
     }
   }

@@ -10,12 +10,12 @@ import SwiftUI
 struct ColorThemePicker: View {
   
   /// The theme.
-  @AppStorage(Preferences.General.Keys.colorTheme) private var colorTheme = Preferences.General.Defaults.colorTheme
+  @AppStorage(Preferences.General.Keys.colorTheme, store: .shared) private var colorTheme = Preferences.General.Defaults.colorTheme
   
   // MARK: Private properties
   
   /// The view's presentation mode.
-  @Environment(\.presentationMode) private var presentationMode
+  @Environment(\.dismiss) private var dismiss
   
   // MARK: View body
   
@@ -37,7 +37,7 @@ struct ColorThemePicker: View {
 struct ColorThemePicker_Previews: PreviewProvider {
   @State static var theme: ColorTheme = .system
   static var previews: some View {
-    NavigationView {
+    NavigationStack {
       ColorThemePicker()
     }
   }

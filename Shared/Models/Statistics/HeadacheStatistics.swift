@@ -56,7 +56,7 @@ struct HeadacheStatistics {
     for i in 0 ..< headaches.count {
       dates[i] = headaches[i].startTime ?? dates[i]
       peaks[i] = Double(headaches[i].severityRange.upperBound.orderingValue)
-      averages[i] = Double(headaches[i].severityRange.average)
+      averages[i] = headaches[i].averageSeverity
       durations[i] = headaches[i].duration
       severities[i] = Headache.Severity.DatedRange(range: headaches[i].severityRange, date: dates[i])
       if let startTime = headaches[i].startTime {
@@ -120,16 +120,26 @@ extension HeadacheStatistics {
   /// - Parameter headaches: The headaches.
   static func headacheRates(_ headaches: [Headache]) -> (Double, Double, Double) {
     logDebug("Get rates with \(headaches.count) headaches.")
-    if let firstHeadacheDate = headaches.first?.createdAt, let lastHeadacheDate = headaches.last?.createdAt {
-      logDebug("Got first and last dates \(firstHeadacheDate) \(lastHeadacheDate)")
-      let interval = lastHeadacheDate.timeIntervalSince(firstHeadacheDate)
-      let years = interval / 31536000.0
-      let months = interval / 2678400.0
-      let weeks = interval / 604800.0
-      let headacheCount = Double(headaches.count)
-      return (headacheCount / years, headacheCount / months, headacheCount / weeks)
+
+    // A rate needs at least two dated headaches and a positive interval;
+    // dividing by a zero interval produced infinite rates for a single
+    // headache, and unsorted input could produce negative ones.
+    let dates = headaches.compactMap({ $0.createdAt }).sorted()
+    guard dates.count >= 2, let firstHeadacheDate = dates.first, let lastHeadacheDate = dates.last else {
+      return (0.0, 0.0, 0.0)
     }
-    return (0.0, 0.0, 0.0)
+
+    let interval = lastHeadacheDate.timeIntervalSince(firstHeadacheDate)
+    guard interval > 0 else {
+      return (0.0, 0.0, 0.0)
+    }
+
+    logDebug("Got first and last dates \(firstHeadacheDate) \(lastHeadacheDate)")
+    let years = interval / 31536000.0
+    let months = interval / 2678400.0
+    let weeks = interval / 604800.0
+    let headacheCount = Double(dates.count)
+    return (headacheCount / years, headacheCount / months, headacheCount / weeks)
   }
   
 }

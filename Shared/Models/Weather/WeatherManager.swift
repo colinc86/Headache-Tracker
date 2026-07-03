@@ -5,7 +5,6 @@
 //  Created by Colin Campbell on 2/25/22.
 //
 
-import Alamofire
 import Foundation
 import CoreLocation
 import WeatherKit
@@ -50,17 +49,6 @@ extension WeatherManager {
     return Weather(location: location, spread: spread, pressure: pressure)
   }
   
-}
-
-fileprivate struct WeatherAPIParams: Codable {
-  let latitude: Double
-  let longitude: Double
-  let spread: Int
-  let time: Int
-}
-
-enum MyError: Error {
-  case errorA
 }
 
 extension WeatherManager {

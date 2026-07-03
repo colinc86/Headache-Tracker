@@ -5,7 +5,7 @@
 //  Created by Colin Campbell on 2/11/22.
 //
 
-#if NON_PREVIEW
+#if !targetEnvironment(simulator)
 import CoreML
 
 /// Model Prediction Output Type
@@ -20,12 +20,18 @@ class SeverityClassifierOutput: MLFeatureInitializable {
   
   /// Severity as string value
   lazy var Severity: String = {
-    [unowned self] in return self.provider.featureValue(for: FeatureName.severity)!.stringValue
+    [unowned self] in return self.provider.featureValue(for: FeatureName.severity)?.stringValue ?? ""
   }()
-  
+
   /// SeverityProbability as dictionary of strings to doubles
   lazy var SeverityProbability: [String: Double] = {
-    [unowned self] in return self.provider.featureValue(for: "SeverityProbability")!.dictionaryValue as! [String: Double]
+    [unowned self] in
+    let dictionary = self.provider.featureValue(for: "SeverityProbability")?.dictionaryValue ?? [:]
+    return dictionary.reduce(into: [String: Double]()) { result, entry in
+      if let key = entry.key as? String {
+        result[key] = entry.value.doubleValue
+      }
+    }
   }()
   
   var featureNames: Set<String> {

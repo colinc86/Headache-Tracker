@@ -15,49 +15,38 @@ struct CurrentHeadacheView: View {
   // MARK: Types
   
   class ViewModel: ObservableObject {
-    
+
     /// Whether the change severity confirmation alert is visible.
-    @State var showingSeverityConfirmation = false
-    
+    @Published var showingSeverityConfirmation = false
+
     /// Whether or not the headache manager needs more not-present headache training data.
-    @State var needsInput: Bool = false
-    
+    @Published var needsInput: Bool = false
+
     /// The application's first appearance.
-    @State var firstAppearance: Bool = true
-    
-    /// The identifier of the predection views.
-    @State var predictionID = UUID()
-    
-    
-    
+    var firstAppearance: Bool = true
+
     /// The waiter to automatically refresh the view.
     let automaticRefreshWaiter = Waiter()
-    
+
     // MARK: Private properties
-    
-    
-    
-    /// The app's scene delegate.
-    private let sceneDelegate: SceneDelegate
-    
+
     /// The app's headache manager.
     private let headacheManager: HeadacheManager
-    
+
     /// The app's headache predictor.
     private let predictor: Predictor
-    
+
     /// The app's refresher.
     private let refresher: Refresher
-    
+
     // MARK: Initializers
-    
-    init(sceneDelegate: SceneDelegate, headacheManager: HeadacheManager, predictor: Predictor, refresher: Refresher) {
-      self.sceneDelegate = sceneDelegate
+
+    init(headacheManager: HeadacheManager, predictor: Predictor, refresher: Refresher) {
       self.headacheManager = headacheManager
       self.predictor = predictor
       self.refresher = refresher
     }
-    
+
   }
   
   // MARK: Private properties
@@ -69,7 +58,11 @@ struct CurrentHeadacheView: View {
   @EnvironmentObject private var predictor: Predictor
   
   /// The view's model.
-  @ObservedObject private var viewModel: ViewModel
+  ///
+  /// Held as a state object so parent re-renders don't recreate it (which
+  /// reset its state and leaked refresh waiters when it was an observed
+  /// object created in init).
+  @StateObject private var viewModel: ViewModel
   
   /// The headaches fetch request.
   ///
@@ -91,8 +84,8 @@ struct CurrentHeadacheView: View {
   // MARK: View body
   
   var body: some View {
-    NavigationView {
-      ScrollView {
+    NavigationStack {
+      List {
         // New/Current Headache
         Section {
           // New/Current Severity
@@ -139,20 +132,31 @@ struct CurrentHeadacheView: View {
         }
       }
     }
-    .navigationViewStyle(StackNavigationViewStyle())
-    .onReceive(didBecomeActiveNotificationPublisher, perform: viewModel.didBecomeActive)
+    .onReceive(didBecomeActiveNotificationPublisher) { _ in
+      viewModel.didBecomeActive(hasDesiredSeverity: sceneDelegate.desiredSeverity != nil)
+    }
     .onAppear(perform: viewModel.appeared)
     .onDisappear(perform: viewModel.automaticRefreshWaiter.stop)
     .confirmationDialog("Change headache severity to \((sceneDelegate.desiredSeverity ?? .notPresent).title.lowercased())?", isPresented: $viewModel.showingSeverityConfirmation, titleVisibility: .visible) {
-      AsyncButton("Change", action: viewModel.confirmChangeSeverity)
-      Button("Cancel", role: .cancel, action: viewModel.cancelChangeSeverity)
+      AsyncButton("Change") {
+        // Read the desired severity from the live scene delegate; the view
+        // model previously held a second instance that could disagree.
+        let severity = sceneDelegate.desiredSeverity
+        sceneDelegate.desiredSeverity = nil
+        if let severity = severity {
+          try await viewModel.changeSeverity(to: severity)
+        }
+      }
+      Button("Cancel", role: .cancel) {
+        sceneDelegate.desiredSeverity = nil
+      }
     }
   }
-  
-  init(sceneDelegate: SceneDelegate, headacheManager: HeadacheManager, predictor: Predictor, refresher: Refresher) {
-    viewModel = ViewModel(sceneDelegate: sceneDelegate, headacheManager: headacheManager, predictor: predictor, refresher: refresher)
+
+  init(headacheManager: HeadacheManager, predictor: Predictor, refresher: Refresher) {
+    _viewModel = StateObject(wrappedValue: ViewModel(headacheManager: headacheManager, predictor: predictor, refresher: refresher))
   }
-  
+
 }
 
 extension CurrentHeadacheView.ViewModel {
@@ -162,14 +166,17 @@ extension CurrentHeadacheView.ViewModel {
   }
   
   /// Called when the app becomes active.
-  func didBecomeActive(_ notification: NotificationCenter.Publisher.Output) {
+  ///
+  /// - Parameter hasDesiredSeverity: Whether a widget deep link requested a
+  ///   severity change.
+  func didBecomeActive(hasDesiredSeverity: Bool) {
     // Were we launched from the widget?
-    if sceneDelegate.desiredSeverity != nil {
+    if hasDesiredSeverity {
       withAnimation {
         showingSeverityConfirmation = true
       }
     }
-    
+
     // Run a prediction
     Task {
       await nonForcedPrediction()
@@ -252,31 +259,12 @@ extension CurrentHeadacheView.ViewModel {
     await setNeedsInput(try await headacheManager.needsTrainingData())
   }
   
-  /// Changes the severity to the desired severity if available.
-  @MainActor func confirmChangeSeverity() async throws {
-    guard let severity = sceneDelegate.desiredSeverity else {
-      return
-    }
-    
-    // Reset the desired severity
-    sceneDelegate.desiredSeverity = nil
-    
-    // Change the severity
-    try await changeSeverity(to: severity)
-  }
-  
-  /// Cancels the severity change.
-  func cancelChangeSeverity() {
-    // Reset the desired severity
-    sceneDelegate.desiredSeverity = nil
-  }
-  
 }
 
 struct CurrentHeadacheView_Previews: PreviewProvider {
   static let refresher = Refresher()
   static var previews: some View {
-    CurrentHeadacheView(sceneDelegate: SceneDelegate(), headacheManager: Previewing.headacheManager, predictor: Previewing.Prediction.predictor, refresher: refresher)
+    CurrentHeadacheView(headacheManager: Previewing.headacheManager, predictor: Previewing.Prediction.predictor, refresher: refresher)
       .environmentObject(SceneDelegate())
       .environment(\.managedObjectContext, Previewing.CoreData.viewContext)
       .environmentObject(Previewing.headacheManager)

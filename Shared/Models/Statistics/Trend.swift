@@ -21,8 +21,10 @@ enum Trend {
   ///   - steadyValue: The value to use if the trend is steady.
   ///   - tolerance: The tolerance to use when calculating if the trend is steady.
   init(_ valueA: Double, _ valueB: Double, _ steadyValue: Double? = nil, _ tolerance: Double = 0.0) {
-    let percentDifference = abs(valueB - valueA) / valueA
-    if percentDifference < tolerance {
+    // Guard the zero denominator (0 → NaN, which silently skipped the steady
+    // branch) and treat exactly-equal values as steady.
+    let percentDifference = abs(valueB - valueA) / max(abs(valueA), .ulpOfOne)
+    if percentDifference <= tolerance {
       if let steadyValue = steadyValue {
         self = .steady(valueA: steadyValue, valueB: steadyValue)
       }

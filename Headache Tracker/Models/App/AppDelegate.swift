@@ -34,13 +34,23 @@ class AppDelegate: NSObject, UIApplicationDelegate, ObservableObject {
   
   func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
     logDebug("Application did finish launching.")
-    
+
+    // Theme and units moved to the shared suite so widgets render with the
+    // user's settings; migrate existing values from standard defaults once.
+    if let shared = UserDefaults.shared {
+      let keys = [Preferences.General.Keys.colorTheme, Preferences.General.Keys.measurementSystem]
+      for key in keys where shared.object(forKey: key) == nil {
+        if let value = UserDefaults.standard.object(forKey: key) {
+          shared.set(value, forKey: key)
+        }
+      }
+    }
+
     // Adjust the table view appearance
     UITableView.appearance().sectionFooterHeight = 0
     
     // Set up the refresh tasks
     refresher.setupPredictionRefreshTask()
-    refresher.setupOutlookRefreshTask()
     refresher.setupTrainingProcessingTask()
     
     // Make sure the headache manager has a reference to the alert and health kit managers
@@ -52,12 +62,27 @@ class AppDelegate: NSObject, UIApplicationDelegate, ObservableObject {
     // Set up the async stuff
     Task {
       do {
+        // The models' feature schema changed (circular time encoding,
+        // separate device pressure); models trained on the old schema can't
+        // serve the new features, and old evaluations scored a different
+        // methodology. Reset both once.
+        let defaults = UserDefaults.standard
+        if defaults.integer(forKey: Constants.modelSchemaVersionKey) < Constants.modelSchemaVersion {
+          logInfo("Model schema changed; resetting models and evaluations.")
+          headacheManager.predictor.reset()
+          try await headacheManager.resetEvaluation()
+          defaults.set(Constants.modelSchemaVersion, forKey: Constants.modelSchemaVersionKey)
+        }
+
+        // Repair any data integrity issues from earlier versions
+        try await headacheManager.repairDataIntegrity()
+
         // Check our alert authorization status
         try await checkAlertAuthorizationStatus()
-        
+
         // Check our health kit authorization status
         try await checkHealthKitAuthorizationStatus()
-        
+
         // Load our ML classifiers
         try await headacheManager.predictor.load()
       }
@@ -97,20 +122,36 @@ extension AppDelegate {
     dimScreen(preservingBrightness: false)
   }
   
+  /// The active window scene's screen.
+  private var screen: UIScreen? {
+    return UIApplication.shared.connectedScenes
+      .compactMap({ $0 as? UIWindowScene })
+      .first(where: { $0.activationState == .foregroundActive })?.screen
+      ?? UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }).first?.screen
+  }
+
   /// Dims the screen.
   func dimScreen(preservingBrightness: Bool) {
-    if preservingBrightness {
-      previousBrightness = UIScreen.main.brightness
+    guard let screen = screen else {
+      return
     }
-    
-    UIScreen.main.wantsSoftwareDimming = true
-    UIScreen.main.brightness = previousBrightness * (1.0 - CGFloat(preferences.general.screenDimPercent))
+
+    if preservingBrightness {
+      previousBrightness = screen.brightness
+    }
+
+    screen.wantsSoftwareDimming = true
+    screen.brightness = previousBrightness * (1.0 - CGFloat(preferences.general.screenDimPercent))
   }
-  
+
   /// Restores the screen to the previous brightness.
   func restoreScreenBrightness() {
-    UIScreen.main.brightness = previousBrightness
-    UIScreen.main.wantsSoftwareDimming = false
+    guard let screen = screen else {
+      return
+    }
+
+    screen.brightness = previousBrightness
+    screen.wantsSoftwareDimming = false
   }
   
 }

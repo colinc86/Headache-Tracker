@@ -18,7 +18,7 @@ struct BlockGraph: View {
   let earliestDate: Date?
   
   /// The application's custom color theme.
-  @AppStorage(Preferences.General.Keys.colorTheme) private var colorTheme = Preferences.General.Defaults.colorTheme
+  @AppStorage(Preferences.General.Keys.colorTheme, store: .shared) private var colorTheme = Preferences.General.Defaults.colorTheme
   
   // MARK: View body
   
@@ -65,32 +65,33 @@ extension BlockGraph {
   
   /// The bar graph's rectangles.
   ///
+  /// The series is bucketed by day in a single pass; the previous day-by-day
+  /// filter was O(days x series) on every body evaluation.
+  ///
   /// - Returns: An array of unit points.
   private func ranges() -> [Headache.Severity.Range] {
     guard let earliestDate = earliestDate ?? series.first?.date else {
       return []
     }
-    
-    let count = Calendar.current.numberOfDaysBetween(earliestDate, and: Date())
-    
+
+    let calendar = Calendar.current
+    let count = calendar.numberOfDaysBetween(earliestDate, and: Date())
+
     guard count > 0 else {
       return []
     }
-    
-    var ranges = [Headache.Severity.Range]()
-    
-    for i in 0 ..< count {
-      let date = earliestDate.addingTimeInterval(TimeInterval(i) * 86400.0)
-      
-      // Get the series value on this date
-      if let value = series.filter({ Calendar.current.numberOfDaysBetween(date, and: $0.date) == 0 }).first {
-        ranges.append(value.range)
-      }
-      else {
-        ranges.append(Headache.Severity.Range.empty)
+
+    var ranges = [Headache.Severity.Range](repeating: .empty, count: count)
+    let startDay = calendar.startOfDay(for: earliestDate)
+
+    // Keep the first range seen per day, matching the previous behavior.
+    for entry in series.reversed() {
+      let index = calendar.dateComponents([.day], from: startDay, to: calendar.startOfDay(for: entry.date)).day ?? -1
+      if index >= 0 && index < count {
+        ranges[index] = entry.range
       }
     }
-    
+
     return ranges
   }
   

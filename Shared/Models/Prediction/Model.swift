@@ -7,7 +7,7 @@
 
 import CoreML
 
-#if NON_PREVIEW
+#if !targetEnvironment(simulator)
 import CreateML
 
 /// An object that can be initialized with a feature provider.

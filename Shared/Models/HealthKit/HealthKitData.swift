@@ -86,9 +86,32 @@ enum HealthKitData: CaseIterable, Codable {
     case .stepCount: return .count()
     case .heartRate, .restingHeartRate, .walkingHeartRateAverage, .respiratoryRate: return .count().unitDivided(by: .minute())
     case .environmentalAudioExposure, .headphoneAudioExposure: return .decibelAWeightedSoundPressureLevel()
-    case .heartRateVariabilitySDNN: return .second()
+    case .heartRateVariabilitySDNN: return .secondUnit(with: .milli)
     case .oxygenSaturation: return .percent()
     default: return nil
+    }
+  }
+
+  /// The sampling window to read for this metric, ending at the given date.
+  ///
+  /// Fast-moving metrics use short trailing windows; sleep uses the previous
+  /// evening onward; daily aggregates look back far enough to contain at
+  /// least one sample.
+  ///
+  /// - Parameter date: The end of the window.
+  /// - Returns: The window to query.
+  func window(endingAt date: Date) -> DateInterval {
+    switch self {
+    case .sleepSeconds, .sleepOnset:
+      // 6 PM the previous day through now.
+      let start = Calendar.current.startOfDay(for: date).addingTimeInterval(-6.0 * 3600.0)
+      return DateInterval(start: min(start, date), end: date)
+    case .heartRate:
+      return DateInterval(start: date.addingTimeInterval(-3600.0), end: date)
+    case .restingHeartRate, .walkingHeartRateAverage:
+      return DateInterval(start: date.addingTimeInterval(-48.0 * 3600.0), end: date)
+    default:
+      return DateInterval(start: date.addingTimeInterval(-86400.0), end: date)
     }
   }
   
@@ -121,29 +144,39 @@ enum HealthKitData: CaseIterable, Codable {
     case .environmentalAudioExposure,
         .headphoneAudioExposure:
       return .statistics(options: .discreteAverage)
-    case .restingHeartRate,
-        .walkingHeartRateAverage,
-        .respiratoryRate,
+    case .respiratoryRate,
         .oxygenSaturation,
         .heartRate,
         .heartRateVariabilitySDNN:
+      // Averages over the window instead of a single (possibly stale) sample.
+      return .statistics(options: .discreteAverage)
+    case .restingHeartRate,
+        .walkingHeartRateAverage:
+      // HealthKit writes roughly one of these per day; take the latest.
       return .statistics(options: .mostRecent)
     }
   }
-  
-  /// Creates a query from the data.
+
+  /// Creates a query for the data's window ending at the given date.
   ///
   /// - Parameters:
-  ///   - interval: The query's interval.
+  ///   - date: The end of the metric's sampling window.
   ///   - completion: Called after the query has completed.
   /// - Returns: A query.
-  func query(in interval: DateInterval, completion: @escaping (HKQuery?, [HKSample]?, HKQuantity?, Error?) -> Void) -> HKQuery? {
+  func query(endingAt date: Date, completion: @escaping (HKQuery?, [HKSample]?, HKQuantity?, Error?) -> Void) -> HKQuery? {
     guard let type = type else {
       completion(nil, nil, nil, nil)
       return nil
     }
-    
-    let predicate = HKQuery.predicateForSamples(withStart: interval.start, end: interval.end, options: .strictStartDate)
+
+    // Sleep uses overlap semantics (a block that started before the window
+    // but overlaps it still counts, clamped when summed). Everything else
+    // keeps strict starts: statistics queries count a matched sample's full
+    // value, so overlap semantics would double count sums like step count
+    // across successive sampling windows.
+    let interval = window(endingAt: date)
+    let options: HKQueryOptions = (self == .sleepSeconds || self == .sleepOnset) ? [] : .strictStartDate
+    let predicate = HKQuery.predicateForSamples(withStart: interval.start, end: interval.end, options: options)
     let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)
     let limit = Int(Int32.max)
     

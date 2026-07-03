@@ -105,7 +105,26 @@ struct DebugSettingsView: View {
         SubtitleCell(title: "Severity Evaluation", subtitle: "\(String(format: "%0.1f%%", evaluation.1 * 100.0))")
         AsyncButton("Reset Evaluation", mode: .afterContent, action: headacheManager.resetEvaluation)
       } footer: {
-        Text("Out of \(evaluation.2) samples.")
+        Text("Out of \(evaluation.2) resolved forecasts. Severity is scored only when a headache actually occurred.")
+      }
+
+      if let metrics = predictor.metrics {
+        Section {
+          if let outlook = metrics.outlook {
+            SubtitleCell(title: "Outlook Validation", subtitle: "\(String(format: "%0.1f%%", outlook.accuracy * 100.0)) (n=\(outlook.validationRowCount))")
+          }
+          if let severity = metrics.severity {
+            SubtitleCell(title: "Severity Validation", subtitle: "\(String(format: "%0.1f%%", severity.accuracy * 100.0)) (n=\(severity.validationRowCount))")
+          }
+          if let onset = metrics.onset {
+            SubtitleCell(title: "Onset RMSE", subtitle: Formatters.formatInterval(onset.rootMeanSquaredError))
+          }
+          if let duration = metrics.duration {
+            SubtitleCell(title: "Duration RMSE", subtitle: Formatters.formatInterval(duration.rootMeanSquaredError))
+          }
+        } footer: {
+          Text("Measured on a held-out validation slice the models never trained on (trained \(metrics.trainedAt.formattedNonRelative())).")
+        }
       }
       
       Section {

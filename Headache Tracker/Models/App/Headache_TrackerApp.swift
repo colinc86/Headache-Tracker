@@ -19,10 +19,9 @@ struct Headache_TrackerApp: App {
   @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
   
   // Preferences
-  @AppStorage(Preferences.General.Keys.colorTheme) private var colorTheme = Preferences.General.Defaults.colorTheme
+  @AppStorage(Preferences.General.Keys.colorTheme, store: .shared) private var colorTheme = Preferences.General.Defaults.colorTheme
   @AppStorage(Preferences.General.Keys.shouldDimScreen) var shouldDimScreen = false
   @AppStorage(Preferences.General.Keys.screenDimPercent) var screenDimPercent = 0.5
-  @AppStorage(Preferences.Notifications.Keys.dailyOutlookAlerts) var dailyOutlookAlerts = true
   
   /// The application did become active publisher.
   private let didBecomeActiveNotificationPublisher = NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)
@@ -51,8 +50,8 @@ struct Headache_TrackerApp: App {
         // Subscribe to notifications
         .onReceive(didBecomeActiveNotificationPublisher, perform: didBecomeActive)
         .onReceive(willResignActiveNotificationPublisher, perform: willResignActive)
-        .onChange(of: shouldDimScreen, perform: appDelegate.dimScreenChanged)
-        .onChange(of: screenDimPercent, perform: appDelegate.dimmingPercentChanged)
+        .onChange(of: shouldDimScreen) { _, newValue in appDelegate.dimScreenChanged(newValue) }
+        .onChange(of: screenDimPercent) { _, newValue in appDelegate.dimmingPercentChanged(newValue) }
     }
   }
   
@@ -69,7 +68,6 @@ extension Headache_TrackerApp {
     
     appDelegate.refresher.cancelTrainingProcessingTask()
     appDelegate.refresher.cancelPredictionRefreshTask()
-    appDelegate.refresher.cancelOutlookRefreshTask()
     appDelegate.refresher.alertManager.removeRequests(pending: false, delivered: true)
     
     Task {
@@ -89,23 +87,17 @@ extension Headache_TrackerApp {
       appDelegate.restoreScreenBrightness()
     }
     
-    // Schedule our training and prediction tasks
+    // Schedule our training and prediction tasks. The prediction task also
+    // presents the daily outlook alert when it's due.
     Task {
       do {
         try await appDelegate.refresher.scheduleTrainingRefreshTask()
         try await appDelegate.refresher.schedulePredictionRefreshTask()
-        
-        // Schedule our outlook task
-        if dailyOutlookAlerts {
-          try await appDelegate.refresher.scheduleOutlookRefreshTask()
-        }
       }
       catch {
         logError("Error scheduling task: \(error)")
       }
     }
   }
-  
-  
-  
+
 }

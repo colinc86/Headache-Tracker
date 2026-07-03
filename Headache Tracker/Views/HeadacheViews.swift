@@ -27,7 +27,7 @@ struct HeadacheViews: View {
   // MARK: Private properties
   
   /// The view's presentation mode.
-  @Environment(\.presentationMode) private var presentationMode
+  @Environment(\.dismiss) private var dismiss
   
   /// The app's headache manager.
   @EnvironmentObject private var headacheManager: HeadacheManager
@@ -63,7 +63,7 @@ struct HeadacheViews: View {
   @State private var showingEditTagsView = false
   
   // Preferences
-  @AppStorage(Preferences.General.Keys.colorTheme) private var colorTheme = Preferences.General.Defaults.colorTheme
+  @AppStorage(Preferences.General.Keys.colorTheme, store: .shared) private var colorTheme = Preferences.General.Defaults.colorTheme
   @AppStorage(Preferences.Lists.Keys.type) private var showTypeView = Preferences.Lists.Defaults.shown
   @AppStorage(Preferences.Lists.Keys.onset) private var showOnsetView = Preferences.Lists.Defaults.shown
   @AppStorage(Preferences.Lists.Keys.duration) private var showDurationView = Preferences.Lists.Defaults.shown
@@ -324,7 +324,7 @@ extension HeadacheViews {
           }
           
           // Dismiss the view
-          presentationMode.wrappedValue.dismiss()
+          dismiss()
         }
         catch {
           showAlert("Unable to Delete Headache", error)

@@ -43,7 +43,7 @@ enum HeadacheAlertRequest: AlertRequest {
         }
       }
       else {
-        return "Your daily headache outlook good with no headaches!"
+        return "Your daily headache outlook is good with no headaches!"
       }
     }
   }

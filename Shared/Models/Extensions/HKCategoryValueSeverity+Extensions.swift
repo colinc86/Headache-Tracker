@@ -31,22 +31,28 @@ extension HKCategoryValueSeverity: Codable, @retroactive RawRepresentable {
   
   /// Pairs a severity value with a date interval.
   struct Interval {
-    
+
     /// The severity.
     let severity: HKCategoryValueSeverity
-    
+
     /// The severity's date interval.
     let interval: DateInterval
-    
+
+    /// The identifier of the severity state the interval represents. Used to
+    /// scope HealthKit samples to their owning severity.
+    let identifier: UUID?
+
     /// Creates a new severity interval.
     ///
     /// - Parameters:
     ///   - severity: The severity.
     ///   - start: The severity's start time.
     ///   - end: The severity's end time.
-    init(_ severity: HKCategoryValueSeverity, start: Date, end: Date) {
+    ///   - identifier: The identifier of the owning severity state.
+    init(_ severity: HKCategoryValueSeverity, start: Date, end: Date, identifier: UUID? = nil) {
       self.severity = severity
       self.interval = DateInterval(start: start, end: end)
+      self.identifier = identifier
     }
   }
   
@@ -135,8 +141,11 @@ extension HKCategoryValueSeverity.Range {
     return "\(lowerBound.title) - \(upperBound.title)"
   }
   
-  /// The range's average.
-  var average: Double {
+  /// The midpoint of the range's bounds.
+  ///
+  /// This is a midrange, not an average of the severity progression; use
+  /// `Headache.averageSeverity` for a duration-weighted mean.
+  var midpoint: Double {
     return Double(lowerBound.orderingValue + upperBound.orderingValue) / 2.0
   }
   

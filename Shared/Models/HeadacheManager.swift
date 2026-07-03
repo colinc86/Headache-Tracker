@@ -19,7 +19,8 @@ class HeadacheManager: ObservableObject {
     case testing
     case missing
     case headacheDateRange
-    
+    case alreadyActive
+
     var description: String {
       switch self {
       case .testing:
@@ -28,6 +29,8 @@ class HeadacheManager: ObservableObject {
         return "The required data was missing."
       case .headacheDateRange:
         return "The headache's onset must be before its end."
+      case .alreadyActive:
+        return "A headache is already in progress. Resolve it before starting another."
       }
     }
   }
@@ -68,10 +71,7 @@ class HeadacheManager: ObservableObject {
   
   /// The app's preferences.
   private var preferences = Preferences()
-  
-  /// The queue to train on.
-  private var trainingQueue = DispatchQueue(label: ApplicationKey(from: "trainingQueue"))
-  
+
 }
 
 // MARK: - Current headache methods
@@ -84,10 +84,17 @@ extension HeadacheManager {
   /// - Parameter severity: The headache's current severity.
   func changeSeverity(to severity: Headache.Severity) async throws {
     logDebug("Change severity to \(severity.title).")
-    
+
+    // Selecting "not present" means the headache is over; resolve it instead
+    // of leaving it open with a not-present severity.
+    guard severity != .notPresent else {
+      try await resolve()
+      return
+    }
+
     let classification = preferences.headaches.defaultHeadacheClassification
     let type = preferences.headaches.defaultHeadacheType
-    
+
     // The date interval of the severity to save to health kit
     let severityUpdates: Headache.SeverityUpdates = try await currentHeadache { headache, context in
       // Add to the current headache or create a new one
@@ -95,7 +102,7 @@ extension HeadacheManager {
         logDebug("Adding severity to current headache.")
         return headache.addSeverity(severity, start: Date())
       }
-      
+
       logDebug("Creating new headache.")
       _ = Headache(context: context, severity: severity, classification: classification, type: type, start: Date())
       return .empty
@@ -154,10 +161,26 @@ extension HeadacheManager {
   ///   - startTime: The headache's start time.
   ///   - endTime: The headache's end time.
   func createHeadache(severity: Headache.Severity, start: Date, end: Date?) async throws {
+    if let end = end {
+      guard start < end else {
+        throw HeadacheError.headacheDateRange
+      }
+    }
+
     let classification = preferences.headaches.defaultHeadacheClassification
     let type = preferences.headaches.defaultHeadacheType
-    
+
     let severityIdentifier = try await DataController.shared.performInBackground(saveOnComplete: true) { (context) -> UUID? in
+      // Only one headache may be open at a time.
+      if end == nil {
+        let request = Headache.fetchRequest()
+        request.predicate = NSPredicate(format: "resolved = NO")
+        request.fetchLimit = 1
+        if try context.fetch(request).first != nil {
+          throw HeadacheError.alreadyActive
+        }
+      }
+
       let headache = Headache(context: context, severity: severity, classification: classification, type: type, start: start, end: end)
       return headache.severitiesArray.first?.identifier
     }
@@ -283,13 +306,13 @@ extension HeadacheManager {
       return
     }
     
-    // The start and end times to delete from health kit
-    var startTime: Date?
-    var endTime: Date?
-    
+    // The interval and severities to delete from health kit
+    var headacheInterval: DateInterval?
+    var severityIdentifiers = [UUID]()
+
     try await headacheWithIdentifier(identifier: identifier) { [weak self] headache, context in
       logDebug("Deleting headache.")
-      
+
       // Get the headache
       if let headache = headache {
         // Remove the headache from its tags
@@ -299,12 +322,12 @@ extension HeadacheManager {
             context.delete(tag)
           }
         }
-        
+
         // Delete the headache
-        startTime = headache.startTime
-        endTime = headache.endTime ?? headache.pendingEndTime
+        headacheInterval = headache.dateInterval
+        severityIdentifiers = headache.severitiesArray.compactMap({ $0.identifier })
         context.delete(headache)
-        
+
         // If this headache was the current headache, then cancel any pending check-in notifications
         // and reset the current severity.
         if !headache.resolved {
@@ -312,11 +335,11 @@ extension HeadacheManager {
         }
       }
     }
-    
+
     // If there wasn't an error, then we should check and delete it from health kit
-    if deleteHealthKitData, let startTime = startTime, let endTime = endTime {
+    if deleteHealthKitData, let headacheInterval = headacheInterval {
       logDebug("Successfully reset headache. Deleting severity samples.")
-      try await healthKitManager.deleteSeveritySamples(in: DateInterval(start: startTime, end: endTime))
+      try await healthKitManager.deleteSeveritySamples(in: headacheInterval, severityIdentifiers: severityIdentifiers)
     }
     else {
       logDebug("Successfully reset headache, but not deleting severity samples.")
@@ -333,26 +356,35 @@ extension HeadacheManager {
     }
     
     var originalHeadacheInterval: DateInterval?
+    var originalSeverityIdentifiers = [UUID]()
     var newSeveritySamples = [Headache.Severity.Interval]()
-    
+
     try await severityWithIdentifier(identifier: identifier) { severity, context in
       if let severity = severity {
         let headache = severity.headache
         originalHeadacheInterval = headache?.dateInterval
+        originalSeverityIdentifiers = (headache?.severitiesArray ?? []).compactMap({ $0.identifier })
         headache?.removeFromSeverities(severity)
         context.delete(severity)
         headache?.reorganize()
-        
+
+        // Deleting the open severity may have left the headache with only
+        // closed intervals; keep the resolved flag consistent with the
+        // open-interval invariant.
+        if let headache = headache, !headache.severitiesArray.isEmpty {
+          headache.resolved = headache.severitiesArray.last?.endTime != nil
+        }
+
         for severity in headache?.severitiesArray ?? [] {
           guard let interval = severity.severityInterval else { continue }
           newSeveritySamples.append(interval)
         }
       }
     }
-    
+
     // Check to see if we need to delete and re-add samples
     if let originalHeadacheInterval = originalHeadacheInterval {
-      try await healthKitManager.deleteSeveritySamples(in: originalHeadacheInterval)
+      try await healthKitManager.deleteSeveritySamples(in: originalHeadacheInterval, severityIdentifiers: originalSeverityIdentifiers)
       try await healthKitManager.saveSeveritySamples(intervals: newSeveritySamples)
     }
   }
@@ -362,45 +394,180 @@ extension HeadacheManager {
   /// - Parameter identifier: The severity's identifier.
   func updateSeverity(identifier: UUID, value: Headache.Severity, startTime: Date, endTime: Date) async throws {
     logDebug("Update severity.")
-    
+
+    guard startTime < endTime else {
+      throw HeadacheError.headacheDateRange
+    }
+
     var originalHeadacheInterval: DateInterval?
+    var originalSeverityIdentifiers = [UUID]()
     var newSeveritySamples = [Headache.Severity.Interval]()
-    
-    let modified = try await severityWithIdentifier(identifier: identifier) { (severity, context) -> Bool in
-      var modified = false
-      
+
+    try await severityWithIdentifier(identifier: identifier) { (severity, context) in
       if let severity = severity {
-        modified = severity.startTime != startTime
-        
         let headache = severity.headache
         originalHeadacheInterval = headache?.dateInterval
+        originalSeverityIdentifiers = (headache?.severitiesArray ?? []).compactMap({ $0.identifier })
         severity.severity = value
         severity.startTime = startTime
         severity.endTime = endTime
         headache?.reorganize()
-        
+
+        // Editing may have closed (or reopened) the last severity; keep the
+        // resolved flag consistent with the open-interval invariant.
+        if let headache = headache {
+          headache.resolved = headache.severitiesArray.last?.endTime != nil
+        }
+
         for severity in headache?.severitiesArray ?? [] {
           guard let interval = severity.severityInterval else { continue }
           newSeveritySamples.append(interval)
         }
       }
-      
-      return modified
     }
-    
-    // Update the training data if needed
-    if modified {
-      let input = await predictorInput(atDate: startTime, inWidget: false)
-      try await createTrainingData(from: input, severityIdentifier: identifier, replacingExistingData: true)
-    }
-    
+
     // Check to see if we need to delete and re-add samples
     if let originalHeadacheInterval = originalHeadacheInterval {
-      try await healthKitManager.deleteSeveritySamples(in: originalHeadacheInterval)
+      try await healthKitManager.deleteSeveritySamples(in: originalHeadacheInterval, severityIdentifiers: originalSeverityIdentifiers)
       try await healthKitManager.saveSeveritySamples(intervals: newSeveritySamples)
     }
   }
   
+}
+
+// MARK: - Insights
+
+extension HeadacheManager {
+
+  /// Builds correlation samples and headache episodes, runs the correlation
+  /// engine outside of any managed object context, and caches the report.
+  ///
+  /// - Returns: The freshly computed report.
+  @discardableResult
+  func computeInsights() async throws -> InsightsReport {
+    let (samples, episodes, totalRowCount) = try await DataController.shared.performInBackground { context -> ([CorrelationSample], [HeadacheEpisode], Int) in
+      let request = TrainingData.fetchRequest()
+      request.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: true)]
+      let trainingData = try context.fetch(request)
+      let samples = trainingData.compactMap({ $0.correlationSample })
+      let episodes = try HeadacheManager.headacheEpisodes(in: context)
+      return (samples, episodes, trainingData.count)
+    }
+
+    logInfo("Computing insights from \(samples.count) samples and \(episodes.count) episodes.")
+    let engine = CorrelationEngine(samples: samples, episodes: episodes)
+    let computed = engine.computeReport()
+
+    // Store the total row count — the same number insights() compares
+    // against for staleness. Using the filtered sample count instead made
+    // the cache permanently stale when any row lacked usable values.
+    let report = InsightsReport(
+      generatedAt: computed.generatedAt,
+      rowCount: totalRowCount,
+      insights: computed.insights,
+      insufficient: computed.insufficient)
+    InsightsStore.shared.save(report)
+    return report
+  }
+
+  /// The latest insights report, recomputing when stale.
+  ///
+  /// - Returns: The report.
+  func insights() async throws -> InsightsReport {
+    let rowCount = try await trainingDataCount()
+    if InsightsStore.shared.isStale(rowCount: rowCount) {
+      return try await computeInsights()
+    }
+    if let report = InsightsStore.shared.load() {
+      return report
+    }
+    return try await computeInsights()
+  }
+
+  /// The dated series of a feature's values along with all headache
+  /// episodes, for the trigger detail chart.
+  ///
+  /// - Parameter feature: The feature.
+  /// - Returns: The feature's series and the headache episodes.
+  func featureSeries(for feature: CorrelationFeature) async throws -> ([DatedValue], [HeadacheEpisode]) {
+    return try await DataController.shared.performInBackground { context in
+      let request = TrainingData.fetchRequest()
+      request.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: true)]
+      let trainingData = try context.fetch(request)
+
+      let series: [DatedValue] = trainingData.compactMap { row in
+        guard let sample = row.correlationSample, let value = sample.values[feature] else {
+          return nil
+        }
+        return DatedValue(date: sample.timestamp, value: value)
+      }
+
+      let episodes = try HeadacheManager.headacheEpisodes(in: context)
+      return (series, episodes)
+    }
+  }
+
+}
+
+// MARK: - Data integrity
+
+extension HeadacheManager {
+
+  /// Repairs data integrity violations left behind by earlier versions:
+  /// resolved flags that disagree with the open-severity invariant, multiple
+  /// unresolved headaches, and missing identifiers.
+  func repairDataIntegrity() async throws {
+    try await DataController.shared.performInBackground(saveOnComplete: true) { context in
+      let request = Headache.fetchRequest()
+      request.sortDescriptors = [NSSortDescriptor(key: "createdAt", ascending: true)]
+      let headaches = try context.fetch(request)
+
+      var repairedCount = 0
+      var unresolved = [Headache]()
+
+      for headache in headaches {
+        // Assign missing identifiers so edits can address the objects.
+        if headache.identifier == nil {
+          headache.identifier = UUID()
+          repairedCount += 1
+        }
+
+        for severity in headache.severitiesArray where severity.identifier == nil {
+          severity.identifier = UUID()
+          repairedCount += 1
+        }
+
+        guard !headache.severitiesArray.isEmpty else {
+          continue
+        }
+
+        // Reconcile the resolved flag with the open-severity invariant:
+        // unresolved if and only if the last severity has no end time.
+        let hasOpenSeverity = headache.severitiesArray.last?.endTime == nil
+        if headache.resolved == hasOpenSeverity {
+          headache.resolved = !hasOpenSeverity
+          repairedCount += 1
+        }
+
+        if !headache.resolved {
+          unresolved.append(headache)
+        }
+      }
+
+      // At most one headache may be open; keep the newest and resolve the rest.
+      if unresolved.count > 1 {
+        for headache in unresolved.dropLast() {
+          _ = headache.resolve(end: headache.pendingEndTime ?? Date())
+          repairedCount += 1
+        }
+      }
+
+      if repairedCount > 0 {
+        logInfo("Repaired \(repairedCount) data integrity issues.")
+      }
+    }
+  }
+
 }
 
 // MARK: - Caching
@@ -434,7 +601,9 @@ extension HeadacheManager {
   private func currentHeadache<T>(update: @escaping (Headache?, NSManagedObjectContext) throws -> T) async throws -> T {
     try await DataController.shared.performInBackground(saveOnComplete: true) { context in
       let request = Headache.fetchRequest()
-      request.predicate = NSPredicate(format: "ANY severities.endTime = nil")
+      request.predicate = NSPredicate(format: "resolved = NO")
+      request.sortDescriptors = [NSSortDescriptor(key: "createdAt", ascending: false)]
+      request.fetchLimit = 1
       return try update(try context.fetch(request).first, context)
     }
   }
@@ -539,11 +708,26 @@ extension HeadacheManager {
   ///
   /// - Returns: A boolean indicating if the app needs to train its models.
   func needsTraining() async throws -> Bool {
-    guard let lastTrainingDate = predictor.modelUpdatedAt, let timestamp = try await lastTrainingDataDate() else {
+    guard let timestamp = try await lastTrainingDataDate() else {
       return false
     }
-    
+
+    guard let lastTrainingDate = predictor.modelUpdatedAt else {
+      // No models have been trained yet. Bootstrap the first training run
+      // once enough samples have accumulated.
+      return try await trainingDataCount() >= Constants.minimumTrainingDataCount
+    }
+
     return timestamp.timeIntervalSince(lastTrainingDate) > 0.0
+  }
+
+  /// The number of training data samples.
+  ///
+  /// - Returns: The count of training data.
+  func trainingDataCount() async throws -> Int {
+    return try await trainingData { trainingData, _ in
+      return trainingData.count
+    }
   }
   
   /// Cancels the current classification input reading.
@@ -583,8 +767,7 @@ extension HeadacheManager {
     }
     
     // Get the health kit data
-    let interval = DateInterval(start: date.addingTimeInterval(-86400.0), end: date)
-    let healthKitData = healthKitManager.readHealthKitData(in: interval, inWidget: inWidget)
+    let healthKitData = healthKitManager.readHealthKitData(endingAt: date, inWidget: inWidget)
     
     // Return the model input
     return ModelInput(date: date, location: location, weatherStatistics: weather?.statistics, healthKitData: healthKitData)
@@ -607,8 +790,17 @@ extension HeadacheManager {
     }
     
     if predict {
+      // Score any matured forecasts before recording a new one.
+      try await resolveEvaluations()
+
       let prediction = try await predictor.predict(input, inWidget: inWidget)
-      try await evaluatePrediction(prediction)
+
+      // Only record forecasts a model actually made; before the first
+      // training, predict returns the empty placeholder, and evaluating it
+      // would inflate the accuracy readout with fabricated no-headache rows.
+      if prediction != .empty {
+        try await evaluatePrediction(prediction)
+      }
     }
   }
   
@@ -616,30 +808,23 @@ extension HeadacheManager {
   /// with the given identifier. If no identifier is present, then the training data is
   /// still created but orphaned (a not-present severity).
   ///
+  /// The relationship is advisory provenance; training labels are derived
+  /// from headache intervals at training time, so edits to a severity never
+  /// require replacing its training data.
+  ///
   /// - Parameters:
   ///   - input: The input data to create the training data from.
   ///   - severityIdentifier: The identifier of the training data's parent severity, if any.
-  ///   - replacingExistingData: Whether the severity's existing training data should be replaced with the new data.
-  func createTrainingData(from input: ModelInput, severityIdentifier: UUID? = nil, replacingExistingData: Bool = false) async throws {
+  func createTrainingData(from input: ModelInput, severityIdentifier: UUID? = nil) async throws {
     logInfo("Creating training data...")
     try await DataController.shared.performInBackground(saveOnComplete: true) { context in
       // Create the training data
       let trainingData = TrainingData(context: context, input: input)
       logDebug("Created training data.")
-      
+
       if let severityIdentifier = severityIdentifier {
         let request = SeverityState.fetchRequest(withIdentifier: severityIdentifier)
         if let severity = ((try? context.fetch(request)) ?? []).first {
-          if replacingExistingData {
-            if let existingTrainingData = severity.trainingData {
-              for data in existingTrainingData {
-                guard let uData = data as? TrainingData else { continue }
-                severity.removeFromTrainingData(uData)
-                context.delete(uData)
-              }
-            }
-          }
-          
           severity.addToTrainingData(trainingData)
         }
         else {
@@ -650,156 +835,233 @@ extension HeadacheManager {
   }
   
   /// Upgrades the app's training data.
+  ///
+  /// Rows to upgrade are collected in a read pass, the replacement health and
+  /// weather values are fetched outside of any managed object context, and a
+  /// final write pass applies them. Blocking a context's queue while awaiting
+  /// work on that same queue deadlocks, so no context is held while fetching.
   func upgradeTrainingData() async throws {
     logInfo("Upgrading health kit training data.")
-    try await trainingData(predicate: NSPredicate(format: "(healthData.version != %@) OR (healthData.version == %@)", Constants.trainingDataVersion as NSString, NSNull())) { [weak self] trainingData, _ in
-      logInfo("Performing upgrade on \(trainingData.count) data.")
-      // Perform the upgrade
-      for trainingDatum in trainingData {
+    let healthUpgradeTargets: [(NSManagedObjectID, Date)] = try await trainingData(predicate: NSPredicate(format: "(healthData.version != %@) OR (healthData.version == %@)", Constants.trainingDataVersion as NSString, NSNull())) { trainingData, _ in
+      return trainingData.compactMap { trainingDatum in
         guard let timestamp = trainingDatum.timestamp else {
-          continue
+          return nil
         }
+        return (trainingDatum.objectID, timestamp)
+      }
+    }
 
-        let interval = DateInterval(start: timestamp.addingTimeInterval(-86400.0), end: timestamp)
-        if let data = self?.healthKitManager.readHealthKitData(in: interval) {
+    logInfo("Performing upgrade on \(healthUpgradeTargets.count) data.")
+    var healthUpdates = [(NSManagedObjectID, [HealthKitData: Double], Date)]()
+    for (objectID, timestamp) in healthUpgradeTargets {
+      if let data = healthKitManager.readHealthKitData(endingAt: timestamp) {
+        healthUpdates.append((objectID, data, timestamp))
+      }
+    }
+
+    if !healthUpdates.isEmpty {
+      try await DataController.shared.performInBackground(saveOnComplete: true) { context in
+        for (objectID, data, timestamp) in healthUpdates {
+          guard let trainingDatum = try? context.existingObject(with: objectID) as? TrainingData else {
+            continue
+          }
           trainingDatum.updateWithHealthKitData(data, at: timestamp)
         }
       }
-      logDebug("Finished upgrading health kit training data.")
     }
-    
+    logDebug("Finished upgrading health kit training data.")
+
     logInfo("Upgrading weather training data.")
-    try await trainingData(predicate: NSPredicate(format: "(weatherData.version != %@) OR (weatherData.version == %@)", Constants.trainingDataWeatherVersion as NSString, NSNull())) { [weak self] trainingData, context in
-      guard let self = self else {
-        return
-      }
-      
-      logInfo("Performing weather upgrade on \(trainingData.count) data.")
-      // Perform the upgrade
-      let group = DispatchGroup()
-      for trainingDatum in trainingData {
+    let weatherUpgradeTargets: [(NSManagedObjectID, Date)] = try await trainingData(predicate: NSPredicate(format: "(weatherData.version != %@) OR (weatherData.version == %@)", Constants.trainingDataWeatherVersion as NSString, NSNull())) { trainingData, _ in
+      return trainingData.compactMap { trainingDatum in
         guard let timestamp = trainingDatum.timestamp else {
-          continue
+          return nil
         }
+        return (trainingDatum.objectID, timestamp)
+      }
+    }
 
-        group.enter()
-        Task {
-          do {
-            let location = try await self.locationManager.location()
-            let weather = try await self.weatherManager.weather(at: timestamp, for: location)
-            await context.perform {
-              trainingDatum.updateWithWeatherStatistics(weather.statistics, at: timestamp)
-            }
-          }
-          catch {
-            logError("Error upgrading weather: \(error)")
-          }
+    logInfo("Performing weather upgrade on \(weatherUpgradeTargets.count) data.")
+    var weatherUpdates = [(NSManagedObjectID, WeatherStatistics, Date)]()
+    for (objectID, timestamp) in weatherUpgradeTargets {
+      do {
+        let location = try await locationManager.location()
+        let weather = try await weatherManager.weather(at: timestamp, for: location)
+        weatherUpdates.append((objectID, weather.statistics, timestamp))
+      }
+      catch {
+        logError("Error upgrading weather: \(error)")
+      }
+    }
 
-          group.leave()
+    if !weatherUpdates.isEmpty {
+      try await DataController.shared.performInBackground(saveOnComplete: true) { context in
+        for (objectID, statistics, timestamp) in weatherUpdates {
+          guard let trainingDatum = try? context.existingObject(with: objectID) as? TrainingData else {
+            continue
+          }
+          trainingDatum.updateWithWeatherStatistics(statistics, at: timestamp)
         }
       }
-      group.wait()
-      logDebug("Finished upgrading weather training data.")
     }
+    logDebug("Finished upgrading weather training data.")
   }
   
   /// Trains the classifiers.
-  ///
-  /// - Parameter completion: Called when training is complete.
   func trainClassifiers() async throws {
-    try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
-      Task {
-        do {
-          try await trainingData(predicate: NSPredicate(format: "(healthData.version == %@) AND (weatherData.version == %@)", Constants.trainingDataVersion as NSString, Constants.trainingDataWeatherVersion as NSString)) { [weak self] trainingData, _ in
-            guard let self = self else {
-              continuation.resume()
-              return
-            }
-            
-            var notPresentTrainingData = trainingData.filter({ $0.severity?.severity == .notPresent || $0.severity?.severity == nil })
-            var notNotPresentTrainingData = trainingData.filter({ $0.severity?.severity != .notPresent && $0.severity?.severity != nil })
-            
-            notPresentTrainingData.shuffle()
-            notNotPresentTrainingData.shuffle()
-            
-            if notNotPresentTrainingData.count < 50 {
-              let maxNotPresent = notNotPresentTrainingData.count * 2
-              if notPresentTrainingData.count > maxNotPresent {
-                notPresentTrainingData.removeLast(notPresentTrainingData.count - maxNotPresent)
-              }
-            }
-            else {
-              let maxNotPresent = notNotPresentTrainingData.count
-              if notPresentTrainingData.count > maxNotPresent {
-                notPresentTrainingData.removeLast(notPresentTrainingData.count - maxNotPresent)
-              }
-            }
-            
-            let trimmedTrainingData = notPresentTrainingData + notNotPresentTrainingData
-            
-            // Get the training input
-            let input = try TrainingInput(trainingData: trimmedTrainingData)
-            
-            logDebug("Training classifiers with \(trimmedTrainingData.count) data...")
-            Task {
-              do {
-                try await self.predictor.train(input)
-                continuation.resume()
-              }
-              catch {
-                logError("Error training classifiers: \(error)")
-                continuation.resume(throwing: error)
-              }
-            }
-          }
-        }
-        catch {
-          logError("Got error \(error)")
-          continuation.resume(throwing: error)
-        }
-      }
+    // Build the training input inside the context block; the input holds
+    // context-free data tables, so training itself runs outside of it.
+    let input = try await trainingData(predicate: NSPredicate(format: "(healthData.version == %@) AND (weatherData.version == %@)", Constants.trainingDataVersion as NSString, Constants.trainingDataWeatherVersion as NSString)) { trainingData, context -> TrainingInput in
+      // Derive labels from headache intervals rather than the severity
+      // relationship, so edited and deleted headaches still label correctly.
+      let episodes = try HeadacheManager.headacheEpisodes(in: context)
+      trainingData.deriveLabels(from: episodes)
+
+      let trimmedTrainingData = HeadacheManager.trimmedTrainingData(trainingData)
+      logDebug("Training classifiers with \(trimmedTrainingData.count) data...")
+      return try TrainingInput(trainingData: trimmedTrainingData)
+    }
+
+    try await predictor.train(input)
+
+    // Refresh the correlation insights on the new data; a failure here
+    // shouldn't fail training.
+    do {
+      try await computeInsights()
+    }
+    catch {
+      logError("Error computing insights after training: \(error)")
     }
   }
+
+  /// The episodes of every headache in the store.
+  ///
+  /// - Parameter context: The context to fetch in.
+  /// - Returns: An array of headache episodes.
+  static func headacheEpisodes(in context: NSManagedObjectContext) throws -> [HeadacheEpisode] {
+    let request = Headache.fetchRequest()
+    return try context.fetch(request).compactMap({ $0.episode })
+  }
+
+  /// Balances the ratio of not-present training data to headache training data.
+  ///
+  /// Rows must have derived labels (see `deriveLabels(from:)`); rows without
+  /// them fall back to the severity relationship.
+  ///
+  /// - Parameter trainingData: The training data to trim.
+  /// - Returns: The trimmed training data.
+  static func trimmedTrainingData(_ trainingData: [TrainingData]) -> [TrainingData] {
+    let severityOf: (TrainingData) -> Headache.Severity? = { $0.derivedSeverity ?? $0.severity?.severity }
+
+    var notPresentTrainingData = trainingData.filter({ severityOf($0) == .notPresent || severityOf($0) == nil })
+    var notNotPresentTrainingData = trainingData.filter({ severityOf($0) != .notPresent && severityOf($0) != nil })
+
+    notPresentTrainingData.shuffle()
+    notNotPresentTrainingData.shuffle()
+
+    let maxNotPresent = notNotPresentTrainingData.count < 50 ? notNotPresentTrainingData.count * 2 : notNotPresentTrainingData.count
+    if notPresentTrainingData.count > maxNotPresent {
+      notPresentTrainingData.removeLast(notPresentTrainingData.count - maxNotPresent)
+    }
+
+    return notPresentTrainingData + notNotPresentTrainingData
+  }
   
-  /// Evaluates the prediction and saves it to core data.
+  /// Records the prediction as a pending evaluation.
+  ///
+  /// An outlook forecast predicts the *future*, so it can't be scored
+  /// against the present; the pending row matures after its window passes
+  /// and `resolveEvaluations()` scores it against what actually happened.
   ///
   /// - Parameter prediction: The prediction.
   private func evaluatePrediction(_ prediction: PredictionOutput) async throws {
-    let hasCurrent = try await hasCurrentHeadache()
-    let severity = try await currentHeadache { headache, _ in
-      return headache?.severity ?? .notPresent
+    // Only forecasts made outside a headache are evaluated; during a
+    // headache the outlook trivially matches the present.
+    guard try await !hasCurrentHeadache() else {
+      return
     }
-    
+
     try await DataController.shared.performInBackground(saveOnComplete: true) { context in
       let evaluation = Evaluation(context: context)
       evaluation.timestamp = Date()
-      evaluation.outlook = (hasCurrent && prediction.outlookClassifierOutput.prediction == .headache) || (!hasCurrent && prediction.outlookClassifierOutput.prediction == .noHeadache)
-      evaluation.severity = severity == prediction.severityClassifierOutput.prediction
+      evaluation.predictedOutlookRaw = prediction.outlookClassifierOutput.prediction.rawValue
+      evaluation.predictedSeverityRaw = Int64(prediction.severityClassifierOutput.prediction.rawValue)
+      evaluation.resolveAfter = Date().addingTimeInterval([TrainingData].possibleHeadacheWindow)
+      evaluation.resolved = false
     }
   }
-  
+
+  /// Scores matured pending evaluations against the actual headache record.
+  func resolveEvaluations() async throws {
+    try await DataController.shared.performInBackground(saveOnComplete: true) { context in
+      let request = Evaluation.fetchRequest()
+      request.predicate = NSPredicate(format: "(resolved == NO) AND (resolveAfter != nil) AND (resolveAfter <= %@)", Date() as NSDate)
+      let pending = try context.fetch(request)
+
+      guard !pending.isEmpty else {
+        return
+      }
+
+      let episodes = try HeadacheManager.headacheEpisodes(in: context).sorted(by: { $0.start < $1.start })
+
+      for evaluation in pending {
+        guard let timestamp = evaluation.timestamp, let resolveAfter = evaluation.resolveAfter else {
+          evaluation.resolved = true
+          continue
+        }
+
+        // Did a headache actually start within the forecast window?
+        let actualEpisode = episodes.first(where: { $0.start > timestamp && $0.start <= resolveAfter })
+        let predictedPositive = evaluation.predictedOutlookRaw == Outlook.headache.rawValue || evaluation.predictedOutlookRaw == Outlook.possibleHeadache.rawValue
+
+        evaluation.outlook = predictedPositive == (actualEpisode != nil)
+
+        // Severity is only scorable when a headache actually happened;
+        // trivial not-present matches would inflate the accuracy. The
+        // sentinel excludes unscorable rows from the readout.
+        if let actualEpisode = actualEpisode {
+          let peakSeverity = actualEpisode.severities.map({ $0.severity }).max(by: { $0.orderingValue < $1.orderingValue })
+          evaluation.severity = evaluation.predictedSeverityRaw == Int64(peakSeverity?.rawValue ?? -1)
+        }
+        else {
+          evaluation.predictedSeverityRaw = -1
+        }
+
+        evaluation.resolved = true
+      }
+
+      logInfo("Resolved \(pending.count) pending evaluations.")
+    }
+  }
+
   /// Calculates the current model evaluation metrics for the outlook
-  /// and severity predictions.
+  /// and severity predictions, over resolved evaluations only.
   ///
   /// - Returns: A pair of evaluation metrics and a count (outlook, severity, count).
   func evaluation() async throws -> (Double, Double, Int) {
     return try await DataController.shared.performInBackground { context in
       let request = Evaluation.fetchRequest()
+      request.predicate = NSPredicate(format: "resolved == YES")
       let evaluations = try context.fetch(request)
-      
+
       guard evaluations.count > 0 else {
         return (0.0, 0.0, 0)
       }
-      
+
       var outlookSuccess = 0
       var severitySuccess = 0
+      var severityCount = 0
       for evaluation in evaluations {
         outlookSuccess += evaluation.outlook ? 1 : 0
-        severitySuccess += evaluation.severity ? 1 : 0
+        if evaluation.predictedSeverityRaw >= 0 {
+          severityCount += 1
+          severitySuccess += evaluation.severity ? 1 : 0
+        }
       }
-      
-      let evaluationCount = Double(evaluations.count)
-      return (Double(outlookSuccess) / evaluationCount, Double(severitySuccess) / evaluationCount, evaluations.count)
+
+      let outlookAccuracy = Double(outlookSuccess) / Double(evaluations.count)
+      let severityAccuracy = severityCount > 0 ? Double(severitySuccess) / Double(severityCount) : 0.0
+      return (outlookAccuracy, severityAccuracy, evaluations.count)
     }
   }
   

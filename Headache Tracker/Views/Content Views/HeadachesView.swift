@@ -40,7 +40,7 @@ struct HeadachesView: View {
   // MARK: View body
   
   var body: some View {
-    NavigationView {
+    NavigationStack {
       List {
         if unresolvedHeadaches.count > 0 {
           Section {
@@ -79,9 +79,8 @@ struct HeadachesView: View {
         }
       }
     }
-    .navigationViewStyle(StackNavigationViewStyle())
     .sheet(isPresented: $showingAddHeadache, onDismiss: nil) {
-      NavigationView {
+      NavigationStack {
         AddHeadacheView(headacheManager: headacheManager)
       }
     }

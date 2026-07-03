@@ -7,6 +7,22 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		CB20CB20CB20CB2000000002 /* FeatureMedians.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB20CB20CB20CB2000000001 /* FeatureMedians.swift */; };
+		CB20CB20CB20CB2000000003 /* FeatureMedians.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB20CB20CB20CB2000000001 /* FeatureMedians.swift */; };
+		CB20CB20CB20CB2000000005 /* ModelMetrics.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB20CB20CB20CB2000000004 /* ModelMetrics.swift */; };
+		CB20CB20CB20CB2000000006 /* ModelMetrics.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB20CB20CB20CB2000000004 /* ModelMetrics.swift */; };
+		CA10CA10CA10CA1000000002 /* CorrelationFeature.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10CA10CA10CA1000000001 /* CorrelationFeature.swift */; };
+		CA10CA10CA10CA1000000003 /* CorrelationFeature.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10CA10CA10CA1000000001 /* CorrelationFeature.swift */; };
+		CA10CA10CA10CA1000000005 /* CorrelationMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10CA10CA10CA1000000004 /* CorrelationMath.swift */; };
+		CA10CA10CA10CA1000000006 /* CorrelationMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10CA10CA10CA1000000004 /* CorrelationMath.swift */; };
+		CA10CA10CA10CA1000000008 /* CorrelationEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10CA10CA10CA1000000007 /* CorrelationEngine.swift */; };
+		CA10CA10CA10CA1000000009 /* CorrelationEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10CA10CA10CA1000000007 /* CorrelationEngine.swift */; };
+		CA10CA10CA10CA100000000B /* TriggerInsight.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10CA10CA10CA100000000A /* TriggerInsight.swift */; };
+		CA10CA10CA10CA100000000C /* TriggerInsight.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10CA10CA10CA100000000A /* TriggerInsight.swift */; };
+		CA10CA10CA10CA100000000E /* InsightsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10CA10CA10CA100000000D /* InsightsStore.swift */; };
+		CA10CA10CA10CA100000000F /* InsightsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10CA10CA10CA100000000D /* InsightsStore.swift */; };
+		CA10CA10CA10CA1000000011 /* InsightsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10CA10CA10CA1000000010 /* InsightsView.swift */; };
+		CA10CA10CA10CA1000000013 /* TriggerDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10CA10CA10CA1000000012 /* TriggerDetailView.swift */; };
 		3B051A4E27B0E9060017131D /* HeadachesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B051A4D27B0E9060017131D /* HeadachesView.swift */; };
 		3B051A5027B0E9410017131D /* CurrentHeadacheView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B051A4F27B0E9410017131D /* CurrentHeadacheView.swift */; };
 		3B051A8F27B0FA9B0017131D /* HeadacheCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B051A8E27B0FA9B0017131D /* HeadacheCell.swift */; };
@@ -284,6 +300,15 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		CB20CB20CB20CB2000000001 /* FeatureMedians.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FeatureMedians.swift; sourceTree = "<group>"; };
+		CB20CB20CB20CB2000000004 /* ModelMetrics.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModelMetrics.swift; sourceTree = "<group>"; };
+		CA10CA10CA10CA1000000001 /* CorrelationFeature.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CorrelationFeature.swift; sourceTree = "<group>"; };
+		CA10CA10CA10CA1000000004 /* CorrelationMath.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CorrelationMath.swift; sourceTree = "<group>"; };
+		CA10CA10CA10CA1000000007 /* CorrelationEngine.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CorrelationEngine.swift; sourceTree = "<group>"; };
+		CA10CA10CA10CA100000000A /* TriggerInsight.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TriggerInsight.swift; sourceTree = "<group>"; };
+		CA10CA10CA10CA100000000D /* InsightsStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InsightsStore.swift; sourceTree = "<group>"; };
+		CA10CA10CA10CA1000000010 /* InsightsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InsightsView.swift; sourceTree = "<group>"; };
+		CA10CA10CA10CA1000000012 /* TriggerDetailView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TriggerDetailView.swift; sourceTree = "<group>"; };
 		3B051A4927B0B3590017131D /* Headache_Tracker 1.0.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Headache_Tracker 1.0.xcdatamodel"; sourceTree = "<group>"; };
 		3B051A4D27B0E9060017131D /* HeadachesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeadachesView.swift; sourceTree = "<group>"; };
 		3B051A4F27B0E9410017131D /* CurrentHeadacheView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentHeadacheView.swift; sourceTree = "<group>"; };
@@ -303,8 +328,10 @@
 		3B09192227BD91F400844F6C /* SectionTitleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SectionTitleView.swift; sourceTree = "<group>"; };
 		3B10D45127ED5A77004B68AA /* TypeCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeCard.swift; sourceTree = "<group>"; };
 		3B10D45427ED7D78004B68AA /* Headache_Tracker 1.8.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Headache_Tracker 1.8.xcdatamodel"; sourceTree = "<group>"; };
+		3B10D45527ED7D78004B69AB /* Headache_Tracker 1.9.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Headache_Tracker 1.9.xcdatamodel"; sourceTree = "<group>"; };
 		3B10D45527ED825F004B68AA /* Headache+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Headache+CoreDataClass.swift"; sourceTree = "<group>"; };
 		3B10D45827ED8FD3004B68AA /* EditTypeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditTypeView.swift; sourceTree = "<group>"; };
+		3B18180E2D00147000CEAA9E /* CreateML.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CreateML.framework; path = System/Library/Frameworks/CreateML.framework; sourceTree = SDKROOT; };
 		3B1C7DAE27D1EE32000B3A99 /* Headache_Tracker 1.6.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Headache_Tracker 1.6.xcdatamodel"; sourceTree = "<group>"; };
 		3B1C7DB327D2005E000B3A99 /* StatusCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusCard.swift; sourceTree = "<group>"; };
 		3B1C7DB527D205EE000B3A99 /* ActionCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionCard.swift; sourceTree = "<group>"; };
@@ -507,9 +534,23 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		CA10CA10CA10CA10000003E7 /* Correlation */ = {
+			isa = PBXGroup;
+			children = (
+				CA10CA10CA10CA1000000001 /* CorrelationFeature.swift */,
+				CA10CA10CA10CA1000000004 /* CorrelationMath.swift */,
+				CA10CA10CA10CA1000000007 /* CorrelationEngine.swift */,
+				CA10CA10CA10CA100000000A /* TriggerInsight.swift */,
+				CA10CA10CA10CA100000000D /* InsightsStore.swift */,
+			);
+			path = Correlation;
+			sourceTree = "<group>";
+		};
 		3B051A9627B198CB0017131D /* Content Views */ = {
 			isa = PBXGroup;
 			children = (
+				CA10CA10CA10CA1000000010 /* InsightsView.swift */,
+				CA10CA10CA10CA1000000012 /* TriggerDetailView.swift */,
 				3BA933B027DFA5D000BAD5A4 /* AddHeadacheView.swift */,
 				3B68BDF827BDFCD3007AAAC6 /* AnalyzeView.swift */,
 				3BF5313827ACE18D00056673 /* ContentView.swift */,
@@ -646,6 +687,7 @@
 		3B3FFE4E27D592A000DFACC1 /* Statistics */ = {
 			isa = PBXGroup;
 			children = (
+				CA10CA10CA10CA10000003E7 /* Correlation */,
 				3B3FFE5127D592A000DFACC1 /* HeadacheStatistics.swift */,
 				3B3FFE5027D592A000DFACC1 /* Trend.swift */,
 				3B3FFE4F27D592A000DFACC1 /* Statistic.swift */,
@@ -674,6 +716,8 @@
 		3B3FFE5E27D592A000DFACC1 /* Prediction */ = {
 			isa = PBXGroup;
 			children = (
+				CB20CB20CB20CB2000000001 /* FeatureMedians.swift */,
+				CB20CB20CB20CB2000000004 /* ModelMetrics.swift */,
 				3B3FFE6627D592A000DFACC1 /* Inputs */,
 				3B3FFE6127D592A000DFACC1 /* Outputs */,
 				3B3FFE5F27D592A000DFACC1 /* Model.swift */,
@@ -939,6 +983,7 @@
 		3BF5316627ACE1DA00056673 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				3B18180E2D00147000CEAA9E /* CreateML.framework */,
 				3B9332D227CE005B00BACE93 /* libc++.tbd */,
 				3B9332D027CE005200BACE93 /* CoreGraphics.framework */,
 				3B9332CE27CE004400BACE93 /* CoreServices.framework */,
@@ -1185,6 +1230,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CB20CB20CB20CB2000000003 /* FeatureMedians.swift in Sources */,
+				CB20CB20CB20CB2000000006 /* ModelMetrics.swift in Sources */,
+				CA10CA10CA10CA1000000003 /* CorrelationFeature.swift in Sources */,
+				CA10CA10CA10CA1000000006 /* CorrelationMath.swift in Sources */,
+				CA10CA10CA10CA1000000009 /* CorrelationEngine.swift in Sources */,
+				CA10CA10CA10CA100000000C /* TriggerInsight.swift in Sources */,
+				CA10CA10CA10CA100000000F /* InsightsStore.swift in Sources */,
 				3B3FFEEA27D592A000DFACC1 /* MotionManager.swift in Sources */,
 				3B3FFEE627D592A000DFACC1 /* WeatherManager.swift in Sources */,
 				3BD1D34C27E192D30072A576 /* ToggleCell.swift in Sources */,
@@ -1269,6 +1321,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CB20CB20CB20CB2000000002 /* FeatureMedians.swift in Sources */,
+				CB20CB20CB20CB2000000005 /* ModelMetrics.swift in Sources */,
+				CA10CA10CA10CA1000000002 /* CorrelationFeature.swift in Sources */,
+				CA10CA10CA10CA1000000005 /* CorrelationMath.swift in Sources */,
+				CA10CA10CA10CA1000000008 /* CorrelationEngine.swift in Sources */,
+				CA10CA10CA10CA100000000B /* TriggerInsight.swift in Sources */,
+				CA10CA10CA10CA100000000E /* InsightsStore.swift in Sources */,
+				CA10CA10CA10CA1000000011 /* InsightsView.swift in Sources */,
+				CA10CA10CA10CA1000000013 /* TriggerDetailView.swift in Sources */,
 				3B3FFF1527D87EAE00DFACC1 /* ErrorButton.swift in Sources */,
 				3B051A8F27B0FA9B0017131D /* HeadacheCell.swift in Sources */,
 				3B10D45227ED5A77004B68AA /* TypeCard.swift in Sources */,
@@ -1489,7 +1550,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -1548,7 +1609,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 4WS4246RA4;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.cnc.Headache-TrackerTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1715,7 +1776,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -1772,7 +1833,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -1870,7 +1931,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 4WS4246RA4;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.cnc.Headache-TrackerTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1889,7 +1950,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 4WS4246RA4;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.cnc.Headache-TrackerTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -2016,10 +2077,10 @@
 		};
 		3BD1D34127E12DEA0072A576 /* XCRemoteSwiftPackageReference "DataController" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/colinc86/DataController.git";
+			repositoryURL = "file:///Users/colin/Local Documents/Programming/Xcode Projects/Packages/DataController";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.7;
+				minimumVersion = 1.3.0;
 			};
 		};
 		3BE731F827DB11DB007C013B /* XCRemoteSwiftPackageReference "CocoaLumberjack" */ = {
@@ -2125,6 +2186,7 @@
 		3BF5314127ACE18F00056673 /* Headache_Tracker.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				3B10D45527ED7D78004B69AB /* Headache_Tracker 1.9.xcdatamodel */,
 				3B10D45427ED7D78004B68AA /* Headache_Tracker 1.8.xcdatamodel */,
 				3B86C6EF27E4517200CCD7A0 /* Headache_Tracker 1.7.xcdatamodel */,
 				3B1C7DAE27D1EE32000B3A99 /* Headache_Tracker 1.6.xcdatamodel */,
@@ -2136,7 +2198,7 @@
 				3B051A4927B0B3590017131D /* Headache_Tracker 1.0.xcdatamodel */,
 				3BF5314227ACE18F00056673 /* Headache_Tracker.xcdatamodel */,
 			);
-			currentVersion = 3B10D45427ED7D78004B68AA /* Headache_Tracker 1.8.xcdatamodel */;
+			currentVersion = 3B10D45527ED7D78004B69AB /* Headache_Tracker 1.9.xcdatamodel */;
 			path = Headache_Tracker.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;
