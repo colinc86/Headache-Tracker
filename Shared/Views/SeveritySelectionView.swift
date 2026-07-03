@@ -192,6 +192,7 @@ struct SeverityButton: View {
         .font(.caption)
         .foregroundColor(selectedSeverity == nil && selectedSeverityRange == nil ? .primary : (selected ? .primary : .secondary))
     }
+    .animation(Tokens.Motion.selection, value: selected)
     .accessibilityElement(children: .ignore)
     .accessibilityLabel("\(severity.title) severity")
     .accessibilityAddTraits(accessibilityTraits)

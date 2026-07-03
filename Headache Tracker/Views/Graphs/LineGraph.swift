@@ -50,7 +50,7 @@ struct LineGraph: View {
         QuadCurve(unitPoints: pathPoints())
           .trim(from: 0.0, to: trim)
           .stroke(LinearGradient(gradient: gradient, startPoint: .bottom, endPoint: .top), lineWidth: 2.0)
-          .animation(.easeInOut(duration: 0.5), value: trim)
+          .animation(Tokens.Motion.reveal, value: trim)
           .onAppear(perform: { trim = 1.0 })
       }
     }

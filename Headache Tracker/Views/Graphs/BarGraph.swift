@@ -79,11 +79,24 @@ struct BarGraph: View {
       
       GeometryReader { geometry in
         ZStack {
+          // Gridlines — subtle horizontal rules aligned with the y-axis
+          // labels, matching the Swift Charts elsewhere in the app.
+          if yAxis.count > 1 {
+            Path { path in
+              for i in 0 ..< yAxis.count {
+                let y = geometry.size.height * CGFloat(i) / CGFloat(yAxis.count - 1)
+                path.move(to: CGPoint(x: 0.0, y: y))
+                path.addLine(to: CGPoint(x: geometry.size.width, y: y))
+              }
+            }
+            .stroke(Color(UIColor.separator).opacity(0.5), lineWidth: 0.5)
+          }
+
           // Bars
           Bars(series: statistic.signal, earliestDate: earliestDate, staticMax: staticMax)
             .trim(from: 0.0, to: trim)
             .stroke(LinearGradient(gradient: gradient, startPoint: .bottom, endPoint: .top), lineWidth: 0.9 * geometry.size.width / CGFloat(statistic.count))
-            .animation(.easeInOut(duration: Double.random(in: 0.0 ... 0.3) + 0.3), value: trim)
+            .animation(Tokens.Motion.reveal, value: trim)
             .onAppear(perform: { trim = 1.0 })
             .onTouch(limitToBounds: true) { location, type in
               touched(size: geometry.size, location: location, type: type)

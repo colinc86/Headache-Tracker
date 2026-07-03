@@ -40,9 +40,9 @@ struct BlockGraph: View {
       
       Divider().padding(0)
       
-      HStack(spacing: 0.5) {
+      HStack(spacing: Tokens.Spacing.xxs) {
         ForEach(ranges(), id: \.self) { range in
-          VStack(spacing: 0.5) {
+          VStack(spacing: Tokens.Spacing.xxs) {
             ForEach(0 ..< 5) { i in
               if range == .empty || 4 - i < range.lowerBound.orderingValue || 4 - i > range.upperBound.orderingValue {
                 Rectangle()

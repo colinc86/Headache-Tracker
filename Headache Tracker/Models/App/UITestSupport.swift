@@ -149,10 +149,13 @@ enum UITestSupport {
         explainedBy: .exposurePoorHydration, partialCoefficient: 0.12)
     ]
 
+    // rowCount/exposureCount must match the store (no TrainingData seeded,
+    // three exposures) so HeadacheManager.insights() treats the cache as
+    // fresh instead of recomputing it to empty.
     let report = InsightsReport(
       generatedAt: Date(),
-      rowCount: 120,
-      exposureCount: 8,
+      rowCount: 0,
+      exposureCount: 3,
       insights: insights,
       insufficient: [
         InsightsReport.InsufficientFeature(feature: .menstrualDaysSinceCycleStart, sampleCount: 12)

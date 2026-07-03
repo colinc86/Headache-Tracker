@@ -43,14 +43,24 @@ final class ScreenshotSweepTests: XCTestCase {
     tabBar.buttons["Analyze"].tap()
     sleep(2)
     capture("02-Analyze")
+    // Scroll down to the graphs.
+    app.swipeUp()
+    app.swipeUp()
+    sleep(1)
+    capture("02b-AnalyzeGraphs")
+    app.swipeDown()
+    app.swipeDown()
+    sleep(1)
 
-    // 2b. A trigger insight detail (tap the first insight cell).
-    let insightCell = app.cells.firstMatch
-    if insightCell.waitForExistence(timeout: 4) {
-      insightCell.tap()
-      sleep(2)
-      capture("03-TriggerDetail")
-      back()
+    // 2b. A trigger insight detail (tap the first insight's title).
+    let insightTitle = app.staticTexts["Sleep Duration"].firstMatch
+    if insightTitle.waitForExistence(timeout: 5) {
+      insightTitle.tap()
+      if app.navigationBars.buttons.firstMatch.waitForExistence(timeout: 5), !app.staticTexts["Insights"].exists {
+        sleep(2)
+        capture("03-TriggerDetail")
+        back()
+      }
     }
     // 2c. All Insights list.
     tapText("All Insights")
@@ -64,14 +74,15 @@ final class ScreenshotSweepTests: XCTestCase {
     tabBar.buttons["Headaches"].tap()
     sleep(2)
     capture("05-Headaches")
-    let headacheCell = app.cells.firstMatch
-    if headacheCell.waitForExistence(timeout: 5) {
-      headacheCell.tap()
-      // Confirm the push landed (the large "Headaches" title goes away);
-      // retry with a coordinate tap if the first tap missed.
-      if !waitForListTitleToVanish() {
-        headacheCell.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
-        _ = waitForListTitleToVanish()
+    // Tap the first headache's onset date (definitely inside its
+    // NavigationLink row — app.cells.firstMatch can match a section header).
+    let onsetDate = app.staticTexts.matching(NSPredicate(format: "label CONTAINS '2026'")).firstMatch
+    if onsetDate.waitForExistence(timeout: 5) {
+      let editButton = app.navigationBars.buttons["Edit"]
+      onsetDate.tap()
+      if !editButton.waitForExistence(timeout: 5) {
+        onsetDate.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+        _ = editButton.waitForExistence(timeout: 5)
       }
       sleep(2)
       capture("06-HeadacheDetail")
