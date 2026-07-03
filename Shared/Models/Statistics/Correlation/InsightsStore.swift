@@ -56,15 +56,19 @@ extension InsightsStore {
     }
   }
 
-  /// Whether the report should be recomputed for the given row count.
+  /// Whether the report should be recomputed for the given data counts.
   ///
-  /// - Parameter rowCount: The current number of training data rows.
+  /// - Parameters:
+  ///   - rowCount: The current number of training data rows.
+  ///   - exposureCount: The current number of logged exposures.
   /// - Returns: A boolean.
-  func isStale(rowCount: Int) -> Bool {
+  func isStale(rowCount: Int, exposureCount: Int) -> Bool {
     guard let report = load() else {
       return true
     }
-    return report.rowCount != rowCount || Date().timeIntervalSince(report.generatedAt) > 86400.0
+    return report.rowCount != rowCount
+      || (report.exposureCount ?? 0) != exposureCount
+      || Date().timeIntervalSince(report.generatedAt) > 86400.0
   }
 
 }

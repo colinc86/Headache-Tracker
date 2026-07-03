@@ -35,7 +35,13 @@ enum HealthKitData: CaseIterable, Codable {
   case heartRateVariabilitySDNN
   case oxygenSaturation
   case respiratoryRate
-  
+  case dietaryCaffeine
+  case dietaryWater
+  case timeInDaylight
+  case appleExerciseTime
+  case menstrualDaysSinceCycleStart
+  case menstrualFlowActive
+
   /// Whether or not this is a sharable type.
   var isShareType: Bool {
     switch self {
@@ -43,27 +49,38 @@ enum HealthKitData: CaseIterable, Codable {
     default: return false
     }
   }
-  
+
+  /// Whether authorization for this type should be deferred to an explicit
+  /// user opt-in instead of the bulk launch-time prompt. Used for sensitive
+  /// types like menstrual data.
+  var isDeferredAuthorization: Bool {
+    switch self {
+    case .menstrualDaysSinceCycleStart, .menstrualFlowActive: return true
+    default: return false
+    }
+  }
+
   /// The data's type.
   var dataType: HealthKitDataType {
     switch self {
-    case .headache, .sleepSeconds, .sleepOnset, .mindfulSession:
+    case .headache, .sleepSeconds, .sleepOnset, .mindfulSession, .menstrualDaysSinceCycleStart, .menstrualFlowActive:
       return .category
     default:
       return .quantity
     }
   }
-  
+
   /// The data's category type identifier.
   var categoryTypeIdentifier: HKCategoryTypeIdentifier? {
     switch self {
     case .headache: return .headache
     case .sleepSeconds, .sleepOnset: return .sleepAnalysis
     case .mindfulSession: return .mindfulSession
+    case .menstrualDaysSinceCycleStart, .menstrualFlowActive: return .menstrualFlow
     default: return nil
     }
   }
-  
+
   /// The data's quantitity type identifier.
   var quantityTypeIdentifier: HKQuantityTypeIdentifier? {
     switch self {
@@ -76,10 +93,14 @@ enum HealthKitData: CaseIterable, Codable {
     case .heartRateVariabilitySDNN: return .heartRateVariabilitySDNN
     case .oxygenSaturation: return .oxygenSaturation
     case .respiratoryRate: return .respiratoryRate
+    case .dietaryCaffeine: return .dietaryCaffeine
+    case .dietaryWater: return .dietaryWater
+    case .timeInDaylight: return .timeInDaylight
+    case .appleExerciseTime: return .appleExerciseTime
     default: return nil
     }
   }
-  
+
   /// The data's unit.
   var unit: HKUnit? {
     switch self {
@@ -88,6 +109,9 @@ enum HealthKitData: CaseIterable, Codable {
     case .environmentalAudioExposure, .headphoneAudioExposure: return .decibelAWeightedSoundPressureLevel()
     case .heartRateVariabilitySDNN: return .secondUnit(with: .milli)
     case .oxygenSaturation: return .percent()
+    case .dietaryCaffeine: return .gramUnit(with: .milli)
+    case .dietaryWater: return .literUnit(with: .milli)
+    case .timeInDaylight, .appleExerciseTime: return .minute()
     default: return nil
     }
   }
@@ -110,6 +134,9 @@ enum HealthKitData: CaseIterable, Codable {
       return DateInterval(start: date.addingTimeInterval(-3600.0), end: date)
     case .restingHeartRate, .walkingHeartRateAverage:
       return DateInterval(start: date.addingTimeInterval(-48.0 * 3600.0), end: date)
+    case .menstrualDaysSinceCycleStart, .menstrualFlowActive:
+      // Long enough to contain the most recent cycle start.
+      return DateInterval(start: date.addingTimeInterval(-60.0 * 86400.0), end: date)
     default:
       return DateInterval(start: date.addingTimeInterval(-86400.0), end: date)
     }
@@ -137,9 +164,15 @@ enum HealthKitData: CaseIterable, Codable {
     case .headache,
         .sleepSeconds,
         .sleepOnset,
-        .mindfulSession:
+        .mindfulSession,
+        .menstrualDaysSinceCycleStart,
+        .menstrualFlowActive:
       return .sample
-    case .stepCount:
+    case .stepCount,
+        .dietaryCaffeine,
+        .dietaryWater,
+        .timeInDaylight,
+        .appleExerciseTime:
       return .statistics(options: .cumulativeSum)
     case .environmentalAudioExposure,
         .headphoneAudioExposure:
@@ -175,7 +208,14 @@ enum HealthKitData: CaseIterable, Codable {
     // value, so overlap semantics would double count sums like step count
     // across successive sampling windows.
     let interval = window(endingAt: date)
-    let options: HKQueryOptions = (self == .sleepSeconds || self == .sleepOnset) ? [] : .strictStartDate
+    let usesOverlapSemantics: Bool
+    switch self {
+    case .sleepSeconds, .sleepOnset, .menstrualDaysSinceCycleStart, .menstrualFlowActive:
+      usesOverlapSemantics = true
+    default:
+      usesOverlapSemantics = false
+    }
+    let options: HKQueryOptions = usesOverlapSemantics ? [] : .strictStartDate
     let predicate = HKQuery.predicateForSamples(withStart: interval.start, end: interval.end, options: options)
     let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)
     let limit = Int(Int32.max)

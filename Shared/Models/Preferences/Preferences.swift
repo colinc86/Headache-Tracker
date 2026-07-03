@@ -195,6 +195,8 @@ struct Preferences {
       static let tags                = Key("settings.listoptions.tags")
       static let outlook             = Key("settings.listoptions.outlook")
       static let severity            = Key("settings.listoptions.severity")
+      static let medications         = Key("settings.listoptions.medications")
+      static let checkIn             = Key("settings.listoptions.checkIn")
     }
     
     struct Defaults {
@@ -228,6 +230,12 @@ struct Preferences {
 
     /// Whether the severity view should be shown.
     @UserDefault(Keys.severity) var showSeverityView = Defaults.shown
+
+    /// Whether the medications view should be shown.
+    @UserDefault(Keys.medications) var showMedicationsView = Defaults.shown
+
+    /// Whether the daily check-in view should be shown.
+    @UserDefault(Keys.checkIn) var showCheckInView = Defaults.shown
   }
 
   /// Notification settings.
@@ -238,6 +246,8 @@ struct Preferences {
       static let realTimeAlerts     = Key("settings.notifications.realTimeAlerts")
       static let dailyOutlookAlerts = Key("settings.notifications.dailyOutlookAlerts")
       static let dailyOutlookTime   = Key("settings.notifications.dailyOutlookTime")
+      static let checkInReminderAlerts = Key("settings.notifications.checkInReminderAlerts")
+      static let checkInReminderTime   = Key("settings.notifications.checkInReminderTime")
     }
     
     struct Defaults {
@@ -246,6 +256,8 @@ struct Preferences {
       static let realTimeAlerts = false
       static let dailyOutlookAlerts = false
       static let dailyOutlookTime: TimeInterval = 28800.0
+      static let checkInReminderAlerts = false
+      static let checkInReminderTime: TimeInterval = 72000.0
     }
 
     /// Whether check-in alerts should be displayed to the user after
@@ -264,6 +276,12 @@ struct Preferences {
     /// The time interval after midnight at which a daily outlook alert should
     /// take place.
     @UserDefault(Keys.dailyOutlookTime) var dailyOutlookTime = Defaults.dailyOutlookTime
+
+    /// Whether an evening reminder to log the daily check-in is scheduled.
+    @UserDefault(Keys.checkInReminderAlerts) var checkInReminderAlerts = Defaults.checkInReminderAlerts
+
+    /// The time interval after midnight at which the check-in reminder fires.
+    @UserDefault(Keys.checkInReminderTime) var checkInReminderTime = Defaults.checkInReminderTime
   }
 
   /// Prediction settings.
@@ -286,10 +304,19 @@ struct Preferences {
       static let heartRateVariability       = Key("settings.predictors.heartRateVariability")
       static let walkingHeartRateAverage    = Key("settings.predictors.walkingHeartRateAverage")
       static let restingHeartRate           = Key("settings.predictors.restingHeartRate")
+      static let dietaryCaffeine            = Key("settings.predictors.dietaryCaffeine")
+      static let dietaryWater               = Key("settings.predictors.dietaryWater")
+      static let timeInDaylight             = Key("settings.predictors.timeInDaylight")
+      static let exerciseMinutes            = Key("settings.predictors.exerciseMinutes")
+      static let menstrualCycle             = Key("settings.predictors.menstrualCycle")
     }
     
     struct Defaults {
       static let enabled = true
+
+      /// Sensitive types are opt-in; turning the toggle on triggers the
+      /// deferred HealthKit authorization prompt.
+      static let optIn = false
     }
 
     /// Whether the model should include this key.
@@ -343,6 +370,35 @@ struct Preferences {
     /// Whether the model should include this key.
     @UserDefault(Keys.restingHeartRate) var restingHeartRate = Defaults.enabled
 
+    /// Whether caffeine intake should be collected and correlated.
+    @UserDefault(Keys.dietaryCaffeine) var dietaryCaffeine = Defaults.enabled
+
+    /// Whether water intake should be collected and correlated.
+    @UserDefault(Keys.dietaryWater) var dietaryWater = Defaults.enabled
+
+    /// Whether time in daylight should be collected and correlated.
+    @UserDefault(Keys.timeInDaylight) var timeInDaylight = Defaults.enabled
+
+    /// Whether exercise minutes should be collected and correlated.
+    @UserDefault(Keys.exerciseMinutes) var exerciseMinutes = Defaults.enabled
+
+    /// Whether menstrual cycle data should be collected and correlated.
+    @UserDefault(Keys.menstrualCycle) var menstrualCycle = Defaults.optIn
+
+    /// Whether the given metric should be collected at all. The five
+    /// correlation-only signals are gated at collection time; ML features
+    /// are gated at feature-construction time instead.
+    func isCollectionEnabled(_ data: HealthKitData) -> Bool {
+      switch data {
+      case .dietaryCaffeine: return dietaryCaffeine
+      case .dietaryWater: return dietaryWater
+      case .timeInDaylight: return timeInDaylight
+      case .appleExerciseTime: return exerciseMinutes
+      case .menstrualDaysSinceCycleStart, .menstrualFlowActive: return menstrualCycle
+      default: return true
+      }
+    }
+
     /// Gets the current settings dictionary.
     func settingsDictionary() -> [String: Bool] {
       return [
@@ -362,7 +418,12 @@ struct Preferences {
         Keys.oxygenSaturation: oxygenSaturation,
         Keys.heartRateVariability: heartRateVariability,
         Keys.walkingHeartRateAverage: walkingHeartRateAverage,
-        Keys.restingHeartRate: restingHeartRate
+        Keys.restingHeartRate: restingHeartRate,
+        Keys.dietaryCaffeine: dietaryCaffeine,
+        Keys.dietaryWater: dietaryWater,
+        Keys.timeInDaylight: timeInDaylight,
+        Keys.exerciseMinutes: exerciseMinutes,
+        Keys.menstrualCycle: menstrualCycle
       ]
     }
   }

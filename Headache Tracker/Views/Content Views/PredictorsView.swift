@@ -33,6 +33,11 @@ struct PredictorsView: View {
   @AppStorage(Preferences.Predictors.Keys.weekday) var weekday = Preferences.Predictors.Defaults.enabled
   @AppStorage(Preferences.Predictors.Keys.secondsSinceMidnight) var secondsSinceMidnight = Preferences.Predictors.Defaults.enabled
   @AppStorage(Preferences.Predictors.Keys.barometricPressure) var barometricPressure = Preferences.Predictors.Defaults.enabled
+  @AppStorage(Preferences.Predictors.Keys.dietaryCaffeine) var dietaryCaffeine = Preferences.Predictors.Defaults.enabled
+  @AppStorage(Preferences.Predictors.Keys.dietaryWater) var dietaryWater = Preferences.Predictors.Defaults.enabled
+  @AppStorage(Preferences.Predictors.Keys.timeInDaylight) var timeInDaylight = Preferences.Predictors.Defaults.enabled
+  @AppStorage(Preferences.Predictors.Keys.exerciseMinutes) var exerciseMinutes = Preferences.Predictors.Defaults.enabled
+  @AppStorage(Preferences.Predictors.Keys.menstrualCycle) var menstrualCycle = Preferences.Predictors.Defaults.optIn
   @AppStorage(Preferences.Predictors.Keys.humidity) var humidity = Preferences.Predictors.Defaults.enabled
   @AppStorage(Preferences.Predictors.Keys.temperature) var temperature = Preferences.Predictors.Defaults.enabled
   
@@ -46,8 +51,27 @@ struct PredictorsView: View {
     Form {
       Section {
         ToggleCell(title: "Steps", data: .stepCount, state: $stepCount, systemName: "figure.walk", valueChanged: updateSetting)
+        ToggleCell(title: "Exercise Minutes", data: .appleExerciseTime, state: $exerciseMinutes, systemName: "figure.run", valueChanged: updateSetting)
+        ToggleCell(title: "Time in Daylight", data: .timeInDaylight, state: $timeInDaylight, systemName: "sun.max", valueChanged: updateSetting)
       } header: {
         SectionTitleView(title: "Activity")
+      }
+
+      Section {
+        ToggleCell(title: "Caffeine", data: .dietaryCaffeine, state: $dietaryCaffeine, systemName: "cup.and.saucer", valueChanged: updateSetting)
+        ToggleCell(title: "Water", data: .dietaryWater, state: $dietaryWater, systemName: "drop", valueChanged: updateSetting)
+      } header: {
+        SectionTitleView(title: "Nutrition")
+      } footer: {
+        SectionFooterView(title: "Logged in the Health app or by other apps.")
+      }
+
+      Section {
+        ToggleCell(title: "Menstrual Cycle", data: .menstrualDaysSinceCycleStart, state: $menstrualCycle, systemName: "calendar.circle", valueChanged: updateSetting)
+      } header: {
+        SectionTitleView(title: "Cycle")
+      } footer: {
+        SectionFooterView(title: "Off by default. Turning this on asks for read access to menstrual data and includes cycle timing in your insights.")
       }
       
       Section {

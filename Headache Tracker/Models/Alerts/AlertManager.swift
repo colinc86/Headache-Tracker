@@ -11,6 +11,7 @@ import SwiftUI
 import UIKit
 
 protocol AlertRequest {
+  var identifier: String { get }
   var title: String { get }
   var body: String { get }
   var userInfo: [AnyHashable: Any]? { get }
@@ -34,7 +35,7 @@ extension AlertRequest {
     content.categoryIdentifier = categoryIdentifier
     content.sound = sound
     content.badge = NSNumber(integerLiteral: badgeNumber)
-    return UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+    return UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
   }
   
 }
@@ -100,6 +101,14 @@ extension AlertManager {
     return (await checkNotificationSettings()).authorizationStatus
   }
   
+  /// Removes pending requests with the given identifiers.
+  ///
+  /// - Parameter identifiers: The notification request identifiers.
+  func removePendingRequests(withIdentifiers identifiers: [String]) {
+    logDebug("Removing pending requests: \(identifiers).")
+    center.removePendingNotificationRequests(withIdentifiers: identifiers)
+  }
+
   /// Removes all requests from the center.
   func removeRequests(pending: Bool = true, delivered: Bool = true) {
     if pending {

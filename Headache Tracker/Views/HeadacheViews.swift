@@ -61,6 +61,9 @@ struct HeadacheViews: View {
   
   /// Whether the edit tags view is visible.
   @State private var showingEditTagsView = false
+
+  /// Whether the edit medications view is visible.
+  @State private var showingEditMedicationsView = false
   
   // Preferences
   @AppStorage(Preferences.General.Keys.colorTheme, store: .shared) private var colorTheme = Preferences.General.Defaults.colorTheme
@@ -70,6 +73,7 @@ struct HeadacheViews: View {
   @AppStorage(Preferences.Lists.Keys.progression) private var showProgressionView = Preferences.Lists.Defaults.shown
   @AppStorage(Preferences.Lists.Keys.notes) private var showNotesView = Preferences.Lists.Defaults.shown
   @AppStorage(Preferences.Lists.Keys.tags) private var showTagsView = Preferences.Lists.Defaults.shown
+  @AppStorage(Preferences.Lists.Keys.medications) private var showMedicationsView = Preferences.Lists.Defaults.shown
   @AppStorage(Preferences.Health.Keys.enabled) private var healthEnabled = Preferences.Health.Defaults.enabled
   @AppStorage(Preferences.Health.Keys.deleteDisposition) private var deleteDisposition = Preferences.Health.Defaults.deleteDisposition
   
@@ -149,6 +153,13 @@ struct HeadacheViews: View {
         }
       }
       
+      // Medications
+      if showsAllCards || showMedicationsView {
+        Section {
+          MedicationsCard(headache: headache, editAction: editMedicationsAction)
+        }
+      }
+
       // Tags
       if showsAllCards || showTagsView {
         Section {
@@ -235,6 +246,10 @@ struct HeadacheViews: View {
       EditTagsView(tags: headache.tagsArray.map({ $0.value ?? "" }), identifier: headache.identifier ?? UUID())
         .accentColor(colorTheme.baseColor)
     }
+    .sheet(isPresented: $showingEditMedicationsView) {
+      EditMedicationsView(headacheIdentifier: headache.identifier ?? UUID())
+        .accentColor(colorTheme.baseColor)
+    }
   }
 }
 
@@ -253,6 +268,12 @@ extension HeadacheViews {
   }
   
   /// The edit tags action.
+  private func editMedicationsAction() {
+    withAnimation {
+      showingEditMedicationsView = true
+    }
+  }
+
   private func editTagsAction() {
     withAnimation { showingEditTagsView = true }
   }
@@ -270,7 +291,7 @@ extension HeadacheViews {
     try await headacheManager.resolve()
     
     // Remove any pending alerts
-    alertManager.removeRequests(pending: true, delivered: false)
+    alertManager.removePendingRequests(withIdentifiers: ["headache-check-in"])
   }
   
   /// Shows an alert to the user.
@@ -320,7 +341,7 @@ extension HeadacheViews {
           
           // Remove any alerts
           if !headache.resolved {
-            alertManager.removeRequests(pending: true, delivered: false)
+            alertManager.removePendingRequests(withIdentifiers: ["headache-check-in"])
           }
           
           // Dismiss the view

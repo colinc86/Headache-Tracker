@@ -77,6 +77,19 @@ struct CurrentHeadacheView: View {
   @MainActor private var currentHeadache: Headache? {
     return headaches.first
   }
+
+  /// Today's logged exposures (live).
+  @FetchRequest(
+    sortDescriptors: [NSSortDescriptor(key: "kindRaw", ascending: true)],
+    predicate: NSPredicate(format: "timestamp >= %@", Calendar.current.startOfDay(for: Date()) as NSDate),
+    animation: .default)
+  private var todaysExposures: FetchedResults<Exposure>
+
+  /// Whether the daily check-in sheet is visible.
+  @State private var showingCheckInView = false
+
+  /// Whether the check-in card should be shown.
+  @AppStorage(Preferences.Lists.Keys.checkIn) private var showCheckInView = Preferences.Lists.Defaults.shown
   
   /// Called when the application becomes active.
   private let didBecomeActiveNotificationPublisher = NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)
@@ -117,6 +130,17 @@ struct CurrentHeadacheView: View {
             .id(currentHeadache)
         }
         
+        // Daily check-in
+        if showCheckInView {
+          Section {
+            DailyCheckInCard(kinds: todaysExposures.compactMap({ $0.kindRaw })) {
+              showingCheckInView = true
+            }
+          } footer: {
+            SectionFooterView(title: "Logged exposures feed your correlation insights.")
+          }
+        }
+
         // Predictions
         if let prediction = predictor.prediction {
           PredictionViews(prediction: prediction)
@@ -136,6 +160,9 @@ struct CurrentHeadacheView: View {
       viewModel.didBecomeActive(hasDesiredSeverity: sceneDelegate.desiredSeverity != nil)
     }
     .onAppear(perform: viewModel.appeared)
+    .sheet(isPresented: $showingCheckInView) {
+      DailyCheckInView()
+    }
     .onDisappear(perform: viewModel.automaticRefreshWaiter.stop)
     .confirmationDialog("Change headache severity to \((sceneDelegate.desiredSeverity ?? .notPresent).title.lowercased())?", isPresented: $viewModel.showingSeverityConfirmation, titleVisibility: .visible) {
       AsyncButton("Change") {

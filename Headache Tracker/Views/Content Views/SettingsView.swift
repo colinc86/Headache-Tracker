@@ -45,6 +45,8 @@ struct SettingsView: View {
   @AppStorage(Preferences.Notifications.Keys.realTimeAlerts) private var realTimeAlerts = Preferences.Notifications.Defaults.realTimeAlerts
   @AppStorage(Preferences.Notifications.Keys.dailyOutlookAlerts) private var dailyOutlookAlerts = Preferences.Notifications.Defaults.dailyOutlookAlerts
   @AppStorage(Preferences.Notifications.Keys.dailyOutlookTime) private var dailyOutlookTime = Preferences.Notifications.Defaults.dailyOutlookTime
+  @AppStorage(Preferences.Notifications.Keys.checkInReminderAlerts) private var checkInReminderAlerts = Preferences.Notifications.Defaults.checkInReminderAlerts
+  @AppStorage(Preferences.Notifications.Keys.checkInReminderTime) private var checkInReminderTime = Preferences.Notifications.Defaults.checkInReminderTime
   
   /// The headaches fetch request.
   @FetchRequest(
@@ -80,6 +82,15 @@ struct SettingsView: View {
       return Calendar.current.startOfDay(for: Date()).addingTimeInterval(dailyOutlookTime)
     } set: { newValue in
       dailyOutlookTime = Calendar.current.timeIntervalSinceMidnight(newValue)
+    }
+  }
+
+  /// The binding to modify the check-in reminder time.
+  private var checkInReminderDate: Binding<Date> {
+    Binding<Date> {
+      return Calendar.current.startOfDay(for: Date()).addingTimeInterval(checkInReminderTime)
+    } set: { newValue in
+      checkInReminderTime = Calendar.current.timeIntervalSinceMidnight(newValue)
     }
   }
   
@@ -150,6 +161,22 @@ struct SettingsView: View {
           
           DatePicker("Daily Outlook Time", selection: dailyOutlookDate, displayedComponents: .hourAndMinute)
             .disabled(!dailyOutlookAlerts)
+        }
+
+        // Daily check-in
+        Section {
+          Toggle("Check-In Reminder", isOn: $checkInReminderAlerts)
+            .tint(colorTheme.baseColor)
+            .disabled(alertsDenied)
+            .onChange(of: checkInReminderAlerts) { _, _ in rescheduleCheckInReminder() }
+
+          DatePicker("Reminder Time", selection: checkInReminderDate, displayedComponents: .hourAndMinute)
+            .disabled(!checkInReminderAlerts)
+            .onChange(of: checkInReminderTime) { _, _ in rescheduleCheckInReminder() }
+        } header: {
+          SectionTitleView(title: "Daily Check-In")
+        } footer: {
+          SectionFooterView(title: "An evening nudge to log the day's exposures.")
         }
         
         // Information
@@ -223,6 +250,18 @@ extension SettingsView {
   private func shareFeedback() {
     withAnimation {
       showingShareFeedback = true
+    }
+  }
+
+  /// Reschedules the evening check-in reminder to match preferences.
+  private func rescheduleCheckInReminder() {
+    Task {
+      do {
+        try await refresher.updateExposureReminderSchedule()
+      }
+      catch {
+        logError("Error scheduling check-in reminder: \(error)")
+      }
     }
   }
   

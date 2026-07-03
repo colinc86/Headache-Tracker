@@ -7,6 +7,16 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		CC30CC30CC30CC3000000002 /* HeadacheManager+Medications.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC30CC30CC30CC3000000001 /* HeadacheManager+Medications.swift */; };
+		CC30CC30CC30CC3000000003 /* HeadacheManager+Medications.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC30CC30CC30CC3000000001 /* HeadacheManager+Medications.swift */; };
+		CC30CC30CC30CC3000000005 /* HeadacheManager+Exposures.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC30CC30CC30CC3000000004 /* HeadacheManager+Exposures.swift */; };
+		CC30CC30CC30CC3000000006 /* HeadacheManager+Exposures.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC30CC30CC30CC3000000004 /* HeadacheManager+Exposures.swift */; };
+		CC30CC30CC30CC3000000008 /* MedicationEntry+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC30CC30CC30CC3000000007 /* MedicationEntry+Extensions.swift */; };
+		CC30CC30CC30CC3000000009 /* MedicationEntry+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC30CC30CC30CC3000000007 /* MedicationEntry+Extensions.swift */; };
+		CC30CC30CC30CC300000000B /* DailyCheckInCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC30CC30CC30CC300000000A /* DailyCheckInCard.swift */; };
+		CC30CC30CC30CC300000000D /* MedicationsCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC30CC30CC30CC300000000C /* MedicationsCard.swift */; };
+		CC30CC30CC30CC300000000F /* DailyCheckInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC30CC30CC30CC300000000E /* DailyCheckInView.swift */; };
+		CC30CC30CC30CC3000000011 /* EditMedicationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC30CC30CC30CC3000000010 /* EditMedicationsView.swift */; };
 		CB20CB20CB20CB2000000002 /* FeatureMedians.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB20CB20CB20CB2000000001 /* FeatureMedians.swift */; };
 		CB20CB20CB20CB2000000003 /* FeatureMedians.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB20CB20CB20CB2000000001 /* FeatureMedians.swift */; };
 		CB20CB20CB20CB2000000005 /* ModelMetrics.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB20CB20CB20CB2000000004 /* ModelMetrics.swift */; };
@@ -300,6 +310,13 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		CC30CC30CC30CC3000000001 /* HeadacheManager+Medications.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "HeadacheManager+Medications.swift"; sourceTree = "<group>"; };
+		CC30CC30CC30CC3000000004 /* HeadacheManager+Exposures.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "HeadacheManager+Exposures.swift"; sourceTree = "<group>"; };
+		CC30CC30CC30CC3000000007 /* MedicationEntry+Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "MedicationEntry+Extensions.swift"; sourceTree = "<group>"; };
+		CC30CC30CC30CC300000000A /* DailyCheckInCard.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "DailyCheckInCard.swift"; sourceTree = "<group>"; };
+		CC30CC30CC30CC300000000C /* MedicationsCard.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "MedicationsCard.swift"; sourceTree = "<group>"; };
+		CC30CC30CC30CC300000000E /* DailyCheckInView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "DailyCheckInView.swift"; sourceTree = "<group>"; };
+		CC30CC30CC30CC3000000010 /* EditMedicationsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "EditMedicationsView.swift"; sourceTree = "<group>"; };
 		CB20CB20CB20CB2000000001 /* FeatureMedians.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FeatureMedians.swift; sourceTree = "<group>"; };
 		CB20CB20CB20CB2000000004 /* ModelMetrics.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModelMetrics.swift; sourceTree = "<group>"; };
 		CA10CA10CA10CA1000000001 /* CorrelationFeature.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CorrelationFeature.swift; sourceTree = "<group>"; };
@@ -329,6 +346,7 @@
 		3B10D45127ED5A77004B68AA /* TypeCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeCard.swift; sourceTree = "<group>"; };
 		3B10D45427ED7D78004B68AA /* Headache_Tracker 1.8.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Headache_Tracker 1.8.xcdatamodel"; sourceTree = "<group>"; };
 		3B10D45527ED7D78004B69AB /* Headache_Tracker 1.9.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Headache_Tracker 1.9.xcdatamodel"; sourceTree = "<group>"; };
+		3B10D45627ED7D78004B70AC /* Headache_Tracker 2.0.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Headache_Tracker 2.0.xcdatamodel"; sourceTree = "<group>"; };
 		3B10D45527ED825F004B68AA /* Headache+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Headache+CoreDataClass.swift"; sourceTree = "<group>"; };
 		3B10D45827ED8FD3004B68AA /* EditTypeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditTypeView.swift; sourceTree = "<group>"; };
 		3B18180E2D00147000CEAA9E /* CreateML.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CreateML.framework; path = System/Library/Frameworks/CreateML.framework; sourceTree = SDKROOT; };
@@ -549,6 +567,8 @@
 		3B051A9627B198CB0017131D /* Content Views */ = {
 			isa = PBXGroup;
 			children = (
+				CC30CC30CC30CC3000000010 /* EditMedicationsView.swift */,
+				CC30CC30CC30CC300000000E /* DailyCheckInView.swift */,
 				CA10CA10CA10CA1000000010 /* InsightsView.swift */,
 				CA10CA10CA10CA1000000012 /* TriggerDetailView.swift */,
 				3BA933B027DFA5D000BAD5A4 /* AddHeadacheView.swift */,
@@ -596,6 +616,8 @@
 		3B1C7DB227D2003C000B3A99 /* Cards */ = {
 			isa = PBXGroup;
 			children = (
+				CC30CC30CC30CC300000000C /* MedicationsCard.swift */,
+				CC30CC30CC30CC300000000A /* DailyCheckInCard.swift */,
 				3B1C7DB527D205EE000B3A99 /* ActionCard.swift */,
 				3B09191527BCD38300844F6C /* DurationCard.swift */,
 				3BF7943827DFB6970094C531 /* EditableDateTimeCard.swift */,
@@ -676,6 +698,8 @@
 				3B3FFE6C27D592A000DFACC1 /* DescribableError.swift */,
 				3B3FFE8927D592A000DFACC1 /* Formatters.swift */,
 				3B3FFE5A27D592A000DFACC1 /* HeadacheManager.swift */,
+				CC30CC30CC30CC3000000004 /* HeadacheManager+Exposures.swift */,
+				CC30CC30CC30CC3000000001 /* HeadacheManager+Medications.swift */,
 				3B3FFE8727D592A000DFACC1 /* HolisticOutlook.swift */,
 				3B3FFE5827D592A000DFACC1 /* Outlook.swift */,
 				3B3FFE8827D592A000DFACC1 /* Previewing.swift */,
@@ -780,6 +804,7 @@
 				3B3FFE7227D592A000DFACC1 /* Headache+Extensions.swift */,
 				3B86C6E627E41C5B00CCD7A0 /* HealthData+Extensions.swift */,
 				3B86C6EC27E4310700CCD7A0 /* Location+Extensions.swift */,
+				CC30CC30CC30CC3000000007 /* MedicationEntry+Extensions.swift */,
 				3B86C6E927E4291800CCD7A0 /* WeatherData+Extensions.swift */,
 				3B3FFE7127D592A000DFACC1 /* Severity+Extensions.swift */,
 				3B3FFE7027D592A000DFACC1 /* TrainingData+Extensions.swift */,
@@ -1230,6 +1255,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CC30CC30CC30CC3000000003 /* HeadacheManager+Medications.swift in Sources */,
+				CC30CC30CC30CC3000000006 /* HeadacheManager+Exposures.swift in Sources */,
+				CC30CC30CC30CC3000000009 /* MedicationEntry+Extensions.swift in Sources */,
 				CB20CB20CB20CB2000000003 /* FeatureMedians.swift in Sources */,
 				CB20CB20CB20CB2000000006 /* ModelMetrics.swift in Sources */,
 				CA10CA10CA10CA1000000003 /* CorrelationFeature.swift in Sources */,
@@ -1321,6 +1349,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CC30CC30CC30CC3000000002 /* HeadacheManager+Medications.swift in Sources */,
+				CC30CC30CC30CC3000000005 /* HeadacheManager+Exposures.swift in Sources */,
+				CC30CC30CC30CC3000000008 /* MedicationEntry+Extensions.swift in Sources */,
+				CC30CC30CC30CC300000000B /* DailyCheckInCard.swift in Sources */,
+				CC30CC30CC30CC300000000D /* MedicationsCard.swift in Sources */,
+				CC30CC30CC30CC300000000F /* DailyCheckInView.swift in Sources */,
+				CC30CC30CC30CC3000000011 /* EditMedicationsView.swift in Sources */,
 				CB20CB20CB20CB2000000002 /* FeatureMedians.swift in Sources */,
 				CB20CB20CB20CB2000000005 /* ModelMetrics.swift in Sources */,
 				CA10CA10CA10CA1000000002 /* CorrelationFeature.swift in Sources */,
@@ -2186,6 +2221,7 @@
 		3BF5314127ACE18F00056673 /* Headache_Tracker.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				3B10D45627ED7D78004B70AC /* Headache_Tracker 2.0.xcdatamodel */,
 				3B10D45527ED7D78004B69AB /* Headache_Tracker 1.9.xcdatamodel */,
 				3B10D45427ED7D78004B68AA /* Headache_Tracker 1.8.xcdatamodel */,
 				3B86C6EF27E4517200CCD7A0 /* Headache_Tracker 1.7.xcdatamodel */,
@@ -2198,7 +2234,7 @@
 				3B051A4927B0B3590017131D /* Headache_Tracker 1.0.xcdatamodel */,
 				3BF5314227ACE18F00056673 /* Headache_Tracker.xcdatamodel */,
 			);
-			currentVersion = 3B10D45527ED7D78004B69AB /* Headache_Tracker 1.9.xcdatamodel */;
+			currentVersion = 3B10D45627ED7D78004B70AC /* Headache_Tracker 2.0.xcdatamodel */;
 			path = Headache_Tracker.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;

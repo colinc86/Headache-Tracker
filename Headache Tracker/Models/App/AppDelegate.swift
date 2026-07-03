@@ -85,6 +85,9 @@ class AppDelegate: NSObject, UIApplicationDelegate, ObservableObject {
 
         // Load our ML classifiers
         try await headacheManager.predictor.load()
+
+        // Keep the evening check-in reminder aligned with preferences
+        try await refresher.updateExposureReminderSchedule()
       }
       catch {
         logError("Error handling async process: \(error)")

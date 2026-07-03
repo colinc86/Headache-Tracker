@@ -48,15 +48,22 @@ class HealthKitManager: ObservableObject {
   
   /// The health preferences.
   private let preferences = Preferences.Health()
+
+  /// The predictor preferences, gating collection of the opt-in signals.
+  private let predictorPreferences = Preferences.Predictors()
   
   /// The read queue when gathering training data.
   private let readQueue = DispatchQueue(label: ApplicationKey(from: "readQueue"))
   
   /// The types to share in health kit.
   private let shareTypes: Set<HKSampleType> = Set<HKSampleType>(HealthKitData.allCases.filter({ $0.isShareType }).map({ $0.type! as! HKSampleType }))
-  
+
   /// The types to read in health kit.
-  private let readTypes: Set<HKSampleType> = Set<HKSampleType>(HealthKitData.allCases.filter({ !$0.isShareType }).map({ $0.type! as! HKSampleType }))
+  ///
+  /// Deferred-authorization types (menstrual data) are excluded from the
+  /// bulk launch prompt; they're requested individually when the user turns
+  /// their predictor toggle on.
+  private let readTypes: Set<HKSampleType> = Set<HKSampleType>(HealthKitData.allCases.filter({ !$0.isShareType && !$0.isDeferredAuthorization }).map({ $0.type! as! HKSampleType }))
   
 }
 
@@ -259,7 +266,7 @@ extension HealthKitManager {
     }
 
     let group = DispatchGroup()
-    for data in HealthKitData.allCases where !data.isShareType {
+    for data in HealthKitData.allCases where !data.isShareType && predictorPreferences.isCollectionEnabled(data) {
       group.enter()
       readQueue.async {
         guard let query = data.query(endingAt: date, completion: { query, samples, quantity, error in
@@ -281,6 +288,14 @@ extension HealthKitManager {
             case .mindfulSession:
               guard !samples.isEmpty else { break }
               setValue(.mindfulSession, samples.reduce(0.0, { $0 + $1.endDate.timeIntervalSince($1.startDate) }))
+            case .menstrualFlowActive:
+              if let active = HealthKitManager.menstrualFlowActive(from: samples, asOf: date) {
+                setValue(.menstrualFlowActive, active ? 1.0 : 0.0)
+              }
+            case .menstrualDaysSinceCycleStart:
+              if let days = HealthKitManager.daysSinceCycleStart(from: samples, asOf: date) {
+                setValue(.menstrualDaysSinceCycleStart, days)
+              }
             default:
               break
             }
@@ -300,6 +315,79 @@ extension HealthKitManager {
     group.wait()
 
     return healthKitData.isEmpty ? nil : healthKitData
+  }
+
+}
+
+// MARK: Menstrual sample analysis
+
+extension HealthKitManager {
+
+  /// Whether the given menstrual flow sample records actual flow.
+  ///
+  /// - Parameter sample: The sample.
+  /// - Returns: A boolean.
+  private static func recordsFlow(_ sample: HKCategorySample) -> Bool {
+    // `.none` explicitly records "no flow"; everything else (unspecified,
+    // light, medium, heavy) is a flow day.
+    return sample.value != HKCategoryValueMenstrualFlow.none.rawValue
+  }
+
+  /// Whether menstrual flow was recorded in the trailing 24 hours.
+  ///
+  /// - Parameters:
+  ///   - samples: The menstrual flow samples (60-day window).
+  ///   - date: The end of the sampling window.
+  /// - Returns: Whether flow is active, or nil when the window contains no
+  ///   samples at all — "not tracking" is absent, not zero.
+  static func menstrualFlowActive(from samples: [HKCategorySample], asOf date: Date) -> Bool? {
+    guard !samples.isEmpty else {
+      return nil
+    }
+
+    let window = DateInterval(start: date.addingTimeInterval(-86400.0), end: date)
+    return samples.contains { sample in
+      recordsFlow(sample) && window.intersects(DateInterval(start: sample.startDate, end: sample.endDate))
+    }
+  }
+
+  /// Days since the most recent cycle start at the given date.
+  ///
+  /// Prefers samples flagged with `HKMetadataKeyMenstrualCycleStart`;
+  /// falls back to the start of the most recent consecutive run of flow
+  /// days when a writer omits the metadata.
+  ///
+  /// - Parameters:
+  ///   - samples: The menstrual flow samples (60-day window).
+  ///   - date: The date to measure from.
+  /// - Returns: Days since cycle start, or nil when no cycle start is found.
+  static func daysSinceCycleStart(from samples: [HKCategorySample], asOf date: Date) -> Double? {
+    let flowSamples = samples
+      .filter({ recordsFlow($0) && $0.startDate <= date })
+      .sorted(by: { $0.startDate < $1.startDate })
+
+    guard !flowSamples.isEmpty else {
+      return nil
+    }
+
+    // Metadata-flagged cycle starts win.
+    if let flagged = flowSamples.last(where: { ($0.metadata?[HKMetadataKeyMenstrualCycleStart] as? Bool) == true }) {
+      return date.timeIntervalSince(flagged.startDate) / 86400.0
+    }
+
+    // Fallback: walk back from the latest flow day through consecutive days
+    // (gaps of more than ~36 hours break the run).
+    var runStart = flowSamples.last!
+    for sample in flowSamples.dropLast().reversed() {
+      if runStart.startDate.timeIntervalSince(sample.endDate) <= 36.0 * 3600.0 {
+        runStart = sample
+      }
+      else {
+        break
+      }
+    }
+
+    return date.timeIntervalSince(runStart.startDate) / 86400.0
   }
 
 }

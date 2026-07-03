@@ -30,6 +30,12 @@ struct HealthMetricPresence: OptionSet {
   static let heartRateVariabilitySDNN    = HealthMetricPresence(rawValue: 1 << 9)
   static let oxygenSaturation            = HealthMetricPresence(rawValue: 1 << 10)
   static let respiratoryRate             = HealthMetricPresence(rawValue: 1 << 11)
+  static let dietaryCaffeine             = HealthMetricPresence(rawValue: 1 << 12)
+  static let dietaryWater                = HealthMetricPresence(rawValue: 1 << 13)
+  static let timeInDaylight              = HealthMetricPresence(rawValue: 1 << 14)
+  static let appleExerciseTime           = HealthMetricPresence(rawValue: 1 << 15)
+  static let menstrualDaysSinceCycleStart = HealthMetricPresence(rawValue: 1 << 16)
+  static let menstrualFlowActive         = HealthMetricPresence(rawValue: 1 << 17)
 
   /// The presence flag for the given health kit data, if it has one.
   ///
@@ -48,6 +54,12 @@ struct HealthMetricPresence: OptionSet {
     case .heartRateVariabilitySDNN: self = .heartRateVariabilitySDNN
     case .oxygenSaturation: self = .oxygenSaturation
     case .respiratoryRate: self = .respiratoryRate
+    case .dietaryCaffeine: self = .dietaryCaffeine
+    case .dietaryWater: self = .dietaryWater
+    case .timeInDaylight: self = .timeInDaylight
+    case .appleExerciseTime: self = .appleExerciseTime
+    case .menstrualDaysSinceCycleStart: self = .menstrualDaysSinceCycleStart
+    case .menstrualFlowActive: self = .menstrualFlowActive
     case .headache: return nil
     }
   }
@@ -105,6 +117,12 @@ extension HealthData {
     if presence.contains(.headphoneAudioExposure) { data[.headphoneAudioExposure] = headphoneAudioExposure }
     if presence.contains(.environmentalAudioExposure) { data[.environmentalAudioExposure] = environmentalAudioExposure }
     if presence.contains(.stepCount) { data[.stepCount] = stepCount }
+    if presence.contains(.dietaryCaffeine) { data[.dietaryCaffeine] = dietaryCaffeine }
+    if presence.contains(.dietaryWater) { data[.dietaryWater] = dietaryWater }
+    if presence.contains(.timeInDaylight) { data[.timeInDaylight] = timeInDaylight }
+    if presence.contains(.appleExerciseTime) { data[.appleExerciseTime] = appleExerciseTime }
+    if presence.contains(.menstrualDaysSinceCycleStart) { data[.menstrualDaysSinceCycleStart] = menstrualDaysSinceCycleStart }
+    if presence.contains(.menstrualFlowActive) { data[.menstrualFlowActive] = menstrualFlowActive }
     return data
   }
 
@@ -159,6 +177,12 @@ extension HealthData {
       case .headphoneAudioExposure: headphoneAudioExposure = value
       case .environmentalAudioExposure: environmentalAudioExposure = value
       case .stepCount: stepCount = value
+      case .dietaryCaffeine: dietaryCaffeine = value
+      case .dietaryWater: dietaryWater = value
+      case .timeInDaylight: timeInDaylight = value
+      case .appleExerciseTime: appleExerciseTime = value
+      case .menstrualDaysSinceCycleStart: menstrualDaysSinceCycleStart = value
+      case .menstrualFlowActive: menstrualFlowActive = value
       default: continue
       }
 

@@ -7,6 +7,7 @@
 
 import CoreData
 import DataController
+import HealthKit
 import XCTest
 @testable import Headache_Tracker
 
@@ -333,6 +334,143 @@ class Headache_TrackerTests: XCTestCase {
 
     XCTAssertTrue(report.insights.isEmpty)
     XCTAssertTrue(report.insufficient.contains(where: { $0.feature == .temperature }))
+  }
+
+  // MARK: Data capture (Phase 1)
+
+  func testNewMetricPresenceBitsRoundTrip() {
+    let health = HealthData(context: context)
+    health.updateWithHealthKitData([
+      .dietaryCaffeine: 120.0,
+      .dietaryWater: 1500.0,
+      .timeInDaylight: 45.0,
+      .appleExerciseTime: 30.0,
+      .menstrualDaysSinceCycleStart: 4.0,
+      .menstrualFlowActive: 1.0
+    ], at: baseDate)
+
+    let data = health.healthKitData
+    XCTAssertEqual(data[.dietaryCaffeine], 120.0)
+    XCTAssertEqual(data[.dietaryWater], 1500.0)
+    XCTAssertEqual(data[.timeInDaylight], 45.0)
+    XCTAssertEqual(data[.appleExerciseTime], 30.0)
+    XCTAssertEqual(data[.menstrualDaysSinceCycleStart], 4.0)
+    XCTAssertEqual(data[.menstrualFlowActive], 1.0)
+    XCTAssertNil(data[.heartRate], "Absent metrics stay absent")
+  }
+
+  func testCorrelationSampleSurfacesNewFeatures() {
+    let trainingData = TrainingData(context: context)
+    trainingData.timestamp = baseDate
+    trainingData.updateWithHealthKitData([.dietaryCaffeine: 200.0, .appleExerciseTime: 20.0], at: baseDate)
+
+    let sample = trainingData.correlationSample
+    XCTAssertEqual(sample?.values[.dietaryCaffeine], 200.0)
+    XCTAssertEqual(sample?.values[.exerciseMinutes], 20.0)
+  }
+
+  func testExposureMergeCountsTrailingWindow() {
+    let samples = (0 ..< 4).map { day in
+      CorrelationSample(timestamp: baseDate.addingTimeInterval(Double(day) * 86_400.0), values: [:])
+    }
+
+    // One caffeine exposure at noon of day 1 (relative to samples at baseDate + n days).
+    let exposures = [
+      ExposureEvent(kind: "caffeine", timestamp: baseDate.addingTimeInterval(86_400.0 - 3_600.0), amount: nil),
+      ExposureEvent(kind: "caffeine", timestamp: baseDate.addingTimeInterval(86_400.0 - 7_200.0), amount: nil),
+      ExposureEvent(kind: "custom-thing", timestamp: baseDate.addingTimeInterval(86_400.0), amount: nil)
+    ]
+
+    let merged = CorrelationEngine.merged(samples, exposures: exposures)
+
+    // Day 0 precedes the first check-in: untouched.
+    XCTAssertNil(merged[0].values[.exposureCaffeine])
+    // Day 1 sees both events in its trailing 24h.
+    XCTAssertEqual(merged[1].values[.exposureCaffeine], 2.0)
+    // Day 2 sees none (events are >24h old).
+    XCTAssertEqual(merged[2].values[.exposureCaffeine], 0.0)
+    // Custom kinds never become features.
+    for sample in merged {
+      XCTAssertFalse(sample.values.keys.contains(where: { $0 == .exposureScreenTime }))
+    }
+  }
+
+  func testMenstrualHelpers() throws {
+    let type = try XCTUnwrap(HKObjectType.categoryType(forIdentifier: .menstrualFlow))
+    let cycleStart = baseDate
+
+    let flagged = HKCategorySample(
+      type: type,
+      value: HKCategoryValueMenstrualFlow.medium.rawValue,
+      start: cycleStart,
+      end: cycleStart.addingTimeInterval(86_400.0),
+      metadata: [HKMetadataKeyMenstrualCycleStart: true])
+    let followUp = HKCategorySample(
+      type: type,
+      value: HKCategoryValueMenstrualFlow.light.rawValue,
+      start: cycleStart.addingTimeInterval(86_400.0),
+      end: cycleStart.addingTimeInterval(2.0 * 86_400.0),
+      metadata: [HKMetadataKeyMenstrualCycleStart: false])
+
+    let asOf = cycleStart.addingTimeInterval(5.0 * 86_400.0)
+
+    // Metadata-flagged start wins.
+    let days = HealthKitManager.daysSinceCycleStart(from: [flagged, followUp], asOf: asOf)
+    XCTAssertEqual(try XCTUnwrap(days), 5.0, accuracy: 0.001)
+
+    // Fallback: no flagged start, consecutive run start. (HealthKit requires
+    // the metadata key on creation, so "unflagged" means false, not absent.)
+    let unflagged1 = HKCategorySample(type: type, value: HKCategoryValueMenstrualFlow.medium.rawValue, start: cycleStart, end: cycleStart.addingTimeInterval(86_400.0), metadata: [HKMetadataKeyMenstrualCycleStart: false])
+    let unflagged2 = HKCategorySample(type: type, value: HKCategoryValueMenstrualFlow.light.rawValue, start: cycleStart.addingTimeInterval(86_400.0), end: cycleStart.addingTimeInterval(2.0 * 86_400.0), metadata: [HKMetadataKeyMenstrualCycleStart: false])
+    let fallbackDays = HealthKitManager.daysSinceCycleStart(from: [unflagged1, unflagged2], asOf: asOf)
+    XCTAssertEqual(try XCTUnwrap(fallbackDays), 5.0, accuracy: 0.001)
+
+    // Flow active within 24h vs. not vs. untracked.
+    XCTAssertEqual(HealthKitManager.menstrualFlowActive(from: [flagged], asOf: cycleStart.addingTimeInterval(3_600.0)), true)
+    XCTAssertEqual(HealthKitManager.menstrualFlowActive(from: [flagged], asOf: asOf), false)
+    XCTAssertNil(HealthKitManager.menstrualFlowActive(from: [], asOf: asOf))
+  }
+
+  func testMedicationRankingAndCascade() throws {
+    let headache = makeHeadache()
+
+    let older = MedicationEntry(context: context, name: "Sumatriptan", takenAt: baseDate)
+    let newer = MedicationEntry(context: context, name: "Ibuprofen", takenAt: baseDate.addingTimeInterval(3_600.0))
+    let duplicate = MedicationEntry(context: context, name: "SUMATRIPTAN", takenAt: baseDate.addingTimeInterval(7_200.0))
+    headache.addToMedications(older)
+    headache.addToMedications(newer)
+    headache.addToMedications(duplicate)
+
+    XCTAssertEqual(older.efficacy, .unrated)
+    older.efficacy = .helpful
+    XCTAssertEqual(older.efficacyRaw, MedicationEntry.Efficacy.helpful.rawValue)
+
+    // Ranking: most recent first, case-insensitive dedupe.
+    let ranked = HeadacheManager.rankedMedicationNames(from: [duplicate, newer, older], limit: 8)
+    XCTAssertEqual(ranked, ["SUMATRIPTAN", "Ibuprofen"])
+
+    // Canonical name matches most recent casing.
+    try context.save()
+    XCTAssertEqual(HeadacheManager.canonicalMedicationName(for: "sumatriptan", in: context), "SUMATRIPTAN")
+
+    // Deleting the headache cascades its medication entries.
+    context.delete(headache)
+    try context.save()
+    let remaining = try context.fetch(MedicationEntry.fetchRequest())
+    XCTAssertTrue(remaining.isEmpty)
+  }
+
+  func testExposureEventsExtraction() throws {
+    let exposure = Exposure(context: context)
+    exposure.identifier = UUID()
+    exposure.kindRaw = "alcohol"
+    exposure.timestamp = baseDate
+    exposure.amount = 0.0
+
+    let events = try HeadacheManager.exposureEvents(in: context)
+    XCTAssertEqual(events.count, 1)
+    XCTAssertEqual(events.first?.kind, "alcohol")
+    XCTAssertNil(events.first?.amount, "Zero amount reads as no amount")
   }
 
   // MARK: Training data trimming

@@ -14,7 +14,9 @@ struct Constants {
   ///
   /// 1.2: per-metric sampling windows, sleep stages, HRV in milliseconds,
   /// presence bits, and sleep onset as a date.
-  static let trainingDataVersion = "1.2"
+  /// 1.3: dietary caffeine and water, time in daylight, exercise minutes,
+  /// and menstrual cycle features.
+  static let trainingDataVersion = "1.3"
   
   /// The weather training data version.
   static let trainingDataWeatherVersion = "1.1"

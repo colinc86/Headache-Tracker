@@ -15,7 +15,19 @@ enum HeadacheAlertRequest: AlertRequest {
   case checkIn(headacheIdentifier: UUID)
   case prediction(severity: Headache.Severity)
   case outlook(outlook: Outlook, onset: Date?)
-  
+  case exposureCheckIn
+
+  /// Stable identifiers so scheduling replaces prior pending requests of
+  /// the same kind, and removal can be scoped instead of nuking everything.
+  public var identifier: String {
+    switch self {
+    case .checkIn: return "headache-check-in"
+    case .prediction: return "prediction"
+    case .outlook: return "outlook"
+    case .exposureCheckIn: return "exposure-check-in"
+    }
+  }
+
   public var title: String {
     switch self {
     case .checkIn:
@@ -24,6 +36,8 @@ enum HeadacheAlertRequest: AlertRequest {
       return "New Headache Prediction"
     case .outlook:
       return "Your Daily Headache Outlook"
+    case .exposureCheckIn:
+      return "Daily Check-In"
     }
   }
   
@@ -45,6 +59,8 @@ enum HeadacheAlertRequest: AlertRequest {
       else {
         return "Your daily headache outlook is good with no headaches!"
       }
+    case .exposureCheckIn:
+      return "Log today's exposures — caffeine, alcohol, stress, and more — to sharpen your insights."
     }
   }
   

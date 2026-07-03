@@ -24,6 +24,22 @@ enum CorrelationFeature: String, CaseIterable, Codable, Identifiable {
   case oxygenSaturation
   case respiratoryRate
 
+  // Nutrition, activity, and cycle
+  case dietaryCaffeine
+  case dietaryWater
+  case timeInDaylight
+  case exerciseMinutes
+  case menstrualDaysSinceCycleStart
+  case menstrualFlowActive
+
+  // Manual exposures (daily check-in)
+  case exposureCaffeine
+  case exposureAlcohol
+  case exposureStress
+  case exposureSkippedMeal
+  case exposurePoorHydration
+  case exposureScreenTime
+
   // Weather
   case pressure
   case devicePressure
@@ -52,6 +68,18 @@ enum CorrelationFeature: String, CaseIterable, Codable, Identifiable {
     case .heartRateVariability: return "Heart Rate Variability"
     case .oxygenSaturation: return "Oxygen Saturation"
     case .respiratoryRate: return "Respiratory Rate"
+    case .dietaryCaffeine: return "Caffeine Intake"
+    case .dietaryWater: return "Water Intake"
+    case .timeInDaylight: return "Time in Daylight"
+    case .exerciseMinutes: return "Exercise Minutes"
+    case .menstrualDaysSinceCycleStart: return "Cycle Day"
+    case .menstrualFlowActive: return "Menstrual Flow"
+    case .exposureCaffeine: return "Caffeine (logged)"
+    case .exposureAlcohol: return "Alcohol (logged)"
+    case .exposureStress: return "Stress (logged)"
+    case .exposureSkippedMeal: return "Skipped Meal (logged)"
+    case .exposurePoorHydration: return "Poor Hydration (logged)"
+    case .exposureScreenTime: return "Screen Time (logged)"
     case .pressure: return "Barometric Pressure"
     case .devicePressure: return "Device Pressure"
     case .humidity: return "Humidity"
@@ -73,6 +101,16 @@ enum CorrelationFeature: String, CaseIterable, Codable, Identifiable {
     case .heartRateVariability: return "waveform.path.ecg"
     case .oxygenSaturation: return "lungs.fill"
     case .respiratoryRate: return "wind"
+    case .dietaryCaffeine, .exposureCaffeine: return "cup.and.saucer.fill"
+    case .dietaryWater: return "drop.fill"
+    case .timeInDaylight: return "sun.max.fill"
+    case .exerciseMinutes: return "figure.run"
+    case .menstrualDaysSinceCycleStart, .menstrualFlowActive: return "calendar.circle.fill"
+    case .exposureAlcohol: return "wineglass.fill"
+    case .exposureStress: return "bolt.heart.fill"
+    case .exposureSkippedMeal: return "fork.knife"
+    case .exposurePoorHydration: return "drop"
+    case .exposureScreenTime: return "iphone"
     case .pressure, .devicePressure, .sigmaPressure: return "barometer"
     case .humidity, .sigmaHumidity: return "humidity"
     case .temperature, .sigmaTemperature: return "thermometer"
@@ -103,6 +141,18 @@ enum CorrelationFeature: String, CaseIterable, Codable, Identifiable {
       return String(format: "%.0f%%", value * 100.0)
     case .respiratoryRate:
       return String(format: "%.1f br/min", value)
+    case .dietaryCaffeine:
+      return String(format: "%.0f mg", value)
+    case .dietaryWater:
+      return String(format: "%.0f mL", value)
+    case .timeInDaylight, .exerciseMinutes:
+      return String(format: "%.0f min", value)
+    case .menstrualDaysSinceCycleStart:
+      return String(format: "day %.0f", value)
+    case .menstrualFlowActive:
+      return value > 0.5 ? "yes" : "no"
+    case .exposureCaffeine, .exposureAlcohol, .exposureStress, .exposureSkippedMeal, .exposurePoorHydration, .exposureScreenTime:
+      return String(format: "%.0f\u{00D7}", value)
     case .pressure, .devicePressure, .sigmaPressure:
       return Formatters.formatMeasurementDelta(Measurement(value: value, unit: UnitPressure.kilopascals))
     case .humidity, .sigmaHumidity:
@@ -128,6 +178,18 @@ enum CorrelationFeature: String, CaseIterable, Codable, Identifiable {
     case .heartRateVariability: return "Heart Rate Variability"
     case .oxygenSaturation: return "Oxygen Saturation"
     case .respiratoryRate: return "Respiratory Rate"
+    case .dietaryCaffeine: return "Dietary Caffeine"
+    case .dietaryWater: return "Dietary Water"
+    case .timeInDaylight: return "Time In Daylight"
+    case .exerciseMinutes: return "Exercise Minutes"
+    case .menstrualDaysSinceCycleStart: return "Cycle Day"
+    case .menstrualFlowActive: return "Menstrual Flow"
+    case .exposureCaffeine: return "Exposure Caffeine"
+    case .exposureAlcohol: return "Exposure Alcohol"
+    case .exposureStress: return "Exposure Stress"
+    case .exposureSkippedMeal: return "Exposure Skipped Meal"
+    case .exposurePoorHydration: return "Exposure Poor Hydration"
+    case .exposureScreenTime: return "Exposure Screen Time"
     case .pressure: return "Current Pressure"
     case .devicePressure: return "Device Pressure"
     case .humidity: return "Current Humidity"
@@ -148,6 +210,51 @@ enum CorrelationFeature: String, CaseIterable, Codable, Identifiable {
     return (secondsSinceMidnight + 6.0 * 3600.0).truncatingRemainder(dividingBy: 86400.0) / 3600.0
   }
 
+}
+
+/// A daily check-in exposure kind. Built-in kinds map to fixed correlation
+/// features; custom kinds are captured and displayed but not correlated in
+/// v1 (the feature space is enum-keyed).
+enum ExposureKind: String, CaseIterable, Identifiable {
+  case caffeine
+  case alcohol
+  case stress
+  case skippedMeal = "skipped-meal"
+  case poorHydration = "poor-hydration"
+  case screenTime = "screen-time"
+
+  var id: String {
+    return rawValue
+  }
+
+  /// A title suitable for the user interface.
+  var title: String {
+    switch self {
+    case .caffeine: return "Caffeine"
+    case .alcohol: return "Alcohol"
+    case .stress: return "Stress"
+    case .skippedMeal: return "Skipped Meal"
+    case .poorHydration: return "Poor Hydration"
+    case .screenTime: return "Screen Time"
+    }
+  }
+
+  /// The system image to represent the kind.
+  var systemImage: String {
+    return correlationFeature.systemImage
+  }
+
+  /// The correlation feature the kind feeds.
+  var correlationFeature: CorrelationFeature {
+    switch self {
+    case .caffeine: return .exposureCaffeine
+    case .alcohol: return .exposureAlcohol
+    case .stress: return .exposureStress
+    case .skippedMeal: return .exposureSkippedMeal
+    case .poorHydration: return .exposurePoorHydration
+    case .screenTime: return .exposureScreenTime
+    }
+  }
 }
 
 extension TrainingData {
@@ -188,6 +295,12 @@ extension TrainingData {
           }
         case .oxygenSaturation: values[.oxygenSaturation] = value
         case .respiratoryRate: values[.respiratoryRate] = value
+        case .dietaryCaffeine: values[.dietaryCaffeine] = value
+        case .dietaryWater: values[.dietaryWater] = value
+        case .timeInDaylight: values[.timeInDaylight] = value
+        case .appleExerciseTime: values[.exerciseMinutes] = value
+        case .menstrualDaysSinceCycleStart: values[.menstrualDaysSinceCycleStart] = value
+        case .menstrualFlowActive: values[.menstrualFlowActive] = value
         case .headache: break
         }
       }

@@ -54,8 +54,9 @@ extension Refresher {
       return
     }
     
-    // Cancel any pending notifications
-    alertManager.removeRequests(pending: true, delivered: false)
+    // Cancel any pending check-in notification (scoped, so the repeating
+    // evening exposure reminder survives)
+    alertManager.removePendingRequests(withIdentifiers: [HeadacheAlertRequest.checkIn(headacheIdentifier: headacheIdentifier).identifier])
     
     // Get our date components
     let futureDate = Date(timeIntervalSinceNow: preferences.notifications.checkInInterval)
@@ -100,6 +101,28 @@ extension Refresher {
     logDebug("Presenting alert for outlook: \(prediction.outlookClassifierOutput.prediction).")
     try await alertManager.presentAlert(
       with: HeadacheAlertRequest.outlook(outlook: prediction.outlookClassifierOutput.prediction, onset: prediction.onsetRegressorOutput.prediction),
+      badgeNumber: 0)
+  }
+
+  /// Schedules (or cancels) the repeating evening exposure check-in
+  /// reminder to match the current preferences.
+  func updateExposureReminderSchedule() async throws {
+    let request = HeadacheAlertRequest.exposureCheckIn
+    alertManager.removePendingRequests(withIdentifiers: [request.identifier])
+
+    guard preferences.notifications.checkInReminderAlerts else {
+      return
+    }
+
+    let time = preferences.notifications.checkInReminderTime
+    var components = DateComponents()
+    components.hour = Int(time) / 3600
+    components.minute = (Int(time) % 3600) / 60
+
+    logDebug("Scheduling exposure check-in reminder at \(components.hour ?? 0):\(components.minute ?? 0).")
+    try await alertManager.presentAlert(
+      with: request,
+      trigger: UNCalendarNotificationTrigger(dateMatching: components, repeats: true),
       badgeNumber: 0)
   }
 

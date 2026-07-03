@@ -18,9 +18,11 @@ struct ListOptionsMenu: View {
   @AppStorage(Preferences.Lists.Keys.tags) private var showTagsView = Preferences.Lists.Defaults.shown
   @AppStorage(Preferences.Lists.Keys.outlook) private var showOutlookView = Preferences.Lists.Defaults.shown
   @AppStorage(Preferences.Lists.Keys.severity) private var showSeverityView = Preferences.Lists.Defaults.shown
-  
+  @AppStorage(Preferences.Lists.Keys.medications) private var showMedicationsView = Preferences.Lists.Defaults.shown
+  @AppStorage(Preferences.Lists.Keys.checkIn) private var showCheckInView = Preferences.Lists.Defaults.shown
+
   // MARK: View body
-  
+
   var body: some View {
     Menu {
       Section {
@@ -30,8 +32,13 @@ struct ListOptionsMenu: View {
         CheckmarkButton(title: "Progression", checked: $showProgressionView)
         CheckmarkButton(title: "Notes", checked: $showNotesView)
         CheckmarkButton(title: "Tags", checked: $showTagsView)
+        CheckmarkButton(title: "Medications", checked: $showMedicationsView)
       }
-      
+
+      Section {
+        CheckmarkButton(title: "Daily Check-In", checked: $showCheckInView)
+      }
+
       Section {
         CheckmarkButton(title: "Outlook", checked: $showOutlookView)
         CheckmarkButton(title: "Severity", checked: $showSeverityView)

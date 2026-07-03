@@ -445,25 +445,27 @@ extension HeadacheManager {
   /// - Returns: The freshly computed report.
   @discardableResult
   func computeInsights() async throws -> InsightsReport {
-    let (samples, episodes, totalRowCount) = try await DataController.shared.performInBackground { context -> ([CorrelationSample], [HeadacheEpisode], Int) in
+    let (samples, episodes, exposures, totalRowCount) = try await DataController.shared.performInBackground { context -> ([CorrelationSample], [HeadacheEpisode], [ExposureEvent], Int) in
       let request = TrainingData.fetchRequest()
       request.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: true)]
       let trainingData = try context.fetch(request)
       let samples = trainingData.compactMap({ $0.correlationSample })
       let episodes = try HeadacheManager.headacheEpisodes(in: context)
-      return (samples, episodes, trainingData.count)
+      let exposures = try HeadacheManager.exposureEvents(in: context)
+      return (samples, episodes, exposures, trainingData.count)
     }
 
-    logInfo("Computing insights from \(samples.count) samples and \(episodes.count) episodes.")
-    let engine = CorrelationEngine(samples: samples, episodes: episodes)
+    logInfo("Computing insights from \(samples.count) samples, \(exposures.count) exposures, and \(episodes.count) episodes.")
+    let engine = CorrelationEngine(samples: CorrelationEngine.merged(samples, exposures: exposures), episodes: episodes)
     let computed = engine.computeReport()
 
-    // Store the total row count — the same number insights() compares
-    // against for staleness. Using the filtered sample count instead made
-    // the cache permanently stale when any row lacked usable values.
+    // Store the total counts — the same numbers insights() compares against
+    // for staleness. Using the filtered sample count instead made the cache
+    // permanently stale when any row lacked usable values.
     let report = InsightsReport(
       generatedAt: computed.generatedAt,
       rowCount: totalRowCount,
+      exposureCount: exposures.count,
       insights: computed.insights,
       insufficient: computed.insufficient)
     InsightsStore.shared.save(report)
@@ -475,7 +477,8 @@ extension HeadacheManager {
   /// - Returns: The report.
   func insights() async throws -> InsightsReport {
     let rowCount = try await trainingDataCount()
-    if InsightsStore.shared.isStale(rowCount: rowCount) {
+    let exposureCount = try await exposureCount()
+    if InsightsStore.shared.isStale(rowCount: rowCount, exposureCount: exposureCount) {
       return try await computeInsights()
     }
     if let report = InsightsStore.shared.load() {
@@ -495,8 +498,12 @@ extension HeadacheManager {
       request.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: true)]
       let trainingData = try context.fetch(request)
 
-      let series: [DatedValue] = trainingData.compactMap { row in
-        guard let sample = row.correlationSample, let value = sample.values[feature] else {
+      let samples = trainingData.compactMap({ $0.correlationSample })
+      let exposures = try HeadacheManager.exposureEvents(in: context)
+      let merged = CorrelationEngine.merged(samples, exposures: exposures)
+
+      let series: [DatedValue] = merged.compactMap { sample in
+        guard let value = sample.values[feature] else {
           return nil
         }
         return DatedValue(date: sample.timestamp, value: value)
@@ -504,6 +511,21 @@ extension HeadacheManager {
 
       let episodes = try HeadacheManager.headacheEpisodes(in: context)
       return (series, episodes)
+    }
+  }
+
+  /// The events of every logged exposure in the store.
+  ///
+  /// - Parameter context: The context to fetch in.
+  /// - Returns: An array of exposure events.
+  static func exposureEvents(in context: NSManagedObjectContext) throws -> [ExposureEvent] {
+    let request = Exposure.fetchRequest()
+    request.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: true)]
+    return try context.fetch(request).compactMap { exposure in
+      guard let kind = exposure.kindRaw, let timestamp = exposure.timestamp else {
+        return nil
+      }
+      return ExposureEvent(kind: kind, timestamp: timestamp, amount: exposure.amount > 0 ? exposure.amount : nil)
     }
   }
 

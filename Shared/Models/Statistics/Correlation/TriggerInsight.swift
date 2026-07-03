@@ -143,6 +143,10 @@ struct InsightsReport: Codable {
   /// The number of training data rows the report was computed from.
   let rowCount: Int
 
+  /// The number of logged exposures the report was computed from. Optional
+  /// so reports cached before exposure logging still decode.
+  let exposureCount: Int?
+
   /// Features with enough data, ranked strongest first.
   let insights: [TriggerInsight]
 
