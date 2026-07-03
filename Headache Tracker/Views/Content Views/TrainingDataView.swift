@@ -26,7 +26,7 @@ struct TrainingDataView: View {
   var body: some View {
     List {
       Section {
-        SubtitleCell(title: "Severity", subtitle: trainingData.severity?.severity.title ?? "-")
+        SubtitleCell(title: "Severity", subtitle: trainingData.derivedSeverity?.title ?? "-")
         SubtitleCell(title: "Timestamp", subtitle: trainingData.timestamp?.formattedNonRelative() ?? "N/A")
         SubtitleCell(title: "Health Data Version", subtitle: "\(trainingData.healthData?.version ?? "")")
         SubtitleCell(title: "Weather Version", subtitle: "\(trainingData.weatherData?.version ?? "")")

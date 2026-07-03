@@ -26,11 +26,6 @@ extension SeverityState {
     return Headache.Severity.Interval(severity, start: startTime, end: endTime, identifier: identifier)
   }
   
-  /// The severity's training data as an array.
-  var trainingDataArray: [TrainingData] {
-    return (trainingData?.sortedArray(using: [NSSortDescriptor(key: "timestamp", ascending: true)]) as? [TrainingData]) ?? []
-  }
-  
   // MARK: Initializers
   
   /// Initializes a severity.

@@ -49,6 +49,9 @@ struct Preferences {
   var notifications = Notifications()
   var predictors = Predictors()
   var shared = Shared()
+
+  /// The sync preferences.
+  var sync = Sync()
   
   // MARK: - Types
   
@@ -435,6 +438,28 @@ struct Preferences {
         Keys.menstrualCycle: menstrualCycle
       ]
     }
+  }
+
+  /// iCloud sync settings.
+  struct Sync {
+    struct Keys {
+      static let enabled            = Key("settings.sync.enabled")
+      static let didMigrateUserData = Key("settings.sync.didMigrateUserData")
+    }
+
+    struct Defaults {
+      static let enabled = false
+      static let didMigrateUserData = false
+    }
+
+    /// Whether iCloud sync is enabled. Read at store setup, so changes take
+    /// effect on the next launch. Lives in the shared suite because the
+    /// widget's store must match the app's. One-way in practice: enabling
+    /// turns on persistent history tracking, which can't be turned off.
+    @UserDefault(Keys.enabled, store: .shared) var enabled = Defaults.enabled
+
+    /// Whether the one-time user-data migration into the cloud store ran.
+    @UserDefault(Keys.didMigrateUserData, store: .shared) var didMigrateUserData = Defaults.didMigrateUserData
   }
 
   /// Shared settings.

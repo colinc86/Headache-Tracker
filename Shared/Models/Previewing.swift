@@ -108,8 +108,8 @@ struct Previewing {
       
       headache.resolved = true
       
-      for severity in headache.severitiesArray {
-        severity.addToTrainingData(createTrainingData(in: context))
+      for _ in headache.severitiesArray {
+        _ = createTrainingData(in: context)
       }
       
       do {
@@ -130,8 +130,8 @@ struct Previewing {
       headache.addSeverity(.severe, start: now.addingTimeInterval(-2400.0))
       headache.resolved = false
       
-      for severity in headache.severitiesArray {
-        severity.addToTrainingData(createTrainingData(in: context))
+      for _ in headache.severitiesArray {
+        _ = createTrainingData(in: context)
       }
       
       let tagA = Tag(context: context)

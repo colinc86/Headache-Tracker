@@ -22,7 +22,7 @@ extension TrainingData {
       timeIntervalUntilNextHeadacheStart: timeIntervalUntilNextHeadacheStart,
       timeIntervalUntilNextHeadacheEnd: timeIntervalUntilNextHeadacheEnd,
       outlook: outlook ?? .noHeadache,
-      severity: derivedSeverity ?? severity?.severity ?? .notPresent)
+      severity: derivedSeverity ?? .notPresent)
   }
   
   // MARK: Initializers

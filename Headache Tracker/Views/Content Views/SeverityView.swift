@@ -5,6 +5,7 @@
 //  Created by Colin Campbell on 2/8/22.
 //
 
+import CoreLocation
 import SwiftUI
 
 struct SeverityView: View {
@@ -54,13 +55,32 @@ struct SeverityView: View {
   
   /// The current edit end time.
   @State private var editEndTime = Date()
+
+  /// The location recorded closest to the severity's start (within an
+  /// hour). The training data provenance relationship is gone, so this is
+  /// resolved by timestamp instead.
+  private var nearbyLocation: CLLocation? {
+    guard let start = severity.startTime else {
+      return nil
+    }
+
+    let request = TrainingData.fetchRequest()
+    request.predicate = NSPredicate(format: "(timestamp >= %@) AND (timestamp <= %@)", start.addingTimeInterval(-3600.0) as NSDate, start.addingTimeInterval(3600.0) as NSDate)
+    request.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: true)]
+    request.fetchLimit = 5
+
+    let rows = (try? severity.managedObjectContext?.fetch(request)) ?? []
+    return rows
+      .sorted(by: { abs(($0.timestamp ?? .distantPast).timeIntervalSince(start)) < abs(($1.timestamp ?? .distantPast).timeIntervalSince(start)) })
+      .first?.location?.location
+  }
   
   // MARK: View body
   
   var body: some View {
     List {
       Section {
-        if let location = severity.trainingDataArray.first?.location?.location {
+        if let location = nearbyLocation {
           MapCell(location: location)
         }
         

@@ -8,10 +8,12 @@
 import BackgroundTasks
 import CocoaLumberjackSwift
 import CocoaLumberjackSwiftLogBackend
+import Combine
 import DataController
 import Logging
 import SwiftUI
 import UserNotifications
+import WidgetKit
 
 class AppDelegate: NSObject, UIApplicationDelegate, ObservableObject {
   
@@ -36,6 +38,12 @@ class AppDelegate: NSObject, UIApplicationDelegate, ObservableObject {
   
   /// The app's preferences.
   private let preferences = Preferences()
+
+  /// The remote store-change subscription (sync only).
+  private var remoteChangeCancellable: AnyCancellable?
+
+  /// Serializes remote-change handling so bursts of imports coalesce.
+  private var remoteChangeTask: Task<Void, Never>?
   
   // MARK: Override methods
   
@@ -104,6 +112,13 @@ class AppDelegate: NSObject, UIApplicationDelegate, ObservableObject {
 
         // Keep the evening check-in reminder aligned with preferences
         try await refresher.updateExposureReminderSchedule()
+
+        // One-time user-data migration into the cloud store, then start
+        // observing remote changes
+        if preferences.sync.enabled {
+          try await CloudMigrator.migrateIfNeeded()
+          observeRemoteChanges()
+        }
       }
       catch {
         logError("Error handling async process: \(error)")
@@ -198,6 +213,33 @@ extension AppDelegate {
     if preferences.health.enabled && headacheManager.healthKitManager.needsAuthorization() {
       try await headacheManager.healthKitManager.authorize()
     }
+  }
+
+  /// Subscribes to remote store changes: after a CloudKit import (or a
+  /// widget write), repair invariants, dedupe tags, refresh the shared
+  /// severity, and trim persistent history.
+  private func observeRemoteChanges() {
+    remoteChangeCancellable = DataController.shared.remoteChangePublisher
+      .debounce(for: .seconds(2.0), scheduler: DispatchQueue.main)
+      .sink { [weak self] _ in
+        guard let self = self else {
+          return
+        }
+
+        self.remoteChangeTask?.cancel()
+        self.remoteChangeTask = Task {
+          do {
+            try await self.headacheManager.repairDataIntegrity()
+            try await self.headacheManager.dedupeTags()
+            try await self.headacheManager.refreshSharedState()
+            try await DataController.shared.purgeHistory()
+            WidgetCenter.shared.reloadAllTimelines()
+          }
+          catch {
+            logError("Error handling remote change: \(error)")
+          }
+        }
+      }
   }
   
 }

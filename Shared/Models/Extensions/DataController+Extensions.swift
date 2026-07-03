@@ -13,7 +13,38 @@ import Foundation
 extension DataController {
   
   /// The shared data controller.
-  static let shared = DataController(containerName: Constants.CoreData.sqliteContainerName, appGroup: Constants.appGroupIdentifier)
+  /// The store file names.
+  ///
+  /// The original combined store becomes the Local (device-only) store when
+  /// sync is enabled — it holds the bulky training history in place. User
+  /// data migrates once into the new cloud store (see `CloudMigrator`).
+  static let localStoreFileName = "\(Constants.CoreData.sqliteContainerName).sqlite"
+  static let cloudStoreFileName = "\(Constants.CoreData.sqliteContainerName)-cloud.sqlite"
+
+  static let shared: DataController = {
+    let syncEnabled = Preferences.Sync().enabled
+    let isExtension = Bundle.main.bundleURL.pathExtension == "appex"
+
+    guard syncEnabled else {
+      // Single combined store, exactly as before sync existed. History
+      // tracking stays off until the user opts in.
+      return DataController(containerName: Constants.CoreData.sqliteContainerName, appGroup: Constants.appGroupIdentifier)
+    }
+
+    // Split stores: user data mirrors to CloudKit (app process only — the
+    // widget reads the same files but never runs the mirroring), device
+    // data stays local.
+    return DataController(
+      containerName: Constants.CoreData.sqliteContainerName,
+      appGroup: Constants.appGroupIdentifier,
+      cloudKit: isExtension ? nil : CloudKitConfiguration(containerIdentifier: Constants.cloudKitContainerIdentifier),
+      storeConfigurations: [
+        StoreConfiguration(modelConfiguration: "Local", fileName: localStoreFileName),
+        StoreConfiguration(modelConfiguration: "Cloud", fileName: cloudStoreFileName, syncsToCloudKit: true)
+      ],
+      historyTracking: true,
+      transactionAuthor: isExtension ? "widget" : "app")
+  }()
   
   private var backupURL: URL {
     let backUpFolderURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!

@@ -33,8 +33,8 @@
       "kind" : "localSourceControl",
       "location" : "/Users/colin/Local Documents/Programming/Xcode Projects/Packages/DataController",
       "state" : {
-        "revision" : "540d8bd258c14260e29bf0dea9dd746f0d74e29b",
-        "version" : "1.3.0"
+        "revision" : "d91dc64e456156a42086f24ce8954f04f8fcb34f",
+        "version" : "1.4.0"
       }
     },
     {

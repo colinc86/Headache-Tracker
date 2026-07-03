@@ -143,6 +143,9 @@ struct DebugSettingsView: View {
       Section {
         AsyncButton("Backup Database", mode: .afterContent, action: backupDatabase)
         Button("Restore Database", action: restoreDatabase)
+          .disabled(Preferences.Sync().enabled)
+        AsyncButton("Initialize CloudKit Schema", mode: .replacingContent, action: initializeCloudKitSchema)
+          .disabled(!Preferences.Sync().enabled)
       }
     }
     .navigationTitle("Debug Settings")
@@ -193,6 +196,12 @@ class BackupDocument: FileDocument {
 
 extension DebugSettingsView {
   
+  /// Pushes the record types to the CloudKit development schema. Only
+  /// meaningful in DEBUG with sync enabled.
+  func initializeCloudKitSchema() async throws {
+    try DataController.shared.initializeCloudKitSchema(options: [])
+  }
+
   func backupDatabase() async throws {
     exportURL = try await DataController.shared.backupDatabase()
     showingExportDocument = true

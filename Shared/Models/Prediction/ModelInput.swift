@@ -71,7 +71,7 @@ struct ModelInput: Codable {
       timeIntervalUntilNextHeadacheStart: trainingData.timeIntervalUntilNextHeadacheStart,
       timeIntervalUntilNextHeadacheEnd: trainingData.timeIntervalUntilNextHeadacheEnd,
       outlook: trainingData.outlook ?? .noHeadache,
-      severity: trainingData.severity?.severity ?? .notPresent)
+      severity: trainingData.derivedSeverity ?? .notPresent)
   }
   
   /// The full model input.

@@ -170,7 +170,7 @@ extension HeadacheManager {
     let classification = preferences.headaches.defaultHeadacheClassification
     let type = preferences.headaches.defaultHeadacheType
 
-    let severityIdentifier = try await DataController.shared.performInBackground(saveOnComplete: true) { (context) -> UUID? in
+    try await DataController.shared.performInBackground(saveOnComplete: true) { context in
       // Only one headache may be open at a time.
       if end == nil {
         let request = Headache.fetchRequest()
@@ -181,13 +181,12 @@ extension HeadacheManager {
         }
       }
 
-      let headache = Headache(context: context, severity: severity, classification: classification, type: type, start: start, end: end)
-      return headache.severitiesArray.first?.identifier
+      _ = Headache(context: context, severity: severity, classification: classification, type: type, start: start, end: end)
     }
     
     // Create the training data
     let input = await predictorInput(atDate: start, inWidget: false)
-    try await createTrainingData(from: input, severityIdentifier: severityIdentifier)
+    try await createTrainingData(from: input)
   }
   
   /// Adds a new severity to the headache with the given identifier.
@@ -205,9 +204,9 @@ extension HeadacheManager {
     }
     
     // Create the training data
-    if let identifier = severityUpdates.createdSeverityIdentifier, let startTime = severityUpdates.createdSeverityStartTime {
+    if let startTime = severityUpdates.createdSeverityStartTime {
       let input = await predictorInput(atDate: startTime, inWidget: false)
-      try await createTrainingData(from: input, severityIdentifier: identifier)
+      try await createTrainingData(from: input)
     }
     
     // Update the health kit samples
@@ -705,6 +704,44 @@ extension HeadacheManager {
     }
   }
 
+  /// Merges duplicate tags (equal values) into one, re-pointing headaches.
+  /// CloudKit imports from other devices can introduce duplicates because
+  /// Tag has no unique constraint the mirror can enforce.
+  func dedupeTags() async throws {
+    try await DataController.shared.performInBackground(saveOnComplete: true) { context in
+      let tags = try context.fetch(Tag.fetchRequest())
+      var canonical = [String: Tag]()
+
+      for tag in tags {
+        guard let value = tag.value else {
+          context.delete(tag)
+          continue
+        }
+
+        if let keeper = canonical[value] {
+          for headache in (tag.headaches as? Set<Headache>) ?? [] {
+            headache.removeFromTags(tag)
+            headache.addToTags(keeper)
+          }
+          context.delete(tag)
+        }
+        else {
+          canonical[value] = tag
+        }
+      }
+    }
+  }
+
+  /// Recomputes the shared current severity from the store and reloads the
+  /// widgets. Called after remote changes, which bypass the local write
+  /// paths that normally keep the shared defaults in sync.
+  func refreshSharedState() async throws {
+    let severity: Headache.Severity? = try await currentHeadache { headache, _ in
+      return headache?.severity
+    }
+    preferences.shared.setCurrentSeverity(severity)
+  }
+
   /// The start time of the current headache, if one is in progress.
   func currentHeadacheStart() async throws -> Date? {
     return try await currentHeadache { headache, _ in
@@ -817,7 +854,7 @@ extension HeadacheManager {
     
     if create {
       let identifier = try await currentSeverityIdentifier()
-      try await createTrainingData(from: input, severityIdentifier: identifier)
+      try await createTrainingData(from: input)
     }
     
     if predict {
@@ -835,33 +872,19 @@ extension HeadacheManager {
     }
   }
   
-  /// Create new training data and sets its `severity` relationship to the severity
-  /// with the given identifier. If no identifier is present, then the training data is
-  /// still created but orphaned (a not-present severity).
+  /// Creates new training data from the given input.
   ///
-  /// The relationship is advisory provenance; training labels are derived
-  /// from headache intervals at training time, so edits to a severity never
-  /// require replacing its training data.
+  /// Training labels are derived from headache intervals at training time,
+  /// so no linkage to the triggering severity is kept. (The old provenance
+  /// relationship crossed the Cloud/Local store boundary and was removed in
+  /// model 2.1.)
   ///
-  /// - Parameters:
-  ///   - input: The input data to create the training data from.
-  ///   - severityIdentifier: The identifier of the training data's parent severity, if any.
-  func createTrainingData(from input: ModelInput, severityIdentifier: UUID? = nil) async throws {
+  /// - Parameter input: The input data to create the training data from.
+  func createTrainingData(from input: ModelInput) async throws {
     logInfo("Creating training data...")
     try await DataController.shared.performInBackground(saveOnComplete: true) { context in
-      // Create the training data
-      let trainingData = TrainingData(context: context, input: input)
+      _ = TrainingData(context: context, input: input)
       logDebug("Created training data.")
-
-      if let severityIdentifier = severityIdentifier {
-        let request = SeverityState.fetchRequest(withIdentifier: severityIdentifier)
-        if let severity = ((try? context.fetch(request)) ?? []).first {
-          severity.addToTrainingData(trainingData)
-        }
-        else {
-          logWarning("Unable to add training data to severity with identifier: \(severityIdentifier.uuidString)")
-        }
-      }
     }
   }
   

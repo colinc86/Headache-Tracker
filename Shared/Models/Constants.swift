@@ -35,6 +35,9 @@ struct Constants {
   
   /// The application's app group identifier.
   static let appGroupIdentifier = "group.com.cnc.Headache-Tracker.contents"
+
+  /// The CloudKit container mirroring the user-data store.
+  static let cloudKitContainerIdentifier = "iCloud.com.cnc.Headache-Tracker"
   
   struct AssetKeys {
     

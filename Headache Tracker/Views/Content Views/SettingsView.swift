@@ -85,6 +85,34 @@ struct SettingsView: View {
     }
   }
 
+  /// Whether the sync-enable confirmation is showing.
+  @State private var showingSyncConfirmation = false
+
+  /// Whether the relaunch-required alert is showing.
+  @State private var showingRelaunchAlert = false
+
+  /// The sync preference (read at store setup; not @AppStorage because
+  /// changes only apply on relaunch anyway).
+  @State private var syncEnabled = Preferences.Sync().enabled
+
+  /// The toggle binding: enabling asks for confirmation first; either
+  /// direction requires a relaunch.
+  private var syncToggleBinding: Binding<Bool> {
+    Binding {
+      syncEnabled
+    } set: { newValue in
+      if newValue {
+        showingSyncConfirmation = true
+      }
+      else {
+        var sync = Preferences.Sync()
+        sync.enabled = false
+        syncEnabled = false
+        showingRelaunchAlert = true
+      }
+    }
+  }
+
   /// The binding to modify the check-in reminder time.
   private var checkInReminderDate: Binding<Date> {
     Binding<Date> {
@@ -180,12 +208,19 @@ struct SettingsView: View {
         }
         
         // Data
-        Section("Data") {
+        Section {
           NavigationLink {
             ExportView()
           } label: {
             Text("Export for Clinician")
           }
+
+          Toggle("iCloud Sync", isOn: syncToggleBinding)
+            .tint(colorTheme.baseColor)
+        } header: {
+          SectionTitleView(title: "Data")
+        } footer: {
+          SectionFooterView(title: "Sync your headaches, medications, tags, and check-ins across devices. Prediction and training data stay on this device.")
         }
 
         // Information
@@ -237,6 +272,19 @@ struct SettingsView: View {
         #endif
       }
       .navigationTitle("Settings")
+    }
+    .confirmationDialog("Turn on iCloud Sync? Your headache log will upload to your private iCloud database. This also enables change tracking on the database, which stays on even if you turn sync off later.", isPresented: $showingSyncConfirmation, titleVisibility: .visible) {
+      Button("Turn On Sync") {
+        var sync = Preferences.Sync()
+        sync.enabled = true
+        syncEnabled = true
+        showingRelaunchAlert = true
+      }
+    }
+    .alert("Relaunch Required", isPresented: $showingRelaunchAlert) {
+      Button("OK") {}
+    } message: {
+      Text("Quit and reopen the app for the sync change to take effect.")
     }
     .sheet(isPresented: $showingReportBug, onDismiss: nil) {
       FeedbackView(type: .bug)

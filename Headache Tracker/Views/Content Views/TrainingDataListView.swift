@@ -29,7 +29,7 @@ struct TrainingDataListView: View {
         NavigationLink {
           TrainingDataView(trainingData: data)
         } label: {
-          SubtitleCell(title: data.timestamp?.formattedNonRelative() ?? "N/A", subtitle: data.severity?.severity.title ?? "-")
+          SubtitleCell(title: data.timestamp?.formattedNonRelative() ?? "N/A", subtitle: data.derivedSeverity?.title ?? "-")
         }
       }
       .onDelete(perform: deleteTrainingData)
@@ -51,7 +51,6 @@ extension TrainingDataListView {
   private func deleteTrainingData(offsets: IndexSet) {
     withAnimation {
       offsets.map { trainingData[$0] }.forEach({ element in
-        element.severity?.removeFromTrainingData(element)
         viewContext.delete(element)
       })
     }

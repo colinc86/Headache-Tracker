@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D0A0D0A0D0A0D0A000000011 /* CloudMigrator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0A0D0A0D0A0D0A000000001 /* CloudMigrator.swift */; };
 		D080D080D080D08000000011 /* ClinicianReportData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D080D080D080D08000000001 /* ClinicianReportData.swift */; };
 		D080D080D080D08000000012 /* ClinicianReportBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = D080D080D080D08000000002 /* ClinicianReportBuilder.swift */; };
 		D080D080D080D08000000013 /* ReportPageViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = D080D080D080D08000000003 /* ReportPageViews.swift */; };
@@ -323,6 +324,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		D0A0D0A0D0A0D0A000000001 /* CloudMigrator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CloudMigrator.swift"; sourceTree = "<group>"; };
+		D090D090D090D09000000001 /* Headache_Tracker 2.1.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Headache_Tracker 2.1.xcdatamodel"; sourceTree = "<group>"; };
 		D080D080D080D08000000001 /* ClinicianReportData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ClinicianReportData.swift"; sourceTree = "<group>"; };
 		D080D080D080D08000000002 /* ClinicianReportBuilder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ClinicianReportBuilder.swift"; sourceTree = "<group>"; };
 		D080D080D080D08000000003 /* ReportPageViews.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ReportPageViews.swift"; sourceTree = "<group>"; };
@@ -925,6 +928,7 @@
 			isa = PBXGroup;
 			children = (
 				CF60CF60CF60CF6000000005 /* Router.swift */,
+				D0A0D0A0D0A0D0A000000001 /* CloudMigrator.swift */,
 				D070D070D070D07000000002 /* LiveActivityManager.swift */,
 				3B93330127CF51C600BACE93 /* AppDelegate.swift */,
 				3BF5313627ACE18D00056673 /* Headache_TrackerApp.swift */,
@@ -1426,6 +1430,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D0A0D0A0D0A0D0A000000011 /* CloudMigrator.swift in Sources */,
 				D080D080D080D08000000011 /* ClinicianReportData.swift in Sources */,
 				D080D080D080D08000000012 /* ClinicianReportBuilder.swift in Sources */,
 				D080D080D080D08000000013 /* ReportPageViews.swift in Sources */,
@@ -2310,6 +2315,7 @@
 		3BF5314127ACE18F00056673 /* Headache_Tracker.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				D090D090D090D09000000001 /* Headache_Tracker 2.1.xcdatamodel */,
 				3B10D45627ED7D78004B70AC /* Headache_Tracker 2.0.xcdatamodel */,
 				3B10D45527ED7D78004B69AB /* Headache_Tracker 1.9.xcdatamodel */,
 				3B10D45427ED7D78004B68AA /* Headache_Tracker 1.8.xcdatamodel */,
@@ -2323,7 +2329,7 @@
 				3B051A4927B0B3590017131D /* Headache_Tracker 1.0.xcdatamodel */,
 				3BF5314227ACE18F00056673 /* Headache_Tracker.xcdatamodel */,
 			);
-			currentVersion = 3B10D45627ED7D78004B70AC /* Headache_Tracker 2.0.xcdatamodel */;
+			currentVersion = D090D090D090D09000000001 /* Headache_Tracker 2.1.xcdatamodel */;
 			path = Headache_Tracker.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;

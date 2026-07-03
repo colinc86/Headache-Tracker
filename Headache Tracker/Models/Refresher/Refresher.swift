@@ -233,7 +233,7 @@ extension Refresher {
         // Should we create new training data?
         // If it's been more than half an hour then yes.
         if let timestamp = try await self.headacheManager.lastTrainingDataDate(), Date().timeIntervalSince(timestamp) > 1800.0 {
-          try await self.headacheManager.createTrainingData(from: input, severityIdentifier: currentSeverityID)
+          try await self.headacheManager.createTrainingData(from: input)
         }
 
         // Run a prediction when there's no current headache, or when the
