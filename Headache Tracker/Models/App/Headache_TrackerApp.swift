@@ -78,6 +78,9 @@ extension Headache_TrackerApp {
       catch {
         logError("Error checking for incomplete training data: \(error)")
       }
+
+      // Catch edits, deletes, and the activity lifetime limit
+      await LiveActivityManager.shared.reconcile(headacheManager: appDelegate.headacheManager)
     }
   }
   

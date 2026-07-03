@@ -51,6 +51,12 @@ struct LogSeverityIntent: LiveActivityIntent {
         interval: preferences.checkInInterval)
     }
 
+    // The intent runs in the app process, but this file also compiles in
+    // the widget target where LiveActivityManager doesn't exist.
+    #if !WIDGET_EXTENSION
+    await LiveActivityManager.shared.reconcile(headacheManager: manager)
+    #endif
+
     return .result()
   }
 

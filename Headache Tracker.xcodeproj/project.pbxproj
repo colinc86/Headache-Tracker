@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D070D070D070D07000000011 /* HeadacheActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = D070D070D070D07000000001 /* HeadacheActivityAttributes.swift */; };
+		D070D070D070D07000000012 /* HeadacheActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = D070D070D070D07000000001 /* HeadacheActivityAttributes.swift */; };
+		D070D070D070D07000000013 /* LiveActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D070D070D070D07000000002 /* LiveActivityManager.swift */; };
+		D070D070D070D07000000014 /* HeadacheLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = D070D070D070D07000000003 /* HeadacheLiveActivity.swift */; };
 		CF60CF60CF60CF6000000021 /* AlertManager+Delegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF60CF60CF60CF6000000001 /* AlertManager+Delegate.swift */; };
 		CF60CF60CF60CF6000000022 /* HeadacheAppShortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF60CF60CF60CF6000000002 /* HeadacheAppShortcuts.swift */; };
 		CF60CF60CF60CF6000000023 /* SeverityAppEnum.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF60CF60CF60CF6000000003 /* SeverityAppEnum.swift */; };
@@ -315,6 +319,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		D070D070D070D07000000001 /* HeadacheActivityAttributes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "HeadacheActivityAttributes.swift"; sourceTree = "<group>"; };
+		D070D070D070D07000000002 /* LiveActivityManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "LiveActivityManager.swift"; sourceTree = "<group>"; };
+		D070D070D070D07000000003 /* HeadacheLiveActivity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "HeadacheLiveActivity.swift"; sourceTree = "<group>"; };
 		CF60CF60CF60CF6000000001 /* AlertManager+Delegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "AlertManager+Delegate.swift"; sourceTree = "<group>"; };
 		CF60CF60CF60CF6000000002 /* HeadacheAppShortcuts.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "HeadacheAppShortcuts.swift"; sourceTree = "<group>"; };
 		CF60CF60CF60CF6000000003 /* SeverityAppEnum.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "SeverityAppEnum.swift"; sourceTree = "<group>"; };
@@ -709,6 +716,7 @@
 				3B3FFE6C27D592A000DFACC1 /* DescribableError.swift */,
 				3B3FFE8927D592A000DFACC1 /* Formatters.swift */,
 				3B3FFE5A27D592A000DFACC1 /* HeadacheManager.swift */,
+				D070D070D070D07000000001 /* HeadacheActivityAttributes.swift */,
 				CC30CC30CC30CC3000000004 /* HeadacheManager+Exposures.swift */,
 				CC30CC30CC30CC3000000001 /* HeadacheManager+Medications.swift */,
 				3B3FFE5827D592A000DFACC1 /* Outlook.swift */,
@@ -889,6 +897,7 @@
 			isa = PBXGroup;
 			children = (
 				CF60CF60CF60CF6000000005 /* Router.swift */,
+				D070D070D070D07000000002 /* LiveActivityManager.swift */,
 				3B93330127CF51C600BACE93 /* AppDelegate.swift */,
 				3BF5313627ACE18D00056673 /* Headache_TrackerApp.swift */,
 				3B93330327CF51D500BACE93 /* SceneDelegate.swift */,
@@ -921,6 +930,7 @@
 				3B9332F927CF3CC300BACE93 /* Outlook */,
 				3B9332FA27CF3CDE00BACE93 /* Severity */,
 				3B68BE5227C349B9007AAAC6 /* Headache_Tracker_Widget.swift */,
+				D070D070D070D07000000003 /* HeadacheLiveActivity.swift */,
 				3B68BE5627C349BA007AAAC6 /* Info.plist */,
 			);
 			path = "Headache Tracker Widget";
@@ -1290,6 +1300,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D070D070D070D07000000012 /* HeadacheActivityAttributes.swift in Sources */,
+				D070D070D070D07000000014 /* HeadacheLiveActivity.swift in Sources */,
 				CF60CF60CF60CF6000000024 /* SeverityAppEnum.swift in Sources */,
 				CF60CF60CF60CF6000000026 /* LogSeverityIntent.swift in Sources */,
 				CF60CF60CF60CF6000000028 /* AlertManager.swift in Sources */,
@@ -1386,6 +1398,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D070D070D070D07000000011 /* HeadacheActivityAttributes.swift in Sources */,
+				D070D070D070D07000000013 /* LiveActivityManager.swift in Sources */,
 				CF60CF60CF60CF6000000021 /* AlertManager+Delegate.swift in Sources */,
 				CF60CF60CF60CF6000000022 /* HeadacheAppShortcuts.swift in Sources */,
 				CF60CF60CF60CF6000000023 /* SeverityAppEnum.swift in Sources */,
@@ -1715,6 +1729,7 @@
 		3B68BE5B27C349BA007AAAC6 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) WIDGET_EXTENSION";
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = "Headache Tracker WidgetExtension.entitlements";
@@ -1744,6 +1759,7 @@
 		3B68BE5C27C349BA007AAAC6 /* Preview */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) WIDGET_EXTENSION";
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = "Headache Tracker WidgetExtension.entitlements";
@@ -1773,6 +1789,7 @@
 		3B68BE5D27C349BA007AAAC6 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) WIDGET_EXTENSION";
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = "Headache Tracker WidgetExtension.entitlements";

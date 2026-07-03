@@ -292,6 +292,9 @@ extension HeadacheViews {
     
     // Remove any pending alerts
     alertManager.removePendingRequests(withIdentifiers: ["headache-check-in"])
+
+    // End the Live Activity
+    await LiveActivityManager.shared.reconcile(headacheManager: headacheManager)
   }
   
   /// Shows an alert to the user.
@@ -342,6 +345,7 @@ extension HeadacheViews {
           // Remove any alerts
           if !headache.resolved {
             alertManager.removePendingRequests(withIdentifiers: ["headache-check-in"])
+            await LiveActivityManager.shared.reconcile(headacheManager: headacheManager)
           }
           
           // Dismiss the view

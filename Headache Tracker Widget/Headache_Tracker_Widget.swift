@@ -13,5 +13,6 @@ struct HeadacheWidgets: WidgetBundle {
   var body: some Widget {
     OutlookWidget()
     SeverityWidget()
+    HeadacheLiveActivity()
   }
 }

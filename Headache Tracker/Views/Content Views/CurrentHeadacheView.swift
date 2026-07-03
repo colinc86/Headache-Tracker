@@ -284,6 +284,9 @@ extension CurrentHeadacheView.ViewModel {
     // Get the identifier
     let identifier = try await headacheManager.currentHeadacheIdentifier()
     try await self.refresher.presentCheckInAlert(with: identifier)
+
+    // Keep the Live Activity in sync
+    await LiveActivityManager.shared.reconcile(headacheManager: headacheManager)
   }
   
   /// The action to perform if there is no headache.
