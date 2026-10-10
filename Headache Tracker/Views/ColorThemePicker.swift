@@ -1,5 +1,5 @@
 //
-//  ColorSchemePicker.swift
+//  ColorThemePicker.swift
 //  Headache Tracker
 //
 //  Created by Colin Campbell on 3/26/22.
@@ -29,6 +29,7 @@ struct ColorThemePicker: View {
       .pickerStyle(InlinePickerStyle())
     }
     .listStyle(DefaultListStyle())
+    .navigationTitle("Theme")
     .navigationBarTitleDisplayMode(.inline)
   }
   

@@ -97,9 +97,20 @@ extension WeatherData {
       return
     }
 
+    // The device-barometer reading was captured from the phone's own sensor at
+    // log time. It's location-independent and can't be re-derived from a
+    // historical weather query, so a re-fetch (which only carries station
+    // weather for a past date) must preserve it rather than dropping it.
+    let priorPresence = presence
+    let hadDevicePressure = priorPresence.isEmpty ? devicePressure != 0.0 : priorPresence.contains(.devicePressure)
+
     var presence = WeatherFieldPresence.station
     if let barometricPressure = weatherStatistics.barometricPressure {
       devicePressure = barometricPressure
+      presence.insert(.devicePressure)
+    }
+    else if hadDevicePressure {
+      // Keep the previously recorded device pressure and its presence bit.
       presence.insert(.devicePressure)
     }
 

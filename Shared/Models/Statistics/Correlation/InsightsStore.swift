@@ -60,15 +60,18 @@ extension InsightsStore {
   ///
   /// - Parameters:
   ///   - rowCount: The current number of training data rows.
-  ///   - exposureCount: The current number of logged exposures.
+  ///   - enabledFingerprint: The fingerprint of the currently enabled
+  ///     predictors. A cached report computed with a different set is stale —
+  ///     otherwise toggling a predictor off would leave its insights on screen
+  ///     until the report aged out or the row count moved.
   /// - Returns: A boolean.
-  func isStale(rowCount: Int, exposureCount: Int) -> Bool {
+  func isStale(rowCount: Int, enabledFingerprint: String) -> Bool {
     guard let report = load() else {
       return true
     }
     return report.schemaVersion != InsightsReport.currentSchemaVersion
       || report.rowCount != rowCount
-      || (report.exposureCount ?? 0) != exposureCount
+      || report.enabledFingerprint != enabledFingerprint
       || Date().timeIntervalSince(report.generatedAt) > 86400.0
   }
 

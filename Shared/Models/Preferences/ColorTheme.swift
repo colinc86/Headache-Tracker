@@ -254,7 +254,18 @@ struct ColorTheme: Codable, Equatable, Hashable, Identifiable, RawRepresentable 
     default: return notPresent
     }
   }
-  
+
+  /// The tint color to use for the given risk tier. Centralized so every
+  /// forecast surface — the Outlook card, the widget, and the Risk Live
+  /// Activity — stays coherent across themes instead of hand-keeping copies.
+  func color(for tier: RiskPrediction.RiskTier) -> Color {
+    switch tier {
+    case .low: return mint
+    case .elevated: return orange
+    case .high: return pink
+    }
+  }
+
   func encode(to encoder: Encoder) throws {
     var container = encoder.container(keyedBy: CodingKeys.self)
     try container.encode(name, forKey: .name)
@@ -287,6 +298,8 @@ extension ColorTheme: CaseIterable {
     .grayscale,
     .monokai,
     .github,
+    .night,
+    .sunrise,
     .green,
     .indigo,
     .orange,
@@ -342,6 +355,38 @@ extension ColorTheme: CaseIterable {
                                  purple: Color(#colorLiteral(red: 0.7302459478, green: 0.1746567488, blue: 0.6364159584, alpha: 1)),
                                  teal: Color(#colorLiteral(red: 0.09415204078, green: 0.5254810452, blue: 0.6980336308, alpha: 1)))
   
+  /// A calm, low-glare dark theme: a periwinkle base with a cool→warm
+  /// severity ramp that reads well against dark surfaces.
+  static let night = ColorTheme(
+    name: "Night",
+    baseColor: Color(.displayP3, red: 0.56, green: 0.63, blue: 0.98, opacity: 1.0),
+    cyan: Color(.displayP3, red: 0.38, green: 0.73, blue: 0.86, opacity: 1.0),
+    mint: Color(.displayP3, red: 0.44, green: 0.79, blue: 0.68, opacity: 1.0),
+    yellow: Color(.displayP3, red: 0.87, green: 0.79, blue: 0.52, opacity: 1.0),
+    orange: Color(.displayP3, red: 0.91, green: 0.62, blue: 0.44, opacity: 1.0),
+    red: Color(.displayP3, red: 0.93, green: 0.45, blue: 0.53, opacity: 1.0),
+    pink: Color(.displayP3, red: 0.90, green: 0.53, blue: 0.73, opacity: 1.0),
+    green: Color(.displayP3, red: 0.44, green: 0.79, blue: 0.68, opacity: 1.0),
+    indigo: Color(.displayP3, red: 0.56, green: 0.63, blue: 0.98, opacity: 1.0),
+    purple: Color(.displayP3, red: 0.71, green: 0.59, blue: 0.96, opacity: 1.0),
+    teal: Color(.displayP3, red: 0.38, green: 0.73, blue: 0.86, opacity: 1.0))
+
+  /// A warm dawn theme: a coral base over a pre-dawn-blue → gold → rose
+  /// severity ramp.
+  static let sunrise = ColorTheme(
+    name: "Sunrise",
+    baseColor: Color(.displayP3, red: 0.98, green: 0.55, blue: 0.45, opacity: 1.0),
+    cyan: Color(.displayP3, red: 0.55, green: 0.68, blue: 0.90, opacity: 1.0),
+    mint: Color(.displayP3, red: 0.72, green: 0.80, blue: 0.62, opacity: 1.0),
+    yellow: Color(.displayP3, red: 0.99, green: 0.82, blue: 0.42, opacity: 1.0),
+    orange: Color(.displayP3, red: 0.98, green: 0.60, blue: 0.35, opacity: 1.0),
+    red: Color(.displayP3, red: 0.95, green: 0.38, blue: 0.44, opacity: 1.0),
+    pink: Color(.displayP3, red: 0.97, green: 0.58, blue: 0.66, opacity: 1.0),
+    green: Color(.displayP3, red: 0.72, green: 0.80, blue: 0.62, opacity: 1.0),
+    indigo: Color(.displayP3, red: 0.55, green: 0.58, blue: 0.86, opacity: 1.0),
+    purple: Color(.displayP3, red: 0.80, green: 0.56, blue: 0.80, opacity: 1.0),
+    teal: Color(.displayP3, red: 0.55, green: 0.68, blue: 0.90, opacity: 1.0))
+
   static let green = ColorTheme(name: "Green", baseColor: .green, variation: .green)
   static let indigo = ColorTheme(name: "Indigo", baseColor: .indigo, variation: .indigo)
   static let orange = ColorTheme(name: "Orange", baseColor: .orange, variation: .orange)

@@ -21,8 +21,6 @@ struct SettingsView: View {
   /// The app's alert manager.
   @EnvironmentObject private var alertManager: AlertManager
   
-  /// The app's data refresher.
-  @EnvironmentObject private var refresher: Refresher
   
   /// Whether we are showing the bug report content view.
   @State private var showingReportBug = false
@@ -36,6 +34,10 @@ struct SettingsView: View {
   @AppStorage(Preferences.General.Keys.shouldDimScreen) private var shouldDimScreen = Preferences.General.Defaults.shouldDimScreen
   @AppStorage(Preferences.General.Keys.screenDimPercent) private var screenDimPercent = Preferences.General.Defaults.screenDimPercent
   @AppStorage(Preferences.General.Keys.crashReportingEnabled) private var crashReportingEnabled = Preferences.General.Defaults.crashReportingEnabled
+  @AppStorage(Preferences.General.Keys.aiSummaries) private var aiSummaries = Preferences.General.Defaults.aiSummaries
+
+  /// The written summaries, for the Apple Intelligence setting.
+  @EnvironmentObject private var summaryService: SummaryService
   @AppStorage(Preferences.Health.Keys.enabled) private var healthEnabled = Preferences.Health.Defaults.enabled
   @AppStorage(Preferences.Health.Keys.deleteDisposition) private var healthDeleteDisposition = Preferences.Health.Defaults.deleteDisposition
   @AppStorage(Preferences.Headaches.Keys.defaultHeadacheClassification) private var defaultHeadacheClassification = Preferences.Headaches.Defaults.defaultHeadacheClassification
@@ -45,8 +47,6 @@ struct SettingsView: View {
   @AppStorage(Preferences.Notifications.Keys.realTimeAlerts) private var realTimeAlerts = Preferences.Notifications.Defaults.realTimeAlerts
   @AppStorage(Preferences.Notifications.Keys.dailyOutlookAlerts) private var dailyOutlookAlerts = Preferences.Notifications.Defaults.dailyOutlookAlerts
   @AppStorage(Preferences.Notifications.Keys.dailyOutlookTime) private var dailyOutlookTime = Preferences.Notifications.Defaults.dailyOutlookTime
-  @AppStorage(Preferences.Notifications.Keys.checkInReminderAlerts) private var checkInReminderAlerts = Preferences.Notifications.Defaults.checkInReminderAlerts
-  @AppStorage(Preferences.Notifications.Keys.checkInReminderTime) private var checkInReminderTime = Preferences.Notifications.Defaults.checkInReminderTime
   
   /// The headaches fetch request.
   @FetchRequest(
@@ -56,14 +56,15 @@ struct SettingsView: View {
   
   // MARK: Computed properties
     
-  /// The health app integration binding.
-  /// Will authorize health kit if set to true.
+  /// The health app integration binding: reflects the stored preference and
+  /// requests HealthKit authorization the moment it's switched on, so the
+  /// permission prompt appears immediately rather than only on the next launch.
   private var healthAppIntegration: Binding<Bool> {
     Binding<Bool> {
-      return !healthKitManager.needsAuthorization() && healthEnabled
+      return healthEnabled
     } set: { newValue in
       healthEnabled = newValue
-      if  healthEnabled {
+      if newValue {
         Task {
           do {
             try await healthKitManager.authorize()
@@ -113,18 +114,16 @@ struct SettingsView: View {
     }
   }
 
-  /// The binding to modify the check-in reminder time.
-  private var checkInReminderDate: Binding<Date> {
-    Binding<Date> {
-      return Calendar.current.startOfDay(for: Date()).addingTimeInterval(checkInReminderTime)
-    } set: { newValue in
-      checkInReminderTime = Calendar.current.timeIntervalSinceMidnight(newValue)
-    }
-  }
-  
   /// Whether or not alerts are authorized.
   private var alertsDenied: Bool {
     return alertManager.authorizationStatus == .notDetermined || alertManager.authorizationStatus == .denied
+  }
+
+  /// "enabled/total" predictors, for the My Predictors cell subtitle.
+  private var predictorsSummary: String {
+    let settings = Preferences().predictors.settingsDictionary()
+    let enabled = settings.values.lazy.filter({ $0 }).count
+    return "\(enabled)/\(settings.count)"
   }
   
   // MARK: View body
@@ -134,7 +133,7 @@ struct SettingsView: View {
       Form {
         // Integrations
         Section("Integrations") {
-          Toggle("Health App Integration", isOn: $healthEnabled)
+          Toggle("Health App Integration", isOn: healthAppIntegration)
             .tint(colorTheme.baseColor)
           
           Picker("Delete Health Data", selection: $healthDeleteDisposition) {
@@ -178,35 +177,22 @@ struct SettingsView: View {
           NavigationLink {
             PredictorsView()
           } label: {
-            SubtitleCell(title: "My Predictors", subtitle: "\(Preferences().predictors.settingsDictionary().reduce(0, { $0 + ($1.value ? 1 : 0) }))/\(Preferences().predictors.settingsDictionary().keys.count)")
+            SubtitleCell(title: "My Predictors", subtitle: predictorsSummary)
           }
           
           Toggle("Prediction Notifications", isOn: $realTimeAlerts)
             .tint(colorTheme.baseColor)
-          
+            .disabled(alertsDenied)
+
           Toggle("Morning Brief", isOn: $dailyOutlookAlerts)
             .tint(colorTheme.baseColor)
-          
+            .disabled(alertsDenied)
+
           DatePicker("Morning Brief Time", selection: dailyOutlookDate, displayedComponents: .hourAndMinute)
             .disabled(!dailyOutlookAlerts)
-        }
-
-        // Daily check-in
-        Section {
-          Toggle("Check-In Reminder", isOn: $checkInReminderAlerts)
-            .tint(colorTheme.baseColor)
             .disabled(alertsDenied)
-            .onChange(of: checkInReminderAlerts) { _, _ in rescheduleCheckInReminder() }
-
-          DatePicker("Reminder Time", selection: checkInReminderDate, displayedComponents: .hourAndMinute)
-            .disabled(!checkInReminderAlerts)
-            .onChange(of: checkInReminderTime) { _, _ in rescheduleCheckInReminder() }
-        } header: {
-          Text("Daily Check-In")
-        } footer: {
-          Text("An evening nudge to log the day's exposures.")
         }
-        
+
         // Data
         Section {
           NavigationLink {
@@ -220,7 +206,18 @@ struct SettingsView: View {
         } header: {
           Text("Data")
         } footer: {
-          Text("Sync your headaches, medications, tags, and check-ins across devices. Prediction and training data stay on this device.")
+          Text("Sync your headaches, medications, and tags across devices. Prediction and training data stay on this device.")
+        }
+
+        // Apple Intelligence summaries
+        Section {
+          Toggle("Apple Intelligence Summaries", isOn: $aiSummaries)
+            .tint(colorTheme.baseColor)
+            .onChange(of: aiSummaries) { _, _ in summaryService.invalidate() }
+        } header: {
+          Text("Summaries")
+        } footer: {
+          Text(summariesFooter)
         }
 
         // Information
@@ -243,13 +240,14 @@ struct SettingsView: View {
           
           Toggle("Dim Screen", isOn: $shouldDimScreen)
             .tint(colorTheme.baseColor)
-          
+
           Picker("Dimming Percent", selection: $screenDimPercent) {
             Text("25%").tag(0.25)
             Text("50%").tag(0.5)
             Text("75%").tag(0.75)
             Text("100%").tag(1.0)
           }
+          .disabled(!shouldDimScreen)
         }
          
         Section {
@@ -311,23 +309,29 @@ extension SettingsView {
     }
   }
 
-  /// Reschedules the evening check-in reminder to match preferences.
-  private func rescheduleCheckInReminder() {
-    Task {
-      do {
-        try await refresher.updateExposureReminderSchedule()
-      }
-      catch {
-        logError("Error scheduling check-in reminder: \(error)")
-      }
+}
+
+extension SettingsView {
+
+  /// What the summaries setting does, and why it can't run when it can't.
+  var summariesFooter: String {
+    let base = "The short explanations on Track and Profile are written on this device from your own data. Nothing leaves your phone."
+    switch summaryService.availability {
+    case .available:
+      return base
+    case .turnedOff:
+      return base + " Off, simpler built-in wording is used."
+    case .unavailable(let reason):
+      return base + " " + reason + " Built-in wording is used until then."
     }
   }
-  
+
 }
 
 struct SettingsView_Previews: PreviewProvider {
   static var previews: some View {
     SettingsView()
+      .environmentObject(SummaryService())
       .environment(\.managedObjectContext, Previewing.CoreData.viewContext)
       .environmentObject(Previewing.headacheManager)
       .environmentObject(Previewing.Prediction.predictor)

@@ -12,7 +12,12 @@ import SwiftUI
 struct HeadacheWidgets: WidgetBundle {
   var body: some Widget {
     OutlookWidget()
+    TwinRingWidget()
+    HorizonWidget()
+    SignalsWidget()
+    RiskClockWidget()
     SeverityWidget()
     HeadacheLiveActivity()
+    RiskLiveActivity()
   }
 }

@@ -33,9 +33,9 @@ struct TypeCard: View {
     ) {
       Button("Edit", action: editAction)
     } content: {
-      Text(type.rawValue.capitalized)
+      Text(type.title)
     } caption: {
-      Text(classification.rawValue.capitalized)
+      Text(classification.title)
     }
   }
 }

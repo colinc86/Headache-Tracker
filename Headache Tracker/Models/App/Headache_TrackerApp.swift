@@ -23,6 +23,9 @@ struct Headache_TrackerApp: App {
   @AppStorage(Preferences.General.Keys.shouldDimScreen) var shouldDimScreen = false
   @AppStorage(Preferences.General.Keys.screenDimPercent) var screenDimPercent = 0.5
   
+  /// The written summaries for the Track and Profile tabs.
+  @StateObject private var summaryService = SummaryService()
+
   /// The application did become active publisher.
   private let didBecomeActiveNotificationPublisher = NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)
   
@@ -47,6 +50,7 @@ struct Headache_TrackerApp: App {
         .environmentObject(appDelegate.refresher.alertManager)
         .environmentObject(appDelegate.refresher)
         .environmentObject(appDelegate.router)
+        .environmentObject(summaryService)
       
         // Subscribe to notifications
         .onReceive(didBecomeActiveNotificationPublisher, perform: didBecomeActive)

@@ -163,7 +163,9 @@ struct ReportLogPage: View {
             Text(Self.dateFormatter.string(from: row.start))
             Text(row.type)
             Text(row.peakSeverity.title)
-            Text(Formatters.formatInterval(row.duration))
+            // An unresolved headache has no end yet — its duration is only
+            // "so far", so label it rather than print a misleading interval.
+            Text(row.end == nil ? "ongoing" : Formatters.formatInterval(row.duration))
             Text(row.medications.isEmpty ? "—" : row.medications.joined(separator: ", "))
               .lineLimit(2)
           }
@@ -179,7 +181,7 @@ struct ReportLogPage: View {
 
 // MARK: - Insights page
 
-/// Insights, medications, and exposures.
+/// Insights and medications.
 struct ReportInsightsPage: View {
 
   let data: ClinicianReportData
@@ -246,23 +248,6 @@ struct ReportInsightsPage: View {
               }
               .font(.caption)
             }
-          }
-        }
-      }
-
-      if !data.exposureCounts.isEmpty {
-        VStack(alignment: .leading, spacing: 8) {
-          Text("Logged exposures")
-            .font(.headline)
-
-          ForEach(data.exposureCounts, id: \.title) { exposure in
-            HStack {
-              Text(exposure.title)
-              Spacer()
-              Text("\(exposure.count)×")
-                .foregroundColor(.secondary)
-            }
-            .font(.caption)
           }
         }
       }

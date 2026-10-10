@@ -44,6 +44,31 @@ class Weather: CustomStringConvertible {
     let location: WeatherLocation
     let current: WeatherData
     let past: WeatherData
+
+    /// Every hourly point fetched, oldest first, for the temporal-context
+    /// columns. Empty for spreads decoded from older records.
+    var hourly: [WeatherData] = []
+
+    init(spread: Int, location: WeatherLocation, current: WeatherData, past: WeatherData, hourly: [WeatherData] = []) {
+      self.spread = spread
+      self.location = location
+      self.current = current
+      self.past = past
+      self.hourly = hourly
+    }
+
+    private enum CodingKeys: String, CodingKey {
+      case spread, location, current, past, hourly
+    }
+
+    init(from decoder: Decoder) throws {
+      let container = try decoder.container(keyedBy: CodingKeys.self)
+      spread = try container.decode(Int.self, forKey: .spread)
+      location = try container.decode(WeatherLocation.self, forKey: .location)
+      current = try container.decode(WeatherData.self, forKey: .current)
+      past = try container.decode(WeatherData.self, forKey: .past)
+      hourly = try container.decodeIfPresent([WeatherData].self, forKey: .hourly) ?? []
+    }
   }
   
   var description: String {
@@ -85,6 +110,43 @@ class Weather: CustomStringConvertible {
       sigmaTemperature: sigmaTemperature)
   }
   
+  /// Trailing window statistics for the station fields, from the hourly
+  /// points. Device pressure has no history; the sigma fields are already
+  /// deltas.
+  var windowStatistics: [WeatherField: WindowStatistics] {
+    return windowStatistics(endingAt: Date(timeIntervalSince1970: weatherSpread.current.datetimeEpoch))
+  }
+
+  /// Trailing window statistics ending at an arbitrary date inside the
+  /// fetched hourly span (the back-fill slices several rows from one fetch).
+  ///
+  /// - Parameter end: The end of the window.
+  /// - Returns: The statistics per field.
+  func windowStatistics(endingAt end: Date) -> [WeatherField: WindowStatistics] {
+    guard !weatherSpread.hourly.isEmpty else {
+      return [:]
+    }
+
+    var result = [WeatherField: WindowStatistics]()
+    for field in WeatherField.windowFields {
+      let samples: [(date: Date, value: Double)] = weatherSpread.hourly.map { hour in
+        let value: Double
+        switch field {
+        case .currentPressure: value = Measurement(value: hour.pressure, unit: UnitPressure.millibars).converted(to: .kilopascals).value
+        case .humidity: value = hour.humidity
+        default: value = hour.temp
+        }
+        return (Date(timeIntervalSince1970: hour.datetimeEpoch), value)
+      }
+      let series = WindowStatisticsCalculator.hourlySeries(from: samples, aggregate: .discreteAverage)
+      let buckets = WindowStatisticsCalculator.buckets(from: series, endingAt: end)
+      if let statistics = WindowStatisticsCalculator.statistics(hourlyBuckets: buckets, aggregate: .discreteAverage) {
+        result[field] = statistics
+      }
+    }
+    return result
+  }
+
   init(location: CLLocation, spread: WeatherSpread, pressure: Measurement<UnitPressure>?) {
     self.location = location
     weatherSpread = spread

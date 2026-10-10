@@ -65,8 +65,16 @@ struct Preferences {
       static let lastPredictionDate = Key("settings.debug.lastPredictionDate")
       static let nextPredictionDate = Key("settings.debug.nextPredictionDate")
       static let lastRiskAlertDate  = Key("settings.debug.lastRiskAlertDate")
+      static let lastNudgeDate      = Key("settings.debug.lastNudgeDate")
+      static let lastSeenRiskProbability = Key("settings.debug.lastSeenRiskProbability")
+      static let lastSeenTriggers   = Key("settings.debug.lastSeenTriggers")
+      static let lastModelAccuracy  = Key("settings.debug.lastModelAccuracy")
+      static let lastProspectiveAccuracy = Key("settings.debug.lastProspectiveAccuracy")
+      static let hadModel           = Key("settings.debug.hadModel")
+      static let personalizationEnabled = Key("settings.debug.personalizationEnabled")
+      static let ensembleEnabled    = Key("settings.debug.ensembleEnabled")
     }
-    
+
     struct Defaults {
       static let lastOutlookDate: Date? = nil
       static let nextOutlookDate: Date? = nil
@@ -75,6 +83,14 @@ struct Preferences {
       static let lastPredictionDate: Date? = nil
       static let nextPredictionDate: Date? = nil
       static let lastRiskAlertDate: Date? = nil
+      static let lastNudgeDate: Date? = nil
+      static let lastSeenRiskProbability: Double? = nil
+      static let lastSeenTriggers: [String] = []
+      static let lastModelAccuracy: Double? = nil
+      static let lastProspectiveAccuracy: Double? = nil
+      static let hadModel = false
+      static let personalizationEnabled = true
+      static let ensembleEnabled = true
     }
     
     /// The last date an outlook prediction was performed.
@@ -97,6 +113,37 @@ struct Preferences {
 
     /// The last date a high-risk alert was presented.
     @UserDefault(Keys.lastRiskAlertDate) var lastRiskAlertDate: Date? = Defaults.lastRiskAlertDate
+
+    /// The last date a preemptive (elevated-risk) nudge was presented.
+    @UserDefault(Keys.lastNudgeDate) var lastNudgeDate: Date? = Defaults.lastNudgeDate
+
+    /// The forecast probability the last time the home screen was viewed.
+    @UserDefault(Keys.lastSeenRiskProbability) var lastSeenRiskProbability: Double? = Defaults.lastSeenRiskProbability
+
+    /// The confident trigger feature raw values at last view (for "new trigger").
+    @UserDefault(Keys.lastSeenTriggers) var lastSeenTriggers: [String] = Defaults.lastSeenTriggers
+
+    /// The (legacy) held-out validation accuracy snapshot. No longer read: the
+    /// milestone compares prospective accuracy now, and a fresh key means the
+    /// first prospective reading can't fire a bogus "sharper" message against
+    /// an old validation number.
+    @UserDefault(Keys.lastModelAccuracy) var lastModelAccuracy: Double? = Defaults.lastModelAccuracy
+
+    /// The prospective (resolved-forecast) accuracy at the last milestone check.
+    @UserDefault(Keys.lastProspectiveAccuracy) var lastProspectiveAccuracy: Double? = Defaults.lastProspectiveAccuracy
+
+    /// Whether a trained model existed at the last milestone check.
+    @UserDefault(Keys.hadModel) var hadModel: Bool = Defaults.hadModel
+
+    /// Whether training evaluates a personalized candidate model (extended
+    /// temporal-context columns for the user's own confident triggers) and
+    /// ships it when it wins the rolling-origin comparison.
+    @UserDefault(Keys.personalizationEnabled) var personalizationEnabled: Bool = Defaults.personalizationEnabled
+
+    /// Whether training fits the bagged ensemble whose spread becomes the
+    /// forecast's range. Off, forecasts carry no range and grade on input
+    /// coverage alone.
+    @UserDefault(Keys.ensembleEnabled) var ensembleEnabled: Bool = Defaults.ensembleEnabled
   }
   
   /// Filter settings.
@@ -126,6 +173,7 @@ struct Preferences {
       static let shouldDimScreen       = Key("settings.general.shouldDimScreen")
       static let screenDimPercent      = Key("settings.general.screenDimPercent")
       static let crashReportingEnabled = Key("settings.general.enableCrashReporting")
+      static let aiSummaries           = Key("settings.general.aiSummaries")
     }
     
     struct Defaults {
@@ -134,6 +182,7 @@ struct Preferences {
       static let shouldDimScreen = false
       static let screenDimPercent = 0.5
       static let crashReportingEnabled = true
+      static let aiSummaries = true
     }
 
     /// The application's custom color theme.
@@ -151,6 +200,10 @@ struct Preferences {
 
     /// Whether or not to enable crash reporting with Crashlytics.
     @UserDefault(Keys.crashReportingEnabled) var crashReportingEnabled = Defaults.crashReportingEnabled
+
+    /// Whether Apple Intelligence writes the Track and Profile summaries when
+    /// it's available. Off, or unavailable, the templated summaries show.
+    @UserDefault(Keys.aiSummaries) var aiSummaries = Defaults.aiSummaries
   }
 
   /// Headache settings.
@@ -194,7 +247,6 @@ struct Preferences {
   /// List settings.
   struct Lists {
     struct Keys {
-      static let expandedProgression = Key("settings.listoptions.expandedProgression")
       static let type                = Key("settings.listoptions.type")
       static let onset               = Key("settings.listoptions.onset")
       static let duration            = Key("settings.listoptions.duration")
@@ -204,17 +256,12 @@ struct Preferences {
       static let outlook             = Key("settings.listoptions.outlook")
       static let severity            = Key("settings.listoptions.severity")
       static let medications         = Key("settings.listoptions.medications")
-      static let checkIn             = Key("settings.listoptions.checkIn")
       static let brief               = Key("settings.listoptions.brief")
     }
     
     struct Defaults {
-      static let expanded = false
       static let shown = true
     }
-    
-    /// Whether the progression view should be drawn expanded.
-    @UserDefault(Keys.expandedProgression) var expandedProgressionView = Defaults.expanded
 
     /// Whether the type view should be shown.
     @UserDefault(Keys.type) var showTypeView = Defaults.shown
@@ -243,9 +290,6 @@ struct Preferences {
     /// Whether the medications view should be shown.
     @UserDefault(Keys.medications) var showMedicationsView = Defaults.shown
 
-    /// Whether the daily check-in view should be shown.
-    @UserDefault(Keys.checkIn) var showCheckInView = Defaults.shown
-
     /// Whether the morning brief reasons should be shown.
     @UserDefault(Keys.brief) var showBriefView = Defaults.shown
   }
@@ -258,8 +302,6 @@ struct Preferences {
       static let realTimeAlerts     = Key("settings.notifications.realTimeAlerts")
       static let dailyOutlookAlerts = Key("settings.notifications.dailyOutlookAlerts")
       static let dailyOutlookTime   = Key("settings.notifications.dailyOutlookTime")
-      static let checkInReminderAlerts = Key("settings.notifications.checkInReminderAlerts")
-      static let checkInReminderTime   = Key("settings.notifications.checkInReminderTime")
     }
     
     struct Defaults {
@@ -268,8 +310,6 @@ struct Preferences {
       static let realTimeAlerts = false
       static let dailyOutlookAlerts = false
       static let dailyOutlookTime: TimeInterval = 28800.0
-      static let checkInReminderAlerts = false
-      static let checkInReminderTime: TimeInterval = 72000.0
     }
 
     /// Whether check-in alerts should be displayed to the user after
@@ -288,12 +328,6 @@ struct Preferences {
     /// The time interval after midnight at which a daily outlook alert should
     /// take place.
     @UserDefault(Keys.dailyOutlookTime) var dailyOutlookTime = Defaults.dailyOutlookTime
-
-    /// Whether an evening reminder to log the daily check-in is scheduled.
-    @UserDefault(Keys.checkInReminderAlerts) var checkInReminderAlerts = Defaults.checkInReminderAlerts
-
-    /// The time interval after midnight at which the check-in reminder fires.
-    @UserDefault(Keys.checkInReminderTime) var checkInReminderTime = Defaults.checkInReminderTime
   }
 
   /// Prediction settings.
@@ -321,6 +355,12 @@ struct Preferences {
       static let timeInDaylight             = Key("settings.predictors.timeInDaylight")
       static let exerciseMinutes            = Key("settings.predictors.exerciseMinutes")
       static let menstrualCycle             = Key("settings.predictors.menstrualCycle")
+      static let bodyTemperature            = Key("settings.predictors.bodyTemperature")
+      static let wristTemperature           = Key("settings.predictors.wristTemperature")
+      static let basalBodyTemperature       = Key("settings.predictors.basalBodyTemperature")
+      static let baselineRelative           = Key("settings.predictors.baselineRelative")
+      static let beatToBeatHRV              = Key("settings.predictors.beatToBeatHRV")
+      static let temporalContext            = Key("settings.predictors.temporalContext")
     }
     
     struct Defaults {
@@ -397,6 +437,68 @@ struct Preferences {
     /// Whether menstrual cycle data should be collected and correlated.
     @UserDefault(Keys.menstrualCycle) var menstrualCycle = Defaults.optIn
 
+    /// Whether body (skin) temperature should feed the model.
+    @UserDefault(Keys.bodyTemperature) var bodyTemperature = Defaults.enabled
+
+    /// Whether sleeping wrist temperature should feed the model.
+    @UserDefault(Keys.wristTemperature) var wristTemperature = Defaults.enabled
+
+    /// Whether basal body temperature should feed the model.
+    @UserDefault(Keys.basalBodyTemperature) var basalBodyTemperature = Defaults.enabled
+
+    /// Whether personal-baseline-relative autonomic features (rolling
+    /// z-scores) should feed the model, in addition to raw values.
+    @UserDefault(Keys.baselineRelative) var baselineRelative = Defaults.enabled
+
+    /// Whether beat-to-beat HRV (RMSSD/pNN50/LF-HF from the heartbeat series)
+    /// should be collected and fed to the model.
+    @UserDefault(Keys.beatToBeatHRV) var beatToBeatHRV = Defaults.enabled
+
+    /// Whether the model should include trailing-window context columns (24h
+    /// delta and 48h range per metric, from fixed clock windows).
+    @UserDefault(Keys.temporalContext) var temporalContext = Defaults.enabled
+
+    /// Whether a HealthKit metric feeds a model column under the current
+    /// toggles — the same gating the input providers apply to their raw
+    /// columns, so a metric's window context follows its raw column.
+    ///
+    /// - Parameter data: The metric.
+    /// - Returns: A boolean.
+    func isModelled(_ data: HealthKitData) -> Bool {
+      switch data {
+      case .mindfulSession: return mindfulSession
+      case .sleepSeconds: return sleepSeconds
+      case .sleepOnset: return sleepOnset
+      case .headphoneAudioExposure: return headphoneAudioExposure
+      case .stepCount: return stepCount
+      case .environmentalAudioExposure: return environmentalAudioExposure
+      case .heartRate: return heartRate
+      case .respiratoryRate: return respiratoryRate
+      case .oxygenSaturation: return oxygenSaturation
+      case .heartRateVariabilitySDNN: return heartRateVariability
+      case .walkingHeartRateAverage: return walkingHeartRateAverage
+      case .restingHeartRate: return restingHeartRate
+      case .bodyTemperature: return bodyTemperature
+      case .wristTemperature: return wristTemperature
+      case .basalBodyTemperature: return basalBodyTemperature
+      case .menstrualDaysSinceCycleStart, .menstrualFlowActive: return menstrualCycle
+      case .hrvRMSSD, .hrvPNN50, .hrvLFHF: return beatToBeatHRV
+      case .headache, .dietaryCaffeine, .dietaryWater, .timeInDaylight, .appleExerciseTime: return false
+      }
+    }
+
+    /// Whether a weather field feeds a model column under the current toggles.
+    ///
+    /// - Parameter field: The field.
+    /// - Returns: A boolean.
+    func isModelled(_ field: WeatherField) -> Bool {
+      switch field {
+      case .currentPressure, .devicePressure, .sigmaPressure: return barometricPressure
+      case .humidity, .sigmaHumidity: return humidity
+      case .temperature, .sigmaTemperature: return temperature
+      }
+    }
+
     /// Whether the given metric should be collected at all. The five
     /// correlation-only signals are gated at collection time; ML features
     /// are gated at feature-construction time instead.
@@ -409,6 +511,56 @@ struct Preferences {
       case .menstrualDaysSinceCycleStart, .menstrualFlowActive: return menstrualCycle
       default: return true
       }
+    }
+
+    /// Whether the given correlation feature should be analyzed by the
+    /// insights engine.
+    ///
+    /// The ML pipeline gates its columns at feature-construction time, but the
+    /// correlation engine reads stored rows directly — and a disabled metric's
+    /// historical values live on in `TrainingData` forever. Without this gate,
+    /// turning a predictor off would only stop *new* data while its insights
+    /// kept regenerating from frozen history.
+    ///
+    /// Deliberately exhaustive (no `default:`) so a new `CorrelationFeature`
+    /// fails to compile until it is mapped to a toggle.
+    ///
+    /// - Parameter feature: The feature.
+    /// - Returns: A boolean.
+    func isCorrelationEnabled(_ feature: CorrelationFeature) -> Bool {
+      switch feature {
+      case .sleepSeconds: return sleepSeconds
+      case .sleepOnsetHour: return sleepOnset
+      case .mindfulSeconds: return mindfulSession
+      case .stepCount: return stepCount
+      case .environmentalAudioExposure: return environmentalAudioExposure
+      case .headphoneAudioExposure: return headphoneAudioExposure
+      case .heartRate: return heartRate
+      case .restingHeartRate: return restingHeartRate
+      case .walkingHeartRateAverage: return walkingHeartRateAverage
+      case .heartRateVariability: return heartRateVariability
+      case .oxygenSaturation: return oxygenSaturation
+      case .respiratoryRate: return respiratoryRate
+      case .bodyTemperature: return bodyTemperature
+      case .wristTemperature: return wristTemperature
+      case .basalBodyTemperature: return basalBodyTemperature
+      case .hrvRMSSD, .hrvPNN50, .hrvLFHF: return beatToBeatHRV
+      case .dietaryCaffeine: return dietaryCaffeine
+      case .dietaryWater: return dietaryWater
+      case .timeInDaylight: return timeInDaylight
+      case .exerciseMinutes: return exerciseMinutes
+      case .menstrualDaysSinceCycleStart, .menstrualFlowActive: return menstrualCycle
+      case .pressure, .devicePressure, .sigmaPressure: return barometricPressure
+      case .humidity, .sigmaHumidity: return humidity
+      case .temperature, .sigmaTemperature: return temperature
+      }
+    }
+
+    /// The correlation features the user has enabled.
+    ///
+    /// - Returns: The enabled features.
+    func enabledCorrelationFeatures() -> Set<CorrelationFeature> {
+      return Set(CorrelationFeature.allCases.filter(isCorrelationEnabled))
     }
 
     /// Gets the current settings dictionary.
@@ -435,7 +587,13 @@ struct Preferences {
         Keys.dietaryWater: dietaryWater,
         Keys.timeInDaylight: timeInDaylight,
         Keys.exerciseMinutes: exerciseMinutes,
-        Keys.menstrualCycle: menstrualCycle
+        Keys.menstrualCycle: menstrualCycle,
+        Keys.bodyTemperature: bodyTemperature,
+        Keys.wristTemperature: wristTemperature,
+        Keys.basalBodyTemperature: basalBodyTemperature,
+        Keys.baselineRelative: baselineRelative,
+        Keys.beatToBeatHRV: beatToBeatHRV,
+        Keys.temporalContext: temporalContext
       ]
     }
   }
@@ -515,7 +673,7 @@ struct Preferences {
         NotificationCenter.default.post(name: Preferences.predictionDidChangeNotification, object: nil)
       }
       else {
-        WidgetCenter.shared.reloadTimelines(ofKind: Constants.Widgets.outlookWidgetKind)
+        WidgetReloader.reloadRisk()
       }
     }
 
@@ -524,11 +682,13 @@ struct Preferences {
     /// - Parameter severity: The current severity.
     mutating func setCurrentSeverity(_ severity: Headache.Severity?) {
       currentSeverity = severity
-      WidgetCenter.shared.reloadTimelines(ofKind: Constants.Widgets.severityWidgetKind)
+      WidgetReloader.reloadSeverity()
 
-      if severity == nil {
-        WidgetCenter.shared.reloadTimelines(ofKind: Constants.Widgets.outlookWidgetKind)
-      }
+      // Every risk widget flips between its active-headache and forecast
+      // states off the current severity, so reload them on every change —
+      // not only when a headache resolves. A reload re-renders from cached
+      // preferences; the widgets never run inference themselves.
+      WidgetReloader.reloadRisk()
     }
   }
 }

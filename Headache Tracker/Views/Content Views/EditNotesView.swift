@@ -25,20 +25,26 @@ struct EditNotesView: View {
   
   /// Whether the view is being saved.
   @State private var saving: Bool = false
-  
+
+  /// Focuses the editor so the keyboard is ready the moment the sheet opens.
+  @FocusState private var editorFocused: Bool
+
   var body: some View {
     NavigationStack {
       ZStack(alignment: .topLeading) {
         TextEditor(text: $notes)
-        
+          .focused($editorFocused)
+
         if notes.isEmpty {
           Text("Tap to add notes.")
             .foregroundColor(.secondary)
             .padding(.leading, 5)
             .padding(.top, 8)
+            .allowsHitTesting(false)
         }
       }
       .padding()
+      .onAppear { editorFocused = true }
       .navigationTitle("Notes")
       .toolbar {
         ToolbarItem(placement: .cancellationAction) {
@@ -65,13 +71,20 @@ extension EditNotesView {
   }
   
   /// Saves the headache.
-  private func save() async throws {
+  ///
+  /// `@MainActor` so the `saving` state and `dismiss()` run on the main thread
+  /// (`updateHeadacheNotes` does its work off-main on a background context).
+  @MainActor private func save() async throws {
     withAnimation {
       saving = true
     }
-    
+    // Reset on every exit. A failed save throws to the AsyncButton's alert
+    // instead of dismissing, so without this the Cancel button would stay
+    // stuck disabled and trap the user in the editor.
+    defer { saving = false }
+
     try await headacheManager.updateHeadacheNotes(notes.isEmpty ? nil : notes, identifier: identifier)
-    
+
     dismiss()
   }
   

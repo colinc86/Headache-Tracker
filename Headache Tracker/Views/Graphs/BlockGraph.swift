@@ -78,7 +78,7 @@ extension BlockGraph {
     }
 
     let headacheDays = dayRanges.lazy.filter({ $0 != .empty }).count
-    return "\(dayRanges.count) days shown, \(headacheDays) with headaches"
+    return "\(dayRanges.count) \(dayRanges.count == 1 ? "day" : "days") shown, \(headacheDays) with headaches"
   }
 
 }
@@ -97,7 +97,10 @@ extension BlockGraph {
     }
 
     let calendar = Calendar.current
-    let count = calendar.numberOfDaysBetween(earliestDate, and: Date())
+    // `+ 1` makes the day span inclusive of today; `numberOfDaysBetween` counts
+    // boundaries and would otherwise drop a headache logged today from the last
+    // block (see Statistic.count for the coupled window used by the axis).
+    let count = calendar.numberOfDaysBetween(earliestDate, and: Date()) + 1
 
     guard count > 0 else {
       return []

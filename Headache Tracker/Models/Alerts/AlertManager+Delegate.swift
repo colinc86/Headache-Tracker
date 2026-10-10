@@ -13,12 +13,14 @@ import UserNotifications
 /// receives notification callbacks.
 class AlertDelegate: NSObject, UNUserNotificationCenterDelegate {
 
-  /// Notification category identifiers.
+  /// Notification category identifiers — derived from `HeadacheAlertRequest`
+  /// (the single source of truth) so registration here can't drift from the
+  /// identifiers the requests actually carry.
   enum Category {
-    static let checkIn = "checkIn"
-    static let risk = "risk"
-    static let morningBrief = "morningBrief"
-    static let exposureCheckIn = "exposureCheckIn"
+    static let checkIn = HeadacheAlertRequest.Category.checkIn
+    static let risk = HeadacheAlertRequest.Category.risk
+    static let elevatedRisk = HeadacheAlertRequest.Category.elevatedRisk
+    static let morningBrief = HeadacheAlertRequest.Category.morningBrief
   }
 
   /// Notification action identifiers.
@@ -43,8 +45,8 @@ class AlertDelegate: NSObject, UNUserNotificationCenterDelegate {
     center.setNotificationCategories([
       UNNotificationCategory(identifier: Category.checkIn, actions: [resolve, logNow], intentIdentifiers: []),
       UNNotificationCategory(identifier: Category.risk, actions: [logNow], intentIdentifiers: []),
-      UNNotificationCategory(identifier: Category.morningBrief, actions: [], intentIdentifiers: []),
-      UNNotificationCategory(identifier: Category.exposureCheckIn, actions: [logNow], intentIdentifiers: [])
+      UNNotificationCategory(identifier: Category.elevatedRisk, actions: [logNow], intentIdentifiers: []),
+      UNNotificationCategory(identifier: Category.morningBrief, actions: [], intentIdentifiers: [])
     ])
   }
 
@@ -55,8 +57,6 @@ class AlertDelegate: NSObject, UNUserNotificationCenterDelegate {
   }
 
   func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
-    let category = response.notification.request.content.categoryIdentifier
-
     // Background resolve from the check-in notification. Mirror the in-app
     // resolve path: cancel the pending check-in and end the Live Activity.
     if response.actionIdentifier == Action.resolve {
@@ -75,12 +75,7 @@ class AlertDelegate: NSObject, UNUserNotificationCenterDelegate {
 
     // Everything else routes into the app (default tap or LOG_NOW).
     await MainActor.run {
-      switch category {
-      case Category.exposureCheckIn:
-        router?.routeToTrack(.dailyCheckIn)
-      default:
-        router?.routeToTrack()
-      }
+      router?.routeToTrack()
     }
   }
 

@@ -37,8 +37,12 @@ struct EditTypeView: View {
   
   /// Whether saving is currently disabled.
   private var saveDisabled: Bool {
-    if case .custom(_) = type, customTypeValue.isEmpty {
-      return true
+    // Key off the custom type's own value, not the text field. Selecting an
+    // existing custom type (or opening the editor already on one) clears
+    // `customTypeValue` via `changedType`, which left Save stuck disabled and
+    // made custom-type headaches un-editable.
+    if case .custom(let value) = type {
+      return value.isEmpty
     }
     return false
   }
@@ -69,8 +73,10 @@ struct EditTypeView: View {
           }
           .pickerStyle(InlinePickerStyle())
           .labelsHidden()
-          
+
           TextField("Custom Type", text: $customTypeValue, prompt: Text("Custom"))
+        } footer: {
+          Text("Type your own if the built-in list doesn't fit. Custom types are saved for reuse.")
         }
       }
       .navigationTitle("Type")
@@ -102,17 +108,24 @@ extension EditTypeView {
   }
   
   /// Saves the headache.
-  private func save() async throws {
+  ///
+  /// `@MainActor` so the `saving` state and `dismiss()` run on the main thread
+  /// (the update methods do their work off-main on a background context).
+  @MainActor private func save() async throws {
     withAnimation {
       saving = true
     }
-    
+    // Reset on every exit. A failed save (either update can throw) goes to the
+    // AsyncButton's alert instead of dismissing, so without this the Cancel
+    // button would stay stuck disabled and trap the user in the editor.
+    defer { saving = false }
+
     // Update the headache
     try await headacheManager.updateHeadacheType(type, classification: classification, identifier: identifier)
-    
+
     // Update the custom types
     try await headacheManager.updateCustomTypes()
-    
+
     dismiss()
   }
   

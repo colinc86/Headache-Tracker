@@ -48,7 +48,10 @@ struct AddHeadacheView: View {
   
   /// The view's model.
   @ObservedObject private var viewModel: ViewModel
-  
+
+  /// The app's color theme.
+  @AppStorage(Preferences.General.Keys.colorTheme, store: .shared) private var colorTheme = Preferences.General.Defaults.colorTheme
+
   // MARK: View body
   
   var body: some View {
@@ -63,7 +66,7 @@ struct AddHeadacheView: View {
       }
       
       Section {
-        EditableDateTimeCard(title: "Onset", foregroundColor: .purple, date: $viewModel.onset)
+        EditableDateTimeCard(title: "Onset", foregroundColor: colorTheme.purple, date: $viewModel.onset)
           .cardListRow()
       } header: {
         SectionTitleView(title: "When did it start?")
@@ -71,14 +74,14 @@ struct AddHeadacheView: View {
       
       Section {
         Toggle("Resolved", isOn: $viewModel.resolved)
-          .tint(.accentColor)
+          .tint(colorTheme.baseColor)
       } header: {
         SectionTitleView(title: "Has it resolved?")
       }
       
       if viewModel.resolved {
         Section {
-          EditableDateTimeCard(title: "End", foregroundColor: .teal, date: $viewModel.end)
+          EditableDateTimeCard(title: "End", foregroundColor: colorTheme.teal, date: $viewModel.end)
             .cardListRow()
         } header: {
           SectionTitleView(title: "When did it end?")
@@ -123,7 +126,9 @@ extension AddHeadacheView.ViewModel {
   
   /// Whether or not the view's data is valid.
   @MainActor var validData: Bool {
-    return severity != nil && onset < Date()
+    // A resolved headache also needs a valid interval — `createHeadache`
+    // rejects start >= end, so keep Save disabled rather than erroring on tap.
+    return severity != nil && onset < Date() && (!resolved || onset < end)
   }
   
   /// Sets the severity.
@@ -131,24 +136,30 @@ extension AddHeadacheView.ViewModel {
     withAnimation { self.severity = severity }
   }
   
-  /// Sets the `isSaving` property.
-  @MainActor func setSaving(_ saving: Bool) {
-    withAnimation { isSaving = saving }
-  }
-  
   /// Saves the headache.
-  func save() async throws {
+  ///
+  /// `@MainActor` so the `isSaving` state runs on the main thread; the `defer`
+  /// resets it on every exit so a failed `createHeadache` (which throws to the
+  /// AsyncButton's alert) re-enables Cancel instead of trapping the user.
+  @MainActor func save() async throws {
     guard let severity = severity else { return }
-    await setSaving(true)
-    
+    withAnimation { isSaving = true }
+    defer { isSaving = false }
+
     try await headacheManager.createHeadache(
       severity: severity,
       start: onset,
       end: resolved ? end : nil)
-    
-    await setSaving(false)
+
+    // A new *open* headache becomes the current one, so start its lock-screen
+    // Live Activity. `createHeadache` already mirrored the widget and HealthKit,
+    // but the Live Activity is app-only and can't be reconciled from the
+    // shared manager. (A resolved past-log entry has no active headache.)
+    if !resolved {
+      await LiveActivityManager.shared.reconcile(headacheManager: headacheManager)
+    }
   }
-  
+
 }
 
 struct AddHeadacheView_Previews: PreviewProvider {

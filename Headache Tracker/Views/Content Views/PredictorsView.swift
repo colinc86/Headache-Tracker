@@ -40,13 +40,16 @@ struct PredictorsView: View {
   @AppStorage(Preferences.Predictors.Keys.menstrualCycle) var menstrualCycle = Preferences.Predictors.Defaults.optIn
   @AppStorage(Preferences.Predictors.Keys.humidity) var humidity = Preferences.Predictors.Defaults.enabled
   @AppStorage(Preferences.Predictors.Keys.temperature) var temperature = Preferences.Predictors.Defaults.enabled
+  @AppStorage(Preferences.Predictors.Keys.bodyTemperature) var bodyTemperature = Preferences.Predictors.Defaults.enabled
+  @AppStorage(Preferences.Predictors.Keys.wristTemperature) var wristTemperature = Preferences.Predictors.Defaults.enabled
+  @AppStorage(Preferences.Predictors.Keys.basalBodyTemperature) var basalBodyTemperature = Preferences.Predictors.Defaults.enabled
+  @AppStorage(Preferences.Predictors.Keys.baselineRelative) var baselineRelative = Preferences.Predictors.Defaults.enabled
+  @AppStorage(Preferences.Predictors.Keys.beatToBeatHRV) var beatToBeatHRV = Preferences.Predictors.Defaults.enabled
+  @AppStorage(Preferences.Predictors.Keys.temporalContext) var temporalContext = Preferences.Predictors.Defaults.enabled
   
   /// The view's initial settings.
   @State private var initialSettings = [String: Bool]()
-  
-  /// Whether the view is showing an alert.
-  @State private var showingAlert = false
-  
+
   var body: some View {
     Form {
       Section {
@@ -81,10 +84,25 @@ struct PredictorsView: View {
         ToggleCell(title: "Resting Heart Rate", data: .restingHeartRate, state: $restingHeartRate, systemName: "heart", valueChanged: updateSetting)
         ToggleCell(title: "Respiratory Rate", data: .respiratoryRate, state: $respiratoryRate, systemName: "lungs", valueChanged: updateSetting)
         ToggleCell(title: "Walking Heart Rate", data: .walkingHeartRateAverage, state: $walkingHeartRateAverage, systemName: "heart", valueChanged: updateSetting)
+        ToggleCell(title: "Body Temperature", data: .bodyTemperature, state: $bodyTemperature, systemName: "thermometer.medium", valueChanged: updateSetting)
+        ToggleCell(title: "Wrist Temperature", data: .wristTemperature, state: $wristTemperature, systemName: "thermometer.medium", valueChanged: updateSetting)
+        ToggleCell(title: "Basal Body Temperature", data: .basalBodyTemperature, state: $basalBodyTemperature, systemName: "thermometer.medium", valueChanged: updateSetting)
+        ToggleCell(title: "Beat-to-Beat HRV", state: $beatToBeatHRV, systemName: "waveform.path.ecg.rectangle")
       } header: {
         SectionTitleView(title: "Body")
+      } footer: {
+        SectionFooterView(title: "Temperature from a compatible ring or Apple Watch, and beat-to-beat HRV (RMSSD, pNN50, LF/HF) from the Watch's background readings. Deviation from your own baseline is a known migraine prodrome signal.")
       }
       
+      Section {
+        ToggleCell(title: "Deviation from Baseline", state: $baselineRelative, systemName: "waveform.path.ecg")
+        ToggleCell(title: "Recent Trend", state: $temporalContext, systemName: "clock.arrow.trianglehead.counterclockwise.rotate.90")
+      } header: {
+        SectionTitleView(title: "Sensitivity")
+      } footer: {
+        SectionFooterView(title: "Also feed the model how far your heart-rate variability, resting rate, breathing, sleep, and temperature stray from your own recent normal — the autonomic shift that often precedes a headache. Recent Trend adds each signal's swing over the last two days and its drift from its 24-hour average.")
+      }
+
       Section {
         ToggleCell(title: "Mindful Duration", data: .mindfulSession, state: $mindfulSession, systemName: "brain", valueChanged: updateSetting)
       } header: {
@@ -123,7 +141,6 @@ struct PredictorsView: View {
     .navigationTitle("My Predictors")
     .onAppear(perform: appeared)
     .onDisappear(perform: disappeared)
-    .confirmationAlert(isPresented: $showingAlert, title: "Health Kit Data", message: "Visit the settings app to enable this data type.")
   }
 }
 
@@ -143,6 +160,16 @@ extension PredictorsView {
         }
         catch {
           logError("Error training classifiers: \(error)")
+        }
+
+        // The correlation engine reads the toggles too, so a change makes the
+        // cached insights report wrong. Recompute now rather than waiting for
+        // it to age out, so the Analyze tab is right on the way back.
+        do {
+          _ = try await headacheManager.computeInsights()
+        }
+        catch {
+          logError("Error computing insights: \(error)")
         }
       }
     }

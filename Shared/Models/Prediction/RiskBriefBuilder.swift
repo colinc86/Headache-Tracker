@@ -116,6 +116,12 @@ extension ModelInput {
         case .appleExerciseTime: values[.exerciseMinutes] = value
         case .menstrualDaysSinceCycleStart: values[.menstrualDaysSinceCycleStart] = value
         case .menstrualFlowActive: values[.menstrualFlowActive] = value
+        case .bodyTemperature: values[.bodyTemperature] = value
+        case .wristTemperature: values[.wristTemperature] = value
+        case .basalBodyTemperature: values[.basalBodyTemperature] = value
+        case .hrvRMSSD: values[.hrvRMSSD] = value
+        case .hrvPNN50: values[.hrvPNN50] = value
+        case .hrvLFHF: values[.hrvLFHF] = value
         case .headache: break
         }
       }

@@ -82,8 +82,8 @@ extension HeadacheManager {
     }
   }
 
-  /// Recently used medication names for autocomplete, ordered by recency
-  /// then frequency.
+  /// Recently used medication names for autocomplete: the most recently taken
+  /// distinct names, most recent first.
   ///
   /// - Parameter limit: The maximum number of names.
   /// - Returns: Distinct medication names.
@@ -96,7 +96,8 @@ extension HeadacheManager {
     }
   }
 
-  /// Ranks distinct medication names by recency then frequency.
+  /// The distinct medication names in recency order (each name at its most
+  /// recent use), taking the first `limit`.
   ///
   /// - Parameters:
   ///   - entries: Entries sorted most recent first.

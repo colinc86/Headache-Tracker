@@ -20,8 +20,11 @@ struct DurationCard: View {
   /// The id of the duration view.
   @State private var durationID = UUID()
   
-  /// The waiter to periodically update the view.
-  private let durationUpdateWaiter = Waiter()
+  /// The waiter to periodically update the view. `@State` gives it a stable
+  /// identity across struct re-creations (a parent re-render re-runs a plain
+  /// `let` initializer, orphaning the running timer started in `appeared()` so
+  /// `onDisappear` can never stop it — a leaked repeating timer per re-render).
+  @State private var durationUpdateWaiter = Waiter()
   
   /// The caption to display.
   private var caption: String? {

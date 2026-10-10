@@ -18,20 +18,6 @@ struct CorrelationSample {
 
 }
 
-/// A value-type snapshot of one logged exposure for correlation analysis.
-struct ExposureEvent {
-
-  /// The exposure's kind raw value.
-  let kind: String
-
-  /// The exposure's timestamp.
-  let timestamp: Date
-
-  /// The exposure's amount, if any.
-  let amount: Double?
-
-}
-
 /// A dated feature value for charting.
 struct DatedValue: Identifiable {
 
@@ -67,51 +53,17 @@ struct CorrelationEngine {
   /// The headache episodes to analyze against.
   let episodes: [HeadacheEpisode]
 
-  /// Merges logged exposures into the sample matrix as trailing-24h counts.
+  /// The features to analyze — the predictors the user has left enabled.
   ///
-  /// For each built-in exposure kind ever logged, samples taken at or after
-  /// the user's first check-in gain a count of that kind's events in the
-  /// trailing day. Samples before the first check-in get no exposure values
-  /// at all — absence before the user started logging is unknown, not zero.
-  /// Custom kinds are ignored (the feature space is enum-keyed).
-  ///
-  /// - Parameters:
-  ///   - samples: The base samples.
-  ///   - exposures: The logged exposures.
-  ///   - lookback: The trailing window.
-  /// - Returns: The merged samples.
-  static func merged(_ samples: [CorrelationSample], exposures: [ExposureEvent], lookback: TimeInterval = 86400.0) -> [CorrelationSample] {
-    let knownExposures = exposures.compactMap { event -> (feature: CorrelationFeature, timestamp: Date)? in
-      guard let kind = ExposureKind(rawValue: event.kind) else {
-        return nil
-      }
-      return (kind.correlationFeature, event.timestamp)
-    }
+  /// Injected rather than read from `Preferences` so the engine stays a pure,
+  /// simulator-safe value type. A disabled feature is dropped from the report
+  /// entirely: no insight *and* no "not enough data" entry, even though its
+  /// historical values are still sitting in `TrainingData`.
+  var enabledFeatures: Set<CorrelationFeature> = Set(CorrelationFeature.allCases)
 
-    guard let firstCheckIn = exposures.map({ $0.timestamp }).min() else {
-      return samples
-    }
-
-    // Only kinds the user has ever logged participate; a never-logged kind
-    // is untracked, not zero.
-    let loggedFeatures = Set(knownExposures.map({ $0.feature }))
-
-    return samples.map { sample in
-      guard sample.timestamp >= firstCheckIn else {
-        return sample
-      }
-
-      var values = sample.values
-      for feature in loggedFeatures {
-        let count = knownExposures.lazy.filter { event in
-          event.feature == feature &&
-            event.timestamp > sample.timestamp.addingTimeInterval(-lookback) &&
-            event.timestamp <= sample.timestamp
-        }.count
-        values[feature] = Double(count)
-      }
-      return CorrelationSample(timestamp: sample.timestamp, values: values)
-    }
+  /// The enabled features in their canonical order.
+  private var analyzedFeatures: [CorrelationFeature] {
+    return CorrelationFeature.allCases.filter(enabledFeatures.contains)
   }
 
   /// Computes the full insights report.
@@ -157,7 +109,7 @@ struct CorrelationEngine {
     // Per-feature series: personal-baseline z-scores when enough survive,
     // raw values otherwise. Raw values ride along for display means.
     var occurrenceSeries = [CorrelationFeature: FeatureSeries]()
-    for feature in CorrelationFeature.allCases {
+    for feature in analyzedFeatures {
       if let series = CorrelationEngine.makeSeries(for: feature, from: baselineSamples) {
         occurrenceSeries[feature] = series
       }
@@ -169,7 +121,7 @@ struct CorrelationEngine {
       })
     }
 
-    for feature in CorrelationFeature.allCases {
+    for feature in analyzedFeatures {
       guard let series = occurrenceSeries[feature] else {
         continue
       }
@@ -221,7 +173,7 @@ struct CorrelationEngine {
 
     // MARK: Severity target
 
-    for feature in CorrelationFeature.allCases {
+    for feature in analyzedFeatures {
       var x = [Double]()
       var severities = [Double]()
 
@@ -371,18 +323,18 @@ struct CorrelationEngine {
     }
 
     let measured = Set(insights.map({ $0.feature }))
-    let insufficient = CorrelationFeature.allCases
+    let insufficient = analyzedFeatures
       .filter({ !measured.contains($0) })
       .map({ InsightsReport.InsufficientFeature(feature: $0, sampleCount: maxPairCounts[$0] ?? 0) })
 
     return InsightsReport(
       generatedAt: Date(),
       rowCount: samples.count,
-      exposureCount: nil,
       insights: insights,
       insufficient: insufficient,
-      baselines: CorrelationEngine.baselines(from: sortedSamples),
-      schemaVersion: InsightsReport.currentSchemaVersion)
+      baselines: CorrelationEngine.baselines(from: sortedSamples, enabledFeatures: enabledFeatures),
+      schemaVersion: InsightsReport.currentSchemaVersion,
+      enabledFingerprint: InsightsReport.fingerprint(for: enabledFeatures))
   }
 
   // MARK: Series and baselines
@@ -443,9 +395,18 @@ struct CorrelationEngine {
   /// Per-feature trailing-14-day baselines at report time, for the morning
   /// brief's "vs. your usual" comparisons.
   ///
-  /// - Parameter samples: The time-ordered samples.
+  /// - Parameters:
+  ///   - samples: The time-ordered samples.
+  ///   - window: The trailing window.
+  ///   - enabledFeatures: The features to baseline; disabled predictors are
+  ///     skipped so they can't reappear in the morning brief's "vs. your
+  ///     usual" comparisons by way of `RiskBriefBuilder`.
   /// - Returns: Baselines for features with at least three recent values.
-  static func baselines(from samples: [CorrelationSample], window: TimeInterval = 14.0 * 86400.0) -> [CorrelationFeature: FeatureBaseline] {
+  static func baselines(
+    from samples: [CorrelationSample],
+    window: TimeInterval = 14.0 * 86400.0,
+    enabledFeatures: Set<CorrelationFeature> = Set(CorrelationFeature.allCases)
+  ) -> [CorrelationFeature: FeatureBaseline] {
     guard let latest = samples.last?.timestamp else {
       return [:]
     }
@@ -453,7 +414,7 @@ struct CorrelationEngine {
     let cutoff = latest.addingTimeInterval(-window)
     var valuesByFeature = [CorrelationFeature: [Double]]()
     for sample in samples where sample.timestamp >= cutoff {
-      for (feature, value) in sample.values {
+      for (feature, value) in sample.values where enabledFeatures.contains(feature) {
         valuesByFeature[feature, default: []].append(value)
       }
     }

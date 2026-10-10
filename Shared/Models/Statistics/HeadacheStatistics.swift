@@ -91,14 +91,19 @@ struct HeadacheStatistics {
       logDebug("Second half rates: \(secondHalfRates)")
       logDebug("Total rates: \(totalRates)")
       
+      // Use the same 20% tolerance (and total-rate steady value) as the
+      // severity/duration trends. Without it these rate trends default to a
+      // zero tolerance, so they only ever read "steady" on exact floating-point
+      // equality — a negligible change in frequency showed a rising/falling
+      // arrow, overstating volatility relative to every other stat.
       self.headachesPerYear = totalRates.0
-      self.headachesPerYearTrend = Trend(firstHalfRates.0, secondHalfRates.0)
-      
+      self.headachesPerYearTrend = Trend(firstHalfRates.0, secondHalfRates.0, totalRates.0, 0.2)
+
       self.headachesPerMonth = totalRates.1
-      self.headachesPerMonthTrend = Trend(firstHalfRates.1, secondHalfRates.1)
-      
+      self.headachesPerMonthTrend = Trend(firstHalfRates.1, secondHalfRates.1, totalRates.1, 0.2)
+
       self.headachesPerWeek = totalRates.2
-      self.headachesPerWeekTrend = Trend(firstHalfRates.2, secondHalfRates.2)
+      self.headachesPerWeekTrend = Trend(firstHalfRates.2, secondHalfRates.2, totalRates.2, 0.2)
     }
     else {
       logWarning("Setting to none.")
@@ -124,7 +129,12 @@ extension HeadacheStatistics {
     // A rate needs at least two dated headaches and a positive interval;
     // dividing by a zero interval produced infinite rates for a single
     // headache, and unsorted input could produce negative ones.
-    let dates = headaches.compactMap({ $0.createdAt }).sorted()
+    //
+    // Span by onset (`startTime`), not `createdAt`: a back-logged headache is
+    // created now but occurred in the past, so `createdAt` would collapse the
+    // span (reporting a 0 rate) and disagree with the `startTime`-based trend
+    // halving and every other statistic here.
+    let dates = headaches.compactMap({ $0.startTime }).sorted()
     guard dates.count >= 2, let firstHeadacheDate = dates.first, let lastHeadacheDate = dates.last else {
       return (0.0, 0.0, 0.0)
     }

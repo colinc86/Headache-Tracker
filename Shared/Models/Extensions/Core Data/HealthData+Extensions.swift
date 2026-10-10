@@ -36,6 +36,12 @@ struct HealthMetricPresence: OptionSet {
   static let appleExerciseTime           = HealthMetricPresence(rawValue: 1 << 15)
   static let menstrualDaysSinceCycleStart = HealthMetricPresence(rawValue: 1 << 16)
   static let menstrualFlowActive         = HealthMetricPresence(rawValue: 1 << 17)
+  static let bodyTemperature             = HealthMetricPresence(rawValue: 1 << 18)
+  static let wristTemperature            = HealthMetricPresence(rawValue: 1 << 19)
+  static let basalBodyTemperature        = HealthMetricPresence(rawValue: 1 << 20)
+  static let hrvRMSSD                     = HealthMetricPresence(rawValue: 1 << 21)
+  static let hrvPNN50                     = HealthMetricPresence(rawValue: 1 << 22)
+  static let hrvLFHF                      = HealthMetricPresence(rawValue: 1 << 23)
 
   /// The presence flag for the given health kit data, if it has one.
   ///
@@ -60,6 +66,12 @@ struct HealthMetricPresence: OptionSet {
     case .appleExerciseTime: self = .appleExerciseTime
     case .menstrualDaysSinceCycleStart: self = .menstrualDaysSinceCycleStart
     case .menstrualFlowActive: self = .menstrualFlowActive
+    case .bodyTemperature: self = .bodyTemperature
+    case .wristTemperature: self = .wristTemperature
+    case .basalBodyTemperature: self = .basalBodyTemperature
+    case .hrvRMSSD: self = .hrvRMSSD
+    case .hrvPNN50: self = .hrvPNN50
+    case .hrvLFHF: self = .hrvLFHF
     case .headache: return nil
     }
   }
@@ -123,6 +135,12 @@ extension HealthData {
     if presence.contains(.appleExerciseTime) { data[.appleExerciseTime] = appleExerciseTime }
     if presence.contains(.menstrualDaysSinceCycleStart) { data[.menstrualDaysSinceCycleStart] = menstrualDaysSinceCycleStart }
     if presence.contains(.menstrualFlowActive) { data[.menstrualFlowActive] = menstrualFlowActive }
+    if presence.contains(.bodyTemperature) { data[.bodyTemperature] = bodyTemperature }
+    if presence.contains(.wristTemperature) { data[.wristTemperature] = wristTemperature }
+    if presence.contains(.basalBodyTemperature) { data[.basalBodyTemperature] = basalBodyTemperature }
+    if presence.contains(.hrvRMSSD) { data[.hrvRMSSD] = hrvRMSSD }
+    if presence.contains(.hrvPNN50) { data[.hrvPNN50] = hrvPNN50 }
+    if presence.contains(.hrvLFHF) { data[.hrvLFHF] = hrvLFHF }
     return data
   }
 
@@ -183,6 +201,12 @@ extension HealthData {
       case .appleExerciseTime: appleExerciseTime = value
       case .menstrualDaysSinceCycleStart: menstrualDaysSinceCycleStart = value
       case .menstrualFlowActive: menstrualFlowActive = value
+      case .bodyTemperature: bodyTemperature = value
+      case .wristTemperature: wristTemperature = value
+      case .basalBodyTemperature: basalBodyTemperature = value
+      case .hrvRMSSD: hrvRMSSD = value
+      case .hrvPNN50: hrvPNN50 = value
+      case .hrvLFHF: hrvLFHF = value
       default: continue
       }
 

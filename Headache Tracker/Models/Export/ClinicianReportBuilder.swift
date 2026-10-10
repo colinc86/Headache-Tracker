@@ -139,11 +139,23 @@ struct ClinicianReportBuilder {
     return url
   }
 
-  /// Escapes a CSV field per RFC 4180.
+  /// Escapes a CSV field per RFC 4180, and neutralizes spreadsheet formula
+  /// injection.
+  ///
+  /// A field that begins with `=`, `+`, `-`, `@`, tab, or carriage return is
+  /// prefixed with a single quote so the clinician's spreadsheet app renders
+  /// it as text instead of evaluating it as a formula (OWASP CSV injection).
+  /// Only the free-text fields (notes, tags, medications, custom type names)
+  /// can begin with one of these; every app-generated field starts with a
+  /// digit or letter, so this never alters them.
   ///
   /// - Parameter field: The raw field.
   /// - Returns: The escaped field.
   static func escaped(_ field: String) -> String {
+    var field = field
+    if let first = field.first, "=+-@\t\r".contains(first) {
+      field = "'" + field
+    }
     guard field.contains(where: { $0 == "," || $0 == "\"" || $0 == "\n" || $0 == "\r" }) else {
       return field
     }

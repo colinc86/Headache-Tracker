@@ -26,13 +26,17 @@ extension WeatherManager {
     motionManager.cancel()
   }
   
-  /// Gets the current weather at the device.
+  /// Gets the weather at a location.
   ///
-  /// - Parameter date: The date of the weather reading.
+  /// - Parameters:
+  ///   - date: The date of the weather reading.
+  ///   - location: The location.
+  ///   - trailing: Extra history to fetch before the window that ends at
+  ///     `date`, so one fetch can serve several rows (the back-fill).
   /// - Returns: The weather.
-  func weather(at date: Date = Date(), for location: CLLocation) async throws -> Weather {
+  func weather(at date: Date = Date(), for location: CLLocation, trailing: TimeInterval = 0.0) async throws -> Weather {
     logInfo("Get weather.")
-    let spread = try await getWeatherSpread(location: location, date: date)
+    let spread = try await getWeatherSpread(location: location, date: date, trailing: trailing)
     
     // Only get the barometric pressure if the requested date is
     // "near" the current date.
@@ -59,15 +63,26 @@ extension WeatherManager {
   ///   - location: The location to get the spread for.
   ///   - date: The date of the weather reading.
   /// - Returns: The weather spread.
-  private func getWeatherSpread(location: CLLocation, date: Date) async throws -> Weather.WeatherSpread {
+  private func getWeatherSpread(location: CLLocation, date: Date, trailing: TimeInterval = 0.0) async throws -> Weather.WeatherSpread {
+    // Fetch the full trailing window the temporal-context columns need; the
+    // 6h sigma fields keep their meaning by picking the point nearest -6h.
     let sixHoursAgo = date.addingTimeInterval(-60 * 60 * 6)
-    let weather = try await WeatherService.shared.weather(for: location, including: .hourly(startDate: sixHoursAgo, endDate: date))
-    
-    guard let firstWeather = weather.first,
-          let lastWeather = weather.last else {
+    let windowStart = date.addingTimeInterval(-max(trailing, 0.0) - TimeInterval(WindowStatisticsCalculator.bucketCount) * WindowStatisticsCalculator.bucketLength)
+    let weather = try await WeatherService.shared.weather(for: location, including: .hourly(startDate: windowStart, endDate: date))
+
+    guard let lastWeather = weather.last,
+          let firstWeather = weather.min(by: { abs($0.date.timeIntervalSince(sixHoursAgo)) < abs($1.date.timeIntervalSince(sixHoursAgo)) }) else {
       throw WeatherError.unknown
     }
-    
+
+    let hourly = weather.map { hour in
+      Weather.WeatherSpread.WeatherData(
+        humidity: hour.humidity,
+        pressure: hour.pressure.converted(to: .millibars).value,
+        temp: hour.temperature.converted(to: .celsius).value,
+        datetimeEpoch: hour.date.timeIntervalSince1970)
+    }
+
     let pastWeather = Weather.WeatherSpread.WeatherData(
       humidity: firstWeather.humidity,
       pressure: firstWeather.pressure.converted(to: .millibars).value,
@@ -84,10 +99,12 @@ extension WeatherManager {
     logDebug("Current weather \(currentWeather)")
     
     return Weather.WeatherSpread(
-      spread: 12,
+      // Hours between `past` and `current` — matches the fetch window above.
+      spread: 6,
       location: Weather.WeatherSpread.WeatherLocation(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude),
       current: currentWeather,
-      past: pastWeather)
+      past: pastWeather,
+      hourly: hourly)
   }
   
 }

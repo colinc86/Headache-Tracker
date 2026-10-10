@@ -16,10 +16,20 @@ struct Constants {
   /// presence bits, and sleep onset as a date.
   /// 1.3: dietary caffeine and water, time in daylight, exercise minutes,
   /// and menstrual cycle features.
-  static let trainingDataVersion = "1.3"
+  /// 1.4: body, sleeping-wrist, and basal body temperature.
+  /// 1.5: beat-to-beat HRV (RMSSD, pNN50, LF/HF) from the heartbeat series.
+  static let trainingDataVersion = "1.5"
   
   /// The weather training data version.
-  static let trainingDataWeatherVersion = "1.1"
+  /// 1.2: re-fetch every row's weather at the device's real location (corrects
+  /// rows logged while a simulated location was active); device barometer
+  /// readings are preserved.
+  static let trainingDataWeatherVersion = "1.2"
+
+  /// The version of the trailing-window context stored with training data.
+  /// Rows whose context carries a different (or no) version are back-filled
+  /// from HealthKit and WeatherKit history on the next activation.
+  static let trainingDataContextVersion = "1.0"
 
   /// The minimum number of training data samples required before the first
   /// models are trained.
@@ -28,7 +38,7 @@ struct Constants {
   /// The model feature schema version. Bump when the feature set changes
   /// (renamed/added/removed features), which invalidates compiled models
   /// and stored evaluations; a launch-time check resets both.
-  static let modelSchemaVersion = 3
+  static let modelSchemaVersion = 9
 
   /// The defaults key storing the last seen model schema version.
   static let modelSchemaVersionKey = "modelSchemaVersion"
@@ -86,6 +96,20 @@ struct Constants {
     static let scheme = "myheadache"
     static let severityHost = "severity"
     static let rawValueQuery = "rawValue"
+
+    /// Opens the Track tab (the forecast).
+    static let outlookHost = "outlook"
+
+    /// Opens the Analyze tab on the Signals screen.
+    static let signalsHost = "signals"
+
+    /// Opens the Analyze tab on Insights.
+    static let insightsHost = "insights"
+
+    /// A deep link for a host.
+    static func url(host: String) -> URL? {
+      return URL(string: "\(scheme)://\(host)")
+    }
     
   }
   
@@ -96,6 +120,21 @@ struct Constants {
     
     /// The severity widget's kind.
     static let severityWidgetKind = "com.cnc.myheadache.widget.severity"
+
+    /// The twin-ring widget's kind.
+    static let twinRingWidgetKind = "com.cnc.myheadache.widget.twinring"
+
+    /// The horizon widget's kind.
+    static let horizonWidgetKind = "com.cnc.myheadache.widget.horizon"
+
+    /// The signals widget's kind.
+    static let signalsWidgetKind = "com.cnc.myheadache.widget.signals"
+
+    /// The risk-clock widget's kind.
+    static let riskClockWidgetKind = "com.cnc.myheadache.widget.riskclock"
+
+    /// Every widget that renders the risk forecast.
+    static let riskKinds = [outlookWidgetKind, twinRingWidgetKind, horizonWidgetKind, signalsWidgetKind, riskClockWidgetKind]
     
   }
   

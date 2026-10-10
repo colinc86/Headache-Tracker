@@ -73,7 +73,7 @@ struct ExportView: View {
           }
         }
       } footer: {
-        SectionFooterView(title: "The report covers headaches, medications, and exposures in this range.")
+        SectionFooterView(title: "The report covers headaches, medications, and patterns in this range.")
       }
 
       Section {
@@ -103,17 +103,21 @@ struct ExportView: View {
   // MARK: Private methods
 
   /// Builds the report data off-main, then renders the PDF.
-  private func generatePDF() async throws {
+  ///
+  /// `@MainActor` so the `exportURL`/`exportType`/`showingExporter` state
+  /// mutations run on the main thread — the awaited `build` and `makePDF` still
+  /// do their heavy work off-main (a background Core Data context) or where
+  /// they require the main thread (`makePDF` is itself `@MainActor`).
+  @MainActor private func generatePDF() async throws {
     let data = try await ClinicianReportData.build(interval: range.interval)
-    exportURL = try await MainActor.run {
-      try ClinicianReportBuilder.makePDF(data: data, includeLog: includeLog, includeInsights: includeInsights)
-    }
+    exportURL = try ClinicianReportBuilder.makePDF(data: data, includeLog: includeLog, includeInsights: includeInsights)
     exportType = .pdf
     showingExporter = true
   }
 
-  /// Writes the CSV log.
-  private func generateCSV() async throws {
+  /// Writes the CSV log. `@MainActor` for the same state-mutation reason as
+  /// `generatePDF`; `makeCSV` runs off-main on a background context.
+  @MainActor private func generateCSV() async throws {
     exportURL = try await ClinicianReportBuilder.makeCSV(interval: range.interval)
     exportType = .commaSeparatedText
     showingExporter = true

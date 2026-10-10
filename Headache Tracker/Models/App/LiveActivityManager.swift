@@ -49,6 +49,11 @@ class LiveActivityManager {
     catch {
       logError("Error reconciling Live Activity: \(error)")
     }
+
+    // Keep the risk-gauge activity coherent with the headache activity: this
+    // is already every sync point (app-active, severity change, resolve), and
+    // the gauge must end the moment a headache starts.
+    await RiskActivityManager.shared.reconcile()
   }
 
   // MARK: Private methods

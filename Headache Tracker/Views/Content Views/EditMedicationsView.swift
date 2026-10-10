@@ -115,7 +115,7 @@ struct EditMedicationsView: View {
           .font(.callout)
         Spacer()
         if let takenAt = entry.takenAt {
-          Text(Formatters.formatTime(takenAt))
+          Text(Formatters.formatTimeWithDay(takenAt))
             .font(.caption)
             .foregroundColor(.secondary)
         }

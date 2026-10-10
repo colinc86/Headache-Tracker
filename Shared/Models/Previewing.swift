@@ -41,15 +41,54 @@ struct Previewing {
     /// The preview predictor.
     static let predictor = Predictor()
     
+    /// A populated input for the preview prediction. Real readings matter:
+    /// screens that derive their content from the input (the Signals snapshot,
+    /// the what-if explorer's adjustable signals) render empty against
+    /// `ModelInput.empty`, so previews and the screenshot sweep would never
+    /// exercise them.
+    static let input = ModelInput(
+      date: Date(),
+      location: nil,
+      weatherStatistics: WeatherStatistics(
+        barometricPressure: 100.8,
+        currentPressure: 100.9,
+        currentHumidity: 0.62,
+        currentTemperature: 24.0,
+        sigmaPressure: 0.9,
+        sigmaHumidity: 0.08,
+        sigmaTemperature: 2.1),
+      healthKitData: [
+        .sleepSeconds: 5.2 * 3600.0,
+        .heartRateVariabilitySDNN: 38.0,
+        .restingHeartRate: 62.0,
+        .respiratoryRate: 15.2,
+        .stepCount: 4200.0
+      ],
+      previousHealthKitData: [
+        .heartRateVariabilitySDNN: 52.0,
+        .restingHeartRate: 58.0,
+        .respiratoryRate: 14.6,
+        .sleepSeconds: 5.2 * 3600.0
+      ])
+
     /// The preview prediction.
     static let prediction = RiskPrediction(
-      input: .empty,
+      input: input,
       probability: 0.42,
       topFactors: [
         RiskPrediction.RiskFactor(feature: .sleepSeconds, mlFeatureName: "Sleep Seconds", direction: .reduced, contributionDescription: "Lower sleep duration before headaches"),
         RiskPrediction.RiskFactor(feature: .sigmaPressure, mlFeatureName: "Sigma Pressure", direction: .elevated, contributionDescription: "Higher pressure change before headaches")
       ],
-      computedAt: Date())
+      computedAt: Date(),
+      contributions: [
+        RiskPrediction.RiskContribution(feature: .sleepSeconds, mlFeatureName: "Sleep Seconds", delta: 0.11),
+        RiskPrediction.RiskContribution(feature: .sigmaPressure, mlFeatureName: "Sigma Pressure", delta: 0.07),
+        RiskPrediction.RiskContribution(feature: .heartRateVariability, mlFeatureName: "Heart Rate Variability", delta: 0.05),
+        RiskPrediction.RiskContribution(feature: .restingHeartRate, mlFeatureName: "Resting Heart Rate", delta: -0.03)
+      ],
+      interval: RiskInterval(lower: 0.33, upper: 0.52),
+      coverage: InputCoverage(presentSignals: 9, expectedSignals: 11),
+      modelAccuracy: 0.71)
   }
   
   struct CoreData {

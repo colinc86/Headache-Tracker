@@ -15,17 +15,8 @@ struct TriggerDetailView: View {
   /// The insight to detail.
   let insight: TriggerInsight
 
-  /// The app's headache manager.
-  @EnvironmentObject private var headacheManager: HeadacheManager
-
   /// The application's custom color theme.
   @AppStorage(Preferences.General.Keys.colorTheme, store: .shared) private var colorTheme = Preferences.General.Defaults.colorTheme
-
-  /// The feature's dated series.
-  @State private var series = [DatedValue]()
-
-  /// The headache episodes to overlay.
-  @State private var episodes = [HeadacheEpisode]()
 
   // MARK: View body
 
@@ -47,34 +38,13 @@ struct TriggerDetailView: View {
       }
 
       // Time series with headache overlays
-      if !series.isEmpty {
-        Section {
-          Chart {
-            ForEach(chartEpisodes, id: \.start) { episode in
-              RectangleMark(
-                xStart: .value("Start", episode.start),
-                xEnd: .value("End", episode.end ?? Date())
-              )
-              .foregroundStyle(colorTheme.baseColor.opacity(0.2))
-            }
-
-            ForEach(series) { point in
-              LineMark(
-                x: .value("Date", point.date),
-                y: .value(insight.feature.title, point.value)
-              )
-              .foregroundStyle(colorTheme.baseColor)
-              .interpolationMethod(.monotone)
-            }
-          }
-          .chartYScale(domain: .automatic(includesZero: false))
-          .frame(height: 220)
+      Section {
+        TriggerSeriesChart(insight: insight)
           .padding(.vertical, 8)
-        } header: {
-          SectionTitleView(title: "\(insight.feature.title) vs. Headaches")
-        } footer: {
-          SectionFooterView(title: "Shaded bands are logged headaches.")
-        }
+      } header: {
+        SectionTitleView(title: "\(insight.feature.title) vs. Headaches")
+      } footer: {
+        SectionFooterView(title: chartFooterText)
       }
 
       // Lag profile
@@ -111,32 +81,25 @@ struct TriggerDetailView: View {
       }
     }
     .navigationTitle(insight.feature.title)
-    .task {
-      await load()
-    }
   }
 
   // MARK: Private properties
 
-  /// Episodes clipped to the charted series range.
-  private var chartEpisodes: [HeadacheEpisode] {
-    guard let first = series.first?.date, let last = series.last?.date else {
-      return []
-    }
-    return episodes.filter { episode in
-      episode.start <= last && (episode.end ?? Date()) >= first
-    }
+  /// Whether the chart is showing personal-baseline z-scores, matching how
+  /// the insight itself was computed.
+  private var showsBaselineRelative: Bool {
+    return insight.usesBaselineRelative == true
+  }
+
+  private var chartFooterText: String {
+    let base = showsBaselineRelative
+      ? "Daily averages as deviation from your usual (σ), the same view the association was measured on."
+      : "Daily averages."
+    return base + " Shaded bands are logged headaches; breaks in the line are days without data."
   }
 
   private var summaryText: String {
-    let strength: String
-    switch abs(insight.coefficient) {
-    case 0.5...: strength = "strong"
-    case 0.3 ..< 0.5: strength = "moderate"
-    default: strength = "weak"
-    }
-
-    var text = "A \(strength) association (r = \(String(format: "%.2f", insight.coefficient)), q = \(String(format: "%.3f", insight.qValue)))"
+    var text = "A \(insight.strengthLabel) association (r = \(String(format: "%.2f", insight.coefficient)), q = \(String(format: "%.3f", insight.qValue)))"
     if insight.usesBaselineRelative == true {
       text += ", measured against your personal baseline"
     }
@@ -160,17 +123,6 @@ struct TriggerDetailView: View {
         .foregroundColor(.secondary)
     }
     .frame(maxWidth: .infinity)
-  }
-
-  private func load() async {
-    do {
-      let (series, episodes) = try await headacheManager.featureSeries(for: insight.feature)
-      self.series = series
-      self.episodes = episodes
-    }
-    catch {
-      logError("Error loading feature series: \(error)")
-    }
   }
 
 }

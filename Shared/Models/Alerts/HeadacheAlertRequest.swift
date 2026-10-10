@@ -18,8 +18,8 @@ enum HeadacheAlertRequest: AlertRequest {
   
   case checkIn(headacheIdentifier: UUID)
   case risk(probability: Double)
+  case elevatedRisk(probability: Double, reasons: [String])
   case morningBrief(tier: RiskPrediction.RiskTier, probability: Double, reasons: [String])
-  case exposureCheckIn
 
   /// Stable identifiers so scheduling replaces prior pending requests of
   /// the same kind, and removal can be scoped instead of nuking everything.
@@ -27,8 +27,8 @@ enum HeadacheAlertRequest: AlertRequest {
     switch self {
     case .checkIn: return HeadacheAlertRequest.checkInRequestIdentifier
     case .risk: return "risk"
+    case .elevatedRisk: return "elevated-risk"
     case .morningBrief: return "morning-brief"
-    case .exposureCheckIn: return "exposure-check-in"
     }
   }
 
@@ -38,19 +38,29 @@ enum HeadacheAlertRequest: AlertRequest {
       return "How's your headache?"
     case .risk:
       return "High Headache Risk"
+    case .elevatedRisk:
+      return "Risk Climbing"
     case .morningBrief:
       return "Your Morning Brief"
-    case .exposureCheckIn:
-      return "Daily Check-In"
     }
   }
-  
+
   public var body: String {
     switch self {
     case .checkIn(_):
       return "Tap here to give an update on your headache."
     case .risk(let probability):
       return "Your headache risk is high: \(Int((probability * 100.0).rounded()))% in the next 24 hours."
+    case .elevatedRisk(let probability, let reasons):
+      // Caring and actionable: lead with the strongest reason, if we have one.
+      var body = "Risk is climbing — \(Int((probability * 100.0).rounded()))% in the next 24 hours."
+      if let reason = reasons.first {
+        body += " \(reason). A little care now can help."
+      }
+      else {
+        body += " A little care now can help."
+      }
+      return body
     case .morningBrief(let tier, let probability, let reasons):
       var body: String
       switch tier {
@@ -63,8 +73,6 @@ enum HeadacheAlertRequest: AlertRequest {
         body += " \(reason)."
       }
       return body
-    case .exposureCheckIn:
-      return "Log today's exposures — caffeine, alcohol, stress, and more — to sharpen your insights."
     }
   }
   
@@ -76,12 +84,23 @@ enum HeadacheAlertRequest: AlertRequest {
     }
   }
   
+  /// The notification category identifiers — the single source of truth the
+  /// app's `AlertDelegate` derives its registration and routing from, so the
+  /// two can't silently drift apart (which would drop a notification's action
+  /// buttons with no compile error).
+  enum Category {
+    static let checkIn = "checkIn"
+    static let risk = "risk"
+    static let elevatedRisk = "elevatedRisk"
+    static let morningBrief = "morningBrief"
+  }
+
   var categoryIdentifier: String {
     switch self {
-    case .checkIn: return "checkIn"
-    case .risk: return "risk"
-    case .morningBrief: return "morningBrief"
-    case .exposureCheckIn: return "exposureCheckIn"
+    case .checkIn: return Category.checkIn
+    case .risk: return Category.risk
+    case .elevatedRisk: return Category.elevatedRisk
+    case .morningBrief: return Category.morningBrief
     }
   }
   

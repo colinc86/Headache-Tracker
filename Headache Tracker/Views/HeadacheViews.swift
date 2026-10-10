@@ -23,6 +23,10 @@ struct HeadacheViews: View {
   
   /// Whether the view should show all cards regardless of view options.
   var showsAllCards: Bool = false
+
+  /// Whether the resolved/unresolved status card shows (Track's log bar
+  /// carries the status and Resolve instead).
+  var showsStatus: Bool = true
   
   // MARK: Private properties
   
@@ -88,7 +92,7 @@ struct HeadacheViews: View {
           SectionFooterView(title: "Is your headache gone? Tap Resolve to let the app know.")
         }
       }
-      else {
+      else if showsStatus {
         Section {
           StatusCard(resolved: headache.resolved)
             .cardListRow()
@@ -124,32 +128,6 @@ struct HeadacheViews: View {
           ProgressionCard(headache: headache)
             .cardListRow()
         }
-//        if allowsEditing {
-//          if headache.progression.count > 1 {
-//            ProgressionCard(headache: headache)
-//
-//            ForEach(headache.severitiesArray, id: \.self) { severity in
-//              NavigationLink {
-//                SeverityView(severity: severity, canEditEndTime: severity == headache.severitiesArray.last, canDelete: true)
-//              } label: {
-//                SubtitleCell(title: severity.severity.title, subtitle: severity.startTime?.formattedNonRelative() ?? "N/A")
-//              }
-//            }
-//            .onDelete(perform: deleteSeverities)
-//          }
-//          else if let severity = headache.severitiesArray.first {
-//            NavigationLink {
-//              SeverityView(severity: severity, canEditEndTime: severity == headache.severitiesArray.last, canDelete: false)
-//            } label: {
-//              SubtitleCell(title: severity.severity.title, subtitle: severity.startTime?.formattedNonRelative() ?? "N/A")
-//            }
-//          }
-//        }
-//        else if headache.progression.count > 1 {
-//          Section {
-//            ProgressionCard(headache: headache)
-//          }
-//        }
       }
       
       // Notes
@@ -180,8 +158,7 @@ struct HeadacheViews: View {
         Section {
           HStack {
             Spacer()
-            Button("Delete Headache", action: deleteConfirmation)
-              .foregroundColor(.red)
+            Button("Delete Headache", role: .destructive, action: deleteConfirmation)
             Spacer()
           }
           .padding(.vertical, Tokens.Spacing.sm)
@@ -328,17 +305,24 @@ extension HeadacheViews {
   ///
   /// - Parameter offsets: The item offsets.
   private func deleteSeverities(offsets: IndexSet) {
-    withAnimation {
-      offsets.map { headache.severitiesArray[$0] }.forEach({ headache in
-        Task {
-          do {
-            try await headacheManager.deleteSeverity(identifier: headache.identifier)
-          }
-          catch {
-            showAlert("Unable to Delete Severity", error)
-          }
+    let severities = offsets.map { headache.severitiesArray[$0] }
+    let wasUnresolved = !headache.resolved
+    Task {
+      for severity in severities {
+        do {
+          try await headacheManager.deleteSeverity(identifier: severity.identifier)
         }
-      })
+        catch {
+          showAlert("Unable to Delete Severity", error)
+        }
+      }
+
+      // Editing the active headache's severities can change its current
+      // severity or its onset, so keep the Live Activity in step. (A resolved
+      // headache has no activity, matching the delete-headache path.)
+      if wasUnresolved {
+        await LiveActivityManager.shared.reconcile(headacheManager: headacheManager)
+      }
     }
   }
   
@@ -348,17 +332,21 @@ extension HeadacheViews {
   ///   data should be deleted.
   private func delete(deleteHealthKitData: Bool) {
     if let identifier = headache.identifier {
+      // Capture the resolved state before the delete — reading `headache`
+      // after `deleteHeadache` removes it from the store would touch a deleted
+      // managed object (stale value, or a crash once the context merges).
+      let wasUnresolved = !headache.resolved
       Task {
         do {
           // Delete the headache
           try await headacheManager.deleteHeadache(identifier: identifier, deleteHealthKitData: deleteHealthKitData)
-          
+
           // Remove any alerts
-          if !headache.resolved {
+          if wasUnresolved {
             alertManager.removePendingRequests(withIdentifiers: [HeadacheAlertRequest.checkInRequestIdentifier])
             await LiveActivityManager.shared.reconcile(headacheManager: headacheManager)
           }
-          
+
           // Dismiss the view
           dismiss()
         }

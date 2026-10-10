@@ -193,7 +193,12 @@ struct SeverityButton: View {
         .foregroundColor(selectedSeverity == nil && selectedSeverityRange == nil ? .primary : (selected ? .primary : .secondary))
     }
     .animation(Tokens.Motion.selection, value: selected)
-    .accessibilityElement(children: .ignore)
+    // `.combine` (not `.ignore`) merges the bar and label into one spoken
+    // element while PRESERVING the child button's activation. `.ignore` discards
+    // the button's action, so the interactive severity buttons — in the app and
+    // the widget alike — were announced as buttons but did nothing on a VoiceOver
+    // double-tap. For display mode (no button) the two are equivalent.
+    .accessibilityElement(children: .combine)
     .accessibilityLabel("\(severity.title) severity")
     .accessibilityAddTraits(accessibilityTraits)
   }

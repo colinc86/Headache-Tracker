@@ -8,8 +8,8 @@
 import SwiftUI
 
 /// A capsule chip with selected / unselected / read-only variants — the
-/// single chip vocabulary across exposure check-in and medication
-/// autocomplete. Interactive only when given an `action`.
+/// single chip vocabulary across tags and medication autocomplete.
+/// Interactive only when given an `action`.
 struct Chip: View {
 
   /// A chip's visual style.
@@ -31,22 +31,40 @@ struct Chip: View {
   /// The action to run on tap. Nil renders a non-interactive chip.
   var action: (() -> Void)?
 
+  /// An accent replacing the theme's base color for the read-only style, so
+  /// a chip can carry a semantic tint (a risk going down in green, say).
+  var tint: Color?
+
   /// The application's custom color theme.
   @AppStorage(Preferences.General.Keys.colorTheme, store: .shared) private var colorTheme = Preferences.General.Defaults.colorTheme
+
+  /// Increments on each interactive tap to drive a selection haptic — the
+  /// tactile half of the chip ritual (the spring is `Tokens.Motion.selection`).
+  @State private var taps = 0
 
   // MARK: View body
 
   var body: some View {
     Group {
       if let action = action {
-        Button(action: action) { label }
-          .buttonStyle(.borderless)
+        Button {
+          taps += 1
+          action()
+        } label: {
+          label
+        }
+        .buttonStyle(.borderless)
+        .sensoryFeedback(.selection, trigger: taps)
       }
       else {
         label
       }
     }
     .animation(Tokens.Motion.selection, value: style)
+    // Selection is otherwise conveyed only by fill color and a checkmark glyph,
+    // which VoiceOver can't read as "selected" — mirror SeverityButton so a
+    // chosen chip announces its state. (Read-only chips carry no selection.)
+    .accessibilityAddTraits(style == .selected ? .isSelected : [])
   }
 
   // MARK: Private properties
@@ -70,7 +88,7 @@ struct Chip: View {
     switch style {
     case .selected: return colorTheme.baseColor
     case .unselected: return Color(UIColor.tertiarySystemFill)
-    case .readonly: return colorTheme.baseColor.opacity(0.15)
+    case .readonly: return (tint ?? colorTheme.baseColor).opacity(0.15)
     }
   }
 
@@ -78,7 +96,7 @@ struct Chip: View {
     switch style {
     case .selected: return Color(UIColor.systemBackground)
     case .unselected: return .primary
-    case .readonly: return colorTheme.baseColor
+    case .readonly: return tint ?? colorTheme.baseColor
     }
   }
 

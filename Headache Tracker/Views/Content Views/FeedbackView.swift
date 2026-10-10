@@ -44,7 +44,13 @@ struct FeedbackView: View {
   
   /// Whether the view is submitting the feedback.
   @State private var submitting: Bool = false
-  
+
+  /// Whether there's enough to submit — a description is required so an empty
+  /// report can't be sent.
+  private var canSubmit: Bool {
+    return !message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+  }
+
   // MARK: View body
   
   var body: some View {
@@ -77,6 +83,7 @@ struct FeedbackView: View {
           }
           else {
             Button("Submit", action: submit)
+              .disabled(!canSubmit)
           }
         }
       }

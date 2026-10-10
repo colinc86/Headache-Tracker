@@ -12,12 +12,18 @@ struct PredictionViews: View {
   /// The view's prediction.
   let prediction: RiskPrediction
 
+  /// The headline accuracy shown beside the confidence grade.
+  var accuracy: ForecastAccuracy? = nil
+
   // MARK: Private properties
 
   // Preferences
   @AppStorage(Preferences.Lists.Keys.outlook) var showRiskView = Preferences.Lists.Defaults.shown
   @AppStorage(Preferences.Lists.Keys.brief) var showBriefView = Preferences.Lists.Defaults.shown
   @AppStorage(Preferences.General.Keys.colorTheme, store: .shared) private var colorTheme = Preferences.General.Defaults.colorTheme
+
+  /// The predictor, for the training provenance behind the footer.
+  @EnvironmentObject private var predictor: Predictor
 
   /// The headaches fetch request.
   /// Should only return one headache.
@@ -58,15 +64,21 @@ struct PredictionViews: View {
     if showRiskView && (currentHeadache != nil || prediction != .empty) {
       Section {
         NavigationLink {
-          ModelInputView(input: prediction.input)
+          ModelInputView(prediction: prediction)
         } label: {
-          OutlookView(outlook: outlook)
+          OutlookHeroView(outlook: outlook, accuracy: accuracy)
         }
         .cardListRow()
-      } header: {
-        SectionTitleView(title: "Risk")
       } footer: {
-        SectionFooterView(title: "Updated \(prediction.computedAt.formattedNonRelative()).")
+        // Only a forecast has a meaningful "updated" time. During a headache the
+        // hero shows the live headache state, and an empty prediction's sentinel
+        // date (Date(timeIntervalSince1970: 0)) would otherwise surface as
+        // "Updated Jan 1, 1970" — e.g. for a new user whose first log precedes
+        // any trained model. When forecasting, the body guard guarantees a
+        // non-empty prediction, so `computedAt` is always real here.
+        if currentHeadache == nil {
+          SectionFooterView(title: ([predictor.metrics?.provenanceSummary, prediction.shortCaption, "Updated \(prediction.computedAt.formattedNonRelative())"].compactMap({ $0 })).joined(separator: " · ") + ".")
+        }
       }
 
       // Why: the strongest baseline deviations behind today's risk

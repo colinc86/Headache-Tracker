@@ -12,11 +12,15 @@ import Foundation
 extension MLDataTable {
 
   /// Builds a table from model inputs with the binary risk target: positive
-  /// iff the row's derived outlook is a possible headache (an onset occurs
-  /// within the rolling 24-hour window).
+  /// iff an onset occurs within the horizon's window. The feature columns are
+  /// identical across horizons; only the target label differs, so the two
+  /// horizons train as separate classifiers on separate tables (never in one
+  /// table, which would leak one target into the other as a feature).
   ///
-  /// - Parameter inputs: The (already imputed) model inputs.
-  init(inputs: [ModelInput]) throws {
+  /// - Parameters:
+  ///   - inputs: The (already imputed) model inputs.
+  ///   - horizon: The prediction horizon whose label to build.
+  init(inputs: [ModelInput], horizon: RiskHorizon = .standard) throws {
     var dictionaryInputs = [String: MLDataValueConvertible]()
     for input in inputs {
       let fullInput = input.fullInput()
@@ -33,7 +37,7 @@ extension MLDataTable {
     }
 
     dictionaryInputs[RiskClassifierOutput.FeatureName.risk] = inputs.map { input in
-      input.outlook == .possibleHeadache ? RiskClassifierOutput.positiveLabel : RiskClassifierOutput.negativeLabel
+      input.isPositive(horizon: horizon) ? RiskClassifierOutput.positiveLabel : RiskClassifierOutput.negativeLabel
     }
 
     try self.init(dictionary: dictionaryInputs)

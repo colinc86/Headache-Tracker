@@ -22,14 +22,14 @@ struct HeadacheCell: View {
   
   /// The id of the duration view.
   @State private var durationID = UUID()
-  
-  /// A timer to update the duration view for unresolved headaches.
-  @State private var durationUpdateTimer: Timer?
-  
+
   /// The previous severity range.
   @State private var previousSeverityRange: Headache.Severity.Range?
   
-  private let durationUpdateWaiter = Waiter()
+  // `@State` for a stable identity across struct re-creations: a plain `let`
+  // is re-initialized on every parent re-render, orphaning the running timer
+  // started in `appeared()` so `onDisappear` stops the wrong (new) instance.
+  @State private var durationUpdateWaiter = Waiter()
   
   // MARK: View body
   
@@ -53,6 +53,21 @@ struct HeadacheCell: View {
     }
     .onAppear(perform: appeared)
     .onDisappear(perform: durationUpdateWaiter.stop)
+    // One curated phrase instead of the six label/value stops the raw
+    // concatenation would speak when scanning the list under VoiceOver.
+    .accessibilityElement(children: .ignore)
+    .accessibilityLabel(accessibilityLabel)
+  }
+
+  /// A natural-language summary of the headache for VoiceOver.
+  private var accessibilityLabel: String {
+    let onset = headache.startTime?.formattedNonRelative() ?? "unknown time"
+    let duration = Formatters.formatInterval(headache.duration)
+    let severity = headache.severityRange.description
+    if headache.resolved {
+      return "Headache on \(onset), lasted \(duration), severity \(severity)."
+    }
+    return "Ongoing headache, started \(onset), \(duration) so far, severity \(severity)."
   }
 }
 

@@ -41,11 +41,28 @@ enum HealthKitData: CaseIterable, Codable {
   case appleExerciseTime
   case menstrualDaysSinceCycleStart
   case menstrualFlowActive
+  case bodyTemperature
+  case wristTemperature
+  case basalBodyTemperature
+  case hrvRMSSD
+  case hrvPNN50
+  case hrvLFHF
 
   /// Whether or not this is a sharable type.
   var isShareType: Bool {
     switch self {
     case .headache: return true
+    default: return false
+    }
+  }
+
+  /// Whether this metric is computed on-device from a dedicated read path
+  /// (beat-to-beat HRV from `HKHeartbeatSeriesSample`) rather than mapping to
+  /// a single HealthKit quantity/category type. Derived metrics have no
+  /// `type` and are excluded from the generic read loop and authorization set.
+  var isDerived: Bool {
+    switch self {
+    case .hrvRMSSD, .hrvPNN50, .hrvLFHF: return true
     default: return false
     }
   }
@@ -97,6 +114,9 @@ enum HealthKitData: CaseIterable, Codable {
     case .dietaryWater: return .dietaryWater
     case .timeInDaylight: return .timeInDaylight
     case .appleExerciseTime: return .appleExerciseTime
+    case .bodyTemperature: return .bodyTemperature
+    case .wristTemperature: return .appleSleepingWristTemperature
+    case .basalBodyTemperature: return .basalBodyTemperature
     default: return nil
     }
   }
@@ -112,6 +132,7 @@ enum HealthKitData: CaseIterable, Codable {
     case .dietaryCaffeine: return .gramUnit(with: .milli)
     case .dietaryWater: return .literUnit(with: .milli)
     case .timeInDaylight, .appleExerciseTime: return .minute()
+    case .bodyTemperature, .wristTemperature, .basalBodyTemperature: return .degreeCelsius()
     default: return nil
     }
   }
@@ -122,6 +143,63 @@ enum HealthKitData: CaseIterable, Codable {
   /// evening onward; daily aggregates look back far enough to contain at
   /// least one sample.
   ///
+  /// The metrics that get trailing-window context (24h mean/delta, 48h and
+  /// 72h range, 6h delta), in stable order. Excluded: the menstrual metrics
+  /// (categorical, 60-day), mindful sessions (sparse and user-controlled),
+  /// sleep (one value per night, already baseline-relative), the derived HRV
+  /// metrics (would need bucketed heartbeat-series reads), and the
+  /// correlation-only metrics that feed no model column.
+  static let windowMetrics: [HealthKitData] = [
+    .heartRate,
+    .heartRateVariabilitySDNN,
+    .respiratoryRate,
+    .oxygenSaturation,
+    .bodyTemperature,
+    .environmentalAudioExposure,
+    .headphoneAudioExposure,
+    .restingHeartRate,
+    .walkingHeartRateAverage,
+    .wristTemperature,
+    .basalBodyTemperature,
+    .stepCount
+  ]
+
+  /// How this metric's hourly buckets are aggregated for window context, or
+  /// nil when the metric gets none.
+  var windowAggregate: WindowAggregate? {
+    switch self {
+    case .heartRate, .heartRateVariabilitySDNN, .respiratoryRate, .oxygenSaturation, .bodyTemperature,
+        .environmentalAudioExposure, .headphoneAudioExposure:
+      return .discreteAverage
+    case .restingHeartRate, .walkingHeartRateAverage, .wristTemperature, .basalBodyTemperature:
+      return .mostRecent
+    case .stepCount:
+      return .cumulativeSum
+    default:
+      return nil
+    }
+  }
+
+  /// The base of this metric's `ContextData` attribute names (e.g.
+  /// `heartRateMean24h`), or nil when the metric gets no window context.
+  var contextAttributeBase: String? {
+    switch self {
+    case .heartRate: return "heartRate"
+    case .heartRateVariabilitySDNN: return "heartRateVariability"
+    case .respiratoryRate: return "respiratoryRate"
+    case .oxygenSaturation: return "oxygenSaturation"
+    case .bodyTemperature: return "bodyTemperature"
+    case .environmentalAudioExposure: return "environmentalAudioExposure"
+    case .headphoneAudioExposure: return "headphoneAudioExposure"
+    case .restingHeartRate: return "restingHeartRate"
+    case .walkingHeartRateAverage: return "walkingHeartRateAverage"
+    case .wristTemperature: return "wristTemperature"
+    case .basalBodyTemperature: return "basalBodyTemperature"
+    case .stepCount: return "stepCount"
+    default: return nil
+    }
+  }
+
   /// - Parameter date: The end of the window.
   /// - Returns: The window to query.
   func window(endingAt date: Date) -> DateInterval {
@@ -132,7 +210,9 @@ enum HealthKitData: CaseIterable, Codable {
       return DateInterval(start: min(start, date), end: date)
     case .heartRate:
       return DateInterval(start: date.addingTimeInterval(-3600.0), end: date)
-    case .restingHeartRate, .walkingHeartRateAverage:
+    case .restingHeartRate, .walkingHeartRateAverage, .wristTemperature, .basalBodyTemperature:
+      // Wrist and basal temperature are written roughly once per night;
+      // look back far enough to contain the most recent reading.
       return DateInterval(start: date.addingTimeInterval(-48.0 * 3600.0), end: date)
     case .menstrualDaysSinceCycleStart, .menstrualFlowActive:
       // Long enough to contain the most recent cycle start.
@@ -180,13 +260,21 @@ enum HealthKitData: CaseIterable, Codable {
     case .respiratoryRate,
         .oxygenSaturation,
         .heartRate,
-        .heartRateVariabilitySDNN:
+        .heartRateVariabilitySDNN,
+        .bodyTemperature:
       // Averages over the window instead of a single (possibly stale) sample.
+      // Body temperature (e.g. a ring writing every 30 minutes) averages well.
       return .statistics(options: .discreteAverage)
     case .restingHeartRate,
-        .walkingHeartRateAverage:
+        .walkingHeartRateAverage,
+        .wristTemperature,
+        .basalBodyTemperature:
       // HealthKit writes roughly one of these per day; take the latest.
       return .statistics(options: .mostRecent)
+    case .hrvRMSSD, .hrvPNN50, .hrvLFHF:
+      // Derived from a dedicated heartbeat-series read; never queried here
+      // (`query(endingAt:)` returns nil first because `type` is nil).
+      return .sample
     }
   }
 
@@ -196,9 +284,12 @@ enum HealthKitData: CaseIterable, Codable {
   ///   - date: The end of the metric's sampling window.
   ///   - completion: Called after the query has completed.
   /// - Returns: A query.
+  /// Returns nil (without invoking `completion`) when no query can be built —
+  /// e.g. for derived metrics that have no `type`. Callers must treat a nil
+  /// return as "no query ran" and balance their own bookkeeping; `completion`
+  /// fires only when an actual query executes.
   func query(endingAt date: Date, completion: @escaping (HKQuery?, [HKSample]?, HKQuantity?, Error?) -> Void) -> HKQuery? {
     guard let type = type else {
-      completion(nil, nil, nil, nil)
       return nil
     }
 
@@ -223,16 +314,14 @@ enum HealthKitData: CaseIterable, Codable {
     switch queryType {
     case .sample:
       guard let sampleType = type as? HKSampleType else {
-        completion(nil, nil, nil, nil)
         return nil
       }
-      
+
       return HKSampleQuery(sampleType: sampleType, predicate: predicate, limit: limit, sortDescriptors: [sortDescriptor]) { query, samples, error in
         completion(query, samples, nil, error)
       }
     case .statistics(let options):
       guard let quantityType = type as? HKQuantityType else {
-        completion(nil, nil, nil, nil)
         return nil
       }
       return HKStatisticsQuery(quantityType: quantityType, quantitySamplePredicate: predicate, options: options) { query, statistics, error in

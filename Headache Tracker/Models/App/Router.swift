@@ -14,31 +14,34 @@ class Router: ObservableObject {
   /// The app's tabs.
   enum Tab: Int {
     case track
-    case analyze
+    case profile
     case headaches
     case settings
   }
 
-  /// A destination beyond tab selection.
-  enum Route {
-
-    /// The daily exposure check-in sheet.
-    case dailyCheckIn
-
+  /// A screen inside a tab that a deep link can land on.
+  enum Destination: Equatable {
+    case signals
+    case insights
   }
 
   /// The selected tab.
   @Published var selectedTab = Tab.track
 
-  /// A pending route, consumed by the destination view.
-  @Published var pendingRoute: Route?
+  /// A screen or section the Profile tab should show once it appears.
+  @Published var pendingDestination: Destination?
 
-  /// Routes to the Track tab, optionally with a pending destination.
-  ///
-  /// - Parameter route: The destination beyond the tab, if any.
-  @MainActor func routeToTrack(_ route: Route? = nil) {
+  /// Routes to the Track tab.
+  @MainActor func routeToTrack() {
     selectedTab = .track
-    pendingRoute = route
+  }
+
+  /// Routes to the Profile tab, optionally onto a screen or section in it.
+  ///
+  /// - Parameter destination: Where to land.
+  @MainActor func routeToProfile(_ destination: Destination? = nil) {
+    selectedTab = .profile
+    pendingDestination = destination
   }
 
 }

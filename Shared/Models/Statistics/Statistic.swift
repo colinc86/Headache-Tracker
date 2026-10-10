@@ -30,8 +30,12 @@ class Statistic {
     guard let earliestDate = earliestDate ?? signal.first?.1 else {
       return 0
     }
-    
-    return Calendar.current.numberOfDaysBetween(earliestDate, and: Date())
+
+    // `numberOfDaysBetween` counts day *boundaries*, so it excludes today; the
+    // `+ 1` makes the window inclusive of today. Without it a headache logged
+    // today is dropped from the bars/blocks even though it's in the signal that
+    // the Mean/Min/Max cards summarize — the graph would always lag a day.
+    return Calendar.current.numberOfDaysBetween(earliestDate, and: Date()) + 1
   }
   
   /// The mean value's description.

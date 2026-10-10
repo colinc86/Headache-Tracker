@@ -44,7 +44,11 @@ extension Calendar {
   /// - Parameter date: The date.
   /// - Returns: The date that represents midnight after `date`.
   func midnightAfter(_ date: Date) -> Date {
-    return startOfDay(for: date.addingTimeInterval(86400.0))
+    // Calendar-aware day arithmetic — adding a flat 86,400s lands on the wrong
+    // calendar day across a DST transition (a 23-/25-hour day), which can push
+    // this a full day off. Adding one `.day` to the start of day is DST-safe.
+    return self.date(byAdding: .day, value: 1, to: startOfDay(for: date))
+      ?? startOfDay(for: date.addingTimeInterval(86400.0))
   }
   
   /// A description of the date relative to now.
@@ -66,7 +70,9 @@ extension Calendar {
       dayString = "Tomorrow at "
     }
     else if days < -1 {
-      dayString = "In \(days) days at "
+      // `days` is negative for future dates (days from `date` forward to now),
+      // so negate it to read "In 3 days" rather than "In -3 days".
+      dayString = "In \(-days) days at "
     }
     
     return dayString + timeString

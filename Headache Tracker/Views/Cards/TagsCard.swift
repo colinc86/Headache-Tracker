@@ -34,7 +34,7 @@ struct TagsCard: View {
       Button("Edit", action: editAction)
     } content: {
       ZStack(alignment: .leading) {
-        TagsView(tags: tags, action: { _ in })
+        TagsView(tags: tags, action: tagAction)
           .buttonStyle(TagButtonStyle())
         
         if tags.isEmpty {

@@ -37,12 +37,14 @@ struct MedicationsCard: View {
             HStack {
               Image(systemName: entry.efficacy.systemImage)
                 .foregroundColor(entry.efficacy == .unrated ? .secondary : colorTheme.teal)
+                // Decorative — the efficacy is already spoken via its title.
+                .accessibilityHidden(true)
 
               VStack(alignment: .leading) {
                 Text(entry.name ?? "Medication")
                   .font(.callout)
                 if let takenAt = entry.takenAt {
-                  Text(Formatters.formatTime(takenAt))
+                  Text(Formatters.formatTimeWithDay(takenAt))
                     .font(.caption)
                     .foregroundColor(.secondary)
                 }
@@ -54,6 +56,9 @@ struct MedicationsCard: View {
                 .font(.caption)
                 .foregroundColor(.secondary)
             }
+            // Read the row as one coherent phrase (name, time, efficacy)
+            // instead of three separate VoiceOver stops.
+            .accessibilityElement(children: .combine)
           }
         }
       }

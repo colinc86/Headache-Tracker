@@ -32,13 +32,7 @@ class Refresher: ObservableObject {
 
   /// The refresh task responsible for re-training the machine learning models.
   private let trainingProcessingTask = RefreshTask(identifier: Constants.Tasks.backgroundTrainingTaskIdentifier, type: .processing)
-  
-  /// The create training data background task.
-  private var createTrainingDataBackgroundTask = BackgroundTask(identifier: "createTrainingData")
-  
-  /// The get current classifier input background task.
-  private var getCurrentClassifierInputBackgroundTask = BackgroundTask(identifier: "getCurrentClassifierInput")
-  
+
 }
 
 // MARK: Alerting
@@ -85,6 +79,41 @@ extension Refresher {
     preferences.debug.lastRiskAlertDate = Date()
   }
   
+  /// Presents a preemptive nudge when risk is *elevated* (but not yet high),
+  /// with a caring, actionable reason drawn from the morning-brief builder.
+  /// Debounced via `lastNudgeDate` so consecutive refreshes don't repeat it.
+  ///
+  /// - Parameter prediction: The prediction.
+  func presentElevatedRiskNudge(with prediction: RiskPrediction?) async throws {
+    // Only continue if real-time alerts are on and risk is specifically
+    // elevated — the high tier is handled by `presentRiskAlert`. Skip when the
+    // morning brief is due: it fires later in this same refresh and already
+    // conveys the elevated risk, so a nudge here would just double up.
+    guard preferences.notifications.realTimeAlerts,
+          !isMorningBriefDue,
+          let prediction = prediction,
+          prediction != .empty,
+          prediction.tier == .elevated else {
+      return
+    }
+
+    // Debounce: at most one nudge per six hours.
+    if let last = preferences.debug.lastNudgeDate, Date().timeIntervalSince(last) < 6.0 * 3600.0 {
+      return
+    }
+
+    let brief = RiskBriefBuilder.makeBrief(
+      risk: prediction,
+      todayValues: prediction.input.correlationValues(),
+      report: InsightsStore.shared.load())
+
+    logDebug("Presenting elevated-risk nudge: \(prediction.probability).")
+    try await alertManager.presentAlert(
+      with: HeadacheAlertRequest.elevatedRisk(probability: prediction.probability, reasons: brief?.reasons ?? []),
+      badgeNumber: 0)
+    preferences.debug.lastNudgeDate = Date()
+  }
+
   /// Presents the morning brief now: the risk tier plus the strongest
   /// baseline-deviation reasons.
   ///
@@ -108,28 +137,6 @@ extension Refresher {
       with: HeadacheAlertRequest.morningBrief(tier: prediction.tier, probability: prediction.probability, reasons: brief?.reasons ?? []),
       badgeNumber: 0)
     return true
-  }
-
-  /// Schedules (or cancels) the repeating evening exposure check-in
-  /// reminder to match the current preferences.
-  func updateExposureReminderSchedule() async throws {
-    let request = HeadacheAlertRequest.exposureCheckIn
-    alertManager.removePendingRequests(withIdentifiers: [request.identifier])
-
-    guard preferences.notifications.checkInReminderAlerts else {
-      return
-    }
-
-    let time = preferences.notifications.checkInReminderTime
-    var components = DateComponents()
-    components.hour = Int(time) / 3600
-    components.minute = (Int(time) % 3600) / 60
-
-    logDebug("Scheduling exposure check-in reminder at \(components.hour ?? 0):\(components.minute ?? 0).")
-    try await alertManager.presentAlert(
-      with: request,
-      trigger: UNCalendarNotificationTrigger(dateMatching: components, repeats: true),
-      badgeNumber: 0)
   }
 
   /// Whether the morning brief is due: brief alerts are on, today's brief
@@ -238,11 +245,13 @@ extension Refresher {
 
         let input = await self.headacheManager.predictorInput(atDate: Date(), inWidget: false)
 
-        // Should we create new training data?
-        // If it's been more than half an hour then yes.
-        if let timestamp = try await self.headacheManager.lastTrainingDataDate(), Date().timeIntervalSince(timestamp) > 1800.0 {
-          try await self.headacheManager.createTrainingData(from: input)
-        }
+        // Sample a training row on the clock. The manager drops it when a
+        // row already exists within its dedupe window, which also covers
+        // the zero-row case on a fresh install.
+        try await self.headacheManager.createTrainingData(from: input, source: .background)
+
+        // Score any matured forecasts before recording a new one.
+        try await self.headacheManager.resolveEvaluations()
 
         // Run a prediction when there's no current headache, or when the
         // daily outlook is due (which must fire even during a headache).
@@ -250,17 +259,31 @@ extension Refresher {
           let prediction = try await self.headacheManager.predictor.predict(input, inWidget: false)
 
           if currentSeverityID == nil {
+            // Record the forecast so the prospective accuracy record covers
+            // every hour, not only the hours the app was opened.
+            if prediction != .empty {
+              try await self.headacheManager.recordEvaluation(for: prediction)
+            }
+
             try await self.presentRiskAlert(with: prediction)
+            try await self.presentElevatedRiskNudge(with: prediction)
           }
 
           // Present the morning brief when due
           try await self.presentMorningBriefIfNeeded(with: prediction)
         }
 
+        // Push the freshly computed forecast to the watch (app groups don't
+        // sync across devices, so this is the only path that reaches it).
+        WatchConnectivityProvider.shared.syncStateToWatch()
+
         completion.complete(success: true)
       }
       catch {
-        logError("Error creating training data: \(error)")
+        // This block spans input assembly, training-data creation, prediction,
+        // and every alert presentation — so attribute the failure to the whole
+        // refresh, not just training data.
+        logError("Error handling prediction refresh task: \(error)")
         completion.complete(success: false)
       }
     }

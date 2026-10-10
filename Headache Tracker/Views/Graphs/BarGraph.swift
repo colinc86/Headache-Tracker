@@ -171,11 +171,14 @@ extension BarGraph: AXChartDescriptorRepresentable {
 
   /// The graph's spoken summary: count, peak, and trend.
   var accessibilitySummary: String {
-    guard statistic.count > 0 else {
+    // `statistic.count` is the number of *days* in the window; the headache
+    // count is the number of plotted data points (one per headache).
+    let headacheCount = statistic.signal.count
+    guard headacheCount > 0 else {
       return "No data"
     }
 
-    var parts = ["\(statistic.count) headaches"]
+    var parts = ["\(headacheCount) \(headacheCount == 1 ? "headache" : "headaches")"]
     if let peak = displayString(for: statistic.max) {
       parts.append("peak \(peak)")
     }
@@ -237,12 +240,14 @@ extension BarGraph {
         return
       }
       
-      let count = Calendar.current.numberOfDaysBetween(earliestDate, and: Date())
-      
+      // Inclusive of today (`+ 1`) to match the bars drawn by `Bars`; otherwise
+      // the rightmost scrub segment would select the wrong day.
+      let count = Calendar.current.numberOfDaysBetween(earliestDate, and: Date()) + 1
+
       guard count > 0 else {
         return
       }
-      
+
       let xStep = size.width / CGFloat(count)
       let currentIndex = floor(location.x / xStep)
       let xLocation = currentIndex * xStep + xStep / 2.0
@@ -253,9 +258,15 @@ extension BarGraph {
         feedbackGenerator?.prepare()
       }
       
-      let date = earliestDate.addingTimeInterval(TimeInterval(currentIndex) * 86400.0)
+      // Calendar-aware day stepping (DST-safe) from the same start-of-day the
+      // bars are bucketed against, so scrubbing a bar always selects its own
+      // day — even across a DST transition with `earliestDate` near midnight,
+      // where flat 86,400s stepping would drift across a midnight boundary.
+      let calendar = Calendar.current
+      let date = calendar.date(byAdding: .day, value: Int(currentIndex), to: calendar.startOfDay(for: earliestDate))
+        ?? earliestDate.addingTimeInterval(TimeInterval(currentIndex) * 86400.0)
       selectedDate = date
-      selectedValue = statistic.signal.filter({ Calendar.current.numberOfDaysBetween(date, and: $0.1) == 0 }).first?.0
+      selectedValue = statistic.signal.filter({ calendar.numberOfDaysBetween(date, and: $0.1) == 0 }).first?.0
       touchLocation = CGPoint(x: xLocation, y: location.y)
     }
     
@@ -324,7 +335,10 @@ struct Bars: Shape {
     }
 
     let calendar = Calendar.current
-    let count = calendar.numberOfDaysBetween(earliestDate, and: Date())
+    // `+ 1` makes the day span inclusive of today so a headache logged today is
+    // plotted; must stay in lockstep with `Statistic.count` (bar stroke width)
+    // and the scrub handler below, or bars and touch targets desync.
+    let count = calendar.numberOfDaysBetween(earliestDate, and: Date()) + 1
 
     var values = [Double](repeating: 0.0, count: Swift.max(count, 0))
     let startDay = calendar.startOfDay(for: earliestDate)

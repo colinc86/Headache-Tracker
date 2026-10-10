@@ -22,7 +22,10 @@ struct SectionFooterView: View {
         .foregroundColor(.secondary)
       Spacer()
     }
-    .padding([.leading, .trailing, .bottom], Tokens.Spacing.footerBottom)
+    // Horizontal gutter matches SectionTitleView so headers and footers share
+    // a left edge; only the bottom uses the larger footer spacing.
+    .padding([.leading, .trailing], Tokens.Spacing.gutter)
+    .padding(.bottom, Tokens.Spacing.footerBottom)
   }
 }
 

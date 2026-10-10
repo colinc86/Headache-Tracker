@@ -79,8 +79,12 @@ fileprivate struct _FlexibleView<Data: Collection, Content: View>: View where Da
       
       remainingWidth = remainingWidth - (elementSize.width + spacing)
     }
-    
-    return rows
+
+    // Drop empty rows: an element that doesn't fit the current row starts a new
+    // one, which leaves a leading empty row (and a spurious spacing gap) when
+    // the first element overflows — during the pre-measurement layout pass, or
+    // persistently for an element wider than the available width.
+    return rows.filter { !$0.isEmpty }
   }
 }
 

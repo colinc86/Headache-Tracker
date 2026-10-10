@@ -18,7 +18,7 @@ struct SeverityWidget: Widget {
         .containerBackground(Color(uiColor: .systemBackground), for: .widget)
     }
     .configurationDisplayName("Track Headache")
-    .description("Track your current headache.")
+    .description("Log your current headache severity right from the Home Screen.")
     .supportedFamilies([.systemMedium])
     .contentMarginsDisabled()
   }

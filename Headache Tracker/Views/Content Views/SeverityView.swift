@@ -94,9 +94,11 @@ struct SeverityView: View {
           }
           
           DatePicker("Start Time", selection: $editStartTime, displayedComponents: [.date, .hourAndMinute])
-          
+
           if canEditEndTime {
-            DatePicker("End Time", selection: $editEndTime, displayedComponents: [.date, .hourAndMinute])
+            // Constrain the end to at or after the start so the editor can't
+            // produce a negative-duration severity interval.
+            DatePicker("End Time", selection: $editEndTime, in: editStartTime..., displayedComponents: [.date, .hourAndMinute])
           }
           else {
             SubtitleCell(title: "End Time", subtitle: severity.endTime?.formattedNonRelative() ?? "N/A")
@@ -112,8 +114,7 @@ struct SeverityView: View {
       Section {
         HStack {
           Spacer()
-          Button("Delete Severity", action: deleteConfirmation)
-            .foregroundColor(canDelete ? .red : .secondary)
+          Button("Delete Severity", role: .destructive, action: deleteConfirmation)
             .disabled(!canDelete)
           Spacer()
         }
@@ -197,9 +198,15 @@ extension SeverityView {
     }
     
     if let identifier = severity.identifier {
+      let wasActive = severity.headache?.resolved == false
       Task {
         do {
           try await headacheManager.updateSeverity(identifier: identifier, value: editSeverity, startTime: editStartTime, endTime: editEndTime)
+          // Editing the active headache's severity can close it — keep the
+          // Live Activity in step.
+          if wasActive {
+            await LiveActivityManager.shared.reconcile(headacheManager: headacheManager)
+          }
         }
         catch {
           showAlert("Error Saving Severity", error)
@@ -211,9 +218,13 @@ extension SeverityView {
   /// Deletes the view's severity.
   private func delete() {
     if let identifier = severity.identifier {
+      let wasActive = severity.headache?.resolved == false
       Task {
         do {
           try await headacheManager.deleteSeverity(identifier: identifier)
+          if wasActive {
+            await LiveActivityManager.shared.reconcile(headacheManager: headacheManager)
+          }
           dismiss()
         }
         catch {

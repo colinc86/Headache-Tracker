@@ -399,8 +399,8 @@ extension Headache {
   ///
   /// - Parameter endTime: The headache's end time.
   func resolve(end: Date) -> SeverityUpdates {
-    logDebug("Adding severity \(severity.title) to the headache.")
-    
+    logDebug("Resolving the headache at \(end).")
+
     // Resolve the headache
     resolved = true
     

@@ -25,9 +25,6 @@ struct CurrentHeadacheView: View {
     /// The application's first appearance.
     var firstAppearance: Bool = true
 
-    /// The waiter to automatically refresh the view.
-    let automaticRefreshWaiter = Waiter()
-
     // MARK: Private properties
 
     /// The app's headache manager.
@@ -56,7 +53,10 @@ struct CurrentHeadacheView: View {
   
   /// The app's headache predictor.
   @EnvironmentObject private var predictor: Predictor
-  
+
+  /// The app's headache manager.
+  @EnvironmentObject private var headacheManager: HeadacheManager
+
   /// The view's model.
   ///
   /// Held as a state object so parent re-renders don't recreate it (which
@@ -78,22 +78,44 @@ struct CurrentHeadacheView: View {
     return headaches.first
   }
 
-  /// Today's logged exposures (live).
-  @FetchRequest(
-    sortDescriptors: [NSSortDescriptor(key: "kindRaw", ascending: true)],
-    predicate: NSPredicate(format: "timestamp >= %@", Calendar.current.startOfDay(for: Date()) as NSDate),
-    animation: .default)
-  private var todaysExposures: FetchedResults<Exposure>
+  /// The app's color theme.
+  @AppStorage(Preferences.General.Keys.colorTheme, store: .shared) private var colorTheme = Preferences.General.Defaults.colorTheme
 
-  /// Whether the daily check-in sheet is visible.
-  @State private var showingCheckInView = false
+  /// Whole days headache-free (nil when never had one).
+  @State private var daysFree: Int?
 
-  /// The app's notification tap router.
-  @EnvironmentObject private var router: Router
+  /// The "what changed since last open" digest.
+  @State private var digest = RiskDigest(lines: [])
 
-  /// Whether the check-in card should be shown.
-  @AppStorage(Preferences.Lists.Keys.checkIn) private var showCheckInView = Preferences.Lists.Defaults.shown
-  
+  /// A just-crossed model milestone.
+  @State private var milestone: ModelMilestone?
+
+  /// The logged 24h risk forecasts over the last 48h (for the trend sparkline).
+  @State private var riskHistory: [HeadacheManager.RiskHistoryPoint] = []
+
+  /// The accuracy over resolved forecasts, for the headline beside the
+  /// forecast's confidence grade.
+  @State private var observedAccuracy: (accuracy: Double, count: Int)?
+
+  /// The last two weeks and the headache-free runs.
+  @State private var streak: StreakSummary?
+
+  /// The cached insights report, for the drivers and their drill-ins.
+  @State private var report: InsightsReport?
+
+  /// Where a tap on the hero or a driver leads.
+  @State private var route: TrackRoute?
+
+  /// Whether the resolve confirmation is showing.
+  @State private var showingResolveConfirmation = false
+
+  /// The written summaries.
+  @EnvironmentObject private var summaryService: SummaryService
+
+  // Preferences
+  @AppStorage(Preferences.Lists.Keys.outlook) private var showRiskView = Preferences.Lists.Defaults.shown
+  @AppStorage(Preferences.Lists.Keys.brief) private var showDrivers = Preferences.Lists.Defaults.shown
+
   /// Called when the application becomes active.
   private let didBecomeActiveNotificationPublisher = NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)
   
@@ -102,60 +124,80 @@ struct CurrentHeadacheView: View {
   var body: some View {
     NavigationStack {
       List {
-        // New/Current Headache
-        Section {
-          // New/Current Severity
-          SeveritySelectionView(currentSeverity: currentHeadache?.severity, mode: .action(viewModel.changeSeverity))
-            .cardListRow()
-        } header: {
-          SectionTitleView(title: currentHeadache == nil ? "New Headache" : "Current Headache")
-        } footer: {
-          if let currentHeadache = currentHeadache {
-            if let startTime = currentHeadache.severitiesArray.last?.startTime {
-              SectionFooterView(title: "Last updated \(startTime.formattedNonRelative())")
-            }
-          } else {
-            SectionFooterView(title: "Feel a headache coming on? Select a severity level to start tracking it.")
-          }
-        }
-        
-        // No Headache
-        if currentHeadache == nil && viewModel.needsInput {
+        if let currentHeadache = currentHeadache {
+          // During a headache: the live headache leads, its cards follow.
           Section {
-            ActionCard(title: "No Headache?", buttonTitle: "No Headache", systemImage: "checkmark.circle.fill", action: viewModel.noHeadacheAction)
+            ActiveHeadacheHero(severity: currentHeadache.severity, start: currentHeadache.startTime)
+              .padding(.horizontal, Tokens.Spacing.gutter)
               .cardListRow()
-          } footer: {
-            SectionFooterView(title: "No Headache? Tap above to let the app know.")
           }
-        }
-        
-        // Current Headache Information
-        else if let currentHeadache = currentHeadache {
-          HeadacheViews(headache: currentHeadache, allowsResolution: true, allowsEditing: false, allowsDeletion: false, showsAllCards: false)
+
+          HeadacheViews(headache: currentHeadache, allowsResolution: false, allowsEditing: false, allowsDeletion: false, showsAllCards: false, showsStatus: false)
             .id(currentHeadache)
         }
-        
-        // Daily check-in
-        if showCheckInView {
+        else if showRiskView, let prediction = predictor.prediction, prediction != .empty {
+          // The forecast: score, written summary, and the 48h-into-24h ribbon.
           Section {
-            DailyCheckInCard(kinds: todaysExposures.compactMap({ $0.kindRaw })) {
-              showingCheckInView = true
-            }
-            .cardListRow()
+            TrackHeroView(
+              prediction: prediction,
+              accuracy: accuracy(for: prediction),
+              history: riskHistory,
+              summary: summaryService.risk,
+              isWriting: summaryService.isWritingRisk,
+              onOpenSignals: { route = .signals })
+              .cardListRow()
           } footer: {
-            SectionFooterView(title: "Logged exposures feed your correlation insights.")
+            SectionFooterView(title: ([predictor.metrics?.provenanceSummary, "Updated \(prediction.computedAt.formattedNonRelative())"].compactMap({ $0 })).joined(separator: " · ") + ".")
           }
-        }
 
-        // Predictions
-        if let prediction = predictor.prediction {
-          PredictionViews(prediction: prediction)
+          // What's moving it.
+          if showDrivers, !drivers.isEmpty {
+            Section {
+              DriversStrip(drivers: drivers) { driver in
+                route = driver.feature.map(TrackRoute.trigger) ?? .signals
+              }
+              .cardListRow()
+            } header: {
+              SectionTitleView(title: "Behind Today's Risk")
+            }
+          }
+
+          todaySection
+        }
+        else {
+          emptyHeroSection
+          todaySection
         }
       }
-      .background(Color(UIColor.systemGroupedBackground))
+      .scrollContentBackground(.hidden)
+      .background(ambientBackground)
       .navigationTitle("Track")
       .animation(.default, value: predictor.prediction)
-      .refreshable(action: viewModel.forcedPrediction)
+      .animation(.default, value: currentHeadache == nil)
+      .refreshable {
+        await viewModel.forcedPrediction()
+        await refreshToday()
+      }
+      // Logging is always one tap away, above the tab bar.
+      .safeAreaInset(edge: .bottom, spacing: 0) {
+        SeverityLogBar(
+          currentSeverity: currentHeadache?.severity,
+          onSeverity: { severity in
+            try await viewModel.changeSeverity(to: severity)
+            await refreshToday()
+          },
+          onNoHeadache: viewModel.noHeadacheAction,
+          onResolve: { showingResolveConfirmation = true })
+      }
+      .navigationDestination(item: $route) { route in
+        destination(for: route)
+      }
+      .confirmationDialog("Resolve Headache? It will be available in the Headaches tab.", isPresented: $showingResolveConfirmation, titleVisibility: .visible) {
+        AsyncButton("Resolve", role: .destructive) {
+          try await viewModel.resolve()
+          await refreshToday()
+        }
+      }
       .toolbar {
         ToolbarItem(placement: .automatic) {
           ListOptionsMenu()
@@ -165,18 +207,19 @@ struct CurrentHeadacheView: View {
     .onReceive(didBecomeActiveNotificationPublisher) { _ in
       viewModel.didBecomeActive(hasDesiredSeverity: sceneDelegate.desiredSeverity != nil)
     }
-    .onAppear(perform: viewModel.appeared)
-    .sheet(isPresented: $showingCheckInView) {
-      DailyCheckInView()
-    }
-    .onReceive(router.$pendingRoute) { route in
-      guard case .dailyCheckIn = route else {
-        return
+    // Also surface the deep-link confirmation when the desired severity is set
+    // *after* activation. On a cold launch the URL arrives via `.onOpenURL`,
+    // and `SceneDelegate.handle` defers the assignment a runloop — so the
+    // didBecomeActive check above can run before it's set and miss the prompt.
+    .onChange(of: sceneDelegate.desiredSeverity) { _, newValue in
+      if newValue != nil {
+        viewModel.showingSeverityConfirmation = true
       }
-      router.pendingRoute = nil
-      showingCheckInView = true
     }
-    .onDisappear(perform: viewModel.automaticRefreshWaiter.stop)
+    .onAppear(perform: viewModel.appeared)
+    .onAppear { summaryService.prewarm() }
+    .task { await refreshToday() }
+    .task(id: summaryTrigger) { updateSummary() }
     .confirmationDialog("Change headache severity to \((sceneDelegate.desiredSeverity ?? .notPresent).title.lowercased())?", isPresented: $viewModel.showingSeverityConfirmation, titleVisibility: .visible) {
       AsyncButton("Change") {
         // Read the desired severity from the live scene delegate; the view
@@ -269,9 +312,15 @@ extension CurrentHeadacheView.ViewModel {
     }
     
     logDebug("Updating current headache view prediction.")
-    
-    // Run a prediction
-    try await headacheManager.createPredict(create: false, inWidget: false)
+
+    // Run a prediction, sampling a training row on the clock when the last
+    // one is stale (rows should track time, not taps).
+    try await headacheManager.createPredict(create: .ifStale(.foreground, maxAge: 3600.0), inWidget: false)
+
+    // Surface the fresh forecast on the risk-gauge Live Activity now. A
+    // foreground prediction that newly crosses into high risk otherwise waits
+    // for the next app-active reconcile to appear.
+    await LiveActivityManager.shared.reconcile(headacheManager: headacheManager)
   }
   
   /// Changes the current headache's severity or creates a new headache if one
@@ -283,25 +332,177 @@ extension CurrentHeadacheView.ViewModel {
     
     // Change the severity
     try await headacheManager.changeSeverity(to: severity)
-    
-    // Get the identifier
-    let identifier = try await headacheManager.currentHeadacheIdentifier()
-    try await self.refresher.presentCheckInAlert(with: identifier)
+
+    if severity == .notPresent {
+      // "Not present" resolves the headache — cancel any pending check-in
+      // reminder, matching every other resolve path (detail view, widget,
+      // watch, notification action). Otherwise a stale "How's your headache?"
+      // fires for an already-resolved headache.
+      refresher.alertManager.removePendingRequests(withIdentifiers: [HeadacheAlertRequest.checkInRequestIdentifier])
+    }
+    else {
+      // Schedule the follow-up check-in for the now-current headache.
+      let identifier = try await headacheManager.currentHeadacheIdentifier()
+      try await self.refresher.presentCheckInAlert(with: identifier)
+    }
 
     // Keep the Live Activity in sync
     await LiveActivityManager.shared.reconcile(headacheManager: headacheManager)
   }
   
+  /// Resolves the current headache, matching every other resolve path.
+  func resolve() async throws {
+    logDebug("Resolve current headache from the log bar.")
+    try await headacheManager.resolve()
+    refresher.alertManager.removePendingRequests(withIdentifiers: [HeadacheAlertRequest.checkInRequestIdentifier])
+    await LiveActivityManager.shared.reconcile(headacheManager: headacheManager)
+  }
+
   /// The action to perform if there is no headache.
   func noHeadacheAction() async throws {
     logDebug("No headache action.")
     
-    try await headacheManager.createPredict(inWidget: false)
-    
+    try await headacheManager.createPredict(create: .always(.userAction), inWidget: false)
+
+    // Keep the risk-gauge Live Activity in step with the fresh forecast.
+    await LiveActivityManager.shared.reconcile(headacheManager: headacheManager)
+
     // Check if we should show the not-present training data cell
     await setNeedsInput(try await headacheManager.needsTrainingData())
   }
   
+}
+
+// MARK: Today section
+
+extension CurrentHeadacheView {
+
+  /// The current risk tier's theme color (mint/orange/pink), or nil pre-model.
+  var tierTint: Color? {
+    guard let prediction = predictor.prediction, prediction.probability >= 0 else { return nil }
+    return colorTheme.color(for: prediction.tier)
+  }
+
+  /// The screen's ambient background — a soft wash of the current risk tier's
+  /// color over the grouped background, so the whole screen reflects the state.
+  @ViewBuilder var ambientBackground: some View {
+    ZStack {
+      Color(UIColor.systemGroupedBackground)
+      LinearGradient(colors: [(tierTint ?? .clear).opacity(0.16), .clear], startPoint: .top, endPoint: .center)
+    }
+    .ignoresSafeArea()
+    .animation(.easeInOut(duration: 0.6), value: predictor.prediction)
+  }
+
+  /// The pre-model hero — anticipation, not emptiness.
+  @ViewBuilder var emptyHeroSection: some View {
+    Section {
+      OutlookHeroView(outlook: .risk(.empty))
+        .cardListRow()
+    } footer: {
+      SectionFooterView(title: "Your forecast is learning your patterns. Keep logging headaches — a personal model turns on after a couple of weeks.")
+    }
+  }
+
+  /// The Today card: the headache-free run, the last two weeks, and one line
+  /// of news.
+  @ViewBuilder var todaySection: some View {
+    if let streak = streak {
+      Section {
+        TodayCard(streak: streak, news: milestone?.message ?? digest.lines.first)
+          .cardListRow()
+      }
+    }
+  }
+
+  /// The forecast's drivers.
+  var drivers: [RiskDriver] {
+    guard let prediction = predictor.prediction else {
+      return []
+    }
+    return RiskDriver.make(prediction: prediction, report: report)
+  }
+
+  /// The headline accuracy beside the confidence grade.
+  func accuracy(for prediction: RiskPrediction) -> ForecastAccuracy? {
+    return ForecastAccuracy.headline(observedAccuracy: observedAccuracy?.accuracy, observedCount: observedAccuracy?.count ?? 0, outOfFold: predictor.metrics?.accuracy ?? prediction.modelAccuracy)
+  }
+
+  /// Changes whenever the summary's inputs do.
+  var summaryTrigger: String {
+    let prediction = predictor.prediction
+    return "\(prediction?.probability ?? -1)|\(prediction?.computedAt.timeIntervalSince1970 ?? 0)|\(riskHistory.count)|\(report?.generatedAt.timeIntervalSince1970 ?? 0)"
+  }
+
+  /// Hands the current facts to the summary service.
+  func updateSummary() {
+    guard let prediction = predictor.prediction, prediction != .empty else {
+      summaryService.update(risk: nil)
+      return
+    }
+    summaryService.update(risk: RiskFacts.make(prediction: prediction, drivers: drivers, history: riskHistory))
+  }
+
+  /// The screen a hero or driver tap leads to.
+  @ViewBuilder func destination(for route: TrackRoute) -> some View {
+    switch route {
+    case .signals:
+      if let prediction = predictor.prediction {
+        ModelInputView(prediction: prediction)
+      }
+    case .trigger(let feature):
+      if let insight = report?.insights.first(where: { $0.feature == feature && $0.target == .occurrence }) {
+        TriggerDetailView(insight: insight)
+      }
+      else if let prediction = predictor.prediction {
+        ModelInputView(prediction: prediction)
+      }
+    }
+  }
+
+  /// Recomputes the Today card and advances the last-seen snapshots.
+  func refreshToday() async {
+    daysFree = HeadacheManager.daysHeadacheFree(since: try? await headacheManager.lastResolvedHeadacheEnd())
+    riskHistory = (try? await headacheManager.riskHistory()) ?? []
+    if let source = try? await headacheManager.profileSource() {
+      streak = StreakSummary.make(episodes: source.episodes, now: Date())
+    }
+
+    var debug = Preferences.Debug()
+
+    // Current confident trigger features (non-suggestive onset associations).
+    let report = InsightsStore.shared.load()
+    self.report = report
+    let currentTriggers = Set((report?.insights ?? []).filter { $0.target == .occurrence && $0.confidence != .suggestive }.map { $0.feature })
+    let lastTriggers = Set(debug.lastSeenTriggers.compactMap { CorrelationFeature(rawValue: $0) })
+
+    let lastSeen = debug.lastSeenRiskProbability.map {
+      RiskPrediction(input: .empty, probability: $0, topFactors: [], computedAt: Date())
+    }
+    digest = RiskDigest.make(current: predictor.prediction, lastSeen: lastSeen, currentTriggers: currentTriggers, lastTriggers: lastTriggers)
+
+    // The milestone tracks how forecasts have actually done (resolved
+    // forecasts), not the training-time validation number, and only once
+    // enough have resolved to mean something.
+    let hasModel = predictor.modelUpdatedAt != nil
+    var currentAccuracy: Double?
+    let observed = try? await headacheManager.evaluation()
+    observedAccuracy = observed.map({ ($0.accuracy, $0.count) })
+    if let observed = observed, observed.count >= ModelMilestone.minimumResolvedCount {
+      currentAccuracy = observed.accuracy
+    }
+    milestone = ModelMilestone.evaluate(hadModel: debug.hadModel, hasModel: hasModel, previousAccuracy: debug.lastProspectiveAccuracy, currentAccuracy: currentAccuracy)
+
+    // Advance the snapshots (only record a real forecast probability).
+    if let probability = predictor.prediction?.probability, probability >= 0 {
+      debug.lastSeenRiskProbability = probability
+    }
+    debug.lastSeenTriggers = currentTriggers.map { $0.rawValue }
+    debug.hadModel = hasModel
+    if let currentAccuracy = currentAccuracy {
+      debug.lastProspectiveAccuracy = currentAccuracy
+    }
+  }
 }
 
 struct CurrentHeadacheView_Previews: PreviewProvider {
@@ -313,8 +514,15 @@ struct CurrentHeadacheView_Previews: PreviewProvider {
       .environmentObject(Previewing.headacheManager)
       .environmentObject(Previewing.Prediction.predictor)
       .environmentObject(refresher)
+      .environmentObject(SummaryService())
       .onAppear {
         Previewing.Prediction.predictor.prediction = .empty
       }
   }
+}
+
+/// Where a tap on the Track tab leads.
+enum TrackRoute: Hashable {
+  case signals
+  case trigger(CorrelationFeature)
 }

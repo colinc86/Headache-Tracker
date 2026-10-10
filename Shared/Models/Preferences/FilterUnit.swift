@@ -23,20 +23,27 @@ enum FilterUnit: String, RawRepresentable {
     }
   }
   
-  /// The date before now with the number of `count` units of self
-  /// before the current date.
+  /// The date `count` units of self before the current date.
+  ///
+  /// Uses calendar arithmetic so the window matches real months and years and
+  /// stays correct across DST. A flat 31-day "month"/365-day "year" made "Last
+  /// 12 months" span *more* than "Last 1 year" and drifted the boundaries off
+  /// the calendar. Falls back to a flat interval only if the calendar can't
+  /// resolve the date (it effectively always can).
   func dateBeforeNow(withCount count: Int) -> Date {
-    var interval: TimeInterval = 0.0
+    let calendar = Calendar.current
+    let now = Date()
+
+    let component: Calendar.Component
+    let secondsPerUnit: TimeInterval
     switch self {
-    case .day:
-      interval = TimeInterval(count) * 86400.0
-    case .week:
-      interval = TimeInterval(count) * 604800.0
-    case .month:
-      interval = TimeInterval(count) * 2678400.0
-    case .year:
-      interval = TimeInterval(count) * 31536000.0
+    case .day:   component = .day;        secondsPerUnit = 86400.0
+    case .week:  component = .weekOfYear;  secondsPerUnit = 604800.0
+    case .month: component = .month;       secondsPerUnit = 2678400.0
+    case .year:  component = .year;        secondsPerUnit = 31536000.0
     }
-    return Date().addingTimeInterval(-interval)
+
+    return calendar.date(byAdding: component, value: -count, to: now)
+      ?? now.addingTimeInterval(-TimeInterval(count) * secondsPerUnit)
   }
 }

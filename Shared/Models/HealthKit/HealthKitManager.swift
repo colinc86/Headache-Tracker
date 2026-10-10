@@ -62,8 +62,13 @@ class HealthKitManager: ObservableObject {
   ///
   /// Deferred-authorization types (menstrual data) are excluded from the
   /// bulk launch prompt; they're requested individually when the user turns
-  /// their predictor toggle on.
-  private let readTypes: Set<HKSampleType> = Set<HKSampleType>(HealthKitData.allCases.filter({ !$0.isShareType && !$0.isDeferredAuthorization }).map({ $0.type! as! HKSampleType }))
+  /// their predictor toggle on. Derived metrics (beat-to-beat HRV) have no
+  /// single quantity type, so the heartbeat series type is added explicitly.
+  private let readTypes: Set<HKSampleType> = {
+    var types = Set<HKSampleType>(HealthKitData.allCases.filter({ !$0.isShareType && !$0.isDeferredAuthorization && !$0.isDerived }).map({ $0.type! as! HKSampleType }))
+    types.insert(HKSeriesType.heartbeat())
+    return types
+  }()
   
 }
 
@@ -118,6 +123,15 @@ extension HealthKitManager {
   
   /// Authorizes the manager with health kit.
   func authorize() async throws {
+    // Nothing to authorize when HealthKit isn't available (e.g. iPad) — match
+    // the guard in `needsAuthorization()`/`authorizationStatus(for:)`. Without
+    // it, `needsAuthorization()` is false (on availability, not determination),
+    // so the branch below reads every type as `.notDetermined` and throws a
+    // spurious `unknownAuthorizationStatus`.
+    guard HKHealthStore.isHealthDataAvailable() else {
+      return
+    }
+
     if needsAuthorization() {
       logInfo("Authorization status is not determind. Requesting authorization...")
       try await store.requestAuthorization(toShare: shareTypes, read: readTypes)
@@ -247,7 +261,14 @@ extension HealthKitManager {
   ///   - date: The end of the sampling windows.
   ///   - inWidget: Whether this method is being called by a widget.
   /// - Returns: A dictionary of training data, or nil when nothing was read.
-  func readHealthKitData(endingAt date: Date, inWidget: Bool = false) -> [HealthKitData: Double]? {
+  ///
+  /// - Parameters:
+  ///   - date: The end of each metric's sampling window.
+  ///   - inWidget: Whether the caller is a widget (skips the expensive
+  ///     heartbeat-series read to keep the timeline refresh cheap).
+  ///   - only: When set, restricts the read to this metric subset — used by
+  ///     the cheaper trailing read that only feeds baseline slopes.
+  func readHealthKitData(endingAt date: Date, inWidget: Bool = false, only: Set<HealthKitData>? = nil) -> [HealthKitData: Double]? {
     logDebug("Read HealthKit data ending at \(date).")
 
     // Only continue if we have health integration turned on
@@ -266,7 +287,7 @@ extension HealthKitManager {
     }
 
     let group = DispatchGroup()
-    for data in HealthKitData.allCases where !data.isShareType && predictorPreferences.isCollectionEnabled(data) {
+    for data in HealthKitData.allCases where !data.isShareType && !data.isDerived && predictorPreferences.isCollectionEnabled(data) && (only?.contains(data) ?? true) {
       group.enter()
       readQueue.async {
         guard let query = data.query(endingAt: date, completion: { query, samples, quantity, error in
@@ -314,7 +335,238 @@ extension HealthKitManager {
 
     group.wait()
 
+    // Beat-to-beat HRV is computed from a dedicated heartbeat-series read
+    // (there's no single HealthKit quantity for it), gated on its own toggle.
+    // Skipped for subset reads (the trailing slope read) and in the widget,
+    // where the streaming query is too heavy for a timeline refresh.
+    if only == nil, !inWidget, predictorPreferences.beatToBeatHRV, let hrv = readHeartbeatSeriesHRV(endingAt: date) {
+      for (metric, value) in hrv {
+        setValue(metric, value)
+      }
+    }
+
     return healthKitData.isEmpty ? nil : healthKitData
+  }
+
+  /// Reads trailing fixed-clock-window statistics for every window metric
+  /// ending at a date: one `HKStatisticsCollectionQuery` per metric over
+  /// hourly buckets anchored to the hour, aggregated the way the metric's
+  /// snapshot read aggregates (hourly averages, hourly most-recent, or hourly
+  /// sums). Metrics with no samples in the whole window stay absent.
+  ///
+  /// Synchronous on `readQueue`, like `readHealthKitData`.
+  ///
+  /// - Parameters:
+  ///   - date: The end of the window.
+  ///   - only: When set, restricts the read to this metric subset.
+  /// - Returns: Statistics per metric, or nil when nothing was read.
+  func readWindowStatistics(endingAt date: Date, only: Set<HealthKitData>? = nil) -> [HealthKitData: WindowStatistics]? {
+    guard preferences.enabled, predictorPreferences.temporalContext else {
+      return nil
+    }
+
+    let anchor = WindowStatisticsCalculator.anchor(for: date)
+    let start = anchor.addingTimeInterval(-TimeInterval(WindowStatisticsCalculator.bucketCount - 1) * WindowStatisticsCalculator.bucketLength)
+    let interval = DateInterval(start: start, end: date)
+
+    var result = [HealthKitData: WindowStatistics]()
+    let resultSemaphore = DispatchSemaphore(value: 1)
+    let group = DispatchGroup()
+
+    for metric in HealthKitData.windowMetrics where predictorPreferences.isCollectionEnabled(metric) && (only?.contains(metric) ?? true) {
+      guard let aggregate = metric.windowAggregate else {
+        continue
+      }
+      group.enter()
+      readQueue.async {
+        self.hourlySeries(for: metric, in: interval) { series in
+          defer { group.leave() }
+          guard let series = series, !series.isEmpty else {
+            return
+          }
+          let buckets = WindowStatisticsCalculator.buckets(from: series, endingAt: date)
+          if let statistics = WindowStatisticsCalculator.statistics(hourlyBuckets: buckets, aggregate: aggregate) {
+            resultSemaphore.wait()
+            result[metric] = statistics
+            resultSemaphore.signal()
+          }
+        }
+      }
+    }
+
+    group.wait()
+    return result.isEmpty ? nil : result
+  }
+
+  /// Reads a metric's hourly series over an interval, keyed by hour start,
+  /// for the training-data back-fill. Synchronous.
+  ///
+  /// - Parameters:
+  ///   - metric: The metric (must be a window metric).
+  ///   - interval: The interval to read (callers chunk long spans).
+  /// - Returns: The series, or nil when nothing was read.
+  func readHourlySeries(for metric: HealthKitData, in interval: DateInterval) -> [Date: Double]? {
+    guard preferences.enabled, metric.windowAggregate != nil else {
+      return nil
+    }
+
+    var result: [Date: Double]?
+    let group = DispatchGroup()
+    group.enter()
+    readQueue.async {
+      self.hourlySeries(for: metric, in: interval) { series in
+        result = series
+        group.leave()
+      }
+    }
+    group.wait()
+    return result
+  }
+
+  /// Runs a statistics-collection query for a metric over hourly buckets.
+  ///
+  /// - Parameters:
+  ///   - metric: The metric.
+  ///   - interval: The interval.
+  ///   - completion: Called with the hour-keyed series (nil on failure).
+  private func hourlySeries(for metric: HealthKitData, in interval: DateInterval, completion: @escaping ([Date: Double]?) -> Void) {
+    guard let identifier = metric.quantityTypeIdentifier,
+          let type = HKObjectType.quantityType(forIdentifier: identifier),
+          let unit = metric.unit,
+          case .statistics(let options) = metric.queryType else {
+      completion(nil)
+      return
+    }
+
+    let anchor = WindowStatisticsCalculator.anchor(for: interval.start)
+    let predicate = HKQuery.predicateForSamples(withStart: interval.start, end: interval.end, options: .strictStartDate)
+    let query = HKStatisticsCollectionQuery(
+      quantityType: type,
+      quantitySamplePredicate: predicate,
+      options: options,
+      anchorDate: anchor,
+      intervalComponents: DateComponents(hour: 1))
+
+    query.initialResultsHandler = { _, collection, error in
+      guard let collection = collection else {
+        if let error = error {
+          logError("Error reading hourly \(metric): \(error)")
+        }
+        completion(nil)
+        return
+      }
+
+      var series = [Date: Double]()
+      collection.enumerateStatistics(from: interval.start, to: interval.end) { statistics, _ in
+        let quantity: HKQuantity?
+        if options.contains(.cumulativeSum) {
+          quantity = statistics.sumQuantity()
+        }
+        else if options.contains(.discreteAverage) {
+          quantity = statistics.averageQuantity()
+        }
+        else if options.contains(.mostRecent) {
+          quantity = statistics.mostRecentQuantity()
+        }
+        else {
+          quantity = nil
+        }
+        if let quantity = quantity {
+          series[statistics.startDate] = quantity.doubleValue(for: unit)
+        }
+      }
+      completion(series)
+    }
+
+    store.execute(query)
+  }
+
+  /// Reads recent `HKHeartbeatSeriesSample`s and computes beat-to-beat HRV
+  /// (RMSSD, pNN50, LF/HF) from their inter-beat intervals.
+  ///
+  /// Apple never exposes the raw PPG waveform, but it does expose the
+  /// beat-to-beat intervals recorded during the Watch's background HRV and
+  /// Breathe measurements — the parasympathetic-dominant variability a single
+  /// SDNN value throws away. Series are intermittent and discontiguous, so
+  /// each is treated as its own segment.
+  ///
+  /// - Parameter date: The end of the sampling window.
+  /// - Returns: The computed HRV metrics, or nil when no usable beats exist.
+  func readHeartbeatSeriesHRV(endingAt date: Date) -> [HealthKitData: Double]? {
+    guard HKHealthStore.isHealthDataAvailable() else {
+      return nil
+    }
+
+    let window = HealthKitData.hrvRMSSD.window(endingAt: date)
+    let predicate = HKQuery.predicateForSamples(withStart: window.start, end: window.end, options: .strictStartDate)
+
+    // Fetch the heartbeat series samples in the window.
+    var seriesSamples = [HKHeartbeatSeriesSample]()
+    let sampleGroup = DispatchGroup()
+    sampleGroup.enter()
+    let sampleQuery = HKSampleQuery(sampleType: HKSeriesType.heartbeat(), predicate: predicate, limit: HKObjectQueryNoLimit, sortDescriptors: nil) { _, samples, _ in
+      seriesSamples = (samples as? [HKHeartbeatSeriesSample]) ?? []
+      sampleGroup.leave()
+    }
+    store.execute(sampleQuery)
+    sampleGroup.wait()
+
+    guard !seriesSamples.isEmpty else {
+      return nil
+    }
+
+    // Stream each series' beats into an inter-beat-interval segment (ms),
+    // skipping intervals flagged as preceded by a gap.
+    var segments = [[Double]]()
+    let segmentsLock = DispatchSemaphore(value: 1)
+    let beatGroup = DispatchGroup()
+    for series in seriesSamples {
+      beatGroup.enter()
+      var intervals = [Double]()
+      var lastTime: Double?
+      // Guards this series' single balancing `leave()`. HealthKit can deliver a
+      // terminal error *without* a `done` callback; without leaving on that
+      // path the group would never balance and `beatGroup.wait()` below would
+      // hang the read forever. The guard also prevents a double-leave (which
+      // would crash) if both an error and a `done` arrive. A single query's
+      // handler is invoked serially, so the flag needs no extra locking.
+      var finished = false
+      let beatQuery = HKHeartbeatSeriesQuery(heartbeatSeries: series) { _, timeSinceSeriesStart, precededByGap, done, error in
+        if finished {
+          return
+        }
+        if error != nil {
+          finished = true
+          beatGroup.leave()
+          return
+        }
+        if !precededByGap, let last = lastTime {
+          intervals.append((timeSinceSeriesStart - last) * 1000.0)
+        }
+        lastTime = timeSinceSeriesStart
+        if done {
+          finished = true
+          segmentsLock.wait()
+          segments.append(intervals)
+          segmentsLock.signal()
+          beatGroup.leave()
+        }
+      }
+      store.execute(beatQuery)
+    }
+    beatGroup.wait()
+
+    var result = [HealthKitData: Double]()
+    if let rmssd = HRVCalculator.rmssd(segments: segments) {
+      result[.hrvRMSSD] = rmssd
+    }
+    if let pnn50 = HRVCalculator.pnn50(segments: segments) {
+      result[.hrvPNN50] = pnn50
+    }
+    if let lfhf = HRVCalculator.lfhf(segments: segments) {
+      result[.hrvLFHF] = lfhf
+    }
+    return result.isEmpty ? nil : result
   }
 
 }

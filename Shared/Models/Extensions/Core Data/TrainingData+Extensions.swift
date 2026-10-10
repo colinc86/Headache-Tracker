@@ -19,6 +19,8 @@ extension TrainingData {
       location: location?.location,
       weatherStatistics: weatherData?.weatherStatistics,
       healthKitData: healthData?.healthKitData,
+      healthWindowStatistics: contextData?.healthWindowStatistics,
+      weatherWindowStatistics: contextData?.weatherWindowStatistics,
       timeIntervalUntilNextHeadacheStart: timeIntervalUntilNextHeadacheStart,
       timeIntervalUntilNextHeadacheEnd: timeIntervalUntilNextHeadacheEnd,
       outlook: outlook ?? .noHeadache,
@@ -47,6 +49,40 @@ extension TrainingData {
     updateWithLocation(modelInput?.location)
     updateWithWeatherStatistics(modelInput?.weatherStatistics, at: modelInput?.date)
     updateWithHealthKitData(modelInput?.healthKitData, at: modelInput?.date)
+    updateWithWindowStatistics(health: modelInput?.healthWindowStatistics, weather: modelInput?.weatherWindowStatistics, at: modelInput?.date)
+  }
+
+  /// Updates the trailing-window context with the given statistics.
+  ///
+  /// - Parameters:
+  ///   - health: The health window statistics.
+  ///   - weather: The weather window statistics.
+  ///   - timestamp: The data's timestamp.
+  func updateWithWindowStatistics(health: [HealthKitData: WindowStatistics]?, weather: [WeatherField: WindowStatistics]?, at timestamp: Date?) {
+    if contextData == nil, let context = managedObjectContext {
+      contextData = ContextData(context: context)
+    }
+
+    contextData?.updateWithHealthWindowStatistics(health, at: timestamp)
+    contextData?.updateWithWeatherWindowStatistics(weather, at: timestamp)
+  }
+
+  /// Whether a row already exists within a tolerance of a date.
+  ///
+  /// Rows are also sampled on user actions, which cluster around headaches;
+  /// dropping a user-action row that lands next to an existing one keeps the
+  /// series from densifying with engagement.
+  ///
+  /// - Parameters:
+  ///   - date: The date to check around.
+  ///   - tolerance: The window on either side of the date.
+  ///   - context: The context to fetch in.
+  /// - Returns: A boolean.
+  static func rowExists(near date: Date, within tolerance: TimeInterval, in context: NSManagedObjectContext) throws -> Bool {
+    let request = TrainingData.fetchRequest()
+    request.predicate = NSPredicate(format: "timestamp >= %@ AND timestamp <= %@", date.addingTimeInterval(-tolerance) as NSDate, date.addingTimeInterval(tolerance) as NSDate)
+    request.fetchLimit = 1
+    return try context.count(for: request) > 0
   }
   
   /// Updates the location with the given location.

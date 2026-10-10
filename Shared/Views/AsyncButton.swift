@@ -100,14 +100,20 @@ extension AsyncButton {
   ///
   /// - Parameter errpr: The alert's message.
   private func showAlert(_ error: Error) async {
+    // Derive the message off-main (a pure read), then publish both pieces of
+    // state together on the main actor — assigning `alertMessage` off-main is a
+    // SwiftUI state mutation from a background thread and can leave the alert
+    // showing a stale or empty message.
+    let message: String
     if let describableError = error as? DescribableError {
-      alertMessage = describableError.description
+      message = describableError.description
     }
     else {
-      alertMessage = error.localizedDescription
+      message = error.localizedDescription
     }
-    
+
     await MainActor.run {
+      alertMessage = message
       withAnimation { showingAlert = true }
     }
   }

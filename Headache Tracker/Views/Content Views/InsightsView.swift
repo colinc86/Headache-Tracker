@@ -84,6 +84,17 @@ struct InsightsView: View {
           }
         }
       }
+      else {
+        // Loading finished without a report — a rare compute/fetch error.
+        // Offer a retry instead of showing a blank screen.
+        Section {
+          Text("Couldn't load your insights. Pull down to try again.")
+            .font(.callout)
+            .foregroundColor(.secondary)
+        } header: {
+          SectionTitleView(title: "Possible Triggers")
+        }
+      }
     }
     .navigationTitle("Insights")
     .task(priority: .userInitiated) {
@@ -153,7 +164,8 @@ struct TriggerInsightCell: View {
           .foregroundColor(colorTheme.confounderFlag)
       }
 
-      // Strength bar
+      // Strength bar — visualizes |coefficient|, the ranking dimension. Give
+      // it a spoken equivalent so VoiceOver conveys magnitude, not just tier.
       GeometryReader { geometry in
         ZStack(alignment: .leading) {
           Capsule()
@@ -164,6 +176,8 @@ struct TriggerInsightCell: View {
         }
       }
       .frame(height: 6)
+      .accessibilityElement()
+      .accessibilityLabel("\(insight.strengthLabel) association")
 
       HStack {
         Text(insight.confidence.title)

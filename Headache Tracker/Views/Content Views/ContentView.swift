@@ -38,11 +38,11 @@ struct ContentView: View {
         }
         .tag(Router.Tab.track)
       
-      AnalyzeView()
+      ProfileView()
         .tabItem {
-          Label("Analyze", systemImage: "chart.bar.xaxis")
+          Label("Profile", systemImage: "person.crop.circle")
         }
-        .tag(Router.Tab.analyze)
+        .tag(Router.Tab.profile)
       
       HeadachesView()
         .tabItem {
@@ -56,6 +56,10 @@ struct ContentView: View {
         }
         .tag(Router.Tab.settings)
     }
+    // Deep links (myheadache://severity?rawValue=…). `.onOpenURL` covers a
+    // cold launch — where the URL arrives via the scene's connection options,
+    // which the SceneDelegate's `openURLContexts` (warm only) never sees.
+    .onOpenURL { sceneDelegate.handle($0) }
   }
   
 }
@@ -71,5 +75,6 @@ struct ContentView_Previews: PreviewProvider {
       .environmentObject(Previewing.Prediction.predictor)
       .environmentObject(Refresher())
       .environmentObject(Previewing.healthKitManager)
+      .environmentObject(SummaryService())
   }
 }

@@ -14,8 +14,8 @@ import Foundation
 ///
 /// When the store splits, the original combined file becomes the Local
 /// (device-only) store, so its user rows — headaches, severities, tags,
-/// medications, exposures — are no longer visible to the coordinator (their
-/// entities belong to the Cloud configuration). This migrator opens the old
+/// medications — are no longer visible to the coordinator (their entities
+/// belong to the Cloud configuration). This migrator opens the old
 /// file read-only with a throwaway coordinator, copies the graph into the
 /// live cloud store, and stamps a flag so it runs exactly once.
 struct CloudMigrator {
@@ -44,8 +44,8 @@ struct CloudMigrator {
     logInfo("Cloud migration complete: copied \(migrated) headaches into the cloud store.")
   }
 
-  /// Copies headaches (with severities, tags, medications) and exposures
-  /// from the old combined store into the cloud store.
+  /// Copies headaches (with severities, tags, medications) from the old
+  /// combined store into the cloud store.
   ///
   /// - Returns: The number of headaches copied.
   private static func migrateUserData() async throws -> Int {
@@ -98,15 +98,7 @@ struct CloudMigrator {
       let medications: [MedicationSnapshot]
       let tags: [String]
     }
-    struct ExposureSnapshot {
-      let identifier: UUID?
-      let kindRaw: String?
-      let timestamp: Date?
-      let amount: Double
-      let notes: String?
-    }
-
-    let (headaches, exposures): ([HeadacheSnapshot], [ExposureSnapshot]) = try await sourceContext.perform {
+    let headaches: [HeadacheSnapshot] = try await sourceContext.perform {
       let headacheRequest = NSFetchRequest<NSManagedObject>(entityName: "Headache")
       let headaches = try sourceContext.fetch(headacheRequest).map { headache -> HeadacheSnapshot in
         let severities = ((headache.value(forKey: "severities") as? Set<NSManagedObject>) ?? []).map { severity in
@@ -139,17 +131,7 @@ struct CloudMigrator {
           tags: tags)
       }
 
-      let exposureRequest = NSFetchRequest<NSManagedObject>(entityName: "Exposure")
-      let exposures = try sourceContext.fetch(exposureRequest).map { exposure in
-        ExposureSnapshot(
-          identifier: exposure.value(forKey: "identifier") as? UUID,
-          kindRaw: exposure.value(forKey: "kindRaw") as? String,
-          timestamp: exposure.value(forKey: "timestamp") as? Date,
-          amount: exposure.value(forKey: "amount") as? Double ?? 0.0,
-          notes: exposure.value(forKey: "notes") as? String)
-      }
-
-      return (headaches, exposures)
+      return headaches
     }
 
     // Rebuild the graph in the live cloud store; skip anything whose
@@ -210,19 +192,6 @@ struct CloudMigrator {
         }
       }
 
-      let existingExposureIdentifiers = Set(try context.fetch(Exposure.fetchRequest()).compactMap({ $0.identifier }))
-      for snapshot in exposures {
-        if let identifier = snapshot.identifier, existingExposureIdentifiers.contains(identifier) {
-          continue
-        }
-
-        let exposure = Exposure(context: context)
-        exposure.identifier = snapshot.identifier ?? UUID()
-        exposure.kindRaw = snapshot.kindRaw
-        exposure.timestamp = snapshot.timestamp
-        exposure.amount = snapshot.amount
-        exposure.notes = snapshot.notes
-      }
     }
 
     return headaches.count

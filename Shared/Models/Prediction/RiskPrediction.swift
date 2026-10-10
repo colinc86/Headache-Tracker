@@ -7,6 +7,28 @@
 
 import Foundation
 
+/// A side-effect-free score of one input on both horizons, for the what-if
+/// explorer.
+struct ScenarioScore: Equatable {
+
+  /// The calibrated 24-hour probability, or -1 when no model is loaded.
+  let probability24: Double
+
+  /// The calibrated 12-hour probability, when the shorter-horizon
+  /// classifier is trained.
+  let probability12: Double?
+
+  /// The plausible range around the 24-hour probability, when the caller
+  /// asked for it and an ensemble is loaded.
+  var interval24: RiskInterval? = nil
+
+  /// Whether a model produced the score.
+  var hasModel: Bool {
+    return probability24 >= 0
+  }
+
+}
+
 /// A calibrated forecast of headache risk within the next 24 hours.
 struct RiskPrediction: Equatable, Codable {
 
@@ -30,6 +52,28 @@ struct RiskPrediction: Equatable, Codable {
 
     /// A human-readable description of the contribution.
     let contributionDescription: String
+
+    var id: String {
+      return mlFeatureName
+    }
+  }
+
+  /// A single signal's estimated contribution to this forecast, from swapping
+  /// it to the user's baseline and re-running the model. `delta > 0` means the
+  /// signal is raising risk; `< 0` means it's easing it. Contributions are
+  /// independent "what if this were normal" estimates — they do NOT sum to the
+  /// total probability.
+  struct RiskContribution: Equatable, Codable, Identifiable {
+
+    /// The correlated feature this contribution maps to, when it has one.
+    let feature: CorrelationFeature?
+
+    /// The ML feature/signal name.
+    let mlFeatureName: String
+
+    /// The change in calibrated probability attributable to this signal
+    /// (positive raises risk, negative eases it).
+    let delta: Double
 
     var id: String {
       return mlFeatureName
@@ -93,13 +137,59 @@ struct RiskPrediction: Equatable, Codable {
   /// When the prediction was computed.
   var computedAt: Date
 
+  /// The calibrated probability of a headache within the shorter horizon
+  /// (~12 hours), when the shorter-horizon classifier is trained. Optional so
+  /// forecasts from models trained before it existed decode cleanly.
+  var shortProbability: Double? = nil
+
+  /// Per-signal contributions to this forecast, strongest first. Optional and
+  /// device-only (computed at predict time, skipped in the widget), so older
+  /// or widget-sourced blobs decode cleanly.
+  var contributions: [RiskContribution]? = nil
+
+  /// The plausible range around `probability`, from the bagged ensemble's
+  /// spread. Optional so forecasts from models trained before the ensemble
+  /// existed decode cleanly; nil when no ensemble is loaded.
+  var interval: RiskInterval? = nil
+
+  /// How much of the expected input was measured rather than imputed.
+  /// Optional for the same reason.
+  var coverage: InputCoverage? = nil
+
+  /// The model's out-of-fold accuracy at training, carried so surfaces
+  /// without the metrics sidecar (the widgets) can show a headline accuracy
+  /// before enough forecasts have resolved. Optional for the same reason.
+  var modelAccuracy: Double? = nil
+
+  /// How much to lean on this forecast, from the range and the coverage.
+  var confidence: ForecastConfidence {
+    return ForecastUncertainty.confidence(interval: interval, coverage: coverage)
+  }
+
   /// The prediction's tier.
   var tier: RiskTier {
     return RiskTier(probability: probability)
   }
 
+  /// The shorter-horizon tier, when a shorter-horizon probability exists.
+  var shortTier: RiskTier? {
+    guard let shortProbability = shortProbability, shortProbability >= 0 else {
+      return nil
+    }
+    return RiskTier(probability: shortProbability)
+  }
+
+  /// A one-line caption for the shorter-horizon forecast, or nil when there
+  /// is no shorter-horizon probability.
+  var shortCaption: String? {
+    guard let shortProbability = shortProbability, shortProbability >= 0 else {
+      return nil
+    }
+    return "\(Int((shortProbability * 100.0).rounded()))% chance within the next 12 hours"
+  }
+
   static func == (lhs: Self, rhs: Self) -> Bool {
-    return lhs.probability == rhs.probability && lhs.topFactors == rhs.topFactors
+    return lhs.probability == rhs.probability && lhs.shortProbability == rhs.shortProbability && lhs.topFactors == rhs.topFactors && lhs.contributions == rhs.contributions && lhs.interval == rhs.interval && lhs.coverage == rhs.coverage && lhs.modelAccuracy == rhs.modelAccuracy
   }
 
 }
@@ -148,7 +238,7 @@ enum RiskOutlook {
       guard let since = since else {
         return nil
       }
-      return "Since \(Formatters.formatTime(since))"
+      return "Since \(Formatters.formatTimeWithDay(since))"
     }
   }
 

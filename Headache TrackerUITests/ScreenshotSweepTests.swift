@@ -18,9 +18,9 @@ final class ScreenshotSweepTests: XCTestCase {
     continueAfterFailure = true
     app = XCUIApplication()
     app.launchArguments += ["--uitest-seed"]
-    if let theme = ProcessInfo.processInfo.environment["UITEST_THEME"] {
-      app.launchArguments += ["--uitest-theme", theme]
-    }
+    // Pin a theme: unit tests share the simulator and can leave another one
+    // saved in the shared defaults.
+    app.launchArguments += ["--uitest-theme", ProcessInfo.processInfo.environment["UITEST_THEME"] ?? "System"]
     app.launch()
   }
 
@@ -36,44 +36,64 @@ final class ScreenshotSweepTests: XCTestCase {
     _ = app.staticTexts["Track"].waitForExistence(timeout: 10)
     sleep(4)
 
-    // 1. Track tab (risk, why, check-in, severity).
+    // 1. Track tab (hero, summary, ribbon, drivers, today, log bar).
     capture("01-Track")
-
-    // 2. Analyze tab (insights top-3, graphs, statistics).
-    tabBar.buttons["Analyze"].tap()
-    sleep(2)
-    capture("02-Analyze")
-    // Scroll down to the graphs.
-    app.swipeUp()
     app.swipeUp()
     sleep(1)
-    capture("02b-AnalyzeGraphs")
-    app.swipeDown()
+    capture("01a-TrackLower")
     app.swipeDown()
     sleep(1)
 
-    // 2b. A trigger insight detail (tap the first insight's title).
-    let insightTitle = app.staticTexts["Sleep Duration"].firstMatch
-    if insightTitle.waitForExistence(timeout: 5) {
-      insightTitle.tap()
-      if app.navigationBars.buttons.firstMatch.waitForExistence(timeout: 5), !app.staticTexts["Insights"].exists {
+    // 1b. Signals (behind the forecast hero) and the what-if simulator.
+    let hero = app.descendants(matching: .any)["track.hero"]
+    if hero.waitForExistence(timeout: 5) {
+      hero.tap()
+      if app.navigationBars["Signals"].waitForExistence(timeout: 5) {
         sleep(2)
-        capture("03-TriggerDetail")
+        capture("01b-Signals")
+        scrollTo("What If…")
+        if tapText("What If…") {
+          sleep(3)
+          capture("01c-WhatIf")
+          app.swipeUp()
+          sleep(2)
+          capture("01d-WhatIfSignals")
+          back()
+        }
         back()
       }
     }
-    // 2c. All Insights list.
-    tapText("All Insights")
-    sleep(2)
-    if app.navigationBars["Insights"].waitForExistence(timeout: 4) {
-      capture("04-Insights")
-      back()
+
+    // 2. Profile tab: signature, portrait, triggers, rhythm, shape, month, forecast.
+    tabBar.buttons["Profile"].tap()
+    sleep(3)
+    capture("02-Profile")
+    app.swipeUp()
+    sleep(1)
+    capture("02b-ProfileTriggers")
+    if tapText("Show the data") {
+      sleep(2)
+      capture("02c-ProfileTriggerData")
+    }
+    for index in 0 ..< 4 {
+      app.swipeUp()
+      sleep(1)
+      capture("02d-Profile-\(index)")
     }
 
-    // 3. Headaches tab + detail.
+    // 3. Headaches tab (stats overview above the list) + detail.
     tabBar.buttons["Headaches"].tap()
     sleep(2)
     capture("05-Headaches")
+    if tapText("Severity, onset, and duration charts") {
+      sleep(1)
+      app.swipeUp()
+      sleep(1)
+      capture("05b-HeadacheCharts")
+      app.swipeDown()
+      app.swipeDown()
+      sleep(1)
+    }
     // Tap the first headache's onset date (definitely inside its
     // NavigationLink row — app.cells.firstMatch can match a section header).
     let onsetDate = app.staticTexts.matching(NSPredicate(format: "label CONTAINS '2026'")).firstMatch
@@ -86,6 +106,10 @@ final class ScreenshotSweepTests: XCTestCase {
       }
       sleep(2)
       capture("06-HeadacheDetail")
+      // The progression chart sits below the fold; scroll it into view so the
+      // sweep actually covers it.
+      scrollTo("Progression")
+      capture("06b-Progression")
       back()
     }
 
@@ -103,16 +127,21 @@ final class ScreenshotSweepTests: XCTestCase {
       capture("09-Export")
       back()
     }
+  }
 
-    // 5. Daily check-in sheet from the Track tab.
-    tabBar.buttons["Track"].tap()
-    sleep(2)
-    if let edit = app.buttons.matching(identifier: "Edit").allElementsBoundByIndex.first,
-       edit.waitForExistence(timeout: 3) {
-      edit.tap()
-      sleep(2)
-      capture("10-DailyCheckIn")
-    }
+  /// The Track tab during a headache: the live hero and the log bar's
+  /// severities and Resolve.
+  func testCaptureActiveHeadache() throws {
+    app.terminate()
+    app.launchArguments += ["--uitest-active-headache"]
+    app.launch()
+    XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 20))
+    dismissSystemLocationPrompt()
+    sleep(4)
+    capture("01e-TrackActive")
+    app.swipeUp()
+    sleep(1)
+    capture("01f-TrackActiveCards")
   }
 
   // MARK: Helpers
@@ -151,6 +180,26 @@ final class ScreenshotSweepTests: XCTestCase {
     let gone = NSPredicate(format: "exists == false")
     let expectation = XCTNSPredicateExpectation(predicate: gone, object: listTitle)
     return XCTWaiter().wait(for: [expectation], timeout: 5) == .completed
+  }
+
+  /// Swipes up until an element carrying the given label is on screen.
+  ///
+  /// - Parameters:
+  ///   - label: The label to look for.
+  ///   - maximumSwipes: How many swipes to try before giving up.
+  /// - Returns: Whether the element became visible.
+  @discardableResult
+  private func scrollTo(_ label: String, maximumSwipes: Int = 6) -> Bool {
+    let element = app.staticTexts[label]
+    for _ in 0 ..< maximumSwipes {
+      if element.exists && element.isHittable {
+        sleep(1)
+        return true
+      }
+      app.swipeUp()
+    }
+    sleep(1)
+    return element.exists && element.isHittable
   }
 
   private func back() {

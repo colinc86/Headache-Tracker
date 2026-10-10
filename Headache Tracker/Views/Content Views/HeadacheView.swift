@@ -28,22 +28,7 @@ struct HeadacheView: View {
   
   /// Whether or not the alert is visible.
   @State private var showingAlert = false
-  
-  /// Whether the edit type view is visible.
-  @State private var showingEditTypeView = false
-  
-  /// Whether the edit notes view is visible.
-  @State private var showingEditNotesView = false
-  
-  /// Whether the edit tags view is visible.
-  @State private var showingEditTagsView = false
-  
-  /// The id of the duration view.
-  @State private var durationID = UUID()
-  
-  /// Updates the duration view.
-  private let durationUpdateWaiter = Waiter()
-  
+
   // MARK: View body
   
   var body: some View {
@@ -74,19 +59,8 @@ struct HeadacheView: View {
           .disabled(headache.severities?.count ?? 0 <= 1 || !headache.resolved)
       }
     }
-    .onAppear(perform: appeared)
-    .onDisappear(perform: durationUpdateWaiter.stop)
     .navigationBarTitleDisplayMode(.inline)
     .confirmationAlert(isPresented: $showingAlert, title: alertTitle, message: alertMessage)
-    .sheet(isPresented: $showingEditTypeView) {
-      EditTypeView(type: headache.headacheType, classification: headache.headacheClassification, identifier: headache.identifier ?? UUID())
-    }
-    .sheet(isPresented: $showingEditNotesView) {
-      EditNotesView(notes: headache.notes ?? "", identifier: headache.identifier ?? UUID())
-    }
-    .sheet(isPresented: $showingEditTagsView) {
-      EditTagsView(tags: headache.tagsArray.map({ $0.value ?? "" }), identifier: headache.identifier ?? UUID())
-    }
   }
   
 }
@@ -119,34 +93,7 @@ extension HeadacheView {
       }
     }
   }
-  
-  /// Updates the duration view's identifier.
-  func updateDurationID() {
-    DispatchQueue.main.async {
-      withAnimation { durationID = UUID() }
-    }
-  }
-  
-  /// Called when the view appears.
-  func appeared() {
-    if !headache.resolved {
-      updateDurationID()
-      durationUpdateWaiter.wait(for: 60.0, repeats: true, completion: updateDurationID)
-    }
-  }
-  
-  private func editTypeAction() {
-    withAnimation { showingEditTypeView = true }
-  }
-  
-  private func editNotesAction() {
-    withAnimation { showingEditNotesView = true }
-  }
-  
-  private func editTagsAction() {
-    withAnimation { showingEditTagsView = true }
-  }
-  
+
 }
 
 struct HeadacheView_Previews: PreviewProvider {

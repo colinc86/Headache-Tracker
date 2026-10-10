@@ -60,11 +60,16 @@ enum Tokens {
   /// - type → `mint`
   /// - onset → `purple`
   /// - duration → `green`
-  /// - progression / daily check-in → `orange`
+  /// - progression → `orange`
   /// - notes → `pink`
   /// - tags → `indigo`
   /// - status / medications / actions → `teal`
   /// - risk tiers → low `mint`, elevated `orange`, high `pink`
+  /// - signal domains → sleep `indigo`, heart `pink`, activity `green`, sound
+  ///   `yellow`, lifestyle `orange`, cycle `purple`, weather `cyan`
+  /// - forecast confidence → steady `green`, fair `orange`, rough `.secondary`
+  ///   (the same mapping as insight confidence; the range band on a ring is
+  ///   the tier tint at 0.28 opacity)
   enum Accent {}
 }
 
@@ -83,6 +88,36 @@ extension ColorTheme {
     case .strong: return green
     case .moderate: return orange
     case .suggestive: return .secondary
+    }
+  }
+
+  /// The accent color for a forecast's confidence grade. Mirrors the
+  /// insight-confidence mapping so the two badges read as one vocabulary.
+  ///
+  /// - Parameter confidence: The forecast's grade.
+  /// - Returns: A theme-consistent color.
+  func color(for confidence: ForecastConfidence) -> Color {
+    switch confidence {
+    case .steady: return green
+    case .fair: return orange
+    case .rough: return .secondary
+    }
+  }
+
+  /// The accent color for a signal domain, so the Profile's signature glyph,
+  /// trigger cards, and legends agree.
+  ///
+  /// - Parameter domain: The domain.
+  /// - Returns: A theme-consistent color.
+  func color(for domain: SignalDomain) -> Color {
+    switch domain {
+    case .sleep: return indigo
+    case .autonomic: return pink
+    case .activity: return green
+    case .sound: return yellow
+    case .lifestyle: return orange
+    case .cycle: return purple
+    case .weather: return cyan
     }
   }
 

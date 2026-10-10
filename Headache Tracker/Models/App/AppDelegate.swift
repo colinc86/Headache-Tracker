@@ -80,6 +80,9 @@ class AppDelegate: NSObject, UIApplicationDelegate, ObservableObject {
     // Set up the refresh tasks
     refresher.setupPredictionRefreshTask()
     refresher.setupTrainingProcessingTask()
+
+    // Receive wrist quick-logs from the Apple Watch companion.
+    WatchConnectivityProvider.shared.activate()
     
     // Make sure the headache manager has a reference to the alert and health kit managers
     setHeadacheManagerReferences()
@@ -129,6 +132,9 @@ class AppDelegate: NSObject, UIApplicationDelegate, ObservableObject {
 
         // Repair any data integrity issues from earlier versions
         try await headacheManager.repairDataIntegrity()
+        // The repair can resolve a headache the shared severity still claims
+        // is active; re-derive it from the store so the widgets agree.
+        try await headacheManager.refreshSharedState()
 
         // Check our alert authorization status
         try await checkAlertAuthorizationStatus()
@@ -138,15 +144,6 @@ class AppDelegate: NSObject, UIApplicationDelegate, ObservableObject {
 
         // Load our ML classifiers
         try await headacheManager.predictor.load()
-
-        // Keep the evening check-in reminder aligned with preferences.
-        // Non-critical: scheduling throws when notifications are denied.
-        do {
-          try await refresher.updateExposureReminderSchedule()
-        }
-        catch {
-          logError("Error scheduling check-in reminder: \(error)")
-        }
       }
       catch {
         logError("Error handling async process: \(error)")
@@ -181,6 +178,12 @@ extension AppDelegate {
   }
   
   func dimmingPercentChanged(_ newValue: Double) {
+    // Defense-in-depth: the percent picker is disabled in Settings while "Dim
+    // Screen" is off, but guard here too so a programmatic/edge change can't dim
+    // with a fresh/zero captured brightness and drive the screen toward black.
+    guard preferences.general.shouldDimScreen else {
+      return
+    }
     dimScreen(preservingBrightness: false)
   }
   

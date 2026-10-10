@@ -56,7 +56,14 @@ struct EditTagsView: View {
   private var suggestedTags: [String] {
     let filteredTags = storedTags
       .filter({ !tags.contains($0.value ?? "") })
-      .sorted(by: { $0.headaches?.count ?? 0 > $1.headaches?.count ?? 0 })
+      // Tie-break by value so equally-used tags keep a stable order instead of
+      // shuffling between opens — Swift's sort is unstable, and tag-count ties
+      // are common (many tags are used just once).
+      .sorted(by: { lhs, rhs in
+        let lhsCount = lhs.headaches?.count ?? 0
+        let rhsCount = rhs.headaches?.count ?? 0
+        return lhsCount != rhsCount ? lhsCount > rhsCount : (lhs.value ?? "") < (rhs.value ?? "")
+      })
       .map({ $0.value ?? "" })
     
     let nonEmptyTags = filteredTags.filter({ !$0.isEmpty })
@@ -89,21 +96,20 @@ struct EditTagsView: View {
               .submitLabel(.return)
               .onSubmit(submitAction)
           }
-          .padding([.top, .bottom], 4)
-          
+          .padding([.top, .bottom], Tokens.Spacing.xs)
+
           if newTag.isEmpty {
             Spacer(minLength: 50)
-            // Suggested tags
-            ForEach(suggestedTags, id: \.self) { tag in
-              TagButton(tag, action: addTagAction)
-                .padding(4)
-            }
+            // Suggested tags — wrapped as themed chips, matching the selected
+            // tags above, instead of a vertical column of plain-text buttons.
+            TagsView(tags: suggestedTags, action: addTagAction)
+              .buttonStyle(TagButtonStyle())
+              .frame(maxWidth: .infinity, alignment: .leading)
           }
           else {
-            ForEach(availableTags, id: \.self) { tag in
-              TagButton(tag, action: addTagAction)
-                .padding(4)
-            }
+            TagsView(tags: availableTags, action: addTagAction)
+              .buttonStyle(TagButtonStyle())
+              .frame(maxWidth: .infinity, alignment: .leading)
           }
         }
       }
@@ -178,13 +184,20 @@ extension EditTagsView {
   }
   
   /// Saves the headache.
-  private func save() async throws {
+  ///
+  /// `@MainActor` so the `saving` state and `dismiss()` run on the main thread
+  /// (`updateHeadacheTags` does its work off-main on a background context).
+  @MainActor private func save() async throws {
     withAnimation {
       saving = true
     }
-    
+    // Reset on every exit. A failed save throws to the AsyncButton's alert
+    // instead of dismissing, so without this the Cancel button would stay
+    // stuck disabled and trap the user in the editor.
+    defer { saving = false }
+
     try await headacheManager.updateHeadacheTags(tags, identifier: identifier)
-    
+
     dismiss()
   }
   
